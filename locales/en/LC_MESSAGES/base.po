@@ -1,0 +1,370 @@
+# English translations for ROM package.
+# Copyright (C) 2023 THE ROM'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the ROM package.
+# Automatically generated, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ROM 5BE4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-19 17:48+0100\n"
+"PO-Revision-Date: 2023-03-19 17:48+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: game/types.py:15
+msgid "TXT_KEY_ERA_ANCIENT"
+msgstr "Ancient"
+
+#: game/types.py:17
+msgid "TXT_KEY_ERA_CLASSICAL"
+msgstr "Classical"
+
+#: game/types.py:20
+msgid "TXT_KEY_ERA_INDUSTRIAL"
+msgstr "Industrial"
+
+#: game/types.py:22
+msgid "TXT_KEY_ERA_MODERN"
+msgstr "Modern"
+
+#: game/types.py:90
+msgid "TXT_KEY_TECH_NONE"
+msgstr "No Tech"
+
+#: game/types.py:101
+msgid "TXT_KEY_TECH_MINING_NAME"
+msgstr "Mining"
+
+#: game/types.py:102
+msgid "TXT_KEY_TECH_MINING_EUREKA"
+msgstr "TXT_KEY_TECH_MINING_EUREKA"
+
+#: game/types.py:103
+msgid "TXT_KEY_TECH_MINING_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_MINING_EUREKA_TEXT"
+
+#: game/types.py:110
+msgid "TXT_KEY_TECH_POTTERY_NAME"
+msgstr "Pottery"
+
+#: game/types.py:111
+msgid "TXT_KEY_TECH_POTTERY_EUREKA"
+msgstr "TXT_KEY_TECH_POTTERY_EUREKA"
+
+#: game/types.py:112
+msgid "TXT_KEY_TECH_POTTERY_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_POTTERY_EUREKA_TEXT"
+
+#: game/types.py:119
+msgid "TXT_KEY_TECH_ANIMAL_HUSBANDRY_NAME"
+msgstr "TXT_KEY_TECH_ANIMAL_HUSBANDRY_NAME"
+
+#: game/types.py:120
+msgid "TXT_KEY_TECH_ANIMAL_HUSBANDRY_EUREKA"
+msgstr "TXT_KEY_TECH_ANIMAL_HUSBANDRY_EUREKA"
+
+#: game/types.py:121
+msgid "TXT_KEY_TECH_ANIMAL_HUSBANDRY_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_ANIMAL_HUSBANDRY_EUREKA_TEXT"
+
+#: game/types.py:128
+msgid "TXT_KEY_TECH_SAILING_NAME"
+msgstr "TXT_KEY_TECH_SAILING_NAME"
+
+#: game/types.py:129
+msgid "TXT_KEY_TECH_SAILING_EUREKA"
+msgstr "TXT_KEY_TECH_SAILING_EUREKA"
+
+#: game/types.py:130
+msgid "TXT_KEY_TECH_SAILING_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_SAILING_EUREKA_TEXT"
+
+#: game/types.py:137
+msgid "TXT_KEY_TECH_ASTROLOGY_NAME"
+msgstr "TXT_KEY_TECH_ASTROLOGY_NAME"
+
+#: game/types.py:138
+msgid "TXT_KEY_TECH_ASTROLOGY_EUREKA"
+msgstr "TXT_KEY_TECH_ASTROLOGY_EUREKA"
+
+#: game/types.py:139
+msgid "TXT_KEY_TECH_ASTROLOGY_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_ASTROLOGY_EUREKA_TEXT"
+
+#: game/types.py:146
+msgid "TXT_KEY_TECH_IRRIGATION_NAME"
+msgstr "TXT_KEY_TECH_IRRIGATION_NAME"
+
+#: game/types.py:147
+msgid "TXT_KEY_TECH_IRRIGATION_EUREKA"
+msgstr "TXT_KEY_TECH_IRRIGATION_EUREKA"
+
+#: game/types.py:148
+msgid "TXT_KEY_TECH_IRRIGATION_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_IRRIGATION_EUREKA_TEXT"
+
+#: game/types.py:155
+msgid "TXT_KEY_TECH_WRITING_NAME"
+msgstr "TXT_KEY_TECH_WRITING_NAME"
+
+#: game/types.py:156
+msgid "TXT_KEY_TECH_WRITING_EUREKA"
+msgstr "TXT_KEY_TECH_WRITING_EUREKA"
+
+#: game/types.py:157
+msgid "TXT_KEY_TECH_WRITING_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_WRITING_EUREKA_TEXT"
+
+#: game/types.py:164
+msgid "TXT_KEY_TECH_MASONRY_NAME"
+msgstr "TXT_KEY_TECH_MASONRY_NAME"
+
+#: game/types.py:165
+msgid "TXT_KEY_TECH_MASONRY_EUREKA"
+msgstr "TXT_KEY_TECH_MASONRY_EUREKA"
+
+#: game/types.py:166
+msgid "TXT_KEY_TECH_MASONRY_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_MASONRY_EUREKA_TEXT"
+
+#: game/types.py:173
+msgid "TXT_KEY_TECH_ARCHERY_NAME"
+msgstr "TXT_KEY_TECH_ARCHERY_NAME"
+
+#: game/types.py:174
+msgid "TXT_KEY_TECH_ARCHERY_EUREKA"
+msgstr "TXT_KEY_TECH_ARCHERY_EUREKA"
+
+#: game/types.py:175
+msgid "TXT_KEY_TECH_ARCHERY_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_ARCHERY_EUREKA_TEXT"
+
+#: game/types.py:182
+msgid "TXT_KEY_TECH_BRONZE_WORKING_NAME"
+msgstr "TXT_KEY_TECH_BRONZE_WORKING_NAME"
+
+#: game/types.py:183
+msgid "TXT_KEY_TECH_BRONZE_WORKING_EUREKA"
+msgstr "TXT_KEY_TECH_BRONZE_WORKING_EUREKA"
+
+#: game/types.py:184
+msgid "TXT_KEY_TECH_BRONZE_WORKING_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_BRONZE_WORKING_EUREKA_TEXT"
+
+#: game/types.py:191
+msgid "TXT_KEY_TECH_WHEEL_NAME"
+msgstr "TXT_KEY_TECH_WHEEL_NAME"
+
+#: game/types.py:192
+msgid "TXT_KEY_TECH_WHEEL_EUREKA"
+msgstr "TXT_KEY_TECH_WHEEL_EUREKA"
+
+#: game/types.py:193
+msgid "TXT_KEY_TECH_WHEEL_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_WHEEL_EUREKA_TEXT"
+
+#: game/types.py:202
+msgid "TXT_KEY_TECH_CELESTIAL_NAVIGATION_NAME"
+msgstr "TXT_KEY_TECH_CELESTIAL_NAVIGATION_NAME"
+
+#: game/types.py:203
+msgid "TXT_KEY_TECH_CELESTIAL_NAVIGATION_EUREKA"
+msgstr "TXT_KEY_TECH_CELESTIAL_NAVIGATION_EUREKA"
+
+#: game/types.py:204
+msgid "TXT_KEY_TECH_CELESTIAL_NAVIGATION_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_CELESTIAL_NAVIGATION_EUREKA_TEXT"
+
+#: game/types.py:211
+msgid "TXT_KEY_TECH_HORSEBACK_RIDING_NAME"
+msgstr "TXT_KEY_TECH_HORSEBACK_RIDING_NAME"
+
+#: game/types.py:212
+msgid "TXT_KEY_TECH_HORSEBACK_RIDING_EUREKA"
+msgstr "TXT_KEY_TECH_HORSEBACK_RIDING_EUREKA"
+
+#: game/types.py:213
+msgid "TXT_KEY_TECH_HORSEBACK_RIDING_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_HORSEBACK_RIDING_EUREKA_TEXT"
+
+#: game/types.py:220
+msgid "TXT_KEY_TECH_CURRENCY_NAME"
+msgstr "TXT_KEY_TECH_CURRENCY_NAME"
+
+#: game/types.py:221
+msgid "TXT_KEY_TECH_CURRENCY_EUREKA"
+msgstr "TXT_KEY_TECH_CURRENCY_EUREKA"
+
+#: game/types.py:222
+msgid "TXT_KEY_TECH_CURRENCY_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_CURRENCY_EUREKA_TEXT"
+
+#: game/types.py:229
+msgid "TXT_KEY_TECH_CONSTRUCTION_NAME"
+msgstr "TXT_KEY_TECH_CONSTRUCTION_NAME"
+
+#: game/types.py:230
+msgid "TXT_KEY_TECH_CONSTRUCTION_EUREKA"
+msgstr "TXT_KEY_TECH_CONSTRUCTION_EUREKA"
+
+#: game/types.py:231
+msgid "TXT_KEY_TECH_CONSTRUCTION_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_CONSTRUCTION_EUREKA_TEXT"
+
+#: game/types.py:238
+msgid "TXT_KEY_TECH_IRON_WORKING_NAME"
+msgstr "TXT_KEY_TECH_IRON_WORKING_NAME"
+
+#: game/types.py:239
+msgid "TXT_KEY_TECH_IRON_WORKING_EUREKA"
+msgstr "TXT_KEY_TECH_IRON_WORKING_EUREKA"
+
+#: game/types.py:240
+msgid "TXT_KEY_TECH_IRON_WORKING_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_IRON_WORKING_EUREKA_TEXT"
+
+#: game/types.py:247
+msgid "TXT_KEY_TECH_SHIP_BUILDING_NAME"
+msgstr "TXT_KEY_TECH_SHIP_BUILDING_NAME"
+
+#: game/types.py:248
+msgid "TXT_KEY_TECH_SHIP_BUILDING_EUREKA"
+msgstr "TXT_KEY_TECH_SHIP_BUILDING_EUREKA"
+
+#: game/types.py:249
+msgid "TXT_KEY_TECH_SHIP_BUILDING_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_SHIP_BUILDING_EUREKA_TEXT"
+
+#: game/types.py:256
+msgid "TXT_KEY_TECH_MATHEMATICS_NAME"
+msgstr "TXT_KEY_TECH_MATHEMATICS_NAME"
+
+#: game/types.py:257
+msgid "TXT_KEY_TECH_MATHEMATICS_EUREKA"
+msgstr "TXT_KEY_TECH_MATHEMATICS_EUREKA"
+
+#: game/types.py:258
+msgid "TXT_KEY_TECH_MATHEMATICS_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_MATHEMATICS_EUREKA_TEXT"
+
+#: game/types.py:265
+msgid "TXT_KEY_TECH_ENGINEERING_NAME"
+msgstr "TXT_KEY_TECH_ENGINEERING_NAME"
+
+#: game/types.py:266
+msgid "TXT_KEY_TECH_ENGINEERING_EUREKA"
+msgstr "TXT_KEY_TECH_ENGINEERING_EUREKA"
+
+#: game/types.py:267
+msgid "TXT_KEY_TECH_ENGINEERING_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_ENGINEERING_EUREKA_TEXT"
+
+#: game/types.py:276
+msgid "TXT_KEY_TECH_INDUSTRIALIZATION_NAME"
+msgstr "TXT_KEY_TECH_INDUSTRIALIZATION_NAME"
+
+#: game/types.py:277
+msgid "TXT_KEY_TECH_INDUSTRIALIZATION_EUREKA"
+msgstr "TXT_KEY_TECH_INDUSTRIALIZATION_EUREKA"
+
+#: game/types.py:278
+msgid "TXT_KEY_TECH_INDUSTRIALIZATION_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_INDUSTRIALIZATION_EUREKA_TEXT"
+
+#: game/types.py:287
+msgid "TXT_KEY_TECH_REFINING_NAME"
+msgstr "TXT_KEY_TECH_REFINING_NAME"
+
+#: game/types.py:288
+msgid "TXT_KEY_TECH_REFINING_EUREKA"
+msgstr "TXT_KEY_TECH_REFINING_EUREKA"
+
+#: game/types.py:289
+msgid "TXT_KEY_TECH_REFINING_EUREKA_TEXT"
+msgstr "TXT_KEY_TECH_REFINING_EUREKA_TEXT"
+
+#: game/types.py:333
+msgid "TXT_KEY_CIVIC_NONE"
+msgstr "No Civic"
+
+#: map/generation.py:163
+msgid "TXT_KEY_MAP_GENERATOR_START"
+msgstr "start map generator"
+
+#: map/generation.py:169
+msgid "TXT_KEY_MAP_GENERATOR_INITED"
+msgstr "Init map generator"
+
+#: map/generation.py:175
+msgid "TXT_KEY_MAP_GENERATOR_ELEVATION"
+msgstr "Generate Elevation"
+
+#: map/generation.py:180
+msgid "TXT_KEY_MAP_GENERATOR_CLIMATE"
+msgstr "Generate climate"
+
+#: map/generation.py:186
+msgid "TXT_KEY_MAP_GENERATOR_COASTAL"
+msgstr "Configure coast"
+
+#: map/generation.py:192
+msgid "TXT_KEY_MAP_GENERATOR_TERRAIN"
+msgstr "Place terrain"
+
+#: map/generation.py:196
+msgid "TXT_KEY_MAP_GENERATOR_RESOURCES"
+msgstr "Place resources"
+
+#: map/generation.py:201
+msgid "TXT_KEY_MAP_GENERATOR_RIVERS"
+msgstr "Place rivers"
+
+#: map/generation.py:206
+msgid "TXT_KEY_MAP_GENERATOR_FEATURES"
+msgstr "Place terrain features"
+
+#: map/generation.py:211
+msgid "TXT_KEY_MAP_GENERATOR_NATURAL_WONDERS"
+msgstr "Place some natural wonders"
+
+#: map/generation.py:216
+msgid "TXT_KEY_MAP_GENERATOR_CONTINENTS"
+msgstr "Identify continents"
+
+#: map/generation.py:220
+msgid "TXT_KEY_MAP_GENERATOR_OCEANS"
+msgstr "Identify oceans"
+
+#: map/generation.py:228
+msgid "TXT_KEY_MAP_GENERATOR_GOODIES"
+msgstr "Place some goodies"
+
+#: map/generation.py:234
+msgid "TXT_KEY_MAP_GENERATOR_READY"
+msgstr "Ready"
+
+#: map/types.py:36
+msgid "TXT_KEY_MAP_SIZE_DUEL_NAME"
+msgstr "Duel"
+
+#: map/types.py:42
+msgid "TXT_KEY_MAP_SIZE_TINY_NAME"
+msgstr "Tiny"
+
+#: map/types.py:48
+msgid "TXT_KEY_MAP_SIZE_SMALL_NAME"
+msgstr "Small"
+
+#: map/types.py:54
+msgid "TXT_KEY_MAP_SIZE_STANDARD_NAME"
+msgstr "Standard"
+
+#: main.py:10
+msgid "SmartEvents"
+msgstr "SmartEvents"
