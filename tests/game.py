@@ -1,6 +1,6 @@
 import unittest
 
-from game.base_types import LeaderType
+from game.base_types import LeaderType, HandicapType
 from game.players import Player
 from map.base import HexPoint
 from map.map import Map
@@ -34,12 +34,32 @@ class TestSimulation(unittest.TestCase):
 		"""Test the Simulation constructor"""
 		# GIVEN
 		map = Map(10, 10)
-		simulation = Simulation(map)
-		player = Player(LeaderType.TRAJAN, human=True)
-		simulation.players.append(player)
+		simulation = Simulation(map, handicap=HandicapType.CHIEFTAIN)
 
-		player.foundCity(HexPoint(4, 5), "Berlin", simulation)
+		playerBarbar = Player(LeaderType.BARBAR, human=False)
+		playerBarbar.initialize()
+		simulation.players.append(playerBarbar)
+
+		playerTrajan = Player(LeaderType.TRAJAN, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		playerAlexander = Player(LeaderType.ALEXANDER, human=True)
+		playerAlexander.initialize()
+		simulation.players.append(playerAlexander)
+
+		# add UI
+		simulation.userInterface = object()
+
+		playerTrajan.foundCity(HexPoint(4, 5), "Berlin", simulation)
 
 		# WHEN
-		player.doTurn(simulation=simulation)
-		simulation.doTurn()
+		while not(playerAlexander.hasProcessedAutoMoves() and playerAlexander.turnFinished()):
+			simulation.update()
+
+			if playerAlexander.isTurnActive():
+				playerAlexander.finishTurn()
+				playerAlexander.setAutoMovesTo(True)
+
+		# THEN
+

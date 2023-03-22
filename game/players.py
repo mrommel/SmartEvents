@@ -52,6 +52,9 @@ class Player:
         self.lostCapitalValue = False
         self.conquerorValue = None
 
+    def initialize(self):
+        pass
+
     def doTurn(self, simulation):
         self.grandStrategyAI.doTurn(simulation)
         self.economicAI.doTurn(simulation)
@@ -199,6 +202,9 @@ class Player:
     def setLastSliceMoved(self, value: int):
         self.lastSliceMovedValue = value
 
+    def isTurnActive(self) -> bool:
+        return self.turnActive
+
     def __eq__(self, other):
         return self.leader == other.leader
 
@@ -216,3 +222,18 @@ class Player:
 
     def culture(self, simulation, consume: bool) -> float:
         pass
+
+    def isAlive(self) -> bool:
+        return self.isAliveVal
+
+    def prepareTurn(self, simulation):
+        pass
+
+    def startTurn(self, simulation):
+        pass
+
+    def hasProcessedAutoMoves(self) -> bool:
+        return True
+
+    def setAutoMovesTo(self, value: bool):
+        return

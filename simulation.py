@@ -1,5 +1,7 @@
 from enum import Enum
 
+from game.ai.barbarians import BarbarianAI
+from game.ai.religions import Religions
 from game.base_types import LeaderType, HandicapType, VictoryType
 from game.cities import City
 from game.players import Player
@@ -20,11 +22,15 @@ class ScreenType(Enum):
 
 
 class GameState(Enum):
-    pass
+    ON = 0
+    OVER = 1
+    EXTENDED = 2
 
 
 class Simulation:
     def __init__(self, map: Map, handicap: HandicapType = HandicapType.SETTLER):
+        self.turnSliceValue = 0
+        self.waitDiploPlayer = None
         self.players = []
         self.currentTurn = 0
         self.victoryTypes = [
@@ -33,7 +39,12 @@ class Simulation:
         ]
         self.handicap = handicap
         self._map = map
-        self.interface = None
+        self.userInterface = None
+        self.gameStateValue = GameState.ON
+
+        # game ai
+        self.barbarianAI = BarbarianAI()
+        self.religions = Religions()
 
     def initialize(self, humanLeader: LeaderType):
         # init human player and units
@@ -66,8 +77,7 @@ class Simulation:
 
     def update(self):
         if self.userInterface is None:
-            print("no UI")
-            return
+            raise Exception("no UI")
 
         if self.isWaitingForBlockingInput():
             if not self.userInterface.isShown(ScreenType.diplomatic):
@@ -79,7 +89,7 @@ class Simulation:
 
         # if the game is single player, it's ok to block all processing until
         # the user selects an extended match or quits.
-        if self.gameState() == GameState.over:
+        if self.gameState() == GameState.OVER:
             # self.testExtendedGame()
             return
 
@@ -112,7 +122,7 @@ class Simulation:
             # next player ???
             self.checkPlayerTurnDeactivate()
 
-            self.changeTurnSlice(1)
+            self.changeTurnSliceBy(1)
 
     def capitalOf(self, player: Player) -> City:
         return self._map.capitalOf(player)
@@ -162,3 +172,113 @@ class Simulation:
 
     def tutorial(self):
         return None
+
+    def isWaitingForBlockingInput(self) -> bool:
+        return self.waitDiploPlayer is not None
+
+    def gameState(self) -> GameState:
+        return self.gameStateValue
+
+    def setGameState(self, gameState: GameState):
+        self.gameStateValue = gameState
+
+    def turnSlice(self) -> int:
+        return self.turnSliceValue
+
+    def setTurnSliceTo(self, value: int):
+        self.turnSliceValue = value
+
+    def changeTurnSliceBy(self, delta: int):
+        self.turnSliceValue += delta
+
+    def isPaused(self):
+        return False
+
+    def numGameTurnActive(self):
+        numActive = 0
+        for player in self.players:
+            if player.isAlive() and player.isActive():
+                numActive += 1
+
+        return numActive
+
+    def doTurn(self):
+        print()
+        print(f"::: TURN {self.currentTurn + 1} starts now :::")
+        print()
+
+        self.humanPlayer().resetFinishTurnButtonPressed()
+
+        self.barbarianAI.doTurn(self)
+        self.religions.doTurn(self)
+
+        # doUpdateCacheOnTurn();
+        # DoUpdateCachedWorldReligionTechProgress();
+
+        self.updateScore()
+
+        # m_kGameDeals.DoTurn();
+
+        for player in self.players:
+            player.prepareTurn(self)
+
+        # map.doTurn()
+
+        # GC.GetEngineUserInterface()->doTurn();
+
+        self.barbarianAI.doCamps(self)
+        self.barbarianAI.doUnits(self)
+
+        # incrementGameTurn();
+        self.currentTurn += 1
+
+        # Sequential turns.
+        # Activate the << FIRST >> player we find from the start, human or AI, who wants a sequential turn.
+        for player in self.players:
+            if player.isAlive():
+                player.startTurn(self)
+
+                # show stacked messages
+                # if player.isHuman():
+                #    self.showMessages()
+
+                break
+
+        # self.doUnitedNationsCountdown();
+
+        self.doWorldEra()
+
+        # Victory stuff
+        self.doTestVictory()
+
+        # Who's Winning every 25 turns (to be un-hardcoded later)
+        human = self.humanPlayer()
+        if human.isAlive():
+            if self.currentTurn % 25 == 0:
+                # This popup is the sync rand, so beware
+                # self.userInterface.showScreen(screenType: .interimRanking, city: nil, other: nil, data: nil)
+                pass
+
+    def humanPlayer(self) -> Player:
+        return next((player for player in self.players if player.isHuman()), None)
+
+    def updateScore(self):
+        pass
+
+    def doWorldEra(self):
+        pass
+
+    def doTestVictory(self):
+        pass
+
+    def updateMoves(self):
+        pass
+
+    def updateTimers(self):
+        pass
+
+    def updatePlayers(self, self1):
+        pass
+
+    def checkPlayerTurnDeactivate(self):
+        pass
