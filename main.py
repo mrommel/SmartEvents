@@ -3,7 +3,7 @@ import gettext
 from game.base_types import LeaderType
 from map.generation import MapGenerator, MapOptions
 from map.types import MapSize, MapType
-from simulation import Simulation
+from game import Game
 from utils.translation import gettext_lazy as _
 
 if __name__ == '__main__':
@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     map = generator.generate(callbackFunc)
 
-    simulation = Simulation(map)
+    simulation = Game(map)
     simulation.initialize(humanLeader)
 
     # add players

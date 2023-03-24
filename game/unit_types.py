@@ -371,3 +371,9 @@ class UnitType(Enum):
 
 class MoveOptions(Enum):
 	NONE = 0
+
+
+class UnitMissionType(Enum):
+	NONE = 0
+
+	rangedAttack = 1

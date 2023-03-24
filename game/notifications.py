@@ -22,3 +22,6 @@ class Notifications:
 
 	def add(self, notification: Notification):
 		self.notifications.append(notification)
+
+	def cleanUp(self, simulation):
+		pass

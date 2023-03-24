@@ -5,6 +5,7 @@ from game.ai.militaries import MilitaryAI
 from game.cities import City
 from game.notifications import Notifications, NotificationType, Notification
 from game.player_mechanics import Techs, Civics
+from game.unit_types import UnitMissionType
 from map.base import HexPoint
 from map.types import Tutorials
 
@@ -227,13 +228,121 @@ class Player:
         return self.isAliveVal
 
     def prepareTurn(self, simulation):
-        pass
+        # Barbarians get all Techs that 3 / 4 of alive players get
+        if self.isBarbarian():
+            # self.doBarbarianTech()
+            pass
+
+        # / * for (iI = 0; iI < GC.getNumTechInfos();
+        # iI + +)  {
+        #     GetTeamTechs()->SetNoTradeTech(((TechTypes)iI), false);
+        # }
+        #
+        # DoTestWarmongerReminder();
+        #
+        # DoTestSmallAwards(); * /
+        self.checkWorldCircumnavigated(simulation)
 
     def startTurn(self, simulation):
-        pass
+        if not self.isTurnActive():
+            print("try to start already active turn")
+            return
+
+        if self.isHuman():
+            print(f'--- start turn for HUMAN player {self.leader} ---')
+        elif self.isBarbarian():
+            print("--- start turn for barbarian player ---")
+        elif self.leader == LeaderType.CITY_STATE:
+            print(f'--- start turn for city state {self.cityState.name()} ---')
+        elif self.isMajorAI():
+            print(f'--- start turn for AI player {self.leader} ---')
+
+        simulation.userInterface.updatePlayer(self)
+
+        self.turnActive = True
+        self.setEndTurnTo(False, simulation)
+        self.setAutoMovesTo(False)
+
+        # ////////////// // // // // // // // // // // // // // // /
+        # TURN IS BEGINNING
+        # // // // // // // // // // // // // // // // // // // // // // /
+
+        # self.doUnitAttrition()
+        self.verifyAlive(simulation)
+
+        self.setAllUnitsUnprocessed(simulation)
+
+        simulation.updateTacticalAnalysisMap(self)
+
+        self.updateTimers(simulation)
+
+        # This block all has things which might change based on city connections changing
+        self.cityConnections.doTurn(simulation)
+        self.builderTaskingAI.update(simulation)
+
+        if simulation.currentTurn > 0:
+            if self.isAlive():
+                self.doTurn(simulation)
+                self.doTurnUnits(simulation)
+
+        if simulation.currentTurn == 1 and simulation.showTutorialInfos():
+            if self.isHuman():
+                # simulation.userInterface.showPopup(popupType: .tutorialStart(tutorial: gameModel.tutorialInfos()))
+                pass
+
+    def endTurn(self, simulation):
+        if not self.isTurnActive():
+            raise Exception("try to end an inactive turn")
+
+        # print("--- unit animation running: \(gameModel?.userInterface?.animationsAreRunning(for: self.leader)) ---")
+        playerType = 'HUMAN' if self.isHuman() else 'AI'
+        print(f'--- end turn for {playerType} player {self.leader} ---')
+
+        self.turnActive = False
+
+        # /////////////////////////////////////////////
+        # // TURN IS ENDING
+        # /////////////////////////////////////////////
+
+        self.doUnitReset(simulation)
+        self.setCanChangeGovernmentTo(False)
+
+        self.notifications.cleanUp(simulation)
+
+        self.diplomacyRequests.endTurn()
 
     def hasProcessedAutoMoves(self) -> bool:
-        return True
+        return self.processedAutoMovesValue
 
     def setAutoMovesTo(self, value: bool):
-        return
+        if self.autoMovesValue != value:
+            self.autoMovesValue = value
+            self.processedAutoMovesValue = False
+
+    def doUnitReset(self, game):
+        """Units heal and then get their movement back"""
+        for loopUnit in game.unitsOf(self):
+            # HEAL UNIT?
+            if not loopUnit.isEmbarked():
+                if not loopUnit.hasMoved(game):
+                    if loopUnit.isHurt():
+                        loopUnit.doHeal(game)
+
+            # Finally(now that healing is done), restore movement points
+            loopUnit.resetMoves(game)
+            # pLoopUnit->SetIgnoreDangerWakeup(false);
+            loopUnit.setMadeAttackTo(False)
+            # pLoopUnit->setMadeInterception(false);
+
+            if not self.isHuman():
+                mission = loopUnit.peekMission()
+                if mission is not None:
+                    if mission.type == UnitMissionType.rangedAttack:
+                        # CvAssertMsg(0, "An AI unit has a combat mission queued at the end of its turn.");
+                        loopUnit.clearMissions() # Clear the whole thing, the AI will re-evaluate next turn.
+
+    def setCanChangeGovernmentTo(self, param):
+        pass
+
+    def checkWorldCircumnavigated(self, game):
+        pass
