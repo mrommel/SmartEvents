@@ -1,6 +1,8 @@
 import unittest
 
+from game.achievements import CivicAchievements
 from game.base_types import HandicapType
+from game.buildings import BuildingType
 from game.civilizations import LeaderType
 from game.game import Game
 from game.players import Player
@@ -51,10 +53,10 @@ class TestGameAssets(unittest.TestCase):
 		for civic_with_governors in civics_with_governors:
 			self.assertTrue(civic_with_governors.governorTitle(), f'envoys of {civic_with_governors} should be True')
 
-	# def test_civic_achievements(self):
-	# 	achievements = CivicAchievements(CivicType.gamesAndRecreation)
-	#
-	# 	self.assertIn(BuildingType.arena, achievements.buildingTypes)
+	def test_civic_achievements(self):
+		achievements = CivicAchievements(CivicType.gamesAndRecreation)
+
+		self.assertIn(BuildingType.arena, achievements.buildingTypes)
 
 
 class TestSimulation(unittest.TestCase):

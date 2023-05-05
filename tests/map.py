@@ -10,7 +10,7 @@ from map.base import Array2D, HexPoint, HexCube, HexDirection, Size
 from map.generation import MapOptions, MapGenerator, HeightMap
 from map.map import Tile, Map
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, AStarPathfinder, MoveTypeIgnoreUnitsPathfinderDataSource
-from map.types import FeatureType, TerrainType, MovementType, MapSize, MapType
+from map.types import FeatureType, TerrainType, UnitMovementType, MapSize, MapType
 
 
 class TestArray2D(unittest.TestCase):
@@ -286,9 +286,9 @@ class TestTile(unittest.TestCase):
 		mountains_tile._featureValue = FeatureType.mountains
 		ocean_tile = Tile(HexPoint(3, 1), TerrainType.shore)
 
-		self.assertEqual(grass_tile.movementCost(MovementType.walk, tundra_tile), 1)
-		self.assertEqual(mountains_tile.movementCost(MovementType.walk, tundra_tile), 3)
-		self.assertEqual(ocean_tile.movementCost(MovementType.walk, tundra_tile), MovementType.max)
+		self.assertEqual(grass_tile.movementCost(UnitMovementType.walk, tundra_tile), 1)
+		self.assertEqual(mountains_tile.movementCost(UnitMovementType.walk, tundra_tile), 3)
+		self.assertEqual(ocean_tile.movementCost(UnitMovementType.walk, tundra_tile), UnitMovementType.max)
 
 
 class TestMap(unittest.TestCase):
@@ -365,7 +365,7 @@ class TestPathfinding(unittest.TestCase):
 		grid.modifyFeatureAt(HexPoint(1, 2), FeatureType.mountains)  # put a mountain into the path
 
 		datasource_options = MoveTypeIgnoreUnitsOptions(ignore_sight=True, can_embark=False, can_enter_ocean=False)
-		datasource = MoveTypeIgnoreUnitsPathfinderDataSource(grid, MovementType.walk, player, datasource_options)
+		datasource = MoveTypeIgnoreUnitsPathfinderDataSource(grid, UnitMovementType.walk, player, datasource_options)
 		finder = AStarPathfinder(datasource)
 
 		path = finder.shortestPath(HexPoint(0, 0), HexPoint(2, 3))

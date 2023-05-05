@@ -1,11 +1,11 @@
 from map.base import HexPoint
 from map.map import Map
 from map.path_finding.base import AStar
-from map.types import MovementType, TerrainType
+from map.types import UnitMovementType, TerrainType
 
 
 class AStarDataSource:
-	def __init__(self, grid: Map, movement_type: MovementType):
+	def __init__(self, grid: Map, movement_type: UnitMovementType):
 		self.grid = grid
 		self.movement_type = movement_type
 
@@ -26,7 +26,7 @@ class MoveTypeIgnoreUnitsOptions:
 
 class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
 
-	def __init__(self, grid: Map, movement_type: MovementType, player, options: MoveTypeIgnoreUnitsOptions):
+	def __init__(self, grid: Map, movement_type: UnitMovementType, player, options: MoveTypeIgnoreUnitsOptions):
 		super().__init__(grid, movement_type)
 		self.player = player
 		self.options = options
@@ -40,19 +40,19 @@ class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
 
 			to_tile = self.grid.tileAt(neighbor)
 
-			if self.movement_type == MovementType.walk:
+			if self.movement_type == UnitMovementType.walk:
 				if to_tile.terrain == TerrainType.ocean and not self.options.can_enter_ocean:
 					continue
-				if to_tile.isWater() and self.options.can_embark and to_tile.isImpassable(MovementType.swim):
+				if to_tile.isWater() and self.options.can_embark and to_tile.isImpassable(UnitMovementType.swim):
 					continue
 
-				if to_tile.isLand() and to_tile.isImpassable(MovementType.walk):
+				if to_tile.isLand() and to_tile.isImpassable(UnitMovementType.walk):
 					continue
 			else:
 				if to_tile.terrain == TerrainType.ocean and not self.options.can_enter_ocean:
 					continue
 
-				if to_tile.isWater() and to_tile.isImpassable(MovementType.swim):
+				if to_tile.isWater() and to_tile.isImpassable(UnitMovementType.swim):
 					continue
 
 			# use sight?
@@ -66,7 +66,7 @@ class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
 
 			from_tile = self.grid.tileAt(tile_coord)
 
-			if to_tile.movementCost(self.movement_type, from_tile) < MovementType.max.value:
+			if to_tile.movementCost(self.movement_type, from_tile) < UnitMovementType.max.value:
 				walkable_coords.append(neighbor)
 
 		return walkable_coords

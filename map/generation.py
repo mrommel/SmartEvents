@@ -3,13 +3,13 @@ import random
 import sys
 from bitarray import bitarray
 
-from game.base_types import LeaderType, CityStateType
+from game.base_types import CityStateType
 from map.base import HexPoint, HexDirection, Array2D, HexArea
 from map.map import Map, Tile, Continent, ContinentType
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, MoveTypeIgnoreUnitsPathfinderDataSource, AStarPathfinder
 from map.perlin_noise.perlin_noise import PerlinNoise
 from map.types import TerrainType, MapType, MapAge, MapSize, ResourceType, ClimateZone, FeatureType, ResourceUsage, \
-    MovementType
+    UnitMovementType
 from utils.base import WeightedStringList
 from utils.translation import gettext_lazy as _
 
@@ -1072,7 +1072,7 @@ class MapGenerator:
             return
 
         options = MoveTypeIgnoreUnitsOptions(ignore_sight=True, can_embark=False, can_enter_ocean=False)
-        pathFinderDataSource = MoveTypeIgnoreUnitsPathfinderDataSource(grid, MovementType.walk, options)
+        pathFinderDataSource = MoveTypeIgnoreUnitsPathfinderDataSource(grid, UnitMovementType.walk, options)
         pathFinder = AStarPathfinder(pathFinderDataSource)
 
         longestRoute = 0
@@ -1247,8 +1247,8 @@ class MapGenerator:
 
                 tile = grid.tileAt(grid_point)
 
-                if (tile.isImpassable(MovementType.walk) and tile.isImpassable(
-                    MovementType.swim)) or tile._featureValue != FeatureType.none:
+                if (tile.isImpassable(UnitMovementType.walk) and tile.isImpassable(
+                    UnitMovementType.swim)) or tile._featureValue != FeatureType.none:
                     continue
 
                 if tile.terrain.isWater():

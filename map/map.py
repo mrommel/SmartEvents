@@ -5,7 +5,7 @@ from game.players import Player
 from game.unit_types import BuildType
 from game.units import Unit
 from map.base import HexPoint, HexDirection, Size, Array2D
-from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, MovementType, MapSize, Tutorials
+from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, Tutorials
 
 
 class Tile:
@@ -86,18 +86,18 @@ class Tile:
 		# start with terrain cost
 		terrain_cost = self.terrain.movementCost(movement_ype)
 
-		if terrain_cost == MovementType.max:
+		if terrain_cost == UnitMovementType.max:
 			return True
 
 		if self._featureValue != FeatureType.none:
 			feature_cost = self._featureValue.movementCost(movement_ype)
 
-			if feature_cost == MovementType.max:
+			if feature_cost == UnitMovementType.max:
 				return True
 
 		return False
 
-	def movementCost(self, movement_type: MovementType, from_tile: Tile) -> int:
+	def movementCost(self, movement_type: UnitMovementType, from_tile: Tile) -> int:
 		"""
 			cost to enter a terrain given the specified movement_type
 
@@ -108,8 +108,8 @@ class Tile:
 		# start with terrain cost
 		terrain_cost = self.terrain.movementCost(movement_type)
 
-		if terrain_cost == MovementType.max:
-			return MovementType.max
+		if terrain_cost == UnitMovementType.max:
+			return UnitMovementType.max
 
 		# hills
 		hill_costs = 1.0 if self.is_hills else 0.0
@@ -119,8 +119,8 @@ class Tile:
 		if self._featureValue != FeatureType.none:
 			feature_cost = self._featureValue.movementCost(movement_type)
 
-			if feature_cost == MovementType.max:
-				return MovementType.max
+			if feature_cost == UnitMovementType.max:
+				return UnitMovementType.max
 
 			feature_costs = feature_cost
 
@@ -546,7 +546,7 @@ class Map:
 	def _isFreshWaterAt(self, x, y):
 		tile = self.tileAt(x, y)
 
-		if tile.terrain.isWater() or tile.isImpassable(MovementType.walk):
+		if tile.terrain.isWater() or tile.isImpassable(UnitMovementType.walk):
 			return False
 
 		if self.riverAt(x, y):

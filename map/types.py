@@ -71,13 +71,14 @@ class MapType(Enum):
 
 
 class Yields:
-	def __init__(self, food, production, gold, science=0, culture=0, faith=0):
+	def __init__(self, food: int, production: int, gold: int, science: int = 0, culture: int = 0, faith: int = 0, housing: int = 0):
 		self.food = food
 		self.production = production
 		self.gold = gold
 		self.science = science
 		self.culture = culture
 		self.faith = faith
+		self.housing = housing
 
 
 class YieldType(Enum):
@@ -115,25 +116,25 @@ class TerrainType(ExtendedEnum):
 		return not self.isWater()
 
 	def movementCost(self, movement_type):
-		if movement_type == MovementType.immobile:
-			return MovementType.max
+		if movement_type == UnitMovementType.immobile:
+			return UnitMovementType.max
 
-		if movement_type == MovementType.swim:
+		if movement_type == UnitMovementType.swim:
 			if self == TerrainType.ocean:
 				return 1.5
 
 			if self == TerrainType.shore:
 				return 1.0
 
-			return MovementType.max
+			return UnitMovementType.max
 
-		if movement_type == MovementType.swim_shallow:
+		if movement_type == UnitMovementType.swim_shallow:
 			if self == TerrainType.shore:
 				return 1.0
 
-			return MovementType.max
+			return UnitMovementType.max
 
-		if movement_type == MovementType.walk:
+		if movement_type == UnitMovementType.walk:
 			if self == TerrainType.plains:
 				return 1.0
 
@@ -149,7 +150,7 @@ class TerrainType(ExtendedEnum):
 			if self == TerrainType.snow:
 				return 1.0
 
-			return MovementType.max
+			return UnitMovementType.max
 
 	def textures(self):
 		if self == TerrainType.desert:
@@ -237,16 +238,16 @@ class FeatureType(ExtendedEnum):
 	# return FeatureData('None', Yields(0, 0, 0), False)
 
 	def movementCost(self, movement_type):
-		if movement_type == MovementType.immobile:
-			return MovementType.max
+		if movement_type == UnitMovementType.immobile:
+			return UnitMovementType.max
 
-		if movement_type == MovementType.swim:
-			return MovementType.max  # this means that no unit can enter water features
+		if movement_type == UnitMovementType.swim:
+			return UnitMovementType.max  # this means that no unit can enter water features
 
-		if movement_type == MovementType.swim_shallow:
+		if movement_type == UnitMovementType.swim_shallow:
 			return self.movementCosts()
 
-		if movement_type == MovementType.walk:
+		if movement_type == UnitMovementType.walk:
 			return self.movementCosts()
 
 	def movementCosts(self):
@@ -263,19 +264,19 @@ class FeatureType(ExtendedEnum):
 		elif self == FeatureType.reef:
 			return 2
 		elif self == FeatureType.ice:
-			return MovementType.max
+			return UnitMovementType.max
 		elif self == FeatureType.atoll:
 			return 2
 		elif self == FeatureType.volcano:
-			return MovementType.max
+			return UnitMovementType.max
 		elif self == FeatureType.mountains:
 			return 2  # ???
 		elif self == FeatureType.lake:
-			return MovementType.max
+			return UnitMovementType.max
 		elif self == FeatureType.fallout:
 			return 2
 
-		return MovementType.max
+		return UnitMovementType.max
 
 	def isPossibleOn(self, tile):
 		if self == FeatureType.forest:
@@ -997,7 +998,7 @@ class ClimateZone(ExtendedEnum):
 			return ClimateZone.tropic
 
 
-class MovementType(ExtendedEnum):
+class UnitMovementType(ExtendedEnum):
 	immobile = 'immobile'
 	walk = 'walk'
 	swim = 'swim'
