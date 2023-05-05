@@ -71,7 +71,8 @@ class MapType(Enum):
 
 
 class Yields:
-	def __init__(self, food: int, production: int, gold: int, science: int = 0, culture: int = 0, faith: int = 0, housing: int = 0):
+	def __init__(self, food: float, production: float, gold: float, science: float = 0.0, culture: float = 0.0,
+	             faith: float = 0.0, housing: float = 0.0):
 		self.food = food
 		self.production = production
 		self.gold = gold

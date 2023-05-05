@@ -4,9 +4,11 @@ from game.achievements import CivicAchievements
 from game.base_types import HandicapType
 from game.buildings import BuildingType
 from game.civilizations import LeaderType
+from game.districts import DistrictType
 from game.game import Game
 from game.players import Player
 from game.types import CivicType, TechType
+from game.wonders import WonderType
 from map.base import HexPoint
 from map.map import Map
 
@@ -19,6 +21,18 @@ class TestGameAssets(unittest.TestCase):
 	def test_civics_data(self):
 		for civic in list(CivicType):
 			_ = civic.name()
+
+	def test_districts_data(self):
+		for district in list(DistrictType):
+			_ = district.name()
+
+	def test_wonders_data(self):
+		for wonder in list(WonderType):
+			_ = wonder.name()
+
+	def test_buildings_data(self):
+		for building in list(BuildingType):
+			_ = building.name()
 
 	def test_civics_envoys(self):
 		# https://civilization.fandom.com/wiki/Envoy_(Civ6)
@@ -57,6 +71,8 @@ class TestGameAssets(unittest.TestCase):
 		achievements = CivicAchievements(CivicType.gamesAndRecreation)
 
 		self.assertIn(BuildingType.arena, achievements.buildingTypes)
+		self.assertIn(WonderType.colosseum, achievements.wonderTypes)
+		self.assertIn(DistrictType.entertainmentComplex, achievements.districtTypes)
 
 
 class TestSimulation(unittest.TestCase):
