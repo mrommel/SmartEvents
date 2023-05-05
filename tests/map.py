@@ -286,9 +286,9 @@ class TestTile(unittest.TestCase):
 		mountains_tile._featureValue = FeatureType.mountains
 		ocean_tile = Tile(HexPoint(3, 1), TerrainType.shore)
 
-		self.assertEqual(grass_tile.movementCost(MovementType.WALK, tundra_tile), 1)
-		self.assertEqual(mountains_tile.movementCost(MovementType.WALK, tundra_tile), 3)
-		self.assertEqual(ocean_tile.movementCost(MovementType.WALK, tundra_tile), MovementType.max)
+		self.assertEqual(grass_tile.movementCost(MovementType.walk, tundra_tile), 1)
+		self.assertEqual(mountains_tile.movementCost(MovementType.walk, tundra_tile), 3)
+		self.assertEqual(ocean_tile.movementCost(MovementType.walk, tundra_tile), MovementType.max)
 
 
 class TestMap(unittest.TestCase):
@@ -343,7 +343,7 @@ class TestMapGenerator(unittest.TestCase):
 			print(f'Progress: {state.value} - {state.message} ')
 			self.last_state_value = state.value
 
-		options = MapOptions(mapSize=MapSize.DUEL, mapType=MapType.CONTINENTS, leader=LeaderType.TRAJAN)
+		options = MapOptions(mapSize=MapSize.DUEL, mapType=MapType.CONTINENTS, leader=LeaderType.trajan)
 		generator = MapGenerator(options)
 
 		grid = generator.generate(_callback)
@@ -360,12 +360,12 @@ class TestPathfinding(unittest.TestCase):
 		for pt in grid.points():
 			grid.modifyTerrainAt(pt, TerrainType.grass)
 
-		player = Player(leader=LeaderType.TRAJAN, human=True)
+		player = Player(leader=LeaderType.trajan, human=True)
 
 		grid.modifyFeatureAt(HexPoint(1, 2), FeatureType.mountains)  # put a mountain into the path
 
 		datasource_options = MoveTypeIgnoreUnitsOptions(ignore_sight=True, can_embark=False, can_enter_ocean=False)
-		datasource = MoveTypeIgnoreUnitsPathfinderDataSource(grid, MovementType.WALK, player, datasource_options)
+		datasource = MoveTypeIgnoreUnitsPathfinderDataSource(grid, MovementType.walk, player, datasource_options)
 		finder = AStarPathfinder(datasource)
 
 		path = finder.shortestPath(HexPoint(0, 0), HexPoint(2, 3))

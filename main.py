@@ -12,7 +12,7 @@ if __name__ == '__main__':
     def callbackFunc(state):
         print(f'Progress: {state.value} - {state.message}')
 
-    humanLeader = LeaderType.TRAJAN
+    humanLeader = LeaderType.trajan
     options = MapOptions(MapSize.TINY, MapType.CONTINENTS, humanLeader)
     generator = MapGenerator(options)
 

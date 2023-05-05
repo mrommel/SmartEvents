@@ -1,10 +1,11 @@
 from enum import Enum
 
+from game.civilizations import TraitType
+from game.unit_types import UnitDomainType, UnitTaskType
 from utils.base import InvalidEnumError
-from game.base_types import FlavorType, TraitType
+from game.base_types import FlavorType
 from game.ai.grand_strategies import GrandStrategyAIType
 from game.ai.military_strategies import MilitaryStrategyType
-from game.unit_types import UnitTask, UnitDomain
 
 
 class MilitaryThreatType(Enum):
@@ -116,27 +117,27 @@ class MilitaryAI:
 
         for unit in simulation.unitsOf(self.player):
             # Don't count exploration units
-            if unit.task() == UnitTask.EXPLORE or unit.task() == UnitTask.EXPLORE_SEA:
+            if unit.task() == UnitTaskType.explore or unit.task() == UnitTaskType.explore_sea:
                 continue
 
             # Don't count civilians
-            if not unit.hasTask(UnitTask.ATTACK):
+            if not unit.hasTask(UnitTaskType.attack):
                 continue
 
-            if unit.domain() == UnitDomain.LAND:
+            if unit.domain() == UnitDomainType.land:
                 self.baseData.numLandUnits += 1
 
-                if unit.hasTask(UnitTask.RANGED):
+                if unit.hasTask(UnitTaskType.ranged):
                     self.baseData.numRangedLandUnits += 1
 
                 if unit.moves() > 2:
                     self.baseData.numMobileLandUnits += 1
 
-            elif unit.domain() == UnitDomain.SEA:
+            elif unit.domain() == UnitDomainType.sea:
                 self.baseData.numNavalUnits += 1
 
-        flavorOffense = float(self.player.valueOfStrategyAndPersonalityFlavor(FlavorType.OFFENSE))
-        flavorDefense = float(self.player.valueOfStrategyAndPersonalityFlavor(FlavorType.DEFENSE))
+        flavorOffense = float(self.player.valueOfStrategyAndPersonalityFlavor(FlavorType.offense))
+        flavorDefense = float(self.player.valueOfStrategyAndPersonalityFlavor(FlavorType.defense))
 
         # Scale up or down based on true threat level and a bit by flavors(multiplier should range from about 0.5 to
         # about 1.5)
@@ -150,7 +151,7 @@ class MilitaryAI:
         # 1 Unit per City & 1 per Settler
         numUnitsWanted += float(len(simulation.citiesOf(self.player))) * 1.0
         allUnits = simulation.unitsOf(self.player)
-        settlers = list(filter(lambda unit: unit.task() == UnitTask.SETTLE, allUnits))
+        settlers = list(filter(lambda unit: unit.task() == UnitTaskType.settle, allUnits))
         numUnitsWanted += float(len(settlers)) * 1.0
 
         self.baseData.mandatoryReserveSize = int(float(numUnitsWanted) * multiplier)
@@ -169,7 +170,7 @@ class MilitaryAI:
             numUnitsWanted *= 2
 
         # add in a few more if the player is bold
-        numUnitsWanted += float(self.player.leader.traitValue(TraitType.BOLDNESS))
+        numUnitsWanted += float(self.player.leader.traitValue(TraitType.boldness))
 
         # add in more if we are playing on a high difficulty
         # iNumUnitsWanted += iDifficulty * 3

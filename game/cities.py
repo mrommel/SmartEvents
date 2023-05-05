@@ -1,5 +1,5 @@
 from game.ai.cities import CityStrategyAI
-from game.base_types import LeaderWeightList
+from game.civilizations import LeaderWeightList
 from map.base import HexPoint
 from map.types import YieldList
 

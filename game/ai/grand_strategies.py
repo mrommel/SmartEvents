@@ -1,7 +1,8 @@
 import random
 
+from game.civilizations import TraitType
 from utils.base import InvalidEnumError, ExtendedEnum
-from game.base_types import FlavorType, Flavor, TraitType, VictoryType
+from game.base_types import FlavorType, Flavor, VictoryType
 
 
 class GrandStrategyAIType(ExtendedEnum):
@@ -146,7 +147,7 @@ class GrandStrategyAI:
 
         priority = 0
 
-        priority += self.player.leader.traitValue(TraitType.BOLDNESS) * 10
+        priority += self.player.leader.traitValue(TraitType.boldness) * 10
 
         # How many turns must have passed before we test for having met nobody?
         if simulation.currentTurn > 20:

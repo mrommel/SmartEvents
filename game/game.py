@@ -2,8 +2,9 @@ from enum import Enum
 
 from game.ai.barbarians import BarbarianAI
 from game.ai.religions import Religions
-from game.base_types import LeaderType, HandicapType, VictoryType
+from game.base_types import HandicapType, VictoryType
 from game.cities import City
+from game.civilizations import LeaderType
 from game.players import Player
 from game.types import TechType
 from game.unit_types import BuildType

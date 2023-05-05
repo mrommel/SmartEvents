@@ -510,7 +510,7 @@ class StartPositioner:
             if bestLocation == HexPoint(-1, -1):
                 print("Warning: Can't find valid start location for city state")
             else:
-                self.cityStateStartLocations.append(StartLocation(bestLocation, LeaderType.CITY_STATE, False))
+                self.cityStateStartLocations.append(StartLocation(bestLocation, LeaderType.city_state, False))
 
         # sort human to the end
         self.startLocations = sorted(self.startLocations, key=lambda loc: 1 if loc.isHuman else 0)
@@ -1072,7 +1072,7 @@ class MapGenerator:
             return
 
         options = MoveTypeIgnoreUnitsOptions(ignore_sight=True, can_embark=False, can_enter_ocean=False)
-        pathFinderDataSource = MoveTypeIgnoreUnitsPathfinderDataSource(grid, MovementType.WALK, options)
+        pathFinderDataSource = MoveTypeIgnoreUnitsPathfinderDataSource(grid, MovementType.walk, options)
         pathFinder = AStarPathfinder(pathFinderDataSource)
 
         longestRoute = 0
@@ -1247,8 +1247,8 @@ class MapGenerator:
 
                 tile = grid.tileAt(grid_point)
 
-                if (tile.isImpassable(MovementType.WALK) and tile.isImpassable(
-                    MovementType.SWIM)) or tile._featureValue != FeatureType.none:
+                if (tile.isImpassable(MovementType.walk) and tile.isImpassable(
+                    MovementType.swim)) or tile._featureValue != FeatureType.none:
                     continue
 
                 if tile.terrain.isWater():
@@ -1367,7 +1367,7 @@ class MapGenerator:
         aiLeaders: [LeaderType] = self.options.aiLeaders
 
         if len(aiLeaders) == 0:
-            exclude_leaders = [self.options.leader, LeaderType.BARBAR, LeaderType.NONE, LeaderType.CITY_STATE]
+            exclude_leaders = [self.options.leader, LeaderType.barbar, LeaderType.none, LeaderType.city_state]
             aiLeaders = list(filter(lambda leader: leader not in exclude_leaders, list(LeaderType)))
             aiLeaders = random.choices(aiLeaders, k=(numberOfPlayers - 1))
 

@@ -1,22 +1,24 @@
 from enum import Enum
+from typing import Optional
 
-from game.types import EraType, TechType
-from map.types import MovementType, RouteType, FeatureType
+from game.civilizations import CivilizationType
+from game.flavors import Flavor
+from game.types import EraType, TechType, CivicType
+from map.types import MovementType, RouteType, FeatureType, ResourceType
 from utils.base import ExtendedEnum, InvalidEnumError
 from utils.translation import gettext_lazy as _
 
 
 class ImprovementType(Enum):
-	NONE = 0
+	none = 'none'
 
-	MINE = 1
-	plantation = 2
-	FARM = 3
-	mine = 4
-	quarry = 5
-	camp = 6
-	fishingBoats = 7
-	pasture = 8
+	mine = 'mine'
+	plantation = 'plantation'
+	farm = 'farm'
+	quarry = 'quarry'
+	camp = 'camp'
+	fishingBoats = 'fishingBoats'
+	pasture = 'pasture'
 
 
 class BuildTypeData:
@@ -49,20 +51,20 @@ class FeatureBuild:
 
 
 class BuildType(ExtendedEnum):
-	NONE = 0
+	none = 0
 
-	REMOVE_RAINFOREST = 1
-	REMOVE_MARSH = 2
-	REMOVE_FOREST = 3
-	REPAIR = 4
-	MINE = 5
-	ANCIENT_ROAD = 6
-	CLASSICAL_ROAD = 7
-	REMOVE_ROAD = 8
+	remove_rainforest = 1
+	remove_marsh = 2
+	remove_forest = 3
+	repair = 4
+	mine = 5
+	ancient_road = 6
+	classical_road = 7
+	remove_road = 8
 	fishingBoats = 9
 	camp = 10
-	FARM = 11
-	QUARRY = 12
+	farm = 11
+	quarry = 12
 	plantation = 13
 	pasture = 14
 
@@ -75,44 +77,44 @@ class BuildType(ExtendedEnum):
 		return False
 
 	def _data(self) -> BuildTypeData:
-		if self == BuildType.NONE:
+		if self == BuildType.none:
 			return BuildTypeData(
 				name="None",
 				duration=0
 			)
-		elif self == BuildType.REPAIR:
+		elif self == BuildType.repair:
 			return BuildTypeData(
 				name="Repair",
 				repair=True,
 				duration=300
 			)
 
-		elif self == BuildType.ANCIENT_ROAD:
+		elif self == BuildType.ancient_road:
 			return BuildTypeData(
 				name="Road",
-				era=EraType.ANCIENT,
+				era=EraType.ancient,
 				route=RouteType.ancientRoad,
 				duration=300
 			)
 
-		elif self == BuildType.CLASSICAL_ROAD:
+		elif self == BuildType.classical_road:
 			return BuildTypeData(
 				name="Road",
-				era=EraType.CLASSICAL,
+				era=EraType.classical,
 				route=RouteType.classicalRoad,
 				duration=300
 			)
-		elif self == BuildType.REMOVE_ROAD:
+		elif self == BuildType.remove_road:
 			return BuildTypeData(
 				name="Remove Road",
 				required=TechType.wheel,
 				removeRoad=True,
 				duration=300
 			)
-		elif self == BuildType.FARM:
+		elif self == BuildType.farm:
 			farmBuild = BuildTypeData(
 				name="Farm",
-				improvement=ImprovementType.FARM,
+				improvement=ImprovementType.farm,
 				duration=600
 			)
 
@@ -147,7 +149,7 @@ class BuildType(ExtendedEnum):
 			farmBuild.featuresKept.append(FeatureType.floodplains)
 
 			return farmBuild
-		elif self == BuildType.MINE:
+		elif self == BuildType.mine:
 			mineBuild = BuildTypeData(
 				name="Mine",
 				required=TechType.mining,
@@ -161,7 +163,7 @@ class BuildType(ExtendedEnum):
 			mineBuild.featuresKept.append(FeatureType.oasis)
 
 			return mineBuild
-		elif self == BuildType.QUARRY:
+		elif self == BuildType.quarry:
 			quarryBuild = BuildTypeData(
 				name="Quarry",
 				required=TechType.mining,
@@ -227,7 +229,7 @@ class BuildType(ExtendedEnum):
 
 			return fishingBoatsBuild
 
-		elif self == BuildType.REMOVE_FOREST:
+		elif self == BuildType.remove_forest:
 			removeForestBuild = BuildTypeData(
 				name="Remove Forest",
 				duration=300
@@ -245,7 +247,7 @@ class BuildType(ExtendedEnum):
 
 			return removeForestBuild
 
-		elif self == BuildType.REMOVE_RAINFOREST:
+		elif self == BuildType.remove_rainforest:
 			removeRainforestBuild = BuildTypeData(name="Remove Rainforest", duration=600)
 
 			removeRainforestBuild.featureBuilds.append(
@@ -260,7 +262,7 @@ class BuildType(ExtendedEnum):
 
 			return removeRainforestBuild
 
-		elif self == BuildType.REMOVE_MARSH:
+		elif self == BuildType.remove_marsh:
 			removeMarshBuild = BuildTypeData(name="Remove Marsh", duration=500)
 
 			removeMarshBuild.featureBuilds.append(
@@ -276,30 +278,54 @@ class BuildType(ExtendedEnum):
 			return removeMarshBuild
 
 
-class UnitTask(ExtendedEnum):
-	WORK = 5
-	RANGED = 4
-	ATTACK = 3
-	EXPLORE_SEA = 2
-	EXPLORE = 1
-	SETTLE = 0
+class UnitTaskType(ExtendedEnum):
+	none = 'none'
+
+	work = 'work'
+	ranged = 'ranged'
+	attack = 'attack'
+	explore_sea = 'explore_sea'
+	explore = 'explore'
+	settle = 'settle'
 
 
-class UnitDomain(ExtendedEnum):
-	SEA = 1
-	LAND = 0
+class UnitDomainType(ExtendedEnum):
+	sea = 'sea'
+	land = 'land'
+
+
+class UnitAbilityType(ExtendedEnum):
+	pass
 
 
 class OperationType(ExtendedEnum):
-	NOT_SO_QUICK_COLONIZE = 2
-	COLONIZE = 1
-	FOUND_CITY = 0
+	not_so_quick_colonize = 2
+	colonize = 1
+	found_city = 0
+
+
+class UnitClassType(ExtendedEnum):
+	civilian = 'civilian'
+
+
+class BitArray:
+	pass
+
+
+class UnitType:
+	pass
 
 
 class UnitTypeData:
-	def __init__(self, name: str, baseType, domain: UnitDomain, effects, abilities, era: EraType,
-	             requiredResource, civilization, unitTasks: [UnitTask],
-	             defaultTask: UnitTask, movementType: MovementType, productionCost: int, purchaseCost: int):
+	def __init__(self, name: str, baseType: Optional[UnitType], domain: UnitDomainType, effects: [str],
+	             abilities: [UnitAbilityType], era: EraType, requiredResource: Optional[ResourceType],
+	             civilization: Optional[CivilizationType], unitTasks: [UnitTaskType],
+	             defaultTask: UnitTaskType, movementType: MovementType, productionCost: int,
+	             purchaseCost: int, faithCost: int, maintenanceCost: int, sight: int, range: int,
+	             supportDistance: int, strength: int, targetType: UnitClassType, flags: BitArray,
+	             meleeAttack: int, rangedAttack: int, moves: int, requiredTech: Optional[TechType],
+	             obsoleteTech: Optional[TechType], requiredCivic: Optional[CivicType],
+	             upgradesFrom: [UnitType], flavours: [Flavor]):
 		self.name = name
 		self.baseType = baseType
 		self.domain = domain
@@ -315,53 +341,53 @@ class UnitTypeData:
 		self.purchaseCost = purchaseCost
 
 
-class UnitType(Enum):
-	SETTLER = 0
-	BUILDER = 1
-	WARRIOR = 1
+class UnitType(ExtendedEnum):
+	settler = 0
+	builder = 1
+	warrior = 2
 
-	def defaultTask(self) -> UnitTask:
+	def defaultTask(self) -> UnitTaskType:
 		return self._data().defaultTask
 
-	def unitTasks(self) -> [UnitTask]:
+	def unitTasks(self) -> [UnitTaskType]:
 		return self._data().unitTasks
 
 	def _data(self) -> UnitTypeData:
-		if self == UnitType.SETTLER:
+		if self == UnitType.settler:
 			return UnitTypeData(
 				name=_("TXT_KEY_UNIT_SETTLER_NAME"),
-				baseType=UnitType.SETTLER,
-				domain=UnitDomain.LAND,
+				baseType=UnitType.settler,
+				domain=UnitDomainType.land,
 				effects=[
 					_("TXT_KEY_UNIT_SETTLER_EFFECT1"),
 					_("TXT_KEY_UNIT_SETTLER_EFFECT2")
 				],
 				abilities=[""".canFound"""],
-				era=EraType.ANCIENT,
+				era=EraType.ancient,
 				requiredResource=None,
 				civilization=None,
-				unitTasks=[UnitTask.SETTLE],
-				defaultTask=UnitTask.SETTLE,
-				movementType=MovementType.WALK,
+				unitTasks=[UnitTaskType.settle],
+				defaultTask=UnitTaskType.settle,
+				movementType=MovementType.walk,
 				productionCost=80,
 				purchaseCost=320,
 			)
-		elif self == UnitType.BUILDER:
+		elif self == UnitType.builder:
 			return UnitTypeData(
 				name=_("TXT_KEY_UNIT_BUILDER_NAME"),
-				baseType=UnitType.BUILDER,
-				domain=UnitDomain.LAND,
+				baseType=UnitType.builder,
+				domain=UnitDomainType.land,
 				effects=[
 					_("TXT_KEY_UNIT_BUILDER_EFFECT1"),
 					_("TXT_KEY_UNIT_BUILDER_EFFECT2")
 				],
 				abilities=[""".canImprove"""],
-				era=EraType.ANCIENT,
+				era=EraType.ancient,
 				requiredResource=None,
 				civilization=None,
-				unitTasks=[UnitTask.WORK],
-				defaultTask=UnitTask.WORK,
-				movementType=MovementType.WALK,
+				unitTasks=[UnitTaskType.work],
+				defaultTask=UnitTaskType.work,
+				movementType=MovementType.walk,
 				productionCost=50,
 				purchaseCost=200,
 			)

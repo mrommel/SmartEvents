@@ -7,174 +7,6 @@ from utils.theming import Color
 from utils.translation import gettext_lazy as _
 
 
-class TraitType(ExtendedEnum):
-    BOLDNESS = 0
-
-
-class Trait:
-    def __init__(self, traitType: TraitType, value: int):
-        self.traitType = traitType
-        self.value = value
-
-
-class CivilizationType(ExtendedEnum):
-    BARBARIAN = -3
-    FREE = -2
-    CITY_STATE = -1
-
-    GREEK = 0
-    ROMAN = 1
-    ENGLISH = 2
-
-    def startingBias(self, tile, grid) -> int:
-        # https://civilization.fandom.com/wiki/Starting_bias_(Civ5)
-        if self == CivilizationType.GREEK:
-            return 0  # no special bias
-        elif self == CivilizationType.ROMAN:
-            return 0  # no special bias
-        elif self == CivilizationType.ENGLISH:
-            return 2 if grid.isCoastalAt(tile.point) else 0
-
-        return 0  # rest
-
-
-class LeaderType(ExtendedEnum):
-    BARBAR = -2
-    CITY_STATE = -1
-    NONE = 0
-
-    ALEXANDER = 1
-    TRAJAN = 2
-    VICTORIA = 3
-
-    def civilization(self) -> CivilizationType:
-        if self == LeaderType.ALEXANDER:
-            return CivilizationType.GREEK
-        elif self == LeaderType.TRAJAN:
-            return CivilizationType.ROMAN
-        elif self == LeaderType.VICTORIA:
-            return CivilizationType.ENGLISH
-
-        raise Exception(f'Enum not handled: {self}')
-
-    def flavor(self, flavorType: FlavorType) -> int:
-        item = next((flavor for flavor in self._flavors() if flavor.flavorType == flavorType), None)
-
-        if item is not None:
-            return item.value
-
-        return 0
-
-    def _flavors(self) -> [Flavor]:
-        if self == LeaderType.ALEXANDER:
-            return [
-                Flavor(FlavorType.CITY_DEFENSE, 5),
-                Flavor(FlavorType.CULTURE, 7),
-                Flavor(FlavorType.DEFENSE, 5),
-                Flavor(FlavorType.DIPLOMACY, 9),
-                Flavor(FlavorType.EXPANSION, 8),
-                Flavor(FlavorType.GOLD, 3),
-                Flavor(FlavorType.GROWTH, 4),
-                Flavor(FlavorType.AMENITIES, 5),
-                Flavor(FlavorType.INFRASTRUCTURE, 4),
-                Flavor(FlavorType.MILITARY_TRAINING, 5),
-                Flavor(FlavorType.MOBILE, 8),
-                Flavor(FlavorType.NAVAL, 5),
-                Flavor(FlavorType.NAVAL_GROWTH, 6),
-                Flavor(FlavorType.NAVAL_RECON, 5),
-                Flavor(FlavorType.NAVAL_TILE_IMPROVEMENT, 6),
-                Flavor(FlavorType.OFFENSE, 8),
-                Flavor(FlavorType.PRODUCTION, 5),
-                Flavor(FlavorType.RECON, 5),
-                Flavor(FlavorType.SCIENCE, 6),
-                Flavor(FlavorType.TILE_IMPROVEMENT, 4),
-                Flavor(FlavorType.WONDER, 6)
-            ]
-        elif self == LeaderType.TRAJAN:
-            return [
-                Flavor(FlavorType.CITY_DEFENSE, 5),
-                Flavor(FlavorType.CULTURE, 5),
-                Flavor(FlavorType.DEFENSE, 6),
-                Flavor(FlavorType.DIPLOMACY, 5),
-                Flavor(FlavorType.EXPANSION, 8),
-                Flavor(FlavorType.GOLD, 6),
-                Flavor(FlavorType.GROWTH, 5),
-                Flavor(FlavorType.AMENITIES, 8),
-                Flavor(FlavorType.INFRASTRUCTURE, 8),
-                Flavor(FlavorType.MILITARY_TRAINING, 7),
-                Flavor(FlavorType.MOBILE, 4),
-                Flavor(FlavorType.NAVAL, 5),
-                Flavor(FlavorType.NAVAL_GROWTH, 4),
-                Flavor(FlavorType.NAVAL_RECON, 5),
-                Flavor(FlavorType.NAVAL_TILE_IMPROVEMENT, 4),
-                Flavor(FlavorType.OFFENSE, 5),
-                Flavor(FlavorType.PRODUCTION, 6),
-                Flavor(FlavorType.RECON, 3),
-                Flavor(FlavorType.SCIENCE, 5),
-                Flavor(FlavorType.TILE_IMPROVEMENT, 7),
-                Flavor(FlavorType.WONDER, 6)
-            ]
-        elif self == LeaderType.VICTORIA:
-            return [
-                Flavor(FlavorType.CITY_DEFENSE, 6),
-                Flavor(FlavorType.CULTURE, 6),
-                Flavor(FlavorType.DEFENSE, 6),
-                Flavor(FlavorType.DIPLOMACY, 6),
-                Flavor(FlavorType.EXPANSION, 6),
-                Flavor(FlavorType.GOLD, 8),
-                Flavor(FlavorType.GROWTH, 4),
-                Flavor(FlavorType.AMENITIES, 5),
-                Flavor(FlavorType.INFRASTRUCTURE, 5),
-                Flavor(FlavorType.MILITARY_TRAINING, 5),
-                Flavor(FlavorType.MOBILE, 3),
-                Flavor(FlavorType.NAVAL, 8),
-                Flavor(FlavorType.NAVAL_GROWTH, 7),
-                Flavor(FlavorType.NAVAL_RECON, 8),
-                Flavor(FlavorType.NAVAL_TILE_IMPROVEMENT, 7),
-                Flavor(FlavorType.OFFENSE, 3),
-                Flavor(FlavorType.PRODUCTION, 6),
-                Flavor(FlavorType.RECON, 6),
-                Flavor(FlavorType.SCIENCE, 6),
-                Flavor(FlavorType.TILE_IMPROVEMENT, 6),
-                Flavor(FlavorType.WONDER, 5)
-            ]
-        elif self == LeaderType.CITY_STATE:
-            return []
-        elif self == LeaderType.BARBAR:
-            return []
-
-        raise InvalidEnumError(self)
-
-    def traitValue(self, traitType: TraitType) -> int:
-        item = next((trait for trait in self._traits() if trait.traitType == traitType), None)
-
-        if item is not None:
-            return item.value
-
-        return 0
-
-    def _traits(self) -> [Trait]:
-        if self == LeaderType.ALEXANDER:
-            return [Trait(TraitType.BOLDNESS, 8)]
-        elif self == LeaderType.TRAJAN:
-            return [Trait(TraitType.BOLDNESS, 6)]
-        elif self == LeaderType.VICTORIA:
-            return [Trait(TraitType.BOLDNESS, 4)]
-        elif self == LeaderType.CITY_STATE:
-            return []
-        elif self == LeaderType.BARBAR:
-            return []
-
-        raise InvalidEnumError(self)
-
-
-class LeaderWeightList(dict):
-    def __init__(self):
-        super().__init__()
-        for leaderType in list(LeaderType):
-            self[leaderType.name] = 0
-
-
 class CityStateCategoryData:
     def __init__(self, name: str, color: Color, firstEnvoyBonus: str, thirdEnvoyBonus: str, sixthEnvoyBonus: str):
         self.name = name
@@ -317,39 +149,39 @@ class HandicapType(Enum):
 
     def freeHumanStartingUnitTypes(self) -> [UnitType]:
         if self == HandicapType.SETTLER:
-            return [UnitType.SETTLER, UnitType.WARRIOR, UnitType.WARRIOR, UnitType.BUILDER]
+            return [UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.builder]
         elif self == HandicapType.CHIEFTAIN:
-            return [UnitType.SETTLER, UnitType.WARRIOR, UnitType.BUILDER]
+            return [UnitType.settler, UnitType.warrior, UnitType.builder]
         elif self == HandicapType.WARLORD:
-            return [UnitType.SETTLER, UnitType.WARRIOR, UnitType.BUILDER]
+            return [UnitType.settler, UnitType.warrior, UnitType.builder]
         elif self == HandicapType.PRINCE:
-            return [UnitType.SETTLER, UnitType.WARRIOR]
+            return [UnitType.settler, UnitType.warrior]
         elif self == HandicapType.KING:
-            return [UnitType.SETTLER, UnitType.WARRIOR]
+            return [UnitType.settler, UnitType.warrior]
         elif self == HandicapType.EMPEROR:
-            return [UnitType.SETTLER, UnitType.WARRIOR]
+            return [UnitType.settler, UnitType.warrior]
         elif self == HandicapType.IMMORTAL:
-            return [UnitType.SETTLER, UnitType.WARRIOR]
+            return [UnitType.settler, UnitType.warrior]
         elif self == HandicapType.DEITY:
-            return [UnitType.SETTLER, UnitType.WARRIOR]
+            return [UnitType.settler, UnitType.warrior]
 
     def freeAIStartingUnitTypes(self) -> [UnitType]:
         if self == HandicapType.SETTLER:
-            return [UnitType.SETTLER, UnitType.WARRIOR]
+            return [UnitType.settler, UnitType.warrior]
         elif self == HandicapType.CHIEFTAIN:
-            return [UnitType.SETTLER, UnitType.WARRIOR]
+            return [UnitType.settler, UnitType.warrior]
         elif self == HandicapType.WARLORD:
-            return [UnitType.SETTLER, UnitType.WARRIOR]
+            return [UnitType.settler, UnitType.warrior]
         elif self == HandicapType.PRINCE:
-            return [UnitType.SETTLER, UnitType.WARRIOR]
+            return [UnitType.settler, UnitType.warrior]
         elif self == HandicapType.KING:
-            return [UnitType.SETTLER, UnitType.WARRIOR, UnitType.WARRIOR, UnitType.BUILDER]
+            return [UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.builder]
         elif self == HandicapType.EMPEROR:
-            return [UnitType.SETTLER, UnitType.SETTLER, UnitType.WARRIOR, UnitType.WARRIOR, UnitType.WARRIOR,
-                    UnitType.BUILDER]
+            return [UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.warrior,
+                    UnitType.builder]
         elif self == HandicapType.IMMORTAL:
-            return [UnitType.SETTLER, UnitType.SETTLER, UnitType.WARRIOR, UnitType.WARRIOR, UnitType.WARRIOR,
-                    UnitType.WARRIOR, UnitType.BUILDER, UnitType.BUILDER]
+            return [UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.warrior,
+                    UnitType.warrior, UnitType.builder, UnitType.builder]
         elif self == HandicapType.DEITY:
-            return [UnitType.SETTLER, UnitType.SETTLER, UnitType.SETTLER, UnitType.WARRIOR, UnitType.WARRIOR,
-                    UnitType.WARRIOR, UnitType.WARRIOR, UnitType.WARRIOR, UnitType.BUILDER, UnitType.BUILDER]
+            return [UnitType.settler, UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior,
+                    UnitType.warrior, UnitType.warrior, UnitType.warrior, UnitType.builder, UnitType.builder]

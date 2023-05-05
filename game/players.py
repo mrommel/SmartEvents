@@ -1,8 +1,9 @@
-from game.base_types import LeaderType, CityStateType
+from game.base_types import CityStateType
 from game.ai.economics import EconomicAI
 from game.ai.grand_strategies import GrandStrategyAI
 from game.ai.militaries import MilitaryAI
 from game.cities import City
+from game.civilizations import LeaderType
 from game.flavors import Flavors, FlavorType
 from game.notifications import Notifications, NotificationType, Notification
 from game.player_mechanics import Techs, Civics
@@ -253,7 +254,7 @@ class Player:
             print(f'--- start turn for HUMAN player {self.leader} ---')
         elif self.isBarbarian():
             print("--- start turn for barbarian player ---")
-        elif self.leader == LeaderType.CITY_STATE:
+        elif self.leader == LeaderType.city_state:
             print(f'--- start turn for city state {self.cityState.name()} ---')
         elif self.isMajorAI():
             print(f'--- start turn for AI player {self.leader} ---')

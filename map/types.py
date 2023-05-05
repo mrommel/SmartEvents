@@ -115,10 +115,10 @@ class TerrainType(ExtendedEnum):
 		return not self.isWater()
 
 	def movementCost(self, movement_type):
-		if movement_type == MovementType.IMMOBILE:
+		if movement_type == MovementType.immobile:
 			return MovementType.max
 
-		if movement_type == MovementType.SWIM:
+		if movement_type == MovementType.swim:
 			if self == TerrainType.ocean:
 				return 1.5
 
@@ -127,13 +127,13 @@ class TerrainType(ExtendedEnum):
 
 			return MovementType.max
 
-		if movement_type == MovementType.SWIM_SHALLOW:
+		if movement_type == MovementType.swim_shallow:
 			if self == TerrainType.shore:
 				return 1.0
 
 			return MovementType.max
 
-		if movement_type == MovementType.WALK:
+		if movement_type == MovementType.walk:
 			if self == TerrainType.plains:
 				return 1.0
 
@@ -237,16 +237,16 @@ class FeatureType(ExtendedEnum):
 	# return FeatureData('None', Yields(0, 0, 0), False)
 
 	def movementCost(self, movement_type):
-		if movement_type == MovementType.IMMOBILE:
+		if movement_type == MovementType.immobile:
 			return MovementType.max
 
-		if movement_type == MovementType.SWIM:
+		if movement_type == MovementType.swim:
 			return MovementType.max  # this means that no unit can enter water features
 
-		if movement_type == MovementType.SWIM_SHALLOW:
+		if movement_type == MovementType.swim_shallow:
 			return self.movementCosts()
 
-		if movement_type == MovementType.WALK:
+		if movement_type == MovementType.walk:
 			return self.movementCosts()
 
 	def movementCosts(self):
@@ -998,10 +998,10 @@ class ClimateZone(ExtendedEnum):
 
 
 class MovementType(ExtendedEnum):
-	IMMOBILE = 'immobile'
-	WALK = 'walk'
-	SWIM = 'swim'
-	SWIM_SHALLOW = 'swimShallow'
+	immobile = 'immobile'
+	walk = 'walk'
+	swim = 'swim'
+	swimShallow = 'swimShallow'
 
 	max = 1000
 

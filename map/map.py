@@ -546,7 +546,7 @@ class Map:
 	def _isFreshWaterAt(self, x, y):
 		tile = self.tileAt(x, y)
 
-		if tile.terrain.isWater() or tile.isImpassable(MovementType.WALK):
+		if tile.terrain.isWater() or tile.isImpassable(MovementType.walk):
 			return False
 
 		if self.riverAt(x, y):

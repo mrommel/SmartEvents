@@ -1,6 +1,7 @@
 import unittest
 
-from game.base_types import LeaderType, HandicapType
+from game.base_types import HandicapType
+from game.civilizations import LeaderType
 from game.game import Game
 from game.players import Player
 from game.types import CivicType, TechType
@@ -62,7 +63,7 @@ class TestSimulation(unittest.TestCase):
 		# GIVEN
 		map = Map(10, 10)
 		simulation = Game(map)
-		player = Player(LeaderType.TRAJAN, human=True)
+		player = Player(LeaderType.trajan, human=True)
 
 		capitalBefore = simulation.capitalOf(player)
 		totalCitiesFoundedBefore = player.numberOfCitiesFounded()
@@ -85,15 +86,15 @@ class TestSimulation(unittest.TestCase):
 		map = Map(10, 10)
 		simulation = Game(map, handicap=HandicapType.CHIEFTAIN)
 
-		playerBarbar = Player(LeaderType.BARBAR, human=False)
+		playerBarbar = Player(LeaderType.barbar, human=False)
 		playerBarbar.initialize()
 		simulation.players.append(playerBarbar)
 
-		playerTrajan = Player(LeaderType.TRAJAN, human=False)
+		playerTrajan = Player(LeaderType.trajan, human=False)
 		playerTrajan.initialize()
 		simulation.players.append(playerTrajan)
 
-		playerAlexander = Player(LeaderType.ALEXANDER, human=True)
+		playerAlexander = Player(LeaderType.alexander, human=True)
 		playerAlexander.initialize()
 		simulation.players.append(playerAlexander)
 

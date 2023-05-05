@@ -4,7 +4,7 @@ from game.flavors import Flavor, FlavorType, Flavors
 from utils.base import ExtendedEnum, InvalidEnumError
 from game.ai.grand_strategies import GrandStrategyAIType
 from game.ai.military_strategies import MilitaryStrategyType, ReconStateType
-from game.unit_types import UnitTask, OperationType
+from game.unit_types import OperationType, UnitTaskType
 
 
 class EconomicStrategyType(ExtendedEnum):
@@ -136,7 +136,7 @@ class FoundCityStrategy(EconomicStrategy):
         looseSettlers = 0
 
         for unit in simulation.unitsOf(player):
-            if unit.hasTask(UnitTask.SETTLE):
+            if unit.hasTask(UnitTaskType.settle):
                 if unit.army() is None:
                     looseSettlers += 1
                     if looseSettlers == 1:
@@ -166,12 +166,12 @@ class FoundCityStrategy(EconomicStrategy):
 
             # CASE 1: Need a city on this area
             if bestArea == area:
-                player.addOperation(OperationType.FOUND_CITY, None, None, bestArea, None, simulation)
+                player.addOperation(OperationType.found_city, None, None, bestArea, None, simulation)
                 return True
             elif canEmbark and self.isSafeForQuickColonyIn(area, simulation, player):
                 # CASE 2: Need a city on a safe distant area
                 # Have an overseas we can get to safely
-                player.addOperation(OperationType.COLONIZE, None, None, bestArea, None, simulation)
+                player.addOperation(OperationType.colonize, None, None, bestArea, None, simulation)
                 return True
 
                 # CASE 3: My embarked units can fight, I always do quick colonization overseas
@@ -182,11 +182,11 @@ class FoundCityStrategy(EconomicStrategy):
             elif canEmbark and not isAtWarWithSomeone:
                 # CASE 3a: Need a city on a not so safe distant area
                 # not at war with anyone
-                player.addOperation(OperationType.NOT_SO_QUICK_COLONIZE, None, None, area, None, simulation)
+                player.addOperation(OperationType.not_so_quick_colonize, None, None, area, None, simulation)
                 return True
             elif canEmbark:
                 # CASE 4: Need a city on distant area
-                player.addOperation(OperationType.COLONIZE, None, None, area, None, simulation)
+                player.addOperation(OperationType.colonize, None, None, area, None, simulation)
                 return True
 
         return False

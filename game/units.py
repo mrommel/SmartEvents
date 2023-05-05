@@ -1,6 +1,6 @@
 import sys
 
-from game.unit_types import UnitTask, UnitType
+from game.unit_types import UnitTaskType, UnitType
 from map.base import HexPoint, HexArea
 
 
@@ -11,10 +11,10 @@ class Unit:
 		self.player = player
 		self.taskValue = unitType.defaultTask()
 
-	def hasTask(self, task: UnitTask) -> bool:
+	def hasTask(self, task: UnitTaskType) -> bool:
 		return task in self.unitType.unitTasks()
 
-	def task(self) -> UnitTask:
+	def task(self) -> UnitTaskType:
 		return self.taskValue
 
 	def jumpToNearestValidPlotWithin(self, radius, simulation):
@@ -27,7 +27,7 @@ class Unit:
 			loopTile = simulation.tileAt(loopPoint)
 
 			if loopTile.isValidDomainFor(self):
-				if self.canMoveInto(loopPoint, MoveOptions.NONE, simulation):
+				if self.canMoveInto(loopPoint, MoveOptions.none, simulation):
 					if simulation.unitAt(loopPoint, self.unitMapType()) is None:
 						if not loopTile.hasOwner() or self.player == loopTile.owner():
 							if loopTile.isDiscoveredBy(self.player):

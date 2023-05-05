@@ -40,19 +40,19 @@ class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
 
 			to_tile = self.grid.tileAt(neighbor)
 
-			if self.movement_type == MovementType.WALK:
+			if self.movement_type == MovementType.walk:
 				if to_tile.terrain == TerrainType.ocean and not self.options.can_enter_ocean:
 					continue
-				if to_tile.isWater() and self.options.can_embark and to_tile.isImpassable(MovementType.SWIM):
+				if to_tile.isWater() and self.options.can_embark and to_tile.isImpassable(MovementType.swim):
 					continue
 
-				if to_tile.isLand() and to_tile.isImpassable(MovementType.WALK):
+				if to_tile.isLand() and to_tile.isImpassable(MovementType.walk):
 					continue
 			else:
 				if to_tile.terrain == TerrainType.ocean and not self.options.can_enter_ocean:
 					continue
 
-				if to_tile.isWater() and to_tile.isImpassable(MovementType.SWIM):
+				if to_tile.isWater() and to_tile.isImpassable(MovementType.swim):
 					continue
 
 			# use sight?
