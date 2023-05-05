@@ -1,63 +1,10 @@
 from enum import Enum
 
+from game.flavors import FlavorType, Flavor
 from game.units import UnitType
 from utils.base import ExtendedEnum, InvalidEnumError
 from utils.theming import Color
 from utils.translation import gettext_lazy as _
-
-
-class FlavorType(ExtendedEnum):
-    AMENITIES = 1
-    CITY_DEFENSE = 2
-    CULTURE = 3
-    DEFENSE = 4
-    DIPLOMACY = 5
-    EXPANSION = 6
-    GOLD = 7
-    GROWTH = 8
-    INFRASTRUCTURE = 9
-    MILITARY_TRAINING = 10
-    MOBILE = 11
-    NAVAL = 12
-    NAVAL_GROWTH = 13
-    NAVAL_RECON = 14
-    NAVAL_TILE_IMPROVEMENT = 15
-    OFFENSE = 16
-    PRODUCTION = 17
-    RECON = 18
-    SCIENCE = 19
-    TILE_IMPROVEMENT = 20
-    WONDER = 21
-
-
-class Flavor:
-    def __init__(self, flavorType: FlavorType, value: int):
-        self.flavorType = flavorType
-        self.value = value
-
-
-class Flavors:
-    def __init__(self):
-        self._items = []
-
-    def isEmpty(self):
-        return len(self._items) == 0
-
-    def set(self, flavorType: FlavorType, value: int):
-        item = next((flavor for flavor in self._items if flavor.flavorType == flavorType), None)
-
-        if item is not None:
-            item.value = value
-        else:
-            self._items.append(Flavor(flavorType, value))
-
-    def value(self, flavorType: FlavorType):
-        item = next((flavor for flavor in self._items if flavor.flavorType == flavorType), None)
-
-        if item is not None:
-            return item.value
-
-        return 0
 
 
 class TraitType(ExtendedEnum):

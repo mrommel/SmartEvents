@@ -1,8 +1,9 @@
-from game.base_types import LeaderType, FlavorType, Flavors, CityStateType
+from game.base_types import LeaderType, CityStateType
 from game.ai.economics import EconomicAI
 from game.ai.grand_strategies import GrandStrategyAI
 from game.ai.militaries import MilitaryAI
 from game.cities import City
+from game.flavors import Flavors, FlavorType
 from game.notifications import Notifications, NotificationType, Notification
 from game.player_mechanics import Techs, Civics
 from game.unit_types import UnitMissionType
