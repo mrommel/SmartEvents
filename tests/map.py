@@ -4,7 +4,7 @@ import uuid
 
 import pytest
 
-from game.base_types import LeaderType
+from game.civilizations import LeaderType
 from game.players import Player
 from map.base import Array2D, HexPoint, HexCube, HexDirection, Size
 from map.generation import MapOptions, MapGenerator, HeightMap

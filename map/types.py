@@ -129,7 +129,7 @@ class TerrainType(ExtendedEnum):
 
 			return UnitMovementType.max
 
-		if movement_type == UnitMovementType.swim_shallow:
+		if movement_type == UnitMovementType.swimShallow:
 			if self == TerrainType.shore:
 				return 1.0
 
@@ -245,7 +245,7 @@ class FeatureType(ExtendedEnum):
 		if movement_type == UnitMovementType.swim:
 			return UnitMovementType.max  # this means that no unit can enter water features
 
-		if movement_type == UnitMovementType.swim_shallow:
+		if movement_type == UnitMovementType.swimShallow:
 			return self.movementCosts()
 
 		if movement_type == UnitMovementType.walk:

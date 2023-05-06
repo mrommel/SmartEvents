@@ -4,6 +4,7 @@ import sys
 from bitarray import bitarray
 
 from game.base_types import CityStateType
+from game.civilizations import LeaderType
 from map.base import HexPoint, HexDirection, Array2D, HexArea
 from map.map import Map, Tile, Continent, ContinentType
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, MoveTypeIgnoreUnitsPathfinderDataSource, AStarPathfinder
@@ -510,7 +511,7 @@ class StartPositioner:
             if bestLocation == HexPoint(-1, -1):
                 print("Warning: Can't find valid start location for city state")
             else:
-                self.cityStateStartLocations.append(StartLocation(bestLocation, LeaderType.city_state, False))
+                self.cityStateStartLocations.append(StartLocation(bestLocation, LeaderType.cityState, False))
 
         # sort human to the end
         self.startLocations = sorted(self.startLocations, key=lambda loc: 1 if loc.isHuman else 0)
@@ -1367,7 +1368,7 @@ class MapGenerator:
         aiLeaders: [LeaderType] = self.options.aiLeaders
 
         if len(aiLeaders) == 0:
-            exclude_leaders = [self.options.leader, LeaderType.barbar, LeaderType.none, LeaderType.city_state]
+            exclude_leaders = [self.options.leader, LeaderType.barbar, LeaderType.none, LeaderType.cityState]
             aiLeaders = list(filter(lambda leader: leader not in exclude_leaders, list(LeaderType)))
             aiLeaders = random.choices(aiLeaders, k=(numberOfPlayers - 1))
 
