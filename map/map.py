@@ -6,7 +6,8 @@ from game.players import Player
 from game.unit_types import BuildType, ImprovementType
 from game.units import Unit
 from map.base import HexPoint, HexDirection, Size, Array2D
-from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, Tutorials
+from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
+	Tutorials, Yields
 
 
 class Tile:
@@ -335,6 +336,30 @@ class Tile:
 
 	def setWorkingCity(self, city):
 		self._workingCity = city
+
+	def yields(self, player, ignoreFeature: bool):
+		returnYields = Yields(food=0, production=0, gold=0, science=0)
+
+		baseYields = self._terrainValue.yields()
+		returnYields += baseYields
+
+		if self._isHills and self._terrainValue.isLand():
+			returnYields += Yields(food=0, production=1, gold=0, science=0)
+
+		if ignoreFeature == False and self._featureValue != FeatureType.none:
+			returnYields += self._featureValue.yields()
+
+		visibleResource = self.resourceFor(player)
+		returnYields += visibleResource.yields()
+
+		if self._improvement is not None and self._improvement != ImprovementType.none and \
+			not self.isImprovementPillaged():
+			returnYields += self._improvement.yieldsFor(player, visibleResource)
+
+		return returnYields
+
+	def isImprovementPillaged(self):
+		return False
 
 
 class TileStatistics:
@@ -724,3 +749,4 @@ class Map:
 	def setContinent(self, continent: Continent, location: HexPoint):
 		tile = self.tileAt(location)
 		tile.continentIdentifier = continent.identifier
+

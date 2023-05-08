@@ -1,4 +1,4 @@
-from game.types import TechType
+from game.types import TechType, CivicType
 
 
 class Techs:
@@ -14,6 +14,9 @@ class Techs:
 	def discover(self, tech: TechType, simulation):
 		pass
 
+	def hasTech(self, tech: TechType) -> bool:
+		return False
+
 
 class Civics:
 	def __init__(self, player):
@@ -21,3 +24,6 @@ class Civics:
 
 	def needToChooseCivic(self):
 		pass
+
+	def hasCivic(self, civic: CivicType) -> bool:
+		return False

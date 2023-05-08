@@ -50,6 +50,10 @@ class WonderType(ExtendedEnum):
 	machuPicchu = 'machuPicchu'
 	statueOfZeus = 'statueOfZeus'
 
+	# ???
+	hueyTeocalli = 'hueyTeocalli'
+	stBasilsCathedral = 'stBasilsCathedral'
+
 	def name(self) -> str:
 		return self._data().name
 

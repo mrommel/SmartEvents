@@ -4,8 +4,12 @@ from game.ai.cities import CityStrategyAI
 from game.buildings import BuildingType
 from game.civilizations import LeaderWeightList, CivilizationAbility, LeaderAbility, LeaderType
 from game.districts import DistrictType
+from game.religions import PantheonType
+from game.types import EraType, TechType
+from game.unit_types import ImprovementType
+from game.wonders import WonderType
 from map.base import HexPoint
-from map.types import YieldList
+from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType
 from utils.base import ExtendedEnum
 
 
@@ -89,6 +93,31 @@ class MomentType(ExtendedEnum):
 
 class DedicationType(ExtendedEnum):
 	monumentality = 'monumentality'
+
+
+class YieldValues:
+	pass
+
+class YieldValues:
+	def __init__(self, value: float, percentage: float = 0.0):
+		self.value = value
+		self.percentage = percentage
+
+	def calc(self) -> float:
+		return self.value * self.percentage
+
+	def __add__(self, other):
+		if isinstance(other, float):
+			return YieldValues(self.value + other, self.percentage)
+		elif isinstance(other, YieldValues):
+			return YieldValues(self.value + other.value, self.percentage + other.percentage)
+		else:
+			raise Exception(f'invalid parameter: {other}')
+
+
+class CityState(ExtendedEnum):
+	johannesburg = 'johannesburg'
+	auckland = 'auckland'
 
 
 class City:
@@ -316,7 +345,117 @@ class City:
 		return 0.0
 
 	def productionPerTurn(self, simulation) -> float:
-		return 0.0
+		productionPerTurnValue: YieldValues = YieldValues(value=0.0, percentage=1.0)
+
+		productionPerTurnValue += YieldValues(value=self._productionFromTiles(simulation))
+		productionPerTurnValue += YieldValues(value=self._productionFromGovernmentType())
+		productionPerTurnValue += YieldValues(value=self._productionFromDistricts(simulation))
+		productionPerTurnValue += YieldValues(value=self._productionFromBuildings())
+		productionPerTurnValue += YieldValues(value=self._productionFromTradeRoutes(simulation))
+		productionPerTurnValue += YieldValues(value=self.featureProduction())
+
+		# cap yields based on loyalty
+		productionPerTurnValue += YieldValues(value=0.0, percentage=self.loyaltyState().yieldPercentage())
+
+		return productionPerTurnValue.calc()
 
 	def goldPerTurn(self, simulation) -> float:
 		return 0.0
+
+	def _productionFromTiles(self, simulation) -> float:
+		hasHueyTeocalli = self.player.hasWonder(WonderType.hueyTeocalli, simulation)
+		hasStBasilsCathedral = self.player.hasWonder(WonderType.stBasilsCathedral, simulation)
+		productionValue: float = 0.0
+
+		centerTile = simulation.tileAt(self.location)
+		if centerTile is not None:
+
+			productionValue += centerTile.yields(self.player, ignoreFeature=False).production
+
+			# The yield of the tile occupied by the city center will be increased to 2 Food and 1 production, if either
+			# was previously lower (before any bonus yields are applied).
+			if productionValue < 1.0:
+				productionValue = 1.0
+
+		for point in self.cityCitizens.workingTileLocations():
+			if self.cityCitizens.isWorkedAt(point):
+				workedTile = simulation.tileAt(point)
+				productionValue += workedTile.yields(self.player, ignoreFeature=False).production
+
+				# city has petra: +2 Food, +2 Gold, and +1 Production
+				# on all Desert tiles for this city(non - Floodplains).
+				if workedTile.terrain() == TerrainType.desert and \
+					not workedTile.hasFeature(FeatureType.floodplains) and \
+					self.wonders.hasWonder(WonderType.petra):
+					productionValue += 1.0
+
+				# motherRussia
+				if workedTile.terrain() == TerrainType.tundra and \
+					self.player.leader.civilization().ability() == CivilizationAbility.motherRussia:
+					# Tundra tiles provide + 1 Faith and +1 Production, in addition to their usual yields.
+					productionValue += 1.0
+
+				# stBasilsCathedral
+				if workedTile.terrain() == TerrainType.tundra and hasStBasilsCathedral:
+					# +1 Food, +1 Production, and +1 Culture on all Tundra tiles for this city.
+					productionValue += 1.0
+
+				# player has hueyTeocalli: +1 Food and +1 Production for each Lake tile in your empire.
+				if workedTile.hasFeature(FeatureType.lake) and hasHueyTeocalli:
+					productionValue += 1.0
+
+				# city has chichenItza: +2 Culture and +1 Production to all Rainforest tiles for this city.
+				if workedTile.hasFeature(FeatureType.rainforest) and self.hasWonder(WonderType.chichenItza):
+					productionValue += 1.0
+
+				# etemenanki - +2 Science and +1 Production to all Marsh tiles in your empire.
+				if workedTile.hasFeature(FeatureType.marsh) and self.player.hasWonder(WonderType.etemenanki, simulation):
+					productionValue += 1.0
+
+				# etemenanki - +1 Science and +1 Production on all Floodplains tiles in this city.
+				if workedTile.hasFeature(FeatureType.floodplains) and self.hasWonder(WonderType.etemenanki):
+					productionValue += 1.0
+
+				# godOfTheSea - 1 Production from Fishing Boats.
+				if workedTile.improvement() == ImprovementType.fishingBoats and \
+					self.player.religion.pantheon() == PantheonType.godOfTheSea:
+					productionValue += 1.0
+
+				# ladyOfTheReedsAndMarshes - +2 Production from Marsh, Oasis, and Desert Floodplains.
+				if (workedTile.hasFeature(FeatureType.marsh) or workedTile.hasFeature(FeatureType.oasis) or \
+				    workedTile.hasFeature(FeatureType.floodplains)) and \
+					self.player.religion.pantheon() == PantheonType.ladyOfTheReedsAndMarshes:
+					productionValue += 1.0
+
+				# godOfCraftsmen - +1 Production and +1 Faith from improved Strategic resources.
+				if self.player.religion.pantheon() == PantheonType.godOfCraftsmen:
+					if workedTile.resourceFor(self.player).usage() == ResourceUsage.strategic and \
+						workedTile.hasAnyImprovement():
+						productionValue += 1.0
+
+				# goddessOfTheHunt - +1 Food and +1 Production from Camps.
+				if workedTile.improvement() == ImprovementType.camp and \
+					self.player.religion.pantheon() == PantheonType.goddessOfTheHunt:
+					productionValue += 1.0
+
+				# auckland suzerain bonus
+				# Shallow water tiles worked by Citizens provide +1 Production.
+				# Additional +1 when you reach the Industrial Era
+				if self.player.isSuzerainOf(CityState.auckland, simulation):
+					if workedTile.terrain() == TerrainType.shore:
+						productionValue += 1.0
+
+					if self.player.currentEra() == EraType.industrial:
+						productionValue += 1.0
+
+				# johannesburg suzerain bonus
+				# Cities receive + 1 Production for every improved resource type.
+				# After researching Industrialization it becomes +2[Production] Production.
+				if self.player.isSuzerainOf(CityState.johannesburg, simulation):
+					if workedTile.hasAnyImprovement() and workedTile.resourceFor(self.player) != ResourceType.none:
+						productionValue += 1.0
+
+						if self.player.hasTech(TechType.industrialization):
+							productionValue += 1.0
+
+		return productionValue

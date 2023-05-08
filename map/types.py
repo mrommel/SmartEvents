@@ -2,7 +2,13 @@ from enum import Enum
 
 from game.types import TechType
 from map.base import ExtendedEnum, Size
+from utils.base import InvalidEnumError
 from utils.translation import gettext_lazy as _
+
+
+class UnitDomainType(ExtendedEnum):
+	sea = 'sea'
+	land = 'land'
 
 
 class MapAge(Enum):
@@ -72,7 +78,7 @@ class MapType(Enum):
 
 class Yields:
 	def __init__(self, food: float, production: float, gold: float, science: float = 0.0, culture: float = 0.0,
-	             faith: float = 0.0, housing: float = 0.0):
+	             faith: float = 0.0, housing: float = 0.0, appeal: float = 0.0):
 		self.food = food
 		self.production = production
 		self.gold = gold
@@ -80,6 +86,22 @@ class Yields:
 		self.culture = culture
 		self.faith = faith
 		self.housing = housing
+		self.appeal = appeal
+
+	def __iadd__(self, other):
+		if isinstance(other, Yields):
+			self.food += other.food
+			self.production += other.production
+			self.gold += other.gold
+			self.science += other.science
+			self.culture += other.culture
+			self.faith += other.faith
+			self.housing += other.housing
+			self.appeal += other.appeal
+
+			return self
+		else:
+			raise Exception(f'type is not accepted {type(other)}')
 
 
 class YieldType(Enum):
@@ -96,6 +118,15 @@ class YieldList(dict):
 		super().__init__()
 		for yieldType in list(YieldType):
 			self[yieldType.name] = 0
+
+
+class TerrainData:
+	def __init__(self, name: str, yields: Yields, isWater: bool, domain: UnitDomainType, antiquityPriority: int):
+		self.name = name
+		self.yields = yields
+		self.isWater = isWater
+		self.domain = domain
+		self.antiquityPriority = antiquityPriority
 
 
 class TerrainType(ExtendedEnum):
@@ -115,6 +146,83 @@ class TerrainType(ExtendedEnum):
 
 	def isLand(self):
 		return not self.isWater()
+
+	def _data(self) -> TerrainData:
+		if self == TerrainType.desert:
+			return TerrainData(
+				name='Desert',
+				yields=Yields(food=0, production=0, gold=0, science=0),
+				isWater=False,
+				domain=UnitDomainType.land,
+				antiquityPriority=5
+			)
+		elif self == TerrainType.grass:
+			return TerrainData(
+				name='Grassland',
+				yields=Yields(food=2, production=0, gold=0, science=0),
+				isWater=False,
+				domain=UnitDomainType.land,
+				antiquityPriority=2
+			)
+		elif self == TerrainType.ocean:
+			return TerrainData(
+				name='Ocean',
+				yields=Yields(food=1, production=0, gold=0, science=0),
+				isWater=True,
+				domain=UnitDomainType.sea,
+				antiquityPriority=0
+			)
+		elif self == TerrainType.plains:
+			return TerrainData(
+				name='Plains',
+				yields=Yields(food=1, production=1, gold=0, science=0),
+				isWater=False,
+				domain=UnitDomainType.land,
+				antiquityPriority=2
+			)
+		elif self == TerrainType.shore:
+			return TerrainData(
+				name='Shore',
+				yields=Yields(food=1, production=0, gold=1, science=0),
+				isWater=True,
+				domain=UnitDomainType.sea,
+				antiquityPriority=2
+			)
+		elif self == TerrainType.snow:
+			return TerrainData(
+				name='Snow',
+				yields=Yields(food=0, production=0, gold=0, science=0),
+				isWater=False,
+				domain=UnitDomainType.land,
+				antiquityPriority=1
+			)
+		elif self == TerrainType.tundra:
+			return TerrainData(
+				name='Tundra',
+				yields=Yields(food=1, production=0, gold=0, science=0),
+				isWater=False,
+				domain=UnitDomainType.land,
+				antiquityPriority=3
+			)
+
+		elif self == TerrainType.land:
+			return TerrainData(
+				name='',
+				yields=Yields(),
+				isWater=False,
+				domain=UnitDomainType.land,
+				antiquityPriority=0
+			)
+		elif self == TerrainType.sea:
+			return TerrainData(
+				name='',
+				yields=Yields(),
+				isWater=False,
+				domain=UnitDomainType.land,
+				antiquityPriority=0
+			)
+
+		raise InvalidEnumError(self)
 
 	def movementCost(self, movement_type):
 		if movement_type == UnitMovementType.immobile:
@@ -177,6 +285,9 @@ class TerrainType(ExtendedEnum):
 
 		return []
 
+	def yields(self) -> Yields:
+		return self._data().yields
+
 
 class FeatureData:
 	def __init__(self, name, yields, is_wonder):
@@ -208,31 +319,31 @@ class FeatureType(ExtendedEnum):
 
 	def data(self):
 		if self == FeatureType.none:
-			return FeatureData('None', Yields(0, 0, 0), False)
+			return FeatureData('None', Yields(food=0, production=0, gold=0), False)
 		if self == FeatureType.forest:
-			return FeatureData('Forest', Yields(0, 1, 0), False)
+			return FeatureData('Forest', Yields(0, 1, gold=0), False)
 		elif self == FeatureType.rainforest:
-			return FeatureData('Rainforest', Yields(1, 0, 0), False)
+			return FeatureData('Rainforest', Yields(1, 0, gold=0), False)
 		elif self == FeatureType.floodplains:
-			return FeatureData('Floodplains', Yields(3, 0, 0), False)
+			return FeatureData('Floodplains', Yields(3, 0, gold=0), False)
 		elif self == FeatureType.marsh:
-			return FeatureData('Marsh', Yields(3, 0, 0), False)
+			return FeatureData('Marsh', Yields(3, 0, gold=0), False)
 		elif self == FeatureType.oasis:
-			return FeatureData("Oasis", Yields(1, 0, 0), False)
+			return FeatureData("Oasis", Yields(1, 0, gold=0), False)
 		elif self == FeatureType.reef:
-			return FeatureData("Reef", Yields(1, 0, 0), False)
+			return FeatureData("Reef", Yields(1, 0, gold=0), False)
 		elif self == FeatureType.ice:
-			return FeatureData("Ice", Yields(0, 0, 0), False)
+			return FeatureData("Ice", Yields(0, 0, gold=0), False)
 		elif self == FeatureType.atoll:
-			return FeatureData("Atoll", Yields(1, 0, 0), False)
+			return FeatureData("Atoll", Yields(1, 0, gold=0), False)
 		elif self == FeatureType.volcano:
-			return FeatureData("Volcano", Yields(0, 0, 0), False)
+			return FeatureData("Volcano", Yields(0, 0, gold=0), False)
 		elif self == FeatureType.mountains:
-			return FeatureData("Mountains", Yields(0, 0, 0), False)
+			return FeatureData("Mountains", Yields(0, 0, gold=0), False)
 		elif self == FeatureType.lake:
-			return FeatureData("Lake", Yields(0, 0, 0), False)
+			return FeatureData("Lake", Yields(0, 0, gold=0), False)
 		elif self == FeatureType.fallout:
-			return FeatureData("Fallout", Yields(-3, -3, -3), False)
+			return FeatureData("Fallout", Yields(-3, -3, gold=-3), False)
 
 		raise AttributeError(f'FeatureType.data: {self} not handled!')
 
@@ -354,12 +465,12 @@ class FeatureType(ExtendedEnum):
 
 	def _isReefPossibleOn(self, tile):
 		"""
-            checks if feature reef is possible on tile
-            https://civilization.fandom.com/wiki/Reef_(Civ6)
+			checks if feature reef is possible on tile
+			https://civilization.fandom.com/wiki/Reef_(Civ6)
 
-            @param tile: tile to check
-            @return: True, if feature reef is possible on tile
-        """
+			@param tile: tile to check
+			@return: True, if feature reef is possible on tile
+		"""
 		if not tile.isWater():
 			return False
 
@@ -395,7 +506,7 @@ class FeatureType(ExtendedEnum):
 			return False
 
 		if tile.terrain() in [TerrainType.desert, TerrainType.grass, TerrainType.plains, TerrainType.tundra,
-		                    TerrainType.snow]:
+		                      TerrainType.snow]:
 			return True
 
 		return False
@@ -476,6 +587,9 @@ class FeatureType(ExtendedEnum):
 
 		return []
 
+	def yields(self) -> Yields:
+		return self._data().yields
+
 
 class ResourceUsage(ExtendedEnum):
 	bonus = 'bonus'
@@ -493,7 +607,7 @@ class ResourceUsage(ExtendedEnum):
 class ResourceTypeData:
 	def __init__(self, name: str, usage: ResourceUsage, reveal_tech, reveal_civic, placement_order: int,
 	             base_amount: int, place_on_hills: bool, place_on_river_side: bool, place_on_flatlands: bool,
-	             place_on_features, place_on_feature_terrains, place_on_terrains):
+	             place_on_features, place_on_feature_terrains, place_on_terrains, yields: Yields):
 		self.name = name
 		self.usage = usage
 		self.reveal_tech = reveal_tech
@@ -507,6 +621,8 @@ class ResourceTypeData:
 		self.place_on_features = place_on_features
 		self.place_on_feature_terrains = place_on_feature_terrains
 		self.place_on_terrains = place_on_terrains
+
+		self.yields = yields
 
 
 class ResourceType(ExtendedEnum):
@@ -565,7 +681,8 @@ class ResourceType(ExtendedEnum):
 				False,
 				[],
 				[],
-				[]
+				[],
+				yields=Yields(food=0, production=0, gold=0)
 			)
 
 		# bonus
@@ -582,7 +699,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[FeatureType.floodplains],
 				place_on_feature_terrains=[TerrainType.desert],
-				place_on_terrains=[TerrainType.plains]
+				place_on_terrains=[TerrainType.plains],
+				yields=Yields(food=1, production=0, gold=0)
 			)
 		elif self == ResourceType.rice:
 			return ResourceTypeData(
@@ -597,7 +715,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[FeatureType.marsh],
 				place_on_feature_terrains=[TerrainType.grass],
-				place_on_terrains=[TerrainType.grass]
+				place_on_terrains=[TerrainType.grass],
+				yields=Yields(food=1, production=0, gold=0)
 			)
 		elif self == ResourceType.deer:
 			return ResourceTypeData(
@@ -612,7 +731,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[FeatureType.forest],
 				place_on_feature_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra, TerrainType.snow],
-				place_on_terrains=[TerrainType.tundra]
+				place_on_terrains=[TerrainType.tundra],
+				yields=Yields(food=0, production=1, gold=0)
 			)
 		elif self == ResourceType.sheep:
 			return ResourceTypeData(
@@ -627,7 +747,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=False,
 				place_on_features=[FeatureType.forest],
 				place_on_feature_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra, TerrainType.snow],
-				place_on_terrains=[TerrainType.tundra]
+				place_on_terrains=[TerrainType.tundra],
+				yields=Yields(food=1, production=0, gold=0)
 			)
 		elif self == ResourceType.copper:
 			return ResourceTypeData(
@@ -642,7 +763,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=False,
 				place_on_features=[],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra]
+				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra],
+				yields=Yields(food=0, production=1, gold=0)
 			)
 		elif self == ResourceType.stone:
 			return ResourceTypeData(
@@ -657,7 +779,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass]
+				place_on_terrains=[TerrainType.grass],
+				yields=Yields(food=0, production=1, gold=0)
 			)
 		elif self == ResourceType.banana:
 			return ResourceTypeData(
@@ -672,7 +795,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[FeatureType.rainforest],
 				place_on_feature_terrains=[TerrainType.grass, TerrainType.plains],
-				place_on_terrains=[]
+				place_on_terrains=[],
+				yields=Yields(food=1, production=0, gold=0)
 			)
 		elif self == ResourceType.cattle:
 			return ResourceTypeData(
@@ -687,7 +811,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass]
+				place_on_terrains=[TerrainType.grass],
+				yields=Yields(food=1, production=0, gold=0)
 			)
 		elif self == ResourceType.fish:
 			return ResourceTypeData(
@@ -702,7 +827,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=False,
 				place_on_features=[FeatureType.lake],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.shore]
+				place_on_terrains=[TerrainType.shore],
+				yields=Yields(food=1, production=0, gold=0)
 			)
 
 		# luxury
@@ -719,7 +845,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains]
+				place_on_terrains=[TerrainType.grass, TerrainType.plains],
+				yields=Yields(food=2, production=0, gold=0)
 			)
 		elif self == ResourceType.whales:
 			return ResourceTypeData(
@@ -734,7 +861,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.shore]
+				place_on_terrains=[TerrainType.shore],
+				yields=Yields(food=0, production=1, gold=1)
 			)
 
 		# strategic
@@ -751,7 +879,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra]
+				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra],
+				yields=Yields(food=1, production=1, gold=0)
 			)
 		elif self == ResourceType.iron:
 			return ResourceTypeData(
@@ -767,7 +896,8 @@ class ResourceType(ExtendedEnum):
 				place_on_features=[],
 				place_on_feature_terrains=[],
 				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra, TerrainType.desert,
-				                   TerrainType.snow]
+				                   TerrainType.snow],
+				yields=Yields(food=0, production=0, gold=0, science=1)
 			)
 		elif self == ResourceType.coal:
 			return ResourceTypeData(
@@ -782,7 +912,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=False,
 				place_on_features=[],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.plains, TerrainType.grass]
+				place_on_terrains=[TerrainType.plains, TerrainType.grass],
+				yields=Yields(food=0, production=2, gold=0)
 			)
 		elif self == ResourceType.oil:
 			return ResourceTypeData(
@@ -797,7 +928,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[FeatureType.rainforest, FeatureType.marsh],
 				place_on_feature_terrains=[TerrainType.grass, TerrainType.plains],
-				place_on_terrains=[TerrainType.desert, TerrainType.tundra, TerrainType.snow, TerrainType.shore]
+				place_on_terrains=[TerrainType.desert, TerrainType.tundra, TerrainType.snow, TerrainType.shore],
+				yields=Yields(food=0, production=3, gold=0)
 			)
 		elif self == ResourceType.aluminum:
 			return ResourceTypeData(
@@ -812,7 +944,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=False,
 				place_on_features=[],
 				place_on_feature_terrains=[TerrainType.plains],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains]
+				place_on_terrains=[TerrainType.grass, TerrainType.plains],
+				yields=Yields(food=0, production=0, gold=0, science=1)
 			)
 		elif self == ResourceType.uranium:
 			return ResourceTypeData(
@@ -826,10 +959,15 @@ class ResourceType(ExtendedEnum):
 				place_on_river_side=True,
 				place_on_flatlands=True,
 				place_on_features=[FeatureType.rainforest, FeatureType.marsh, FeatureType.forest],
-				place_on_feature_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert,
-				                           TerrainType.tundra, TerrainType.snow],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra,
-				                   TerrainType.snow]
+				place_on_feature_terrains=[
+					TerrainType.grass, TerrainType.plains, TerrainType.desert,
+					TerrainType.tundra, TerrainType.snow
+				],
+				place_on_terrains=[
+					TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra,
+					TerrainType.snow
+				],
+				yields=Yields(food=0, production=2, gold=0)
 			)
 		elif self == ResourceType.niter:
 			return ResourceTypeData(
@@ -844,7 +982,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra]
+				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra],
+				yields=Yields(food=1, production=1, gold=0)
 			)
 
 		# artifacts
@@ -908,16 +1047,16 @@ class ResourceType(ExtendedEnum):
 
 	def revealTech(self):
 		"""
-            returns the tech that reveals the resource
-            :return: tech that is needed to reveal the resource
-        """
+			returns the tech that reveals the resource
+			:return: tech that is needed to reveal the resource
+		"""
 		return self._data().reveal_tech
 
 	def revealCivic(self):
 		"""
-            returns the civic that reveals the resource
-            :return: civic that is needed to reveal the resource
-        """
+			returns the civic that reveals the resource
+			:return: civic that is needed to reveal the resource
+		"""
 		return self._data().reveal_civic
 
 	def texture(self) -> str:
@@ -977,6 +1116,9 @@ class ResourceType(ExtendedEnum):
 
 	def __str__(self):
 		return self.value
+
+	def yields(self):
+		return self._data().yields
 
 
 class ClimateZone(ExtendedEnum):

@@ -10,6 +10,7 @@ from game.notifications import Notifications, NotificationType, Notification
 from game.player_mechanics import Techs, Civics
 from game.types import EraType
 from game.unit_types import UnitMissionType
+from game.wonders import WonderType
 from map.base import HexPoint
 from map.types import Tutorials
 
@@ -378,4 +379,7 @@ class Player:
 
     def hasDedication(self, dedication: DedicationType) -> bool:
         return dedication in self.currentDedicationsVal
+
+    def hasWonder(self, wonder: WonderType, simulation):
+        return False
 
