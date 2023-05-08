@@ -41,7 +41,7 @@ class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
 			to_tile = self.grid.tileAt(neighbor)
 
 			if self.movement_type == UnitMovementType.walk:
-				if to_tile.terrain == TerrainType.ocean and not self.options.can_enter_ocean:
+				if to_tile.terrain() == TerrainType.ocean and not self.options.can_enter_ocean:
 					continue
 				if to_tile.isWater() and self.options.can_embark and to_tile.isImpassable(UnitMovementType.swim):
 					continue
@@ -49,7 +49,7 @@ class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
 				if to_tile.isLand() and to_tile.isImpassable(UnitMovementType.walk):
 					continue
 			else:
-				if to_tile.terrain == TerrainType.ocean and not self.options.can_enter_ocean:
+				if to_tile.terrain() == TerrainType.ocean and not self.options.can_enter_ocean:
 					continue
 
 				if to_tile.isWater() and to_tile.isImpassable(UnitMovementType.swim):

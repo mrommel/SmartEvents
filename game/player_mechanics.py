@@ -11,6 +11,9 @@ class Techs:
 	def needToChooseTech(self):
 		pass
 
+	def discover(self, tech: TechType, simulation):
+		pass
+
 
 class Civics:
 	def __init__(self, player):

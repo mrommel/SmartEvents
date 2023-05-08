@@ -60,7 +60,7 @@ class WonderType(ExtendedEnum):
 		# default
 		if self == WonderType.none:
 			return WonderTypeData(
-				name="",
+				name='',
 				effects=[],
 				era=EraType.ancient,
 				productionCost=-1,
@@ -78,11 +78,11 @@ class WonderType(ExtendedEnum):
 			return WonderTypeData(
 				name="TXT_KEY_WONDER_GREAT_BATH_TITLE",
 				effects=[
-			         "TXT_KEY_WONDER_GREAT_BATH_EFFECT1",
-			         "TXT_KEY_WONDER_GREAT_BATH_EFFECT2",
-			         "TXT_KEY_WONDER_GREAT_BATH_EFFECT3",
-			         "TXT_KEY_WONDER_GREAT_BATH_EFFECT4",
-					"TXT_KEY_WONDER_GREAT_BATH_EFFECT5"
+					'TXT_KEY_WONDER_GREAT_BATH_EFFECT1',
+					'TXT_KEY_WONDER_GREAT_BATH_EFFECT2',
+					'TXT_KEY_WONDER_GREAT_BATH_EFFECT3',
+					'TXT_KEY_WONDER_GREAT_BATH_EFFECT4',
+					'TXT_KEY_WONDER_GREAT_BATH_EFFECT5'
 				],
 				era=EraType.ancient,
 				productionCost=180,
@@ -99,11 +99,11 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.etemenanki:
 			# https://civilization.fandom.com/wiki/Etemenanki_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_ETEMENANKI_TITLE",
+				name='TXT_KEY_WONDER_ETEMENANKI_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_ETEMENANKI_EFFECT1",
-					"TXT_KEY_WONDER_ETEMENANKI_EFFECT2",
-					"TXT_KEY_WONDER_ETEMENANKI_EFFECT3"
+					'TXT_KEY_WONDER_ETEMENANKI_EFFECT1',
+					'TXT_KEY_WONDER_ETEMENANKI_EFFECT2',
+					'TXT_KEY_WONDER_ETEMENANKI_EFFECT3'
 				],
 				era=EraType.ancient,
 				productionCost=220,
@@ -120,11 +120,11 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.pyramids:
 			# https://civilization.fandom.com/wiki/Pyramids_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_PYRAMIDS_TITLE",
+				name='TXT_KEY_WONDER_PYRAMIDS_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_PYRAMIDS_EFFECT1",
-					"TXT_KEY_WONDER_PYRAMIDS_EFFECT2",
-					"TXT_KEY_WONDER_PYRAMIDS_EFFECT3"
+					'TXT_KEY_WONDER_PYRAMIDS_EFFECT1',
+					'TXT_KEY_WONDER_PYRAMIDS_EFFECT2',
+					'TXT_KEY_WONDER_PYRAMIDS_EFFECT3'
 				],
 				era=EraType.ancient,
 				productionCost=220,
@@ -141,10 +141,10 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.hangingGardens:
 			# https://civilization.fandom.com/wiki/Hanging_Gardens_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_HANGING_GARDENS_TITLE",
+				name='TXT_KEY_WONDER_HANGING_GARDENS_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_HANGING_GARDENS_EFFECT1",
-					"TXT_KEY_WONDER_HANGING_GARDENS_EFFECT2"
+					'TXT_KEY_WONDER_HANGING_GARDENS_EFFECT1',
+					'TXT_KEY_WONDER_HANGING_GARDENS_EFFECT2'
 				],
 				era=EraType.ancient,
 				productionCost=180,
@@ -161,12 +161,12 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.oracle:
 			# https://civilization.fandom.com/wiki/Oracle_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_ORACLE_TITLE",
+				name='TXT_KEY_WONDER_ORACLE_TITLE',
 				effects=[
-			         "TXT_KEY_WONDER_ORACLE_EFFECT1",
-			         "TXT_KEY_WONDER_ORACLE_EFFECT2",
-			         "TXT_KEY_WONDER_ORACLE_EFFECT3", #
-			         "TXT_KEY_WONDER_ORACLE_EFFECT4"
+					'TXT_KEY_WONDER_ORACLE_EFFECT1',
+					'TXT_KEY_WONDER_ORACLE_EFFECT2',
+					'TXT_KEY_WONDER_ORACLE_EFFECT3',  #
+					'TXT_KEY_WONDER_ORACLE_EFFECT4'
 				],
 				era=EraType.ancient,
 				productionCost=290,
@@ -183,10 +183,10 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.stonehenge:
 			# https://civilization.fandom.com/wiki/Stonehenge_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_STONEHENGE_TITLE",
+				name='TXT_KEY_WONDER_STONEHENGE_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_STONEHENGE_EFFECT1",
-					"TXT_KEY_WONDER_STONEHENGE_EFFECT2"
+					'TXT_KEY_WONDER_STONEHENGE_EFFECT1',
+					'TXT_KEY_WONDER_STONEHENGE_EFFECT2'
 				],
 				era=EraType.ancient,
 				productionCost=180,
@@ -203,11 +203,11 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.templeOfArtemis:
 			# https://civilization.fandom.com/wiki/Temple_of_Artemis_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_TEMPLE_OF_ARTEMIS_TITLE",
+				name='TXT_KEY_WONDER_TEMPLE_OF_ARTEMIS_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_TEMPLE_OF_ARTEMIS_EFFECT1",
-					"TXT_KEY_WONDER_TEMPLE_OF_ARTEMIS_EFFECT2",
-					"TXT_KEY_WONDER_TEMPLE_OF_ARTEMIS_EFFECT3"
+					'TXT_KEY_WONDER_TEMPLE_OF_ARTEMIS_EFFECT1',
+					'TXT_KEY_WONDER_TEMPLE_OF_ARTEMIS_EFFECT2',
+					'TXT_KEY_WONDER_TEMPLE_OF_ARTEMIS_EFFECT3'
 				],
 				era=EraType.ancient,
 				productionCost=180,
@@ -226,11 +226,11 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.greatLighthouse:
 			# https://civilization.fandom.com/wiki/Great_Lighthouse_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_GREAT_LIGHTHOUSE_TITLE",
+				name='TXT_KEY_WONDER_GREAT_LIGHTHOUSE_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_GREAT_LIGHTHOUSE_EFFECT1",
-					"TXT_KEY_WONDER_GREAT_LIGHTHOUSE_EFFECT2",
-					"TXT_KEY_WONDER_GREAT_LIGHTHOUSE_EFFECT3"
+					'TXT_KEY_WONDER_GREAT_LIGHTHOUSE_EFFECT1',
+					'TXT_KEY_WONDER_GREAT_LIGHTHOUSE_EFFECT2',
+					'TXT_KEY_WONDER_GREAT_LIGHTHOUSE_EFFECT3'
 				],
 				era=EraType.classical,
 				productionCost=290,
@@ -249,13 +249,13 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.greatLibrary:
 			# https://civilization.fandom.com/wiki/Great_Library_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_GREAT_LIBRARY_TITLE",
+				name='TXT_KEY_WONDER_GREAT_LIBRARY_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_GREAT_LIBRARY_EFFECT1",
-					"TXT_KEY_WONDER_GREAT_LIBRARY_EFFECT2",
-					"TXT_KEY_WONDER_GREAT_LIBRARY_EFFECT3",
-					"TXT_KEY_WONDER_GREAT_LIBRARY_EFFECT4",
-					"TXT_KEY_WONDER_GREAT_LIBRARY_EFFECT5"
+					'TXT_KEY_WONDER_GREAT_LIBRARY_EFFECT1',
+					'TXT_KEY_WONDER_GREAT_LIBRARY_EFFECT2',
+					'TXT_KEY_WONDER_GREAT_LIBRARY_EFFECT3',
+					'TXT_KEY_WONDER_GREAT_LIBRARY_EFFECT4',
+					'TXT_KEY_WONDER_GREAT_LIBRARY_EFFECT5'
 				],
 				era=EraType.classical,
 				productionCost=400,
@@ -272,10 +272,10 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.apadana:
 			# https://civilization.fandom.com/wiki/Apadana_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_APADANA_TITLE",
+				name='TXT_KEY_WONDER_APADANA_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_APADANA_EFFECT1",
-					"TXT_KEY_WONDER_APADANA_EFFECT2"  #
+					'TXT_KEY_WONDER_APADANA_EFFECT1',
+					'TXT_KEY_WONDER_APADANA_EFFECT2'  #
 				],
 				era=EraType.classical,
 				productionCost=400,
@@ -292,9 +292,9 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.colosseum:
 			# https://civilization.fandom.com/wiki/Colosseum_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_COLOSSEUM_TITLE",
+				name='TXT_KEY_WONDER_COLOSSEUM_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_COLOSSEUM_EFFECT1"
+					'TXT_KEY_WONDER_COLOSSEUM_EFFECT1'
 				],
 				era=EraType.classical,
 				productionCost=400,
@@ -311,12 +311,12 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.colossus:
 			# https://civilization.fandom.com/wiki/Colossus_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_COLOSSUS_TITLE",
+				name='TXT_KEY_WONDER_COLOSSUS_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_COLOSSUS_EFFECT1",
-					"TXT_KEY_WONDER_COLOSSUS_EFFECT2",
-					"TXT_KEY_WONDER_COLOSSUS_EFFECT3",
-					"TXT_KEY_WONDER_COLOSSUS_EFFECT4"
+					'TXT_KEY_WONDER_COLOSSUS_EFFECT1',
+					'TXT_KEY_WONDER_COLOSSUS_EFFECT2',
+					'TXT_KEY_WONDER_COLOSSUS_EFFECT3',
+					'TXT_KEY_WONDER_COLOSSUS_EFFECT4'
 				],
 				era=EraType.classical,
 				productionCost=400,
@@ -334,10 +334,10 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.jebelBarkal:
 			# https://civilization.fandom.com/wiki/Jebel_Barkal_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_JEBEL_BARKAL_TITLE",
+				name='TXT_KEY_WONDER_JEBEL_BARKAL_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_JEBEL_BARKAL_EFFECT1",  #
-				    "TXT_KEY_WONDER_JEBEL_BARKAL_EFFECT2"
+					'TXT_KEY_WONDER_JEBEL_BARKAL_EFFECT1',  #
+					'TXT_KEY_WONDER_JEBEL_BARKAL_EFFECT2'
 				],
 				era=EraType.classical,
 				productionCost=400,
@@ -354,10 +354,10 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.mausoleumAtHalicarnassus:
 			# https://civilization.fandom.com/wiki/Mausoleum_at_Halicarnassus_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_MAUSOLEUM_AT_HALICARNASSUS_TITLE",
+				name='TXT_KEY_WONDER_MAUSOLEUM_AT_HALICARNASSUS_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_MAUSOLEUM_AT_HALICARNASSUS_EFFECT1",
-					"TXT_KEY_WONDER_MAUSOLEUM_AT_HALICARNASSUS_EFFECT2"  #
+					'TXT_KEY_WONDER_MAUSOLEUM_AT_HALICARNASSUS_EFFECT1',
+					'TXT_KEY_WONDER_MAUSOLEUM_AT_HALICARNASSUS_EFFECT2'  #
 				],
 				era=EraType.classical,
 				productionCost=400,
@@ -376,10 +376,10 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.mahabodhiTemple:
 			# https://civilization.fandom.com/wiki/Mahabodhi_Temple_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_MAHABODHI_TEMPLE_TITLE",
+				name='TXT_KEY_WONDER_MAHABODHI_TEMPLE_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_MAHABODHI_TEMPLE_EFFECT1",
-					"TXT_KEY_WONDER_MAHABODHI_TEMPLE_EFFECT2" #
+					'TXT_KEY_WONDER_MAHABODHI_TEMPLE_EFFECT1',
+					'TXT_KEY_WONDER_MAHABODHI_TEMPLE_EFFECT2'  #
 				],
 				era=EraType.classical,
 				productionCost=400,
@@ -396,9 +396,9 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.petra:
 			# https://civilization.fandom.com/wiki/Petra_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_PETRA_TITLE",
+				name='TXT_KEY_WONDER_PETRA_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_ETRA_EFFECT1"
+					'TXT_KEY_WONDER_ETRA_EFFECT1'
 				],
 				era=EraType.classical,
 				productionCost=400,
@@ -416,10 +416,10 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.terracottaArmy:
 			# https://civilization.fandom.com/wiki/Terracotta_Army_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_TERRACOTTA_ARMY_TITLE",
+				name='TXT_KEY_WONDER_TERRACOTTA_ARMY_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_TERRACOTTA_ARMY_EFFECT1",
-					"TXT_KEY_WONDER_TERRACOTTA_ARMY_EFFECT2"  #
+					'TXT_KEY_WONDER_TERRACOTTA_ARMY_EFFECT1',
+					'TXT_KEY_WONDER_TERRACOTTA_ARMY_EFFECT2'  #
 				],
 				era=EraType.classical,
 				productionCost=400,
@@ -436,10 +436,10 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.machuPicchu:
 			# https://civilization.fandom.com/wiki/Machu_Picchu_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_MACHU_PICCHU_TITLE",
+				name='TXT_KEY_WONDER_MACHU_PICCHU_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_MACHU_PICCHU_EFFECT1",
-					"TXT_KEY_WONDER_MACHU_PICCHU_EFFECT2"   #
+					'TXT_KEY_WONDER_MACHU_PICCHU_EFFECT1',
+					'TXT_KEY_WONDER_MACHU_PICCHU_EFFECT2'  #
 				],
 				era=EraType.classical,
 				productionCost=400,
@@ -455,11 +455,11 @@ class WonderType(ExtendedEnum):
 		elif self == WonderType.statueOfZeus:
 			# https://civilization.fandom.com/wiki/Statue_of_Zeus_(Civ6)
 			return WonderTypeData(
-				name="TXT_KEY_WONDER_STATUE_OF_ZEUS_TITLE",
+				name='TXT_KEY_WONDER_STATUE_OF_ZEUS_TITLE',
 				effects=[
-					"TXT_KEY_WONDER_STATUE_OF_ZEUS_EFFECT1",
-					"TXT_KEY_WONDER_STATUE_OF_ZEUS_EFFECT2",
-					"TXT_KEY_WONDER_STATUE_OF_ZEUS_EFFECT3"
+					'TXT_KEY_WONDER_STATUE_OF_ZEUS_EFFECT1',
+					'TXT_KEY_WONDER_STATUE_OF_ZEUS_EFFECT2',
+					'TXT_KEY_WONDER_STATUE_OF_ZEUS_EFFECT3'
 				],
 				era=EraType.classical,
 				productionCost=400,

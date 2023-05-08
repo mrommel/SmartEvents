@@ -310,44 +310,44 @@ class FeatureType(ExtendedEnum):
 
 	def _isForestPossibleOn(self, tile):
 		"""Grassland, Grassland (Hills), Plains, Plains (Hills), Tundra and Tundra (Hills)."""
-		if tile.terrain == TerrainType.tundra or tile.terrain == TerrainType.grass or tile.terrain == TerrainType.plains:
+		if tile.terrain() == TerrainType.tundra or tile.terrain() == TerrainType.grass or tile.terrain() == TerrainType.plains:
 			return True
 
 		return False
 
 	def _isRainforestPossibleOn(self, tile):
 		"""Modifies Plains and Plains (Hills)."""
-		if tile.terrain == TerrainType.plains:
+		if tile.terrain() == TerrainType.plains:
 			return True
 
 		return False
 
 	def _isFloodplainsPossibleOn(self, tile):
 		"""Floodplains modifies Deserts and also Plains and Grassland."""
-		if tile.is_hills:
+		if tile.isHills():
 			return False
 
-		if tile.terrain in [TerrainType.desert, TerrainType.grass, TerrainType.plains]:
+		if tile.terrain() in [TerrainType.desert, TerrainType.grass, TerrainType.plains]:
 			return True
 
 		return False
 
 	def _isMarshPossibleOn(self, tile):
 		"""Marsh modifies Grassland"""
-		if tile.is_hills:
+		if tile.isHills():
 			return False
 
-		if tile.terrain == TerrainType.grass:
+		if tile.terrain() == TerrainType.grass:
 			return True
 
 		return False
 
 	def _isOasisPossibleOn(self, tile):
 		"""Oasis modifies Desert"""
-		if tile.is_hills:
+		if tile.isHills():
 			return False
 
-		if tile.terrain == TerrainType.desert:
+		if tile.terrain() == TerrainType.desert:
 			return True
 
 		return False
@@ -363,7 +363,7 @@ class FeatureType(ExtendedEnum):
 		if not tile.isWater():
 			return False
 
-		if tile.terrain != TerrainType.shore:
+		if tile.terrain() != TerrainType.shore:
 			return False
 
 		return True
@@ -384,17 +384,17 @@ class FeatureType(ExtendedEnum):
 
 	def _isVolcanoPossibleOn(self, tile):
 		"""Volcano modifies Mountains"""
-		if tile._featureValue == FeatureType.mountains:
+		if tile.hasFeature(FeatureType.mountains):
 			return True
 
 		return False
 
 	def _isMountainPossibleOn(self, tile):
 		"""Mountain modifies hilly Desert, Grassland, Plains, Tundra and Snow"""
-		if tile.is_hills:
+		if tile.isHills():
 			return False
 
-		if tile.terrain in [TerrainType.desert, TerrainType.grass, TerrainType.plains, TerrainType.tundra,
+		if tile.terrain() in [TerrainType.desert, TerrainType.grass, TerrainType.plains, TerrainType.tundra,
 		                    TerrainType.snow]:
 			return True
 
@@ -402,7 +402,7 @@ class FeatureType(ExtendedEnum):
 
 	def _isLakePossibleOn(self, tile):
 		"""Lake modifies all non-hilly terrain"""
-		if tile.is_hills:
+		if tile.isHills():
 			return False
 
 		if tile.isWater():

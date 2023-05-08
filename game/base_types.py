@@ -133,55 +133,55 @@ class CityStateType(Enum):
 
 
 class VictoryType(Enum):
-    DOMINATION = 0
-    CULTURAL = 1
+    domination = 0
+    cultural = 1
 
 
 class HandicapType(Enum):
-    SETTLER = 0
-    CHIEFTAIN = 1
-    WARLORD = 2
-    PRINCE = 3
-    KING = 4
-    EMPEROR = 5
-    IMMORTAL = 6
-    DEITY = 7
+    settler = 0
+    chieftain = 1
+    warlord = 2
+    prince = 3
+    king = 4
+    emperor = 5
+    immortal = 6
+    deity = 7
 
     def freeHumanStartingUnitTypes(self) -> [UnitType]:
-        if self == HandicapType.SETTLER:
+        if self == HandicapType.settler:
             return [UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.builder]
-        elif self == HandicapType.CHIEFTAIN:
+        elif self == HandicapType.chieftain:
             return [UnitType.settler, UnitType.warrior, UnitType.builder]
-        elif self == HandicapType.WARLORD:
+        elif self == HandicapType.warlord:
             return [UnitType.settler, UnitType.warrior, UnitType.builder]
-        elif self == HandicapType.PRINCE:
+        elif self == HandicapType.prince:
             return [UnitType.settler, UnitType.warrior]
-        elif self == HandicapType.KING:
+        elif self == HandicapType.king:
             return [UnitType.settler, UnitType.warrior]
-        elif self == HandicapType.EMPEROR:
+        elif self == HandicapType.emperor:
             return [UnitType.settler, UnitType.warrior]
-        elif self == HandicapType.IMMORTAL:
+        elif self == HandicapType.immortal:
             return [UnitType.settler, UnitType.warrior]
-        elif self == HandicapType.DEITY:
+        elif self == HandicapType.deity:
             return [UnitType.settler, UnitType.warrior]
 
     def freeAIStartingUnitTypes(self) -> [UnitType]:
-        if self == HandicapType.SETTLER:
+        if self == HandicapType.settler:
             return [UnitType.settler, UnitType.warrior]
-        elif self == HandicapType.CHIEFTAIN:
+        elif self == HandicapType.chieftain:
             return [UnitType.settler, UnitType.warrior]
-        elif self == HandicapType.WARLORD:
+        elif self == HandicapType.warlord:
             return [UnitType.settler, UnitType.warrior]
-        elif self == HandicapType.PRINCE:
+        elif self == HandicapType.prince:
             return [UnitType.settler, UnitType.warrior]
-        elif self == HandicapType.KING:
+        elif self == HandicapType.king:
             return [UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.builder]
-        elif self == HandicapType.EMPEROR:
+        elif self == HandicapType.emperor:
             return [UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.warrior,
                     UnitType.builder]
-        elif self == HandicapType.IMMORTAL:
+        elif self == HandicapType.immortal:
             return [UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.warrior,
                     UnitType.warrior, UnitType.builder, UnitType.builder]
-        elif self == HandicapType.DEITY:
+        elif self == HandicapType.deity:
             return [UnitType.settler, UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior,
                     UnitType.warrior, UnitType.warrior, UnitType.warrior, UnitType.builder, UnitType.builder]

@@ -36,6 +36,8 @@ class DistrictType(ExtendedEnum):
 	commercialHub = 'commercialHub'
 	harbor = 'harbor'
 	holySite = 'holySite'
+	neighborhood = 'neighborhood'
+	governmentPlaza = 'governmentPlaza'
 
 	def name(self) -> str:
 		return self._data().name
@@ -46,7 +48,7 @@ class DistrictType(ExtendedEnum):
 	def _data(self) -> DistrictTypeData:
 		if self == DistrictType.none:
 			return DistrictTypeData(
-				name="",
+				name='TXT_KEY_DISTRICT_NONE_TITLE',
 				specialty=False,
 				effects=[],
 				productionCost=-1,
@@ -60,7 +62,7 @@ class DistrictType(ExtendedEnum):
 		elif self == DistrictType.cityCenter:
 			# https://civilization.fandom.com/wiki/City_Center_(Civ6)
 			return DistrictTypeData(
-				name="TXT_KEY_DISTRICT_CITY_CENTER_TITLE",
+				name='TXT_KEY_DISTRICT_CITY_CENTER_TITLE',
 				specialty=False,
 				effects=[
 					'TXT_KEY_DISTRICT_CITY_CENTER_EFFECT1'
@@ -78,12 +80,12 @@ class DistrictType(ExtendedEnum):
 		elif self == DistrictType.preserve:
 			# https://civilization.fandom.com/wiki/Preserve_(Civ6)
 			return DistrictTypeData(
-				name="TXT_KEY_DISTRICT_PRESERVE_TITLE",
+				name='TXT_KEY_DISTRICT_PRESERVE_TITLE',
 				specialty=True,
 				effects=[
-					"TXT_KEY_DISTRICT_PRESERVE_EFFECT1",
-					"TXT_KEY_DISTRICT_PRESERVE_EFFECT2",
-					"TXT_KEY_DISTRICT_PRESERVE_EFFECT3"
+					'TXT_KEY_DISTRICT_PRESERVE_EFFECT1',
+					'TXT_KEY_DISTRICT_PRESERVE_EFFECT2',
+					'TXT_KEY_DISTRICT_PRESERVE_EFFECT3'
 				],
 				productionCost=54,
 				maintenanceCost=0,
@@ -125,7 +127,7 @@ class DistrictType(ExtendedEnum):
 		elif self == DistrictType.campus:
 			# https://civilization.fandom.com/wiki/Campus_(Civ6)
 			return DistrictTypeData(
-				name="TXT_KEY_DISTRICT_CAMPUS_TITLE",
+				name='TXT_KEY_DISTRICT_CAMPUS_TITLE',
 				specialty=True,
 				effects=[
 					'TXT_KEY_DISTRICT_CAMPUS_EFFECT1',
@@ -148,14 +150,14 @@ class DistrictType(ExtendedEnum):
 		elif self == DistrictType.entertainmentComplex:
 			# https://civilization.fandom.com/wiki/Entertainment_Complex_(Civ6)
 			return DistrictTypeData(
-				name="TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_TITLE",
+				name='TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_TITLE',
 				specialty=True,
 				effects=[
-					"TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_EFFECT1",
-					"TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_EFFECT2",
-					"TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_EFFECT3",
-					"TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_EFFECT4",
-					"TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_EFFECT5"
+					'TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_EFFECT1',
+					'TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_EFFECT2',
+					'TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_EFFECT3',
+					'TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_EFFECT4',
+					'TXT_KEY_DISTRICT_ENTERTAINMENT_COMPLEX_EFFECT5'
 				],
 				productionCost=54,
 				maintenanceCost=1,
@@ -170,14 +172,14 @@ class DistrictType(ExtendedEnum):
 		elif self == DistrictType.commercialHub:
 			# https://civilization.fandom.com/wiki/Commercial_Hub_(Civ6)
 			return DistrictTypeData(
-				name="TXT_KEY_DISTRICT_COMMERCIAL_HUB_TITLE",
+				name='TXT_KEY_DISTRICT_COMMERCIAL_HUB_TITLE',
 				specialty=True,
 				effects=[
-					"TXT_KEY_DISTRICT_COMMERCIAL_HUB_EFFECT1",
-					"TXT_KEY_DISTRICT_COMMERCIAL_HUB_EFFECT2",
-					"TXT_KEY_DISTRICT_COMMERCIAL_HUB_EFFECT3",
-					"TXT_KEY_DISTRICT_COMMERCIAL_HUB_EFFECT4",
-					"TXT_KEY_DISTRICT_COMMERCIAL_HUB_EFFECT5"
+					'TXT_KEY_DISTRICT_COMMERCIAL_HUB_EFFECT1',
+					'TXT_KEY_DISTRICT_COMMERCIAL_HUB_EFFECT2',
+					'TXT_KEY_DISTRICT_COMMERCIAL_HUB_EFFECT3',
+					'TXT_KEY_DISTRICT_COMMERCIAL_HUB_EFFECT4',
+					'TXT_KEY_DISTRICT_COMMERCIAL_HUB_EFFECT5'
 				],
 				productionCost=54,
 				maintenanceCost=0,
@@ -192,21 +194,21 @@ class DistrictType(ExtendedEnum):
 		elif self == DistrictType.harbor:
 			# https://civilization.fandom.com/wiki/Harbor_(Civ6)
 			return DistrictTypeData(
-				name="TXT_KEY_DISTRICT_HARBOR_TITLE",
+				name='TXT_KEY_DISTRICT_HARBOR_TITLE',
 				specialty=True,
 				effects=[
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT1",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT2",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT3",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT4",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT5",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT6",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT7",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT8",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT9",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT10",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT11",
-					"TXT_KEY_DISTRICT_HARBOR_EFFECT12"
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT1',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT2',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT3',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT4',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT5',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT6',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT7',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT8',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT9',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT10',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT11',
+					'TXT_KEY_DISTRICT_HARBOR_EFFECT12'
 				],
 				productionCost=54,
 				maintenanceCost=0,
@@ -222,7 +224,7 @@ class DistrictType(ExtendedEnum):
 		elif self == DistrictType.holySite:
 			# https://civilization.fandom.com/wiki/Holy_Site_(Civ6)
 			return DistrictTypeData(
-				name="TXT_KEY_DISTRICT_HOLY_SITE_TITLE",
+				name='TXT_KEY_DISTRICT_HOLY_SITE_TITLE',
 				specialty=True,
 				effects=[
 					'TXT_KEY_DISTRICT_HOLY_SITE_EFFECT1',
@@ -246,5 +248,48 @@ class DistrictType(ExtendedEnum):
 					Flavor(FlavorType.religion, 7)
 				]
 			)
+		elif self == DistrictType.neighborhood:
+			# https://civilization.fandom.com/wiki/Neighborhood_(Civ6)
+			return DistrictTypeData(
+				name='TXT_KEY_DISTRICT_NEIGHBORHOOD_TITLE',
+				specialty=False,
+				effects=[
+					'TXT_KEY_DISTRICT_NEIGHBORHOOD_EFFECT1'
+				],
+				productionCost=54,
+				maintenanceCost=0,
+				requiredTech=None,
+				requiredCivic=CivicType.urbanization,
+				domesticTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
+				foreignTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
+				flavours=[
+					Flavor(FlavorType.growth, 2),
+					Flavor(FlavorType.expansion, 3)
+				]
+			)
+		elif self == DistrictType.governmentPlaza:
+			# https://civilization.fandom.com/wiki/Government_Plaza_(Civ6)
+			return DistrictTypeData(
+				name="TXT_KEY_DISTRICT_GOVERNMENT_PLAZA_TITLE",
+				specialty=True,
+				effects=[
+					"TXT_KEY_DISTRICT_GOVERNMENT_PLAZA_EFFECT1",
+					"TXT_KEY_DISTRICT_GOVERNMENT_PLAZA_EFFECT2",
+					"TXT_KEY_DISTRICT_GOVERNMENT_PLAZA_EFFECT3"
+				],
+				productionCost=30,
+				maintenanceCost=1,
+				requiredTech=None,
+				requiredCivic=CivicType.stateWorkforce,
+				domesticTradeYields=Yields(food=1, production=1, gold=0),
+				foreignTradeYields=Yields(food=0, production=0, gold=2),
+				flavours=[
+					Flavor(FlavorType.diplomacy, 8)
+				],
+				oncePerCivilization=True
+			)
 
 		raise AttributeError(f'cant get data for district {self}')
+
+	def isSpecialty(self):
+		return self._data().specialty

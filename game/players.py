@@ -2,11 +2,13 @@ from game.base_types import CityStateType
 from game.ai.economics import EconomicAI
 from game.ai.grand_strategies import GrandStrategyAI
 from game.ai.militaries import MilitaryAI
-from game.cities import City
+from game.cities import City, AgeType, DedicationType
 from game.civilizations import LeaderType
 from game.flavors import Flavors, FlavorType
+from game.governments import PlayerGovernment
 from game.notifications import Notifications, NotificationType, Notification
 from game.player_mechanics import Techs, Civics
+from game.types import EraType
 from game.unit_types import UnitMissionType
 from map.base import HexPoint
 from map.types import Tutorials
@@ -14,6 +16,14 @@ from map.types import Tutorials
 
 class Player:
     pass
+
+
+class DiplomaticAI:
+    def __init__(self, player):
+        self.player = player
+
+    def hasMetWith(self, player):
+        return False
 
 
 class Player:
@@ -55,8 +65,16 @@ class Player:
         self.lostCapitalValue = False
         self.conquerorValue = None
 
+        self.government = None
+        self.currentEraVal: EraType = EraType.ancient
+        self.currentAgeVal: AgeType = AgeType.normal
+        self.currentDedicationsVal: [DedicationType] = []
+        self.numberOfDarkAgesVal: int = 0
+        self.numberOfGoldenAgesVal: int = 0
+
     def initialize(self):
-        pass
+        self.diplomacyAI = DiplomaticAI(player=self)
+        self.government = PlayerGovernment(player=self)
 
     def doTurn(self, simulation):
         self.grandStrategyAI.doTurn(simulation)
@@ -348,3 +366,16 @@ class Player:
 
     def checkWorldCircumnavigated(self, game):
         pass
+
+    def updatePlots(self, simulation):
+        pass
+
+    def setCapitalCity(self, city, simulation):
+        pass
+
+    def currentAge(self) -> AgeType:
+        return self.currentAgeVal
+
+    def hasDedication(self, dedication: DedicationType) -> bool:
+        return dedication in self.currentDedicationsVal
+

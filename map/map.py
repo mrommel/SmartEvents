@@ -1,8 +1,9 @@
 from enum import Enum
+from typing import Optional
 
 from game.cities import City
 from game.players import Player
-from game.unit_types import BuildType
+from game.unit_types import BuildType, ImprovementType
 from game.units import Unit
 from map.base import HexPoint, HexDirection, Size, Array2D
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, Tutorials
@@ -28,32 +29,36 @@ class Tile:
 			@param terrain: TerrainType
 		"""
 		self.point = point
-		self.terrain = terrain
-		self.is_hills = False
+		self._terrainValue = terrain
+		self._isHills = False
 		self._featureValue = FeatureType.none
 		self._resourceValue = ResourceType.none  # property is hidden
 		self._resourceQuantity = 0
 		self.river_value = 0
 		self.climate_zone = ClimateZone.temperate
-		self.route = RouteType.none
+		self._route = RouteType.none
+		self._improvement = ImprovementType.none
 		self.continentIdentifier = None
 		self.discovered = dict()
 		self.visible = dict()
 		self.cityValue = None
+		self.districtValue = None
+		self._owner = None
+		self._workingCity = None
 
 	def isWater(self):
 		"""
 			returns if this is a water tile
 			:return: True, if this tile is a water tile, False otherwise
 		"""
-		return self.terrain.isWater()
+		return self._terrainValue.isWater()
 
 	def isLand(self):
 		"""
 			returns if this is a land tile
 			:return: True, if this tile is a land tile, False otherwise
 		"""
-		return self.terrain.isLand()
+		return self._terrainValue.isLand()
 
 	def resourceFor(self, player) -> ResourceType:
 		"""
@@ -84,7 +89,7 @@ class Tile:
 
 	def isImpassable(self, movement_ype):
 		# start with terrain cost
-		terrain_cost = self.terrain.movementCost(movement_ype)
+		terrain_cost = self._terrainValue.movementCost(movement_ype)
 
 		if terrain_cost == UnitMovementType.max:
 			return True
@@ -106,21 +111,21 @@ class Tile:
 			@return: movement cost to go from {from_tile} to this tile
 		"""
 		# start with terrain cost
-		terrain_cost = self.terrain.movementCost(movement_type)
+		terrain_cost = self._terrainValue.movementCost(movement_type)
 
 		if terrain_cost == UnitMovementType.max:
-			return UnitMovementType.max
+			return UnitMovementType.max.value
 
 		# hills
-		hill_costs = 1.0 if self.is_hills else 0.0
+		hill_costs = 1.0 if self.isHills() else 0.0
 
 		# add feature costs
 		feature_costs = 0.0
-		if self._featureValue != FeatureType.none:
+		if self.hasAnyFeature():
 			feature_cost = self._featureValue.movementCost(movement_type)
 
 			if feature_cost == UnitMovementType.max:
-				return UnitMovementType.max
+				return UnitMovementType.max.value
 
 			feature_costs = feature_cost
 
@@ -131,9 +136,9 @@ class Tile:
 
 		# https://civilization.fandom.com/wiki/Roads_(Civ6)
 		if self.hasAnyRoute():
-			terrain_cost = self.route.movementCost()
+			terrain_cost = self._route.movementCost()
 
-			if self.route != RouteType.ancientRoad:
+			if self._route != RouteType.ancientRoad:
 				river_cost = 0.0
 
 			hill_costs = 0.0
@@ -162,8 +167,8 @@ class Tile:
 
 	def to_dict(self):
 		return {
-			'terrain': self.terrain.value,
-			'isHills': self.is_hills,
+			'terrain': self._terrainValue.value,
+			'isHills': self._isHills,
 			'feature': self._featureValue.value,
 			'resource': self._resourceValue.value,
 			'resource_quantity': self._resourceQuantity
@@ -191,7 +196,7 @@ class Tile:
 		return self.river_value & 0x10 > 0 or self.river_value & 0x20 > 0
 
 	def hasAnyRoute(self):
-		return False
+		return self._route != RouteType.none
 
 	def canHaveResource(self, grid, resource: ResourceType, ignore_latitude: bool = False) -> bool:
 
@@ -221,7 +226,7 @@ class Tile:
 			if not resource.canBePlacedOnTerrain(self.terrain):
 				return False
 
-		if self.is_hills:
+		if self._isHills:
 			if not resource.canBePlacedOnHills():
 				return False
 		elif self.isFlatlands():
@@ -235,7 +240,7 @@ class Tile:
 		return True
 
 	def isFlatlands(self):
-		if not self.terrain.isLand():
+		if not self._terrainValue.isLand():
 			return False
 
 		if self._featureValue == FeatureType.mountains or self._featureValue == FeatureType.mountEverest or self._featureValue == FeatureType.mountKilimanjaro:
@@ -292,14 +297,44 @@ class Tile:
 
 		return 0
 
+	def terrain(self):
+		return self._terrainValue
+
+	def setTerrain(self, terrain: TerrainType):
+		self._terrainValue = terrain
+
 	def hasAnyFeature(self) -> bool:
 		return self._featureValue != FeatureType.none
 
 	def hasFeature(self, feature: FeatureType) -> bool:
 		return self._featureValue == feature
 
+	def feature(self):
+		return self._featureValue
+
 	def setFeature(self, feature: FeatureType):
 		self._featureValue = feature
+
+	def isHills(self):
+		return self._isHills
+
+	def setHills(self, hills: bool):
+		self._isHills = hills
+
+	def setRoute(self, route: RouteType):
+		self._route = route
+
+	def setImprovement(self, improvement: ImprovementType):
+		self._improvement = improvement
+
+	def buildDistrict(self, district):
+		self.districtValue = district
+
+	def setOwner(self, player):
+		self._owner = player
+
+	def setWorkingCity(self, city):
+		self._workingCity = city
 
 
 class TileStatistics:
@@ -427,7 +462,7 @@ class Map:
 
 		return point_arr
 
-	def tileAt(self, x_or_hex, y=None) -> Tile:
+	def tileAt(self, x_or_hex, y=None) -> Optional[Tile]:
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
 
@@ -452,14 +487,14 @@ class Map:
 			if not self.valid(hex_point.x, hex_point.y):
 				return None
 
-			return self.tiles.values[hex_point.y][hex_point.x].terrain
+			return self.tiles.values[hex_point.y][hex_point.x].terrain()
 		elif isinstance(x_or_hex, int) and isinstance(y, int):
 			x = x_or_hex
 
 			if not self.valid(x, y):
 				return None
 
-			return self.tiles.values[y][x].terrain
+			return self.tiles.values[y][x].terrain()
 		else:
 			raise AttributeError(f'Map.terrainAt with wrong attributes: {x_or_hex} / {y}')
 
@@ -467,22 +502,22 @@ class Map:
 		if isinstance(x_or_hex, HexPoint) and isinstance(y_or_terrain, TerrainType) and terrain is None:
 			hex_point = x_or_hex
 			terrain_type = y_or_terrain
-			self.tiles.values[hex_point.y][hex_point.x].terrain = terrain_type
+			self.tiles.values[hex_point.y][hex_point.x].setTerrain(terrain_type)
 		elif isinstance(x_or_hex, int) and isinstance(y_or_terrain, int) and isinstance(terrain, TerrainType):
 			x = x_or_hex
 			y = y_or_terrain
 			terrain_type = terrain
-			self.tiles.values[y][x].terrain = terrain_type
+			self.tiles.values[y][x].setTerrain(terrain_type)
 		else:
 			raise AttributeError(f'Map.modifyTerrainAt with wrong attributes: {x_or_hex} / {y_or_terrain} / {terrain}')
 
 	def isHillsAtt(self, x_or_hex, y=None):
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
-			return self.tiles.values[hex_point.y][hex_point.x].is_hills
+			return self.tiles.values[hex_point.y][hex_point.x].ishills()
 		elif isinstance(x_or_hex, int) and isinstance(y, int):
 			x = x_or_hex
-			return self.tiles.values[y][x].is_hills
+			return self.tiles.values[y][x].ishills()
 		else:
 			raise AttributeError(f'Map.isHillsAtt with wrong attributes: {x_or_hex} / {y}')
 
@@ -490,11 +525,11 @@ class Map:
 		if isinstance(x_or_hex, HexPoint) and isinstance(y_or_is_hills, bool) and is_hills is None:
 			hex_point = x_or_hex
 			is_hills = y_or_is_hills
-			self.tiles.values[hex_point.y][hex_point.x].is_hills = is_hills
+			self.tiles.values[hex_point.y][hex_point.x].setHills(is_hills)
 		elif isinstance(x_or_hex, int) and isinstance(y_or_is_hills, int) and isinstance(is_hills, bool):
 			x = x_or_hex
 			y = y_or_is_hills
-			self.tiles.values[y][x].is_hills = is_hills
+			self.tiles.values[y][x].setHills(is_hills)
 		else:
 			raise AttributeError(
 				f'Map.modifyIsHillsAt with wrong attributes: {x_or_hex} / {y_or_is_hills} / {is_hills}')
@@ -502,10 +537,10 @@ class Map:
 	def featureAt(self, x_or_hex, y=None):
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
-			return self.tiles.values[hex_point.y][hex_point.x]._featureValue
+			return self.tiles.values[hex_point.y][hex_point.x].feature()
 		elif isinstance(x_or_hex, int) and isinstance(y, int):
 			x = x_or_hex
-			return self.tiles.values[y][x]._featureValue
+			return self.tiles.values[y][x].feature()
 		else:
 			raise AttributeError(f'Map.featureAt with wrong attributes: {x_or_hex} / {y}')
 
@@ -513,12 +548,12 @@ class Map:
 		if isinstance(x_or_hex, HexPoint) and isinstance(y_or_terrain, FeatureType) and feature is None:
 			hex_point = x_or_hex
 			feature_type = y_or_terrain
-			self.tiles.values[hex_point.y][hex_point.x]._featureValue = feature_type
+			self.tiles.values[hex_point.y][hex_point.x].setFeature(feature_type)
 		elif isinstance(x_or_hex, int) and isinstance(y_or_terrain, int) and isinstance(feature, TerrainType):
 			x = x_or_hex
 			y = y_or_terrain
 			feature_type = feature
-			self.tiles.values[y][x]._featureValue = feature_type
+			self.tiles.values[y][x].setFeature(feature_type)
 		else:
 			raise AttributeError(f'Map.modifyTerrainAt with wrong attributes: {x_or_hex} / {y_or_terrain} / {feature}')
 
@@ -546,7 +581,7 @@ class Map:
 	def _isFreshWaterAt(self, x, y):
 		tile = self.tileAt(x, y)
 
-		if tile.terrain.isWater() or tile.isImpassable(UnitMovementType.walk):
+		if tile.terrain().isWater() or tile.isImpassable(UnitMovementType.walk):
 			return False
 
 		if self.riverAt(x, y):
@@ -663,7 +698,7 @@ class Map:
 		}
 
 	def isCoastalAt(self, point: HexPoint):
-		terrain = self.tileAt(point).terrain
+		terrain = self.tileAt(point).terrain()
 		# we are only coastal, if we are on land
 		if terrain.isWater():
 			return False
@@ -674,7 +709,7 @@ class Map:
 			if neighborTile is None:
 				continue
 
-			neighborTerrain = neighborTile.terrain
+			neighborTerrain = neighborTile.terrain()
 			if neighborTerrain.isWater():
 				return True
 

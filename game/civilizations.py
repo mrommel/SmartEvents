@@ -12,6 +12,12 @@ class Trait:
         self.value = value
 
 
+class CivilizationAbility(ExtendedEnum):
+    none = 'none'
+    motherRussia = 'motherRussia'
+    allRoadsLeadToRome = 'allRoadsLeadToRome'
+
+
 class CivilizationType(ExtendedEnum):
     barbarian = -3
     free = -2
@@ -31,6 +37,21 @@ class CivilizationType(ExtendedEnum):
             return 2 if grid.isCoastalAt(tile.point) else 0
 
         return 0  # rest
+    
+    def ability(self):
+        if self == CivilizationType.greek:
+            return CivilizationAbility.none
+        elif self == CivilizationType.roman:
+            return CivilizationAbility.allRoadsLeadToRome
+        elif self == CivilizationType.english:
+            return CivilizationAbility.none
+
+        return None
+
+
+class LeaderAbility(ExtendedEnum):
+    none = 'none'
+    trajansColumn = 'trajansColumn'
 
 
 class LeaderType(ExtendedEnum):
@@ -51,6 +72,16 @@ class LeaderType(ExtendedEnum):
             return CivilizationType.english
 
         raise Exception(f'Enum not handled: {self}')
+
+    def ability(self) -> LeaderAbility:
+        if self == LeaderType.alexander:
+            return LeaderAbility.none
+        elif self == LeaderType.trajan:
+            return LeaderAbility.trajansColumn
+        elif self == LeaderType.victoria:
+            return LeaderAbility.none
+
+        raise InvalidEnumError(f'Enum not handled: {self}')
 
     def flavor(self, flavorType: FlavorType) -> int:
         item = next((flavor for flavor in self._flavors() if flavor.flavorType == flavorType), None)

@@ -53,14 +53,14 @@ class FeatureBuild:
 class BuildType(ExtendedEnum):
 	none = 0
 
-	remove_rainforest = 1
-	remove_marsh = 2
-	remove_forest = 3
+	removeRainforest = 1
+	removeMarsh = 2
+	removeForest = 3
 	repair = 4
 	mine = 5
-	ancient_road = 6
-	classical_road = 7
-	remove_road = 8
+	ancientRoad = 6
+	classicalRoad = 7
+	removeRoad = 8
 	fishingBoats = 9
 	camp = 10
 	farm = 11
@@ -89,7 +89,7 @@ class BuildType(ExtendedEnum):
 				duration=300
 			)
 
-		elif self == BuildType.ancient_road:
+		elif self == BuildType.ancientRoad:
 			return BuildTypeData(
 				name="Road",
 				era=EraType.ancient,
@@ -97,14 +97,14 @@ class BuildType(ExtendedEnum):
 				duration=300
 			)
 
-		elif self == BuildType.classical_road:
+		elif self == BuildType.classicalRoad:
 			return BuildTypeData(
 				name="Road",
 				era=EraType.classical,
 				route=RouteType.classicalRoad,
 				duration=300
 			)
-		elif self == BuildType.remove_road:
+		elif self == BuildType.removeRoad:
 			return BuildTypeData(
 				name="Remove Road",
 				required=TechType.wheel,
@@ -229,7 +229,7 @@ class BuildType(ExtendedEnum):
 
 			return fishingBoatsBuild
 
-		elif self == BuildType.remove_forest:
+		elif self == BuildType.removeForest:
 			removeForestBuild = BuildTypeData(
 				name="Remove Forest",
 				duration=300
@@ -247,7 +247,7 @@ class BuildType(ExtendedEnum):
 
 			return removeForestBuild
 
-		elif self == BuildType.remove_rainforest:
+		elif self == BuildType.removeRainforest:
 			removeRainforestBuild = BuildTypeData(name="Remove Rainforest", duration=600)
 
 			removeRainforestBuild.featureBuilds.append(
@@ -262,7 +262,7 @@ class BuildType(ExtendedEnum):
 
 			return removeRainforestBuild
 
-		elif self == BuildType.remove_marsh:
+		elif self == BuildType.removeMarsh:
 			removeMarshBuild = BuildTypeData(name="Remove Marsh", duration=500)
 
 			removeMarshBuild.featureBuilds.append(

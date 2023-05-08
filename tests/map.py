@@ -115,108 +115,108 @@ class TestFeatureType(unittest.TestCase):
 
 		# forest
 		feature = FeatureType.forest
-		tile.terrain = TerrainType.ocean
+		tile.setTerrain(TerrainType.ocean)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.snow
+		tile.setTerrain(TerrainType.snow)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.grass
+		tile.setTerrain(TerrainType.grass)
 		self.assertEqual(feature.isPossibleOn(tile), True)
 
 		# rainforest
 		feature = FeatureType.rainforest
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.grass
+		tile.setTerrain(TerrainType.grass)
 		self.assertEqual(feature.isPossibleOn(tile), False)
 
 		# floodplains
 		feature = FeatureType.floodplains
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.grass
+		tile.setTerrain(TerrainType.grass)
 		self.assertEqual(feature.isPossibleOn(tile), True)
 
 		# marsh
 		feature = FeatureType.marsh
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.grass
+		tile.setTerrain(TerrainType.grass)
 		self.assertEqual(feature.isPossibleOn(tile), True)
 
 		# oasis
 		feature = FeatureType.oasis
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.grass
+		tile.setTerrain(TerrainType.grass)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.desert
+		tile.setTerrain(TerrainType.desert)
 		self.assertEqual(feature.isPossibleOn(tile), True)
 
 		# reef
 		feature = FeatureType.reef
-		tile.terrain = TerrainType.ocean
+		tile.setTerrain(TerrainType.ocean)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.shore
+		tile.setTerrain(TerrainType.shore)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), False)
 
 		# ice
 		feature = FeatureType.ice
-		tile.terrain = TerrainType.snow
+		tile.setTerrain(TerrainType.snow)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.shore
+		tile.setTerrain(TerrainType.shore)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), False)
 
 		# atoll
 		feature = FeatureType.atoll
-		tile.terrain = TerrainType.ocean
+		tile.setTerrain(TerrainType.ocean)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.shore
+		tile.setTerrain(TerrainType.shore)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), False)
 
 		# volcano
 		feature = FeatureType.volcano
-		tile.terrain = TerrainType.ocean
+		tile.setTerrain(TerrainType.ocean)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.grass
+		tile.setTerrain(TerrainType.grass)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.tundra
+		tile.setTerrain(TerrainType.tundra)
 		self.assertEqual(feature.isPossibleOn(tile), False)
 
 		# mountains
 		feature = FeatureType.mountains
-		tile.terrain = TerrainType.ocean
+		tile.setTerrain(TerrainType.ocean)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.desert
+		tile.setTerrain(TerrainType.desert)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), True)
 
 		# lake
 		feature = FeatureType.lake
-		tile.terrain = TerrainType.grass
+		tile.setTerrain(TerrainType.grass)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.desert
+		tile.setTerrain(TerrainType.desert)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), True)
 
 		# fallout
 		feature = FeatureType.fallout
-		tile.terrain = TerrainType.ocean
+		tile.setTerrain(TerrainType.ocean)
 		self.assertEqual(feature.isPossibleOn(tile), False)
-		tile.terrain = TerrainType.desert
+		tile.setTerrain(TerrainType.desert)
 		self.assertEqual(feature.isPossibleOn(tile), True)
-		tile.terrain = TerrainType.plains
+		tile.setTerrain(TerrainType.plains)
 		self.assertEqual(feature.isPossibleOn(tile), True)
 
 
@@ -250,7 +250,7 @@ class TestTile(unittest.TestCase):
 		self.assertEqual(tile.point, HexPoint(3, 2))
 		self.assertEqual(tile.point.x, 3)
 		self.assertEqual(tile.point.y, 2)
-		self.assertEqual(tile.terrain, TerrainType.tundra)
+		self.assertEqual(tile.terrain(), TerrainType.tundra)
 
 	def test_river_n(self):
 		tile = Tile(HexPoint(3, 2), TerrainType.tundra)
@@ -283,12 +283,12 @@ class TestTile(unittest.TestCase):
 
 		grass_tile = Tile(HexPoint(3, 1), TerrainType.grass)
 		mountains_tile = Tile(HexPoint(3, 1), TerrainType.grass)
-		mountains_tile._featureValue = FeatureType.mountains
+		mountains_tile.setFeature(FeatureType.mountains)
 		ocean_tile = Tile(HexPoint(3, 1), TerrainType.shore)
 
 		self.assertEqual(grass_tile.movementCost(UnitMovementType.walk, tundra_tile), 1)
 		self.assertEqual(mountains_tile.movementCost(UnitMovementType.walk, tundra_tile), 3)
-		self.assertEqual(ocean_tile.movementCost(UnitMovementType.walk, tundra_tile), UnitMovementType.max)
+		self.assertEqual(ocean_tile.movementCost(UnitMovementType.walk, tundra_tile), UnitMovementType.max.value)
 
 
 class TestMap(unittest.TestCase):
@@ -370,7 +370,7 @@ class TestPathfinding(unittest.TestCase):
 
 		path = finder.shortestPath(HexPoint(0, 0), HexPoint(2, 3))
 
-		# print(path)
+		print(path)
 		target_path = [HexPoint(0, 0), HexPoint(1, 1), HexPoint(2, 1), HexPoint(2, 2), HexPoint(2, 3), ]
 		self.assertEqual(len(path), 5)
 		for i, n in enumerate(target_path):

@@ -14,6 +14,7 @@ class GovernmentType(ExtendedEnum):
 	none = 'none'
 
 	chiefdom = 'chiefdom'
+	autocracy = 'chiefdom'
 
 	def name(self) -> str:
 		return self._data().name
@@ -33,3 +34,11 @@ class GovernmentType(ExtendedEnum):
 				requiredCivic=None
 			)
 		raise AttributeError(f'cant get data for government {self}')
+
+
+class PlayerGovernment:
+	def __init__(self, player):
+		self.player = player
+
+	def setGovernment(self, governmentType: GovernmentType, simulation):
+		pass

@@ -3,14 +3,18 @@ import unittest
 from game.achievements import CivicAchievements
 from game.base_types import HandicapType
 from game.buildings import BuildingType
+from game.cities import City
 from game.civilizations import LeaderType
 from game.districts import DistrictType
 from game.game import Game
+from game.governments import GovernmentType
 from game.players import Player
 from game.types import CivicType, TechType
+from game.unit_types import ImprovementType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.map import Map
+from map.types import TerrainType
 
 
 class TestGameAssets(unittest.TestCase):
@@ -75,6 +79,49 @@ class TestGameAssets(unittest.TestCase):
 		self.assertIn(DistrictType.entertainmentComplex, achievements.districtTypes)
 
 
+class TestCity(unittest.TestCase):
+	def test_city_yields(self):
+		"""Test the city yields"""
+		mapModel = Map(10, 10)
+
+		# center
+		centerTile = mapModel.tileAt(HexPoint(1, 1))
+		centerTile.setTerrain(terrain=TerrainType.grass)
+		centerTile.setHills(hills=False)
+		centerTile.setImprovement(improvement=ImprovementType.farm)
+
+		# another
+		anotherTile = mapModel.tileAt(HexPoint(1, 2))
+		anotherTile.setTerrain(terrain=TerrainType.plains)
+		anotherTile.setHills(hills=True)
+		anotherTile.setImprovement(improvement=ImprovementType.mine)
+
+		simulation = Game(mapModel)
+
+		playerTrajan = Player(leader=LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+
+		city = City(name='Berlin', isCapital=True, location=HexPoint(1, 1), player=playerTrajan)
+		city.initialize(simulation)
+
+		playerTrajan.government.setGovernment(governmentType=GovernmentType.autocracy, simulation=simulation)
+
+		try:
+			playerTrajan.techs.discover(tech=TechType.mining, simulation=simulation)
+		except Exception as e:
+			print(f'cannot discover mining: {e}')
+
+		# WHEN
+		foodYield = city.foodPerTurn(simulation=simulation)
+		productionYield = city.productionPerTurn(simulation=simulation)
+		goldYield = city.goldPerTurn(simulation=simulation)
+
+		# THEN
+		self.assertEqual(foodYield, 4.0)
+		self.assertEqual(productionYield, 4.0)
+		self.assertEqual(goldYield, 11.0)
+
+
 class TestSimulation(unittest.TestCase):
 	def test_found_capital(self):
 		"""Test the Simulation constructor"""
@@ -102,7 +149,7 @@ class TestSimulation(unittest.TestCase):
 		"""Test the Simulation constructor"""
 		# GIVEN
 		map = Map(10, 10)
-		simulation = Game(map, handicap=HandicapType.CHIEFTAIN)
+		simulation = Game(map, handicap=HandicapType.chieftain)
 
 		playerBarbar = Player(LeaderType.barbar, human=False)
 		playerBarbar.initialize()
@@ -122,7 +169,8 @@ class TestSimulation(unittest.TestCase):
 		playerTrajan.foundCity(HexPoint(4, 5), "Berlin", simulation)
 
 		# WHEN
-		while not(playerAlexander.hasProcessedAutoMoves() and playerAlexander.turnFinished()):
+		iteration = 0
+		while not(playerAlexander.hasProcessedAutoMoves() and playerAlexander.turnFinished()) and iteration < 25:
 			simulation.update()
 			print(f'-- loop -- active player: {simulation.activePlayer()} --', flush=True)
 
@@ -130,5 +178,8 @@ class TestSimulation(unittest.TestCase):
 				playerAlexander.finishTurn()
 				playerAlexander.setAutoMovesTo(True)
 
+			iteration += 1
+
 		# THEN
+		self.assertLess(iteration, 25, 'maximum iterations reached')
 

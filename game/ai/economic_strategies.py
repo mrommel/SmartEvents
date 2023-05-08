@@ -74,15 +74,15 @@ class EarlyExpansionStrategy(EconomicStrategy):
         self.weightThreshold = 3
 
     def shouldBeActive(self, player, simulation) -> bool:
-        flavorExpansion = player.valueOfStrategyAndPersonalityFlavor(FlavorType.EXPANSION)
-        flavorGrowth = player.valueOfStrategyAndPersonalityFlavor(FlavorType.GROWTH)
+        flavorExpansion = player.valueOfStrategyAndPersonalityFlavor(FlavorType.expansion)
+        flavorGrowth = player.valueOfStrategyAndPersonalityFlavor(FlavorType.growth)
         maxCultureCities = 6  # AI_GS_CULTURE_MAX_CITIES
 
         desiredCities = (3 * flavorExpansion) / max(flavorGrowth, 1)
         difficulty = max(0, simulation.handicap.value - 3)
         desiredCities += difficulty
 
-        if player.grandStrategyAI.activeStrategy == GrandStrategyAIType.CULTURE:
+        if player.grandStrategyAI.activeStrategy == GrandStrategyAIType.culture:
             desiredCities = min(desiredCities, maxCultureCities)
 
         desiredCities = max(desiredCities, maxCultureCities)

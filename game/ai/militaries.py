@@ -166,7 +166,7 @@ class MilitaryAI:
         numUnitsWanted = 7 # size of a basic attack
 
         # if we are going for conquest we want at least one more task force
-        if self.player.grandStrategyAI.activeStrategy == GrandStrategyAIType.CONQUEST:
+        if self.player.grandStrategyAI.activeStrategy == GrandStrategyAIType.conquest:
             numUnitsWanted *= 2
 
         # add in a few more if the player is bold

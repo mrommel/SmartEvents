@@ -1,6 +1,8 @@
 import math
 import random
 import sys
+from typing import Optional
+
 from bitarray import bitarray
 
 from game.base_types import CityStateType
@@ -94,13 +96,13 @@ class ResourcesInfo:
 
 
 class MapOptions:
-    def __init__(self, mapSize: MapSize, mapType: MapType, leader: LeaderType, aiLeaders: [LeaderType] = []):
+    def __init__(self, mapSize: MapSize, mapType: MapType, leader: LeaderType, aiLeaders=None):
         self.mapSize = mapSize
         self.mapType = mapType
         self.rivers = 20
         self.age = MapAge.normal
         self.leader = leader
-        self.aiLeaders = aiLeaders
+        self.aiLeaders = [] if aiLeaders is None else aiLeaders
 
     def mountains_percentage(self):
         """ Percentage of mountain on land """
@@ -167,41 +169,41 @@ class TileFertilityEvaluator(BaseSiteEvaluator):
         plotFertility = 0
 
         # Measure Fertility - - Any cases absent from the process have a 0 value.
-        if tile._featureValue == FeatureType.mountains:  # Note, mountains cannot belong to a landmass AreaID, so they usually go unmeasured.
+        if tile.feature() == FeatureType.mountains:  # Note, mountains cannot belong to a landmass AreaID, so they usually go unmeasured.
             plotFertility = 1  # mountains are better than ice because they allow special buildings and mine bonuses
-        elif tile._featureValue == FeatureType.forest:
+        elif tile.feature() == FeatureType.forest:
             plotFertility = 4  # 2Y
-        elif tile._featureValue == FeatureType.rainforest:
+        elif tile.feature() == FeatureType.rainforest:
             plotFertility = 3  # 1Y, but can be removed
-        elif tile._featureValue == FeatureType.marsh:
+        elif tile.feature() == FeatureType.marsh:
             plotFertility = 3  # 1Y, but can be removed
-        elif tile._featureValue == FeatureType.ice:
+        elif tile.feature() == FeatureType.ice:
             plotFertility = -1  # useless
-        elif tile._featureValue == FeatureType.oasis:
+        elif tile.feature() == FeatureType.oasis:
             plotFertility = 6  # 4Y, but can't be improved (7 with fresh water bonus)
-        elif tile._featureValue == FeatureType.floodplains:
+        elif tile.feature() == FeatureType.floodplains:
             plotFertility = 6  # 3Y (8 with river and fresh water bonuses)
-        elif tile.terrain == TerrainType.grass:
+        elif tile.terrain() == TerrainType.grass:
             plotFertility = 4  # 2Y
-        elif tile.terrain == TerrainType.plains:
+        elif tile.terrain() == TerrainType.plains:
             plotFertility = 4  # 2Y
-        elif tile.terrain == TerrainType.desert:
+        elif tile.terrain() == TerrainType.desert:
             plotFertility = 1  # 0Y
-        elif tile.terrain == TerrainType.tundra:
+        elif tile.terrain() == TerrainType.tundra:
             plotFertility = 2  # 1Y
-        elif tile.terrain == TerrainType.snow:
+        elif tile.terrain() == TerrainType.snow:
             plotFertility = 1  # 0Y
-        elif tile.terrain == TerrainType.shore:
+        elif tile.terrain() == TerrainType.shore:
             plotFertility = 4  # 2Y
-        elif tile.terrain == TerrainType.ocean:
+        elif tile.terrain() == TerrainType.ocean:
             plotFertility = 2  # 1Y
 
-        if tile.is_hills and plotFertility == 1:
+        if tile.isHills() and plotFertility == 1:
             plotFertility = 2  # hills give +1 production even on worthless terrains like desert and snow
 
-        if tile._featureValue == FeatureType.reef or tile._featureValue == FeatureType.greatBarrierReef:
+        if tile.feature() == FeatureType.reef or tile.feature() == FeatureType.greatBarrierReef:
             plotFertility += 2  # +1 yield
-        elif tile._featureValue == FeatureType.atoll:
+        elif tile.feature() == FeatureType.atoll:
             plotFertility += 4  # +2 yields
 
         if self.map.riverAt(tile.point):
@@ -212,7 +214,7 @@ class TileFertilityEvaluator(BaseSiteEvaluator):
 
         if checkForCoastalLand:
             # When measuring only one AreaID, this shortcut helps account for coastal plots not measured.
-            if self.map.isCoastalAt(tile.point) and tile._featureValue != FeatureType.mountains:
+            if self.map.isCoastalAt(tile.point) and tile.feature() != FeatureType.mountains:
                 plotFertility += 2
 
         return plotFertility
@@ -257,7 +259,7 @@ class StartPositioner:
                 tile = self.grid.tileAt(x, y)
                 if tile is not None:
                     # Land plot, process it.
-                    if tile.terrain.isLand():
+                    if tile.terrain().isLand():
                         numberOfLandPlots += 1
                         continentIdentifier = tile.continentIdentifier
 
@@ -329,7 +331,7 @@ class StartPositioner:
             print(f'choose location for {leader.name}')
             civ = leader.civilization()
 
-            bestArea: StartArea = None
+            bestArea: Optional[StartArea] = None
             bestValue: int = 0
             bestLocation: HexPoint = HexPoint(0, 0)
 
@@ -470,7 +472,7 @@ class StartPositioner:
 
     def chooseCityStateLocations(self, cityStateTypes: [CityStateType]):
         for _ in cityStateTypes:
-            bestArea: StartArea = None
+            bestArea: Optional[StartArea] = None
             bestValue: int = 0
             bestLocation: HexPoint = HexPoint(-1, -1)
 
@@ -571,7 +573,7 @@ class ContinentFinder:
     def evaluate(self, x, y, grid):
         currentPoint = HexPoint(x, y)
 
-        if grid.tileAt(currentPoint).terrain.isLand():
+        if grid.tileAt(currentPoint).terrain().isLand():
             northPoint = currentPoint.neighbor(HexDirection.north)
             nortwestPoint = currentPoint.neighbor(HexDirection.northWest)
             southPoint = currentPoint.neighbor(HexDirection.southWest)
@@ -815,8 +817,8 @@ class MapGenerator:
                 if self.plots.values[y][x] == TerrainType.sea:
                     # check is next continent
                     next_to_continent = any(
-                        map(lambda neighbor: grid.valid(neighbor) and grid.terrainAt(neighbor).isLand(),
-                            grid_point.neighbors()))
+                        map(lambda n: grid.valid(n) and grid.terrainAt(n).isLand(), grid_point.neighbors())
+                    )
 
                     if height_map.values[y][x] > 0.1 or next_to_continent:
                         grid.modifyTerrainAt(grid_point, TerrainType.shore)
@@ -1023,10 +1025,10 @@ class MapGenerator:
         for pt in points:
             tile = grid.tileAt(pt)
 
-            if tile.terrain.isWater():
+            if tile.terrain().isWater():
                 continue
 
-            if tile._featureValue == FeatureType.mountains:
+            if tile.hasFeature(FeatureType.mountains):
                 num_near_mountains = 0
 
                 for neighbor in pt.neighbors():
@@ -1086,7 +1088,7 @@ class MapGenerator:
 
             plotA = grid.tileAt(neighborA)
 
-            if plotA.terrain.isLand() and plotA._featureValue != FeatureType.mountains:
+            if plotA.terrain().isLand() and plotA.feature() != FeatureType.mountains:
 
                 opposite_dir = dirA.opposite()
                 dirs = [
@@ -1252,7 +1254,7 @@ class MapGenerator:
                     UnitMovementType.swim)) or tile._featureValue != FeatureType.none:
                     continue
 
-                if tile.terrain.isWater():
+                if tile.terrain().isWater():
                     can_have_ice = False
                     if grid.canHaveFeature(grid_point, FeatureType.ice) and not grid.riverAt(grid_point) and (
                         y == 0 or y == self.height - 1):

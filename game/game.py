@@ -9,6 +9,7 @@ from game.players import Player
 from game.types import TechType
 from game.unit_types import BuildType
 from game.units import Unit
+from map.base import HexPoint
 from map.map import Map, Tile
 from map.types import FeatureType
 
@@ -29,14 +30,14 @@ class GameState(Enum):
 
 
 class Game:
-    def __init__(self, map: Map, handicap: HandicapType = HandicapType.SETTLER):
+    def __init__(self, map: Map, handicap: HandicapType = HandicapType.settler):
         self.turnSliceValue = 0
         self.waitDiploPlayer = None
         self.players = []
         self.currentTurn = 0
         self.victoryTypes = [
-            VictoryType.DOMINATION,
-            VictoryType.CULTURAL
+            VictoryType.domination,
+            VictoryType.cultural
         ]
         self.handicap = handicap
         self._map = map
@@ -142,9 +143,9 @@ class Game:
 
         # check feature removal
         featureRemovalSurplus = 0
-        featureRemovalSurplus += tile.productionFromFeatureRemoval(BuildType.REMOVE_FOREST)
-        featureRemovalSurplus += tile.productionFromFeatureRemoval(BuildType.REMOVE_RAINFOREST)
-        featureRemovalSurplus += tile.productionFromFeatureRemoval(BuildType.REMOVE_MARSH)
+        featureRemovalSurplus += tile.productionFromFeatureRemoval(BuildType.removeForest)
+        featureRemovalSurplus += tile.productionFromFeatureRemoval(BuildType.removeRainforest)
+        featureRemovalSurplus += tile.productionFromFeatureRemoval(BuildType.removeMarsh)
 
         city.changeFeatureProduction(featureRemovalSurplus)
 
@@ -170,6 +171,9 @@ class Game:
 
     def tileAt(self, location) -> Tile:
         return self._map.tileAt(location)
+
+    def valid(self, point: HexPoint):
+        return self._map.valid(point)
 
     def tutorial(self):
         return None
