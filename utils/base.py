@@ -13,7 +13,7 @@ class InvalidEnumError(Exception):
 		super().__init__(f'enum value {type_value} not handled')
 
 
-class WeightedStringList(dict):
+class WeightedBaseList(dict):
 	def addWeight(self, value, identifier):
 		self[identifier] = self.get(identifier, 0) + value
 
@@ -22,3 +22,7 @@ class WeightedStringList(dict):
 
 	def weight(self, identifier):
 		return self[identifier]
+
+
+class WeightedStringList(WeightedBaseList):
+	pass
