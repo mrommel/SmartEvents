@@ -10,7 +10,7 @@ from game.types import EraType, TechType
 from game.unit_types import ImprovementType
 from game.wonders import WonderType
 from map.base import HexPoint
-from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType
+from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType
 from utils.base import ExtendedEnum
 
 
@@ -73,6 +73,8 @@ class CityCitizens:
 		self._numberOfUnassignedCitizensValue = 0
 		self._numberOfCitizensWorkingPlotsValue = 0
 		self._numberOfForcedWorkingPlotsValue = 0
+
+		self._avoidGrowthValue = False
 		self._forceAvoidGrowthValue = False
 
 		# self.numberOfSpecialists = SpecialistCountList()
@@ -170,7 +172,7 @@ class CityCitizens:
 
 		return plot.worked
 
-	def isForcedWorked(self, location: HexPoint) -> bool:
+	def isForcedWorkedAt(self, location: HexPoint) -> bool:
 		# Has our City been told it MUST a particular CvPlot?
 		plot: Optional[WorkingPlot] = next((p for p in self._workingPlots if p.location == location), None)
 
@@ -186,10 +188,11 @@ class CityCitizens:
 		self._focusTypeValue = focusType
 
 	def numberOfCitizensWorkingPlots(self) -> int:
-		pass
+		return self._numberOfCitizensWorkingPlotsValue
 
 	def changeNumberOfCitizensWorkingPlotsBy(self, delta: int):
-		pass
+		"""Changes how many Citizens are working Plots"""
+		self._numberOfCitizensWorkingPlotsValue += delta
 
 	def numberOfUnassignedCitizens(self) -> int:
 		"""How many Citizens need to be given a job?"""
@@ -207,15 +210,20 @@ class CityCitizens:
 		return self._numberOfForcedWorkingPlotsValue
 
 	def changeNumberOfForcedWorkingPlotsBy(self, delta: int):
-		"""Changes how many Citizens are working Plots"""
-		self._numberOfCitizensWorkingPlotsValue += delta
+		self._numberOfForcedWorkingPlotsValue += delta
 
 	def doValidateForcedWorkingPlots(self, simulation):
-		pass
+		"""Make sure we don't have more forced working plots than we have citizens to work"""
+		numForcedWorkingPlotsToDemote = self.numberOfForcedWorkingPlots() - self.numberOfCitizensWorkingPlots()
+
+		if numForcedWorkingPlotsToDemote > 0:
+			for _ in range(numForcedWorkingPlotsToDemote):
+				self.doRemoveWorstForcedWorkingPlot(simulation)
 
 	def doReallocateCitizens(self, simulation):
 		"""Optimize our Citizen Placement"""
-		# Make sure we don't have more forced working plots than we have citizens working.  If so, clean it up before reallocating
+		# Make sure we don't have more forced working plots than we have citizens working.
+		# If so, clean it up before reallocating
 		self.doValidateForcedWorkingPlots(simulation)
 
 		# Remove all the allocated guys
@@ -230,7 +238,7 @@ class CityCitizens:
 				# Don't include Forced guys
 				numSpecialistsToRemove = self.numSpecialistsIn(buildingType) - self.numForcedSpecialistsIn(buildingType)
 				# Loop through guys to remove (if there are any)
-				for _ in 0..<numSpecialistsToRemove:
+				for _ in range(numSpecialistsToRemove):
 					self.doRemoveSpecialistFrom(buildingType, forced=False, simulation=simulation)
 
 		# Remove Default Specialists
@@ -247,6 +255,105 @@ class CityCitizens:
 		if self._forceAvoidGrowthValue != forcedAvoidGrowth:
 			self._forceAvoidGrowthValue = forcedAvoidGrowth
 			self.doReallocateCitizens(simulation)
+
+	def doRemoveWorstForcedWorkingPlot(self, simulation):
+		"""Remove the Forced status from the worst ForcedWorking plot"""
+		worstPlotValue: int = -1
+		worstPlotPoint: Optional[HexPoint] = None
+
+		# Look at all workable Plots
+		for workableTile in self.workableTiles(simulation):
+			if self.city is None:
+				raise Exception("cant get city")
+
+			# skip home plot
+			if workableTile.point == self.city.location:
+				continue
+
+			if self.isForcedWorkedAt(workableTile.point):
+				value = self.plotValueOf(workableTile.point, useAllowGrowthFlag=False, simulation=simulation)
+
+				# First, or worst yet?
+				if worstPlotValue == -1 or value < worstPlotValue:
+					worstPlotValue = value
+					worstPlotPoint = workableTile.point
+
+		if worstPlotPoint is not None:
+			self.forceWorkingPlotAt(worstPlotPoint, force=False, simulation=simulation)
+
+	def plotValueOf(self, point: HexPoint, useAllowGrowthFlag: bool, simulation):
+		"""What is the overall value of the current Plot?"""
+		tile = simulation.tileAt(point)
+
+		if tile is None:
+			raise Exception('cant get tile')
+
+		value = 0.0
+		yields = tile.yieldsFor(self.city.player, ignoreFeature=False)
+
+		# Yield Values
+		foodYieldValue = 12 * yields.value(YieldType.food)
+		productionYieldValue = 8 * yields.value(YieldType.production)
+		goldYieldValue = 10 * yields.value(YieldType.gold)
+		scienceYieldValue = 6 * yields.valueOf(YieldType.science)
+		cultureYieldValue = 8 * yields.culture
+
+		# How much surplus food are we making?
+		# excessFoodTimes100 = city.foodConsumption()
+
+		avoidGrowth = self.isAvoidGrowth()
+
+		# City Focus
+		focusType = self.focusType()
+		if focusType == CityFocusType.food:
+			foodYieldValue *= 5
+		elif focusType == CityFocusType.production:
+			productionYieldValue *= 4
+		elif focusType == CityFocusType.gold:
+			goldYieldValue *= 4
+		elif focusType == CityFocusType.science:
+			scienceYieldValue *= 4
+		elif focusType == CityFocusType.culture:
+			cultureYieldValue *= 4
+		elif focusType == CityFocusType.goldGrowth:
+			foodYieldValue *= 2
+			goldYieldValue *= 5
+		elif focusType == CityFocusType.productionGrowth:
+			foodYieldValue *= 2
+			productionYieldValue *= 5
+
+		# Food can be worth less if we don't want to grow
+		if useAllowGrowthFlag and self.city.hasEnoughFood() and avoidGrowth:
+			# If we at least have enough Food to feed everyone, zero out the value of additional food
+			foodYieldValue = 0
+		else:
+			# We want to grow here
+			# If we have a non-default and non-food focus, only worry about getting to 0 food
+			if focusType != CityFocusType.none and focusType != CityFocusType.food and \
+				focusType != CityFocusType.productionGrowth and focusType != CityFocusType.goldGrowth:
+
+				if not self.city.hasEnoughFood():
+					foodYieldValue *= 2
+			elif not avoidGrowth:
+				# If our surplus is not at least 2, really emphasize food plots
+				if self.city.hasOnlySmallFoodSurplus():
+					foodYieldValue *= 2
+
+		if focusType in [CityFocusType.none, CityFocusType.productionGrowth, CityFocusType.goldGrowth] and \
+			not avoidGrowth and self.city.population() < 5:
+			foodYieldValue *= 3
+
+		value += foodYieldValue
+		value += productionYieldValue
+		value += goldYieldValue
+		value += scienceYieldValue
+		value += cultureYieldValue
+
+		return int(value)
+
+	def isAvoidGrowth(self) -> bool:
+		"""Is this City avoiding growth?"""
+		return self._avoidGrowthValue
 
 
 class CityGreatWorks:

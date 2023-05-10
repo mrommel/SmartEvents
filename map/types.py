@@ -105,12 +105,12 @@ class Yields:
 
 
 class YieldType(Enum):
-	FOOD = 0
-	PRODUCTION = 1
-	GOLD = 2
-	SCIENCE = 3
-	CULTURE = 4
-	FAITH = 5
+	food = 0
+	production = 1
+	gold = 2
+	science = 3
+	culture = 4
+	faith = 5
 
 
 class YieldList(dict):
