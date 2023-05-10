@@ -665,7 +665,19 @@ class City:
 		pass
 
 	def foodPerTurn(self, simulation) -> float:
-		return 0.0
+		foodPerTurn: YieldValues = YieldValues(value=0.0, percentage=1.0)
+
+		foodPerTurn += YieldValues(value=self._foodFromTiles(simulation))
+		foodPerTurn += YieldValues(value=self._foodFromGovernmentType())
+		foodPerTurn += YieldValues(value=self._foodFromBuildings(simulation))
+		foodPerTurn += YieldValues(value=self._foodFromWonders(simulation))
+		foodPerTurn += YieldValues(value=self._foodFromTradeRoutes(simulation))
+		foodPerTurn += self._foodFromGovernors(simulation)
+
+		# cap yields based on loyalty
+		foodPerTurn += YieldValues(value=0.0, percentage=self.loyaltyState().yieldPercentage())
+
+		return foodPerTurn.calc()
 
 	def productionPerTurn(self, simulation) -> float:
 		productionPerTurnValue: YieldValues = YieldValues(value=0.0, percentage=1.0)
@@ -692,7 +704,6 @@ class City:
 
 		centerTile = simulation.tileAt(self.location)
 		if centerTile is not None:
-
 			productionValue += centerTile.yields(self.player, ignoreFeature=False).production
 
 			# The yield of the tile occupied by the city center will be increased to 2 Food and 1 production, if either
@@ -890,3 +901,62 @@ class City:
 
 	def loyaltyState(self) -> LoyaltyState:
 		return LoyaltyState.loyal
+
+	def _foodFromTiles(self, simulation):
+		hasHueyTeocalli = self.player.hasWonder(WonderType.hueyTeocalli, simulation)
+		hasStBasilsCathedral = self.player.hasWonder(WonderType.stBasilsCathedral, simulation)
+
+		foodValue: float = 0.0
+
+		centerTile = simulation.tileAt(self.location)
+		if centerTile is not None:
+			foodValue += centerTile.yields(self.player, ignoreFeature=False).food
+
+			# The yield of the tile occupied by the city center will be increased to 2 Food and 1 Production,
+			# if either was previously lower (before any bonus yields are applied).
+			if foodValue < 2.0:
+				foodValue = 2.0
+
+		for point in self.cityCitizens.workingTileLocations():
+			if self.cityCitizens.isWorkedAt(point):
+				adjacentTile = simulation.tileAt(point)
+
+				if adjacentTile is not None:
+					foodValue += adjacentTile.yieldsFor(self.player, ignoreFeature=False).food
+
+					#  +2 Food, +2 Gold, and +1 Production on all Desert tiles for this city (non-Floodplains).
+					if adjacentTile.terrain() == TerrainType.desert and \
+						not adjacentTile.hasFeature(FeatureType.floodplains) and \
+						self.wonders.hasWonder(WonderType.petra):
+						foodValue += 2.0
+
+					# +1 Food and +1 Production for each Lake tile in your empire.
+					if adjacentTile.hasFeature(FeatureType.lake) and hasHueyTeocalli:
+						foodValue += 1.0
+
+					# stBasilsCathedral
+					if adjacentTile.terrain() == TerrainType.tundra and hasStBasilsCathedral:
+						# +1 Food, +1 Production, and +1 Culture on all Tundra tiles for this city.
+						foodValue += 1.0
+
+					# goddessOfTheHunt - +1 Food and +1 Production from Camps.
+					if adjacentTile.improvement() == ImprovementType.camp and \
+						self.player.religion.pantheon() == PantheonType.goddessOfTheHunt:
+
+						foodValue += 1.0
+
+					# waterMill - Bonus resources improved by Farms gain +1 Food each.
+					if self.buildings.hasBuilding(BuildingType.waterMill) and \
+						adjacentTile.improvement() == ImprovementType.farm and \
+						adjacentTile.resourceFor(self.player).usage() == ResourceUsage.bonus:
+
+						foodValue += 1.0
+
+					# collectivism - Farms +1 Food. All cities +2 [Housing] Housing. +100% Industrial Zone adjacency bonuses.
+					# BUT: [GreatPerson] Great People Points earned 50% slower.
+					if adjacentTile.improvement() == ImprovementType.farm and \
+						self.player.government.hasCard(PolicyCardType.collectivism):
+
+						foodValue += 1.0
+
+			return foodValue
