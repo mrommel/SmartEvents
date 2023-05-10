@@ -1,4 +1,5 @@
 import random
+from typing import Optional
 
 from game.ai.cities import CityStrategyAI
 from game.buildings import BuildingType
@@ -37,17 +38,215 @@ class CityWonders:
 class CityProjects:
 	def __init__(self, city):
 		self.city = city
-		
+
+
+class WorkingPlot:
+	def __init__(self, location: HexPoint, worked: bool, workedForced: bool = False):
+		self.location = location
+		self.worked = worked
+		self.workedForced = workedForced
+
+
+class CityFocusType(ExtendedEnum):
+	none = 'none'  # NO_CITY_AI_FOCUS_TYPE
+	food = 'food'  # CITY_AI_FOCUS_TYPE_FOOD,
+	production = 'production'  # CITY_AI_FOCUS_TYPE_PRODUCTION,
+	gold = 'gold'  # CITY_AI_FOCUS_TYPE_GOLD,
+	greatPeople = 'greatPeople'  # CITY_AI_FOCUS_TYPE_GREAT_PEOPLE,
+	science = 'science'  # CITY_AI_FOCUS_TYPE_SCIENCE,
+	culture = 'culture'  # CITY_AI_FOCUS_TYPE_CULTURE,
+	productionGrowth = 'productionGrowth'  # CITY_AI_FOCUS_TYPE_PROD_GROWTH, // default
+	goldGrowth = 'goldGrowth'  # CITY_AI_FOCUS_TYPE_GOLD_GROWTH,
+	faith = 'faith'  # CITY_AI_FOCUS_TYPE_FAITH,
+
 
 class CityCitizens:
+	# Keeps track of Citizens and Specialists in a City
 	def __init__(self, city):
 		self.city = city
 
+		self._automated = False
+		self._inited = False
+		self._focusTypeValue = CityFocusType.productionGrowth
+		self._workingPlots = []
+
+		self._numberOfUnassignedCitizensValue = 0
+		self._numberOfCitizensWorkingPlotsValue = 0
+		self._numberOfForcedWorkingPlotsValue = 0
+		self._forceAvoidGrowthValue = False
+
+		# self.numberOfSpecialists = SpecialistCountList()
+		# self.numberOfSpecialists.fill()
+		#
+		# self.numberOfSpecialistsInBuilding = []
+		# self.numberOfForcedSpecialistsInBuilding = []
+		#
+		# self.specialistGreatPersonProgress = GreatPersonProgressList()
+		# self.specialistGreatPersonProgress.fill()
+
 	def initialize(self, simulation):
-		pass
+		for location in self.city.location.areaWithRadius(radius=City.workRadius):
+			wrappedLocation = location  # simulation.wrap(point=location)
+
+			if simulation.valid(wrappedLocation):
+				self._workingPlots.append(WorkingPlot(location=wrappedLocation, worked=False))
 
 	def doFound(self, simulation):
+		# always work the home plot (center)
+		self.setWorkedAt(self.city.location, worked=True, useUnassignedPool=False)
+
+	def workingTileLocations(self) -> [HexPoint]:
+		locations: [HexPoint] = []
+
+		for plot in self._workingPlots:
+			locations.append(plot.location)
+
+		return locations
+
+	def workedTileLocations(self) -> [HexPoint]:
+		locations: [HexPoint] = []
+
+		for plot in self._workingPlots:
+			if self.isWorkedAt(plot.location):
+				locations.append(plot.location)
+
+		return locations
+
+	def setWorkedAt(self, location: HexPoint, worked: bool, useUnassignedPool: bool = True):
+		# Tell a City to start or stop working a Plot.  Citizens will go to/from the Unassigned Pool
+		# if the 3rd argument is true
+		plot = next((p for p in self._workingPlots if p.location == location), None)
+
+		if plot is None:
+			raise Exception("not a valid plot to check for this city")
+
+		if plot.worked != worked:
+			# Don't look at the center Plot of a City, because we always work it for free
+			if plot.location != self.city.location:
+				plot.worked = worked
+
+				# Alter the count of Plots being worked by Citizens
+				if worked:
+					self.changeNumberOfCitizensWorkingPlotsBy(delta=1)
+
+					if useUnassignedPool:
+						self.changeNumberOfUnassignedCitizensBy(delta=-1)
+				else:
+					self.changeNumberOfCitizensWorkingPlotsBy(delta=-1)
+
+					if useUnassignedPool:
+						self.changeNumberOfUnassignedCitizensBy(delta=1)
+
+		return
+
+	def forceWorkingPlatAt(self, location: HexPoint, force: bool, simulation):
+		"""Tell our City it MUST work a particular CvPlot"""
+		plot = next((p for p in self._workingPlots if p.location == location), None)
+
+		if plot is None:
+			raise Exception("not a valid plot to check for this city")
+
+		if plot.workedForced != force:
+
+			plot.workedForced = force
+
+			# Change the count of how many are forced
+			if force:
+				self.changeNumberOfForcedWorkingPlotsBy(delta=1)
+				self.doValidateForcedWorkingPlots(simulation)
+			else:
+				self.changeNumberOfForcedWorkingPlotsBy(delta=-1)
+
+			self.doReallocateCitizens(simulation)
+
+		return
+
+	def isWorkedAt(self, location: HexPoint) -> bool:
+		# Is our City working a CvPlot?
+		plot: Optional[WorkingPlot] = next((p for p in self._workingPlots if p.location == location), None)
+
+		if plot is None:
+			return False
+
+		return plot.worked
+
+	def isForcedWorked(self, location: HexPoint) -> bool:
+		# Has our City been told it MUST a particular CvPlot?
+		plot: Optional[WorkingPlot] = next((p for p in self._workingPlots if p.location == location), None)
+
+		if plot is None:
+			return False
+
+		return plot.workedForced
+
+	def focusType(self) -> CityFocusType:
+		return self._focusTypeValue
+
+	def setFocusType(self, focusType: CityFocusType):
+		self._focusTypeValue = focusType
+
+	def numberOfCitizensWorkingPlots(self) -> int:
 		pass
+
+	def changeNumberOfCitizensWorkingPlotsBy(self, delta: int):
+		pass
+
+	def numberOfUnassignedCitizens(self) -> int:
+		"""How many Citizens need to be given a job?"""
+		return self._numberOfUnassignedCitizensValue
+
+	def changeNumberOfUnassignedCitizensBy(self, delta: int):
+		"""Changes how many Citizens need to be given a job"""
+		self._numberOfUnassignedCitizensValue += delta
+
+		if self._numberOfUnassignedCitizensValue < 0:
+			raise Exception('unassigned citizen must be positive')
+
+	def numberOfForcedWorkingPlots(self) -> int:
+		"""How many plots have we forced to be worked?"""
+		return self._numberOfForcedWorkingPlotsValue
+
+	def changeNumberOfForcedWorkingPlotsBy(self, delta: int):
+		"""Changes how many Citizens are working Plots"""
+		self._numberOfCitizensWorkingPlotsValue += delta
+
+	def doValidateForcedWorkingPlots(self, simulation):
+		pass
+
+	def doReallocateCitizens(self, simulation):
+		"""Optimize our Citizen Placement"""
+		# Make sure we don't have more forced working plots than we have citizens working.  If so, clean it up before reallocating
+		self.doValidateForcedWorkingPlots(simulation)
+
+		# Remove all the allocated guys
+		numberOfCitizensToRemove = self.numberOfCitizensWorkingPlots()
+		for _ in range(numberOfCitizensToRemove):
+			self.doRemoveWorstCitizen(simulation)
+
+		# Remove Non-Forced Specialists in Buildings
+		for buildingType in list(BuildingType):
+			# Have this Building in the City?
+			if self.city.buildings.hasBuilding(building=buildingType):
+				# Don't include Forced guys
+				numSpecialistsToRemove = self.numSpecialistsIn(buildingType) - self.numForcedSpecialistsIn(buildingType)
+				# Loop through guys to remove (if there are any)
+				for _ in 0..<numSpecialistsToRemove:
+					self.doRemoveSpecialistFrom(buildingType, forced=False, simulation=simulation)
+
+		# Remove Default Specialists
+		numDefaultsToRemove = self.numDefaultSpecialists() - self.numForcedDefaultSpecialists()
+		for _ in range(numDefaultsToRemove):
+			self.changeNumDefaultSpecialistsBy(delta=-1)
+
+		# Now put all the unallocated guys back
+		numToAllocate = self.numberOfUnassignedCitizens()
+		for _ in range(numToAllocate):
+			self.doAddBestCitizenFromUnassigned(simulation)
+
+	def setForcedAvoidGrowth(self, forcedAvoidGrowth: bool, simulation):
+		if self._forceAvoidGrowthValue != forcedAvoidGrowth:
+			self._forceAvoidGrowthValue = forcedAvoidGrowth
+			self.doReallocateCitizens(simulation)
 
 
 class CityGreatWorks:
@@ -98,6 +297,7 @@ class DedicationType(ExtendedEnum):
 class YieldValues:
 	pass
 
+
 class YieldValues:
 	def __init__(self, value: float, percentage: float = 0.0):
 		self.value = value
@@ -121,6 +321,8 @@ class CityState(ExtendedEnum):
 
 
 class City:
+	workRadius = 3
+
 	def __init__(self, name: str, location: HexPoint, isCapital: bool, player):
 		self.name = name
 		self.location = location
@@ -423,7 +625,7 @@ class City:
 
 				# ladyOfTheReedsAndMarshes - +2 Production from Marsh, Oasis, and Desert Floodplains.
 				if (workedTile.hasFeature(FeatureType.marsh) or workedTile.hasFeature(FeatureType.oasis) or \
-				    workedTile.hasFeature(FeatureType.floodplains)) and \
+					workedTile.hasFeature(FeatureType.floodplains)) and \
 					self.player.religion.pantheon() == PantheonType.ladyOfTheReedsAndMarshes:
 					productionValue += 1.0
 
