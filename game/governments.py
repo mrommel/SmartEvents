@@ -1,5 +1,6 @@
 from typing import Optional
 
+from game.policy_cards import PolicyCardType
 from game.types import CivicType
 from utils.base import ExtendedEnum
 
@@ -39,6 +40,13 @@ class GovernmentType(ExtendedEnum):
 class PlayerGovernment:
 	def __init__(self, player):
 		self.player = player
+		self._currentGovernmentValue = GovernmentType.chiefdom
 
 	def setGovernment(self, governmentType: GovernmentType, simulation):
-		pass
+		self._currentGovernmentValue = governmentType
+
+	def currentGovernment(self) -> GovernmentType:
+		return self._currentGovernmentValue
+
+	def hasCard(self, policyCard: PolicyCardType) -> bool:
+		return False

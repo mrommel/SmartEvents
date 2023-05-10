@@ -38,6 +38,8 @@ class DistrictType(ExtendedEnum):
 	holySite = 'holySite'
 	neighborhood = 'neighborhood'
 	governmentPlaza = 'governmentPlaza'
+	aqueduct = 'aqueduct'
+	industrialZone = 'industrialZone'
 
 	def name(self) -> str:
 		return self._data().name

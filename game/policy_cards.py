@@ -12,6 +12,10 @@ class PolicyCardTypeData:
 
 
 class PolicyCardType(ExtendedEnum):
+	fiveYearPlan = 'fiveYearPlan'
+	craftsmen = 'craftsmen'
+	urbanPlanning = 'urbanPlanning'
+	collectivism = 'collectivism'
 	none = 'none'
 
 	def requiredCivic(self) -> Optional[CivicType]:

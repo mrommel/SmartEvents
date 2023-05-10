@@ -2,7 +2,7 @@ from game.base_types import CityStateType
 from game.ai.economics import EconomicAI
 from game.ai.grand_strategies import GrandStrategyAI
 from game.ai.militaries import MilitaryAI
-from game.cities import City, AgeType, DedicationType
+from game.cities import City, AgeType, DedicationType, CityState
 from game.civilizations import LeaderType
 from game.flavors import Flavors, FlavorType
 from game.governments import PlayerGovernment
@@ -25,6 +25,18 @@ class DiplomaticAI:
 
     def hasMetWith(self, player):
         return False
+
+
+class TradeRoute:
+    pass
+
+
+class PlayerTradeRoutes:
+    def __init__(self, player):
+        self.player = player
+
+    def tradeRoutesStartingAt(self, city) -> [TradeRoute]:
+        return []
 
 
 class Player:
@@ -76,6 +88,7 @@ class Player:
     def initialize(self):
         self.diplomacyAI = DiplomaticAI(player=self)
         self.government = PlayerGovernment(player=self)
+        self.tradeRoutes = PlayerTradeRoutes(player=self)
 
     def doTurn(self, simulation):
         self.grandStrategyAI.doTurn(simulation)
@@ -380,6 +393,9 @@ class Player:
     def hasDedication(self, dedication: DedicationType) -> bool:
         return dedication in self.currentDedicationsVal
 
-    def hasWonder(self, wonder: WonderType, simulation):
+    def hasWonder(self, wonder: WonderType, simulation) -> bool:
+        return False
+
+    def isSuzerainOf(self, cityState: CityState, simulation) -> bool:
         return False
 

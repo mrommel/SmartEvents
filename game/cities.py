@@ -2,9 +2,13 @@ import random
 from typing import Optional
 
 from game.ai.cities import CityStrategyAI
-from game.buildings import BuildingType
-from game.civilizations import LeaderWeightList, CivilizationAbility, LeaderAbility, LeaderType
+from game.buildings import BuildingType, BuildingCategoryType
+from game.civilizations import LeaderWeightList, CivilizationAbility, LeaderAbility, LeaderType, \
+	WeightedCivilizationList, CivilizationType
 from game.districts import DistrictType
+from game.governments import GovernmentType
+from game.loyalties import LoyaltyState
+from game.policy_cards import PolicyCardType
 from game.religions import PantheonType
 from game.types import EraType, TechType
 from game.unit_types import ImprovementType
@@ -21,6 +25,9 @@ class CityDistricts:
 	def build(self, district: DistrictType, location: HexPoint):
 		pass
 
+	def hasDistrict(self, district: DistrictType) -> bool:
+		return False
+
 
 class CityBuildings:
 	def __init__(self, city):
@@ -28,6 +35,12 @@ class CityBuildings:
 
 	def build(self, building: BuildingType):
 		pass
+
+	def numberOfBuildingsOf(self, buildingCategory: BuildingCategoryType) -> int:
+		return 0
+
+	def hasBuilding(self, building: BuildingType) -> bool:
+		return False
 
 
 class CityWonders:
@@ -423,6 +436,7 @@ class YieldValues:
 
 
 class CityState(ExtendedEnum):
+	singapore = 'singapore'
 	johannesburg = 'johannesburg'
 	auckland = 'auckland'
 
@@ -768,3 +782,111 @@ class City:
 							productionValue += 1.0
 
 		return productionValue
+
+	def _productionFromGovernmentType(self):
+		productionFromGovernmentType: float = 0.0
+
+		# yields from government
+		if self.player.government is not None:
+			# https://civilization.fandom.com/wiki/Autocracy_(Civ6)
+			# +1 to all yields for each government building and Palace in a city.
+			if self.player.government.currentGovernment() == GovernmentType.autocracy:
+				productionFromGovernmentType += self.buildings.numberOfBuildingsOf(BuildingCategoryType.government)
+
+			# urbanPlanning: +1 Production in all cities.
+			if self.player.government.hasCard(PolicyCardType.urbanPlanning):
+				productionFromGovernmentType += 1
+
+		return productionFromGovernmentType
+
+	def _productionFromDistricts(self, simulation):
+		productionFromDistricts: float = 0.0
+		policyCardModifier: float = 1.0
+
+		# yields from cards
+		# craftsmen - +100% Industrial Zone adjacency bonuses.
+		if self.player.government.hasCard(PolicyCardType.craftsmen):
+			policyCardModifier += 1.0
+
+		# fiveYearPlan - +100% Campus and Industrial Zone district adjacency bonuses.
+		if self.player.government.hasCard(PolicyCardType.fiveYearPlan):
+			policyCardModifier += 1.0
+
+		# collectivism - Farms +1 [Food] Food. All cities +2 [Housing] Housing. +100% Industrial Zone adjacency bonuses.
+		# BUT: Great People Points earned 50% slower.
+		if self.player.government.hasCard(PolicyCardType.collectivism):
+			policyCardModifier += 1.0
+
+		if self.districts.hasDistrict(DistrictType.industrialZone):
+			industrialLocation = self.locationOf(DistrictType.industrialZone)
+
+			for neighbor in industrialLocation.neighbors():
+				neighborTile = simulation.tileAt(neighbor)
+
+				# Major bonus (+2 Production) for each adjacent Aqueduct, Dam, Canal or Bath
+				if neighborTile.district() == DistrictType.aqueduct:  # or
+					# neighborTile.district() == .dam or
+					# neighborTile.district() == .canal or
+					# neighborTile.district() == .bath */ {
+					productionFromDistricts += 2.0 * policyCardModifier
+					continue
+
+				# Standard bonus (+1 Production) for each adjacent Strategic Resource and Quarry
+				if neighborTile.hasImprovement(ImprovementType.quarry):
+					productionFromDistricts += 1.0 * policyCardModifier
+					continue
+
+				if neighborTile.resourceFor(self.player).usage() == ResourceUsage.strategic:
+					productionFromDistricts += 1.0 * policyCardModifier
+
+				# Minor bonus (+½ Production) for each adjacent district tile, Mine or Lumber Mill
+				if neighborTile.hasImprovement(ImprovementType.mine):  # /*|| neighborTile.has(improvement: .lumberMill)*/ {
+					productionFromDistricts += 0.5 * policyCardModifier
+
+				if neighborTile.district() != DistrictType.none:
+					productionFromDistricts += 0.5 * policyCardModifier
+
+		return productionFromDistricts
+
+	def _productionFromBuildings(self):
+		productionFromBuildings: float = 0.0
+
+		# gather food from builds
+		for building in list(BuildingType):
+			if self.buildings.hasBuilding(building):
+				productionFromBuildings += building.yields().production
+
+		return productionFromBuildings
+
+	def _productionFromTradeRoutes(self, simulation):
+		productionFromTradeRoutes: float = 0.0
+		civilizations: WeightedCivilizationList = WeightedCivilizationList()
+		tradeRoutes = self.player.tradeRoutes.tradeRoutesStartingAt(self)
+
+		for tradeRoute in tradeRoutes:
+			productionFromTradeRoutes += tradeRoute.yields(simulation).production
+
+			if tradeRoute.isInternational(simulation):
+				endCity = tradeRoute.endCity(simulation)
+				endCityPlayer = endCity.player
+
+				if endCityPlayer.isBarbarian() or endCityPlayer.isFreeCity() or endCityPlayer.isCityState():
+					continue
+
+				civilizations.addWeight(1.0, endCityPlayer.leader.civilization())
+
+		numberOfForeignCivilizations: int = 0
+
+		for civilization in list(CivilizationType):
+			if civilizations.weight(civilization) > 0.0:
+				numberOfForeignCivilizations += 1
+
+		# Singapore suzerain bonus
+		# Your cities receive +2 Production for each foreign civilization they have a Trade Route to.
+		if self.player.isSuzerainOf(CityState.singapore, simulation):
+			productionFromTradeRoutes += 2.0 * float(numberOfForeignCivilizations)
+
+		return productionFromTradeRoutes
+
+	def loyaltyState(self) -> LoyaltyState:
+		return LoyaltyState.loyal
