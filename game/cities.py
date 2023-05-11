@@ -1020,7 +1020,7 @@ class City:
 				adjacentTile = simulation.tileAt(point)
 
 				if adjacentTile is not None:
-					foodValue += adjacentTile.yieldsFor(self.player, ignoreFeature=False).food
+					foodValue += adjacentTile.yields(self.player, ignoreFeature=False).food
 
 					#  +2 Food, +2 Gold, and +1 Production on all Desert tiles for this city (non-Floodplains).
 					if adjacentTile.terrain() == TerrainType.desert and \
@@ -1129,7 +1129,7 @@ class City:
 		for point in self.cityCitizens.workingTileLocations():
 			if self.cityCitizens.isWorkedAt(point):
 				adjacentTile = simulation.tileAt(point)
-				goldValue += adjacentTile.yieldsFor(self.player, ignoreFeature=False).gold
+				goldValue += adjacentTile.yields(self.player, ignoreFeature=False).gold
 
 				# +2 Food, +2 Gold, and +1 Production on all Desert tiles for this city(non - Floodplains).
 				if adjacentTile.terrain() == TerrainType.desert and \

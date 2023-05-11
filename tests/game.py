@@ -1,5 +1,7 @@
 import unittest
 
+import pytest
+
 from game.achievements import CivicAchievements
 from game.base_types import HandicapType
 from game.buildings import BuildingType
@@ -80,8 +82,8 @@ class TestGameAssets(unittest.TestCase):
 
 
 class TestCity(unittest.TestCase):
-	def test_city_yields(self):
-		"""Test the city yields"""
+	def test_city_initial_yields(self):
+		"""Test the initial city yields"""
 		mapModel = Map(10, 10)
 
 		# center
@@ -117,6 +119,48 @@ class TestCity(unittest.TestCase):
 		self.assertEqual(foodYield, 4.0)
 		self.assertEqual(productionYield, 4.0)
 		self.assertEqual(goldYield, 5.0)
+
+	def test_city_worked_yields(self):
+		"""Test the worked city yields"""
+		mapModel = Map(10, 10)
+
+		# center
+		centerTile = mapModel.tileAt(HexPoint(1, 1))
+		centerTile.setTerrain(terrain=TerrainType.grass)
+		centerTile.setHills(hills=False)
+		centerTile.setImprovement(improvement=ImprovementType.farm)
+
+		# another
+		anotherTile = mapModel.tileAt(HexPoint(1, 2))
+		anotherTile.setTerrain(terrain=TerrainType.plains)
+		anotherTile.setHills(hills=True)
+		anotherTile.setImprovement(improvement=ImprovementType.mine)
+
+		simulation = Game(mapModel)
+
+		playerTrajan = Player(leader=LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+
+		playerTrajan.government.setGovernment(governmentType=GovernmentType.autocracy, simulation=simulation)
+		playerTrajan.techs.discover(tech=TechType.mining, simulation=simulation)
+
+		city = City(name='Berlin', location=HexPoint(1, 1), isCapital=True, player=playerTrajan)
+		city.initialize(simulation)
+		city.setPopulation(3, reassignCitizen=False, simulation=simulation)
+
+		city.cityCitizens.setWorkedAt(location=HexPoint(1, 0), worked=True)
+		city.cityCitizens.setWorkedAt(location=HexPoint(1, 1), worked=True)
+
+		# WHEN
+		foodYield = city.foodPerTurn(simulation=simulation)
+		productionYield = city.productionPerTurn(simulation=simulation)
+		goldYield = city.goldPerTurn(simulation=simulation)
+
+		# THEN
+		self.assertEqual(foodYield, 5.0)
+		self.assertEqual(productionYield, 4.0)
+		self.assertEqual(goldYield, 5.0)
+
 
 
 class TestSimulation(unittest.TestCase):

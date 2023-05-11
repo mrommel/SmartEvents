@@ -18,7 +18,7 @@ venv: $(VENV)/bin/activate
 #	./$(VENV)/bin/pylint
 
 tests: venv
-	./$(VENV)/bin/pytest -q 'tests/game.py'
+	./$(VENV)/bin/pytest
 
 run: venv
 	./$(VENV)/bin/python3 main.py

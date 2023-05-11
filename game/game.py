@@ -24,9 +24,9 @@ class ScreenType(Enum):
 
 
 class GameState(Enum):
-    ON = 0
-    OVER = 1
-    EXTENDED = 2
+    on = 0
+    over = 1
+    extended = 2
 
 
 class Game:
@@ -42,7 +42,7 @@ class Game:
         self.handicap = handicap
         self._map = map
         self.userInterface = None
-        self.gameStateValue = GameState.ON
+        self.gameStateValue = GameState.on
 
         # game ai
         self.barbarianAI = BarbarianAI()
@@ -91,7 +91,7 @@ class Game:
 
         # if the game is single player, it's ok to block all processing until
         # the user selects an extended match or quits.
-        if self.gameState() == GameState.OVER:
+        if self.gameState() == GameState.over:
             # self.testExtendedGame()
             return
 
@@ -119,7 +119,7 @@ class Game:
             # self.testAlive()
 
             if not self.humanPlayer().isAlive():
-                self.setGameState(GameState.OVER)
+                self.setGameState(GameState.over)
 
             # next player ???
             self.checkPlayerTurnDeactivate()
@@ -416,7 +416,7 @@ class Game:
         """ Check to see if the player's turn should be deactivated.
             This occurs when the player has set its EndTurn and its AutoMoves to true
             and all activity has been completed."""
-        if self.userInterface == None:
+        if self.userInterface is None:
             raise Exception("no UI")
 
         for player in self.players:
@@ -437,7 +437,7 @@ class Game:
                             if not self.userInterface.isShown(ScreenType.diplomatic):
                                 player.endTurn(self)
 
-                                # If it is a hotseat game and the player is human and is dead, don't advance the player,
+                                # If it is a hot seat game and the player is human and is dead, don't advance the player,
                                 # we want them to get the defeat screen
                                 if player.isAlive() or not player.isHuman():
                                     hasReachedCurrentPlayer = False
@@ -457,8 +457,8 @@ class Game:
                                             break
                             else:
                                 # KWG: This doesn't actually do anything other than print to the debug log
-                                print("Because the diplo screen is blocking, I am bumping this up for player \("
-                                      "player.leader)")
+                                print(f"Because the diplomatic screen is blocking, I am bumping this up for player "
+                                      f"{player.leader}")
                                 # changeNumGameTurnActive(1, std::string("Because the diplo screen is blocking I am
                                 # bumping this up for player ") + getName());
 

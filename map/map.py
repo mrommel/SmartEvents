@@ -325,6 +325,9 @@ class Tile:
 	def setRoute(self, route: RouteType):
 		self._route = route
 
+	def improvement(self):
+		return self._improvement
+
 	def setImprovement(self, improvement: ImprovementType):
 		self._improvement = improvement
 

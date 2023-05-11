@@ -8,6 +8,7 @@ from game.flavors import Flavors, FlavorType
 from game.governments import PlayerGovernment
 from game.notifications import Notifications, NotificationType, Notification
 from game.player_mechanics import Techs, Civics
+from game.religions import PantheonType
 from game.types import EraType
 from game.unit_types import UnitMissionType
 from game.wonders import WonderType
@@ -37,6 +38,14 @@ class PlayerTradeRoutes:
 
     def tradeRoutesStartingAt(self, city) -> [TradeRoute]:
         return []
+
+
+class PlayerReligion:
+    def __init__(self, player):
+        self.player = player
+
+    def pantheon(self) -> PantheonType:
+        return PantheonType.none
 
 
 class Player:
@@ -79,6 +88,9 @@ class Player:
         self.conquerorValue = None
 
         self.government = None
+        self.religion = None
+        self.tradeRoutes = None
+        
         self.currentEraVal: EraType = EraType.ancient
         self.currentAgeVal: AgeType = AgeType.normal
         self.currentDedicationsVal: [DedicationType] = []
@@ -88,6 +100,7 @@ class Player:
     def initialize(self):
         self.diplomacyAI = DiplomaticAI(player=self)
         self.government = PlayerGovernment(player=self)
+        self.religion = PlayerReligion(player=self)
         self.tradeRoutes = PlayerTradeRoutes(player=self)
 
     def doTurn(self, simulation):
