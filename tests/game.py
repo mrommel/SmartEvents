@@ -101,15 +101,12 @@ class TestCity(unittest.TestCase):
 		playerTrajan = Player(leader=LeaderType.trajan, human=False)
 		playerTrajan.initialize()
 
-		city = City(name='Berlin', isCapital=True, location=HexPoint(1, 1), player=playerTrajan)
-		city.initialize(simulation)
-
 		playerTrajan.government.setGovernment(governmentType=GovernmentType.autocracy, simulation=simulation)
+		playerTrajan.techs.discover(tech=TechType.mining, simulation=simulation)
 
-		try:
-			playerTrajan.techs.discover(tech=TechType.mining, simulation=simulation)
-		except Exception as e:
-			print(f'cannot discover mining: {e}')
+		city = City(name='Berlin', location=HexPoint(1, 1), isCapital=True, player=playerTrajan)
+		city.initialize(simulation)
+		city.setPopulation(2, reassignCitizen=False, simulation=simulation)
 
 		# WHEN
 		foodYield = city.foodPerTurn(simulation=simulation)

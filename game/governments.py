@@ -16,6 +16,7 @@ class GovernmentType(ExtendedEnum):
 
 	chiefdom = 'chiefdom'
 	autocracy = 'chiefdom'
+	monarchy = 'autocracy'
 
 	def name(self) -> str:
 		return self._data().name

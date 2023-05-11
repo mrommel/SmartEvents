@@ -1,4 +1,5 @@
 import random
+from hmac import new
 from typing import Optional
 
 from game.ai.cities import CityStrategyAI
@@ -32,15 +33,70 @@ class CityDistricts:
 class CityBuildings:
 	def __init__(self, city):
 		self.city = city
+		self._buildings = []
+
+		self._defenseValue = 0
+		self._housingValue = 0.0
 
 	def build(self, building: BuildingType):
-		pass
+		if building in self._buildings:
+			raise Exception(f'Error: {building} already build in {self.city.name}')
+
+		self._updateDefense()
+		self._updateHousing()
+
+		self._buildings.append(building)
+
+		# update current health when walls are built
+		if building == BuildingType.ancientWalls or building == BuildingType.medievalWalls or building == BuildingType.renaissanceWalls:
+			self.city.addHealthPoints(100)
 
 	def numberOfBuildingsOf(self, buildingCategory: BuildingCategoryType) -> int:
-		return 0
+		num: int = 0
+
+		for buildingType in list(BuildingType):
+			if self.hasBuilding(buildingType) and buildingType.categoryType() == buildingCategory:
+				num += 1
+
+		return num
 
 	def hasBuilding(self, building: BuildingType) -> bool:
-		return False
+		return building in self._buildings
+
+	def defense(self):
+		return self._defenseValue
+
+	def _updateDefense(self):
+		defenseValue = 0
+		
+		for building in list(BuildingType):
+			if self.hasBuilding(building):
+				defenseValue += building.defense()
+
+		self._defenseValue = defenseValue
+
+	def housing(self) -> int:
+		return self._housingValue
+
+	def _updateHousing(self):
+		housingValue = 0.0
+
+		for building in list(BuildingType):
+			if self.hasBuilding(building):
+				housingValue += building.yields().housing
+
+		# +1 Housing per level of Walls.
+		if self.city.player.government.currentGovernment() == GovernmentType.monarchy:
+			if self.hasBuilding(BuildingType.ancientWalls):
+				housingValue += 1.0
+
+			if self.hasBuilding(BuildingType.medievalWalls):
+				housingValue += 2.0
+
+			if self.hasBuilding(BuildingType.renaissanceWalls):
+				housingValue += 3.0
+
+		self._housingValue = housingValue
 
 
 class CityWonders:
@@ -368,6 +424,9 @@ class CityCitizens:
 		"""Is this City avoiding growth?"""
 		return self._avoidGrowthValue
 
+	def forceWorkingPlotAt(self, worstPlotPoint, force, simulation):
+		pass
+
 
 class CityGreatWorks:
 	def __init__(self, city):
@@ -449,7 +508,7 @@ class City:
 		self.location = location
 		self.capitalValue = isCapital
 		self.everCapitalValue = isCapital
-		self.populationValue = 0
+		self._populationValue = 0
 		self.gameTurnFoundedValue = 0
 		self.foodBasketValue = 1.0
 
@@ -504,10 +563,7 @@ class City:
 		self.buildDistrict(district=DistrictType.cityCenter, location=self.location, simulation=simulation)
 
 		if self.capitalValue:
-			try:
-				self.buildings.build(building=BuildingType.palace)
-			except:
-				print("cant build palace")
+			self.buildings.build(building=BuildingType.palace)
 
 		self.cityStrategy = CityStrategyAI(city=self)
 		self.cityCitizens = CityCitizens(city=self)
@@ -588,7 +644,7 @@ class City:
 		if self.capitalValue:
 			self.player.setCapitalCity(city=self, simulation=simulation)
 
-		self.setPopulation(value=1, simulation=simulation)
+		self.setPopulation(newPopulation=1, reassignCitizen=True, simulation=simulation)
 
 	def featureProduction(self) -> float:
 		return self.featureProductionValue
@@ -652,8 +708,31 @@ class City:
 		except Exception as e:
 			raise Exception(f'cant build district: already build => {e}')
 
-	def setPopulation(self, value, simulation):
-		pass
+	def population(self) -> int:
+		return int(self._populationValue)
+
+	def setPopulation(self, newPopulation: int, reassignCitizen: bool, simulation):
+		"""Be very careful with setting bReassignPop to false.  This assumes that the caller
+		is manually adjusting the worker assignments *and* handling the setting of
+		the CityCitizens unassigned worker value."""
+		oldPopulation = self.population()
+		populationChange = newPopulation - oldPopulation
+
+		if oldPopulation != newPopulation:
+			# If we are reducing population, remove the workers first
+			if reassignCitizen and populationChange < 0:
+				# Need to Remove Citizens
+				for _ in range(-populationChange):
+					self.cityCitizens.doRemoveWorstCitizen(simulation)
+
+				# Fixup the unassigned workers
+				unassignedWorkers = self.cityCitizens.numberOfUnassignedCitizens()
+				self.cityCitizens.changeNumberOfUnassignedCitizensBy(max(populationChange, -unassignedWorkers))
+
+			if populationChange > 0:
+				self.cityCitizens.changeNumberOfUnassignedCitizensBy(populationChange)
+
+		self._populationValue = float(newPopulation)
 
 	def doUpdateCheapestPlotInfluence(self, simulation):
 		pass
@@ -902,7 +981,7 @@ class City:
 	def loyaltyState(self) -> LoyaltyState:
 		return LoyaltyState.loyal
 
-	def _foodFromTiles(self, simulation):
+	def _foodFromTiles(self, simulation) -> float:
 		hasHueyTeocalli = self.player.hasWonder(WonderType.hueyTeocalli, simulation)
 		hasStBasilsCathedral = self.player.hasWonder(WonderType.stBasilsCathedral, simulation)
 
@@ -952,11 +1031,71 @@ class City:
 
 						foodValue += 1.0
 
-					# collectivism - Farms +1 Food. All cities +2 [Housing] Housing. +100% Industrial Zone adjacency bonuses.
-					# BUT: [GreatPerson] Great People Points earned 50% slower.
+					# collectivism - Farms +1 Food. All cities +2 Housing. +100% Industrial Zone adjacency bonuses.
+					# BUT: Great People Points earned 50% slower.
 					if adjacentTile.improvement() == ImprovementType.farm and \
 						self.player.government.hasCard(PolicyCardType.collectivism):
 
 						foodValue += 1.0
 
-			return foodValue
+		return foodValue
+
+	def _foodFromGovernmentType(self) -> float:
+		foodFromGovernmentValue: float = 0.0
+
+		# yields from government
+		if self.player.government is not None:
+			# https://civilization.fandom.com/wiki/Autocracy_(Civ6)
+			# +1 to all yields for each government building and Palace in a city.
+			if self.player.government.currentGovernment() == GovernmentType.autocracy:
+				foodFromGovernmentValue += float(self.buildings.numberOfBuildingsOf(BuildingCategoryType.government))
+
+		return foodFromGovernmentValue
+
+	def _foodFromBuildings(self, simulation) -> float:
+		foodFromBuildings: float = 0.0
+
+		# gather food from builds
+		for building in list(BuildingType):
+			if self.buildings.hasBuilding(building):
+				foodFromBuildings += building.yields().food
+
+		# handle special building rules
+		if self.buildings.hasBuilding(BuildingType.waterMill):
+			foodFromBuildings += self.amountOfNearbyResource(ResourceType.rice, simulation)
+			foodFromBuildings += self.amountOfNearbyResource(ResourceType.wheat, simulation)
+
+		if self.buildings.hasBuilding(BuildingType.lighthouse):
+			foodFromBuildings += self.amountOfNearbyTerrain(TerrainType.shore, simulation)
+			# fixme: lake feature
+
+		return foodFromBuildings
+
+	def _foodFromWonders(self, simulation) -> float:
+		return 0.0
+
+	def _foodFromTradeRoutes(self, simulation) -> float:
+		return 0.0
+
+	def _foodFromGovernors(self, simulation) -> float:
+		return 0.0
+
+	def amountOfNearbyResource(self, resource: ResourceType, simulation) -> float:
+		resourceValue = 0.0
+
+		for neighbor in self.location.areaWithRadius(2):
+			neighborTile = simulation.tileAt(neighbor)
+			if neighborTile.resourceFor(self.player) == resource:
+				resourceValue += 1.0
+
+		return resourceValue
+
+	def amountOfNearbyTerrain(self, terrain: TerrainType, simulation) -> float:
+		terrainValue = 0.0
+
+		for neighbor in self.location.areaWithRadius(2):
+			neighborTile = simulation.tileAt(neighbor)
+			if neighborTile.terrain() == terrain:
+				terrainValue += 1.0
+
+		return terrainValue

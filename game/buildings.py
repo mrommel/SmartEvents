@@ -85,18 +85,18 @@ class BuildingType(ExtendedEnum):
 	# ancestralHall
 	# audienceChamber
 	# warlordsThrone
-	#
+
 	# medieval
-	# medievalWalls
+	medievalWalls = 'medievalWalls'
 	# workshop
 	# armory
 	# foreignMinistry
 	# grandMastersChapel
 	# intelligenceAgency
 	# university
-	#
+
 	# renaissance
-	# renaissanceWalls
+	renaissanceWalls = 'renaissanceWalls'
 	# shipyard
 	# bank
 	# artMuseum
@@ -138,8 +138,14 @@ class BuildingType(ExtendedEnum):
 	def name(self) -> str:
 		return self._data().name
 
+	def categoryType(self) -> BuildingCategoryType:
+		return self._data().category
+
 	def requiredCivic(self) -> CivicType:
 		return self._data().requiredCivic
+
+	def yields(self) -> Yields:
+		return self._data().yields
 
 	def _data(self) -> BuildingTypeData:
 		# default
