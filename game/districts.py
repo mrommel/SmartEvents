@@ -291,6 +291,54 @@ class DistrictType(ExtendedEnum):
 				oncePerCivilization=True
 			)
 
+		elif self == DistrictType.aqueduct:
+			# https://civilization.fandom.com/wiki/Aqueduct_(Civ6)
+			return DistrictTypeData(
+				name="TXT_KEY_DISTRICT_AQUEDUCT_TITLE",
+				specialty=False,
+				effects=[
+					"TXT_KEY_DISTRICT_AQUEDUCT_EFFECT1",
+					"TXT_KEY_DISTRICT_AQUEDUCT_EFFECT2",
+					"TXT_KEY_DISTRICT_AQUEDUCT_EFFECT3",
+					"TXT_KEY_DISTRICT_AQUEDUCT_EFFECT4",
+					"TXT_KEY_DISTRICT_AQUEDUCT_EFFECT5",
+					"TXT_KEY_DISTRICT_AQUEDUCT_EFFECT6"
+				],
+				productionCost=36,
+				maintenanceCost=0,
+				requiredTech=TechType.engineering,
+				requiredCivic=None,
+				domesticTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
+				foreignTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
+				flavours=[
+					Flavor(FlavorType.tileImprovement, value=7),
+					Flavor(FlavorType.growth, value=2)
+				]
+			)
+		elif self == DistrictType.industrialZone:
+			# https://civilization.fandom.com/wiki/Industrial_Zone_(Civ6)
+			return DistrictTypeData(
+				name="TXT_KEY_DISTRICT_INDUSTRIAL_ZONE_TITLE",
+				specialty=True,
+				effects=[
+					"TXT_KEY_DISTRICT_INDUSTRIAL_ZONE_EFFECT1",
+					"TXT_KEY_DISTRICT_INDUSTRIAL_ZONE_EFFECT2",
+					"TXT_KEY_DISTRICT_INDUSTRIAL_ZONE_EFFECT3",
+					"TXT_KEY_DISTRICT_INDUSTRIAL_ZONE_EFFECT4",
+					"TXT_KEY_DISTRICT_INDUSTRIAL_ZONE_EFFECT5",
+					"TXT_KEY_DISTRICT_INDUSTRIAL_ZONE_EFFECT6"
+				],
+				productionCost=54,
+				maintenanceCost=0,
+				requiredTech=TechType.apprenticeship,
+				requiredCivic=None,
+				domesticTradeYields=Yields(food=0.0, production=1.0, gold=0.0),
+				foreignTradeYields=Yields(food=0.0, production=1.0, gold=0.0),
+				flavours=[
+					Flavor(FlavorType.production, value=9)
+				]
+			)
+
 		raise AttributeError(f'cant get data for district {self}')
 
 	def isSpecialty(self):

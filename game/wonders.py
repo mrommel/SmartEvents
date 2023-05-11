@@ -477,4 +477,45 @@ class WonderType(ExtendedEnum):
 				]
 			)
 
+		# ####
+		elif self == WonderType.hueyTeocalli:
+			# https://civilization.fandom.com/wiki/Huey_Teocalli_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_HUEY_TEOCALLI_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_HUEY_TEOCALLI_EFFECT1",
+					"TXT_KEY_WONDER_HUEY_TEOCALLI_EFFECT2"
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=TechType.militaryTactics,
+				requiredCivic=None,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[],
+				flavours=[
+					Flavor(FlavorType.growth, value=7)
+				]
+			)
+		elif self == WonderType.stBasilsCathedral:
+			# https://civilization.fandom.com/wiki/St._Basil%27s_Cathedral_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_ST_BASILS_CATHEDRAL_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_ST_BASILS_CATHEDRAL_EFFECT1",
+					"TXT_KEY_WONDER_ST_BASILS_CATHEDRAL_EFFECT2",  #
+					"TXT_KEY_WONDER_ST_BASILS_CATHEDRAL_EFFECT3"  #
+				],
+				era=EraType.renaissance,
+				productionCost=920,
+				requiredTech=None,
+				requiredCivic=CivicType.reformedChurch,
+				amenities=0.0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[GreatWorkSlotType.relic, GreatWorkSlotType.relic, GreatWorkSlotType.relic],
+				flavours=[
+					Flavor(FlavorType.religion, value=10)
+				]
+			)
+
 		raise AttributeError(f'cant get data for wonder {self}')

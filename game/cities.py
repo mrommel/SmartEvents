@@ -8,6 +8,7 @@ from game.civilizations import LeaderWeightList, CivilizationAbility, LeaderAbil
 	WeightedCivilizationList, CivilizationType
 from game.districts import DistrictType
 from game.governments import GovernmentType
+from game.governors import GovernorType, GovernorTitle, Governor
 from game.loyalties import LoyaltyState
 from game.policy_cards import PolicyCardType
 from game.religions import PantheonType
@@ -737,11 +738,16 @@ class City:
 	def doUpdateCheapestPlotInfluence(self, simulation):
 		pass
 
-	def doAcquirePlot(self, neighborPoint, simulation):
+	def doAcquirePlot(self, point: HexPoint, simulation):
 		pass
 
 	def updateEurekas(self, simulation):
 		pass
+
+	def governor(self) -> Optional[Governor]:
+		return None
+
+	### yields ###
 
 	def foodPerTurn(self, simulation) -> float:
 		foodPerTurn: YieldValues = YieldValues(value=0.0, percentage=1.0)
@@ -774,7 +780,20 @@ class City:
 		return productionPerTurnValue.calc()
 
 	def goldPerTurn(self, simulation) -> float:
-		return 0.0
+		goldPerTurn: YieldValues = YieldValues(value=0.0, percentage=1.0)
+
+		goldPerTurn += YieldValues(value=self._goldFromTiles(simulation))
+		goldPerTurn += self._goldFromGovernmentType()
+		goldPerTurn += YieldValues(value=self._goldFromDistricts(simulation))
+		goldPerTurn += YieldValues(value=self._goldFromBuildings())
+		goldPerTurn += YieldValues(value=self._goldFromWonders())
+		goldPerTurn += YieldValues(value=self._goldFromTradeRoutes(simulation))
+		goldPerTurn += YieldValues(value=self._goldFromEnvoys(simulation))
+
+		# cap yields based on loyalty
+		goldPerTurn += YieldValues(value=0.0, percentage=self.loyaltyState().yieldPercentage())
+
+		return goldPerTurn.calc()
 
 	def _productionFromTiles(self, simulation) -> float:
 		hasHueyTeocalli = self.player.hasWonder(WonderType.hueyTeocalli, simulation)
@@ -1099,3 +1118,55 @@ class City:
 				terrainValue += 1.0
 
 		return terrainValue
+
+	def _goldFromTiles(self, simulation):
+		goldValue: float = 0.0
+
+		centerTile = simulation.tileAt(self.location)
+		if centerTile is not None:
+			goldValue += centerTile.yields(self.player, ignoreFeature=False).gold
+
+		for point in self.cityCitizens.workingTileLocations():
+			if self.cityCitizens.isWorkedAt(point):
+				adjacentTile = simulation.tileAt(point)
+				goldValue += adjacentTile.yieldsFor(self.player, ignoreFeature=False).gold
+
+				# +2 Food, +2 Gold, and +1 Production on all Desert tiles for this city(non - Floodplains).
+				if adjacentTile.terrain() == TerrainType.desert and \
+					not adjacentTile.hasFeature(FeatureType.floodplains) and \
+					self.wonders.hasWonder(WonderType.petra):
+
+					goldValue += 2.0
+
+				# Reyna + forestryManagement - This city receives +2 Gold for each unimproved feature.
+				if adjacentTile.hasFeature(FeatureType.forest) and not adjacentTile.hasAnyImprovement():
+					if self.governor() is not None:
+						if self.governor().type() == GovernorType.reyna and self.governor().hasTitle(GovernorTitle.forestryManagement):
+							goldValue = 2.0
+
+		return goldValue
+
+	def _goldFromGovernmentType(self):
+		return 0.0
+
+	def _goldFromDistricts(self, simulation):
+		return 0.0
+
+	def _goldFromBuildings(self) -> float:
+		goldFromBuildings: float = 0.0
+
+		# gather yields from builds
+		for building in list(BuildingType):
+			if self.buildings.hasBuilding(building):
+				goldFromBuildings += building.yields().gold
+
+		return goldFromBuildings
+
+	def _goldFromWonders(self):
+		return 0.0
+
+	def _goldFromTradeRoutes(self, simulation):
+		return 0.0
+
+	def _goldFromEnvoys(self, simulation):
+		return 0.0

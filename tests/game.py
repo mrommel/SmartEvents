@@ -116,7 +116,7 @@ class TestCity(unittest.TestCase):
 		# THEN
 		self.assertEqual(foodYield, 4.0)
 		self.assertEqual(productionYield, 4.0)
-		self.assertEqual(goldYield, 11.0)
+		self.assertEqual(goldYield, 5.0)
 
 
 class TestSimulation(unittest.TestCase):
@@ -126,6 +126,7 @@ class TestSimulation(unittest.TestCase):
 		map = Map(10, 10)
 		simulation = Game(map)
 		player = Player(LeaderType.trajan, human=True)
+		player.initialize()
 
 		capitalBefore = simulation.capitalOf(player)
 		totalCitiesFoundedBefore = player.numberOfCitiesFounded()

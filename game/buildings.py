@@ -709,6 +709,71 @@ class BuildingType(ExtendedEnum):
 					Flavor(FlavorType.religion, 10)
 				]
 			)
+		elif self == BuildingType.medievalWalls:
+			# https://civilization.fandom.com/wiki/Medieval_Walls_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_MEDIEVAL_WALLS_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_MEDIEVAL_WALLS_EFFECT0",
+					"TXT_KEY_BUILDING_MEDIEVAL_WALLS_EFFECT1"  #
+				],
+				category=BuildingCategoryType.defensive,
+				era=EraType.medieval,
+				district=DistrictType.cityCenter,
+				requiredTech=TechType.castles,
+				requiredCivic=None,
+				requiredBuildingsOr=[BuildingType.ancientWalls],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[],
+				productionCost=225,
+				goldCost=-1,
+				faithCost=-1,
+				maintenanceCost=0,
+				yields=Yields(food=0, production=0, gold=0, science=0, culture=0, faith=0, housing=0),
+				defense=100,
+				slots=[],
+				specialSlots=None,
+				flavors=[
+					Flavor(FlavorType.militaryTraining, value=7),
+					Flavor(FlavorType.offense, value=5),
+					Flavor(FlavorType.defense, value=6),
+					Flavor(FlavorType.production, value=2),
+					Flavor(FlavorType.naval, value=2),
+					Flavor(FlavorType.tileImprovement, value=2)
+				]
+			)
+		elif self == BuildingType.renaissanceWalls:
+			# https://civilization.fandom.com/wiki/Renaissance_Walls_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_RENAISSANCE_WALLS_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_RENAISSANCE_WALLS_EFFECT0"
+				],
+				category=BuildingCategoryType.defensive,
+				era=EraType.renaissance,
+				district=DistrictType.cityCenter,
+				requiredTech=TechType.siegeTactics,
+				requiredCivic=None,
+				requiredBuildingsOr=[BuildingType.medievalWalls],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[],
+				productionCost=305,
+				goldCost=-1,
+				faithCost=-1,
+				maintenanceCost=0,
+				yields=Yields(food=0, production=0, gold=0, science=0, culture=0, faith=0, housing=0),
+				defense=100,
+				slots=[],
+				specialSlots=None,
+				flavors=[
+					Flavor(FlavorType.militaryTraining, value=7),
+					Flavor(FlavorType.offense, value=5),
+					Flavor(FlavorType.defense, value=7),
+					Flavor(FlavorType.production, value=2),
+					Flavor(FlavorType.naval, value=2),
+					Flavor(FlavorType.tileImprovement, value=2)
+				]
+			)
 
 		raise AttributeError(f'cant get data for building {self}')
 

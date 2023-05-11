@@ -35,6 +35,11 @@ class GovernmentType(ExtendedEnum):
 				name='KEY_CHIEF',
 				requiredCivic=None
 			)
+		elif self == GovernmentType.monarchy:
+			return GovernmentTypeData(
+				name='KEY_MONARCHY',
+				requiredCivic=None
+			)
 		raise AttributeError(f'cant get data for government {self}')
 
 

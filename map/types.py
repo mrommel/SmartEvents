@@ -1,3 +1,4 @@
+from builtins import float
 from enum import Enum
 
 from game.types import TechType
@@ -1000,8 +1001,10 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=True,
 				place_on_features=[],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra,
-				                   TerrainType.snow]
+				place_on_terrains=[
+					TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra, TerrainType.snow
+				],
+				yields=Yields(food=0.0, production=0.0, gold=0.0)
 			)
 		elif self == ResourceType.shipwreck:
 			return ResourceTypeData(
@@ -1016,7 +1019,8 @@ class ResourceType(ExtendedEnum):
 				place_on_flatlands=False,
 				place_on_features=[],
 				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.shore, TerrainType.ocean]
+				place_on_terrains=[TerrainType.shore, TerrainType.ocean],
+				yields=Yields(food=0.0, production=0.0, gold=0.0)
 			)
 
 		raise AttributeError(f'cant determine data of {self}')
