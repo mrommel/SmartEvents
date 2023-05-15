@@ -2,11 +2,16 @@ from utils.base import ExtendedEnum
 
 
 class SpecialistType(ExtendedEnum):
+	none = 'none'
+
+	citizen = 'citizen'
+
 	merchant = 'merchant'
 	captain = 'captain'
 	artist = 'artist'
 	priest = 'priest'
 	commander = 'commander'
+	engineer = 'engineer'
 
 
 class SpecialistSlots:

@@ -6,3 +6,5 @@ class GreatWorkSlotType(ExtendedEnum):
 
 	written = 'written'
 	relic = 'relic'
+	artwork = 'artwork'
+	artifact = 'artifact'

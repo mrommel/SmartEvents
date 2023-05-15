@@ -10,7 +10,7 @@ from utils.base import ExtendedEnum
 class WonderTypeData:
 	def __init__(self, name: str, effects: [str], era: EraType, productionCost: int, requiredTech: Optional[TechType],
 	             requiredCivic: Optional[CivicType], amenities: float, yields: Yields, slots: [GreatWorkSlotType],
-	             flavours: [Flavor]):
+	             flavors: [Flavor]):
 		self.name = name
 		self.effects = effects
 		self.era = era
@@ -20,7 +20,7 @@ class WonderTypeData:
 		self.amenities = amenities
 		self.yields = yields
 		self.slots = slots
-		self.flavours = flavours
+		self.flavors = flavors
 
 
 class WonderType(ExtendedEnum):
@@ -53,6 +53,7 @@ class WonderType(ExtendedEnum):
 	# ???
 	hueyTeocalli = 'hueyTeocalli'
 	stBasilsCathedral = 'stBasilsCathedral'
+	angkorWat = 'angkorWat'
 
 	def name(self) -> str:
 		return self._data().name
@@ -73,7 +74,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0),
 				slots=[],
-				flavours=[]
+				flavors=[]
 			)
 
 		# ancient
@@ -95,7 +96,7 @@ class WonderType(ExtendedEnum):
 				amenities=1.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0, housing=3.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.wonder, value=15),
 					Flavor(FlavorType.religion, value=10)
 				]
@@ -116,7 +117,7 @@ class WonderType(ExtendedEnum):
 				amenities=0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0, science=2.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.science, value=7),
 					Flavor(FlavorType.production, value=3)
 				]
@@ -137,7 +138,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0, culture=2.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.wonder, value=25),
 					Flavor(FlavorType.culture, value=20)
 				]
@@ -157,7 +158,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0, housing=2.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.wonder, value=20),
 					Flavor(FlavorType.growth, value=20)
 				]
@@ -179,7 +180,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0, culture=1.0, faith=1.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.wonder, value=20),
 					Flavor(FlavorType.culture, value=15)
 				]
@@ -199,7 +200,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0, faith=2.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.wonder, value=25),
 					Flavor(FlavorType.culture, value=20)
 				]
@@ -220,7 +221,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=4.0, production=0.0, gold=0.0, housing=3.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.wonder, value=20),
 					Flavor(FlavorType.growth, value=10)
 				]
@@ -243,7 +244,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=3.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.greatPeople, value=20),
 					Flavor(FlavorType.gold, value=15),
 					Flavor(FlavorType.navalGrowth, value=10),
@@ -268,7 +269,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0, science=2.0),
 				slots=[GreatWorkSlotType.written, GreatWorkSlotType.written],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.science, value=20),
 					Flavor(FlavorType.greatPeople, value=15)
 				]
@@ -288,7 +289,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0),
 				slots=[GreatWorkSlotType.any, GreatWorkSlotType.any],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.diplomacy, value=20),
 					Flavor(FlavorType.culture, value=7)
 				]
@@ -307,7 +308,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0, # is handled differently !
 				yields=Yields(food=0.0, production=0.0, gold=0.0, culture=2.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.amenities, value=20),
 					Flavor(FlavorType.culture, value=10)
 				]
@@ -329,7 +330,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=3.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.gold, value=12),
 					Flavor(FlavorType.naval, value=14),
 					Flavor(FlavorType.navalRecon, value=3)
@@ -350,7 +351,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.religion, value=12),
 					Flavor(FlavorType.tileImprovement, value=7)
 				]
@@ -370,7 +371,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0, science=1.0, faith=1.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.tileImprovement, value=7),
 					Flavor(FlavorType.science, value=5),
 					Flavor(FlavorType.religion, value=5),
@@ -392,7 +393,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0, faith=4.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.religion, value=20),
 					Flavor(FlavorType.greatPeople, value=7)
 				]
@@ -411,7 +412,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=2.0, production=1.0, gold=2.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.tileImprovement, value=10),
 					Flavor(FlavorType.growth, value=12),
 					Flavor(FlavorType.gold, value=10)
@@ -432,7 +433,7 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.greatPeople, value=10),
 					Flavor(FlavorType.militaryTraining, value=7)
 				]
@@ -452,7 +453,7 @@ class WonderType(ExtendedEnum):
 				amenities=0,
 				yields=Yields(food=0.0, production=0.0, gold=4.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.production, value=7)
 				]
 			)
@@ -472,7 +473,7 @@ class WonderType(ExtendedEnum):
 				amenities=0,
 				yields=Yields(food=0.0, production=0.0, gold=3.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.gold, value=7)
 				]
 			)
@@ -493,7 +494,7 @@ class WonderType(ExtendedEnum):
 				amenities=0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0),
 				slots=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.growth, value=7)
 				]
 			)
@@ -513,8 +514,29 @@ class WonderType(ExtendedEnum):
 				amenities=0.0,
 				yields=Yields(food=0.0, production=0.0, gold=0.0),
 				slots=[GreatWorkSlotType.relic, GreatWorkSlotType.relic, GreatWorkSlotType.relic],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.religion, value=10)
+				]
+			)
+		elif self == WonderType.angkorWat:
+			# https://civilization.fandom.com/wiki/Angkor_Wat_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_ANGKOR_WAT_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_ANGKOR_WAT_EFFECT1",
+					"TXT_KEY_WONDER_ANGKOR_WAT_EFFECT2",
+					"TXT_KEY_WONDER_ANGKOR_WAT_EFFECT3"
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=None,
+				requiredCivic=CivicType.medievalFaires,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0, faith=2),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.growth, value=10),
+					Flavor(FlavorType.religion, value=2)
 				]
 			)
 

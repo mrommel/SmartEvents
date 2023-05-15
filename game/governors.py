@@ -2,6 +2,7 @@ from utils.base import ExtendedEnum
 
 
 class GovernorType(ExtendedEnum):
+	liang = 'liang'
 	reyna = 'reyna'
 
 

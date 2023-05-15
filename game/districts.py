@@ -40,6 +40,7 @@ class DistrictType(ExtendedEnum):
 	governmentPlaza = 'governmentPlaza'
 	aqueduct = 'aqueduct'
 	industrialZone = 'industrialZone'
+	theatherSquare = 'theatherSquare'
 
 	def name(self) -> str:
 		return self._data().name
@@ -336,6 +337,33 @@ class DistrictType(ExtendedEnum):
 				foreignTradeYields=Yields(food=0.0, production=1.0, gold=0.0),
 				flavours=[
 					Flavor(FlavorType.production, value=9)
+				]
+			)
+		elif self == DistrictType.theatherSquare:
+			# https://civilization.fandom.com/wiki/Theater_Square_(Civ6)
+			return DistrictTypeData(
+				name="TXT_KEY_DISTRICT_THEATER_SQUARE_TITLE",
+				specialty=True,
+				effects=[
+					"TXT_KEY_DISTRICT_THEATER_SQUARE_EFFECT1",
+					"TXT_KEY_DISTRICT_THEATER_SQUARE_EFFECT2",
+					"TXT_KEY_DISTRICT_THEATER_SQUARE_EFFECT3",
+					"TXT_KEY_DISTRICT_THEATER_SQUARE_EFFECT4",
+					"TXT_KEY_DISTRICT_THEATER_SQUARE_EFFECT5",
+					"TXT_KEY_DISTRICT_THEATER_SQUARE_EFFECT6",
+					"TXT_KEY_DISTRICT_THEATER_SQUARE_EFFECT7",
+					"TXT_KEY_DISTRICT_THEATER_SQUARE_EFFECT8",
+					"TXT_KEY_DISTRICT_THEATER_SQUARE_EFFECT9"
+				],
+				productionCost=54,
+				maintenanceCost=1,
+				requiredTech=None,
+				requiredCivic=CivicType.dramaAndPoetry,
+				domesticTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
+				foreignTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
+				flavours=[
+					Flavor(FlavorType.culture, value=6),
+					Flavor(FlavorType.greatPeople, value=4)
 				]
 			)
 

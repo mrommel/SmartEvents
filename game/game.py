@@ -172,8 +172,11 @@ class Game:
     def tileAt(self, location) -> Tile:
         return self._map.tileAt(location)
 
-    def valid(self, point: HexPoint):
+    def valid(self, point: HexPoint) -> bool:
         return self._map.valid(point)
+
+    def isCoastalAt(self, location) -> bool:
+        return self._map.isCoastalAt(location)
 
     def tutorial(self):
         return None

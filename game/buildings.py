@@ -81,27 +81,26 @@ class BuildingType(ExtendedEnum):
 	arena = 'arena'
 	market = 'market'
 	temple = 'temple'
-
-	# ancestralHall
-	# audienceChamber
-	# warlordsThrone
+	ancestralHall = 'ancestralHall'
+	audienceChamber = 'audienceChamber'
+	warlordsThrone = 'warlordsThrone'
 
 	# medieval
 	medievalWalls = 'medievalWalls'
-	# workshop
-	# armory
-	# foreignMinistry
-	# grandMastersChapel
-	# intelligenceAgency
-	# university
+	workshop = 'workshop'
+	armory = 'armory'
+	foreignMinistry = 'foreignMinistry'
+	grandMastersChapel = 'grandMastersChapel'
+	intelligenceAgency = 'intelligenceAgency'
+	university = 'university'
 
 	# renaissance
 	renaissanceWalls = 'renaissanceWalls'
-	# shipyard
-	# bank
-	# artMuseum
-	# archaeologicalMuseum
-	#
+	shipyard = 'shipyard'
+	bank = 'bank'
+	artMuseum = 'artMuseum'
+	archaeologicalMuseum = 'archaeologicalMuseum'
+
 	# industrial
 	# aquarium
 	# coalPowerPlant
@@ -111,7 +110,7 @@ class BuildingType(ExtendedEnum):
 	# sewer
 	# stockExchange
 	# zoo
-	#
+
 	# modern
 	# broadcastCenter
 	# foodMarket
@@ -124,14 +123,14 @@ class BuildingType(ExtendedEnum):
 	# seaport
 	# shoppingMall
 	# warDepartment
-	#
+
 	# atomic
 	# airport
 	# aquaticsCenter
 	# floodBarrier
 	# nuclearPowerPlant
 	# stadium
-	#
+
 	# information
 	# --
 
@@ -677,6 +676,116 @@ class BuildingType(ExtendedEnum):
 					Flavor(FlavorType.production, 1)
 				]
 			)
+		elif self == BuildingType.ancestralHall:
+			# https://civilization.fandom.com/wiki/Ancestral_Hall_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_ANCESTRAL_HALL_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_ANCESTRAL_HALL_EFFECT1",  #
+					"TXT_KEY_BUILDING_ANCESTRAL_HALL_EFFECT2",  #
+					"TXT_KEY_BUILDING_ANCESTRAL_HALL_EFFECT3"  #
+				],
+				category=BuildingCategoryType.government,
+				era=EraType.classical,
+				district=DistrictType.governmentPlaza,
+				requiredTech=None,
+				requiredCivic=None,
+				requiredBuildingsOr=[],
+				requiredGovernmentsOr=[
+					GovernmentType.autocracy,
+					GovernmentType.classicalRepublic,
+					GovernmentType.oligarchy
+				],
+				obsoleteBuildingsOr=[
+					BuildingType.audienceChamber,
+					BuildingType.warlordsThrone
+				],
+				productionCost=150,
+				goldCost=150,
+				faithCost=-1,
+				maintenanceCost=1,
+				yields=Yields(food=0, production=0, gold=0),
+				defense=0,
+				slots=[],
+				specialSlots=None,
+				flavors=[
+					Flavor(FlavorType.growth, value=2),
+					Flavor(FlavorType.tileImprovement, value=4)
+				]
+			)
+		elif self == BuildingType.audienceChamber:
+			# https://civilization.fandom.com/wiki/Audience_Chamber_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_AUDIENCE_CHAMBER_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_AUDIENCE_CHAMBER_EFFECT1",  #
+					"TXT_KEY_BUILDING_AUDIENCE_CHAMBER_EFFECT2",  #
+					"TXT_KEY_BUILDING_AUDIENCE_CHAMBER_EFFECT3"  #
+				],
+				category=BuildingCategoryType.government,
+				era=EraType.classical,
+				district=DistrictType.governmentPlaza,
+				requiredTech=None,
+				requiredCivic=None,
+				requiredBuildingsOr=[],
+				requiredGovernmentsOr=[
+					GovernmentType.autocracy,
+					GovernmentType.classicalRepublic,
+					GovernmentType.oligarchy
+				],
+				obsoleteBuildingsOr=[
+					BuildingType.ancestralHall,
+					BuildingType.warlordsThrone
+				],
+				productionCost=150,
+				goldCost=150,
+				faithCost=-1,
+				maintenanceCost=1,
+				yields=Yields(food=0, production=0, gold=0),
+				defense=0,
+				slots=[],
+				specialSlots=None,
+				flavors=[
+					Flavor(FlavorType.growth, value=4),
+					Flavor(FlavorType.amenities, value=2)
+				]
+			)
+		elif self == BuildingType.warlordsThrone:
+			# https://civilization.fandom.com/wiki/Warlord%27s_Throne_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_WARLORDS_THRONE_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_WARLORDS_THRONE_EFFECT1", #
+				    "TXT_KEY_BUILDING_WARLORDS_THRONE_EFFECT2" #
+				],
+				category=BuildingCategoryType.government,
+				era=EraType.classical,
+				district=DistrictType.governmentPlaza,
+				requiredTech=None,
+				requiredCivic=None,
+				requiredBuildingsOr=[],
+				requiredGovernmentsOr=[
+					GovernmentType.autocracy,
+					GovernmentType.classicalRepublic,
+					GovernmentType.oligarchy
+				],
+				obsoleteBuildingsOr=[
+					BuildingType.ancestralHall,
+					BuildingType.audienceChamber
+				],
+				productionCost=150,
+				goldCost=150,
+				faithCost=-1,
+				maintenanceCost=1,
+				yields=Yields(food=0, production=0, gold=0),
+				defense=0,
+				slots=[],
+				specialSlots=None,
+				flavors=[
+					Flavor(FlavorType.production, value=3),
+					Flavor(FlavorType.offense, value=2)
+				]
+			)
 		elif self == BuildingType.temple:
 			# https://civilization.fandom.com/wiki/Temple_(Civ6)
 			return BuildingTypeData(
@@ -709,6 +818,8 @@ class BuildingType(ExtendedEnum):
 					Flavor(FlavorType.religion, 10)
 				]
 			)
+
+		# medieval
 		elif self == BuildingType.medievalWalls:
 			# https://civilization.fandom.com/wiki/Medieval_Walls_(Civ6)
 			return BuildingTypeData(
@@ -742,6 +853,202 @@ class BuildingType(ExtendedEnum):
 					Flavor(FlavorType.tileImprovement, value=2)
 				]
 			)
+		elif self == BuildingType.workshop:
+			# https://civilization.fandom.com/wiki/Workshop_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_WORKSHOP_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_WORKSHOP_EFFECT0",
+					"TXT_KEY_BUILDING_WORKSHOP_EFFECT1",
+					"TXT_KEY_BUILDING_WORKSHOP_EFFECT2"
+				],
+				category=BuildingCategoryType.production,
+				era=EraType.medieval,
+				district=DistrictType.industrialZone,
+				requiredTech=TechType.apprenticeship,
+				requiredCivic=None,
+				requiredBuildingsOr=[],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[],
+				productionCost=195,
+				goldCost=195,
+				faithCost=-1,
+				maintenanceCost=1,
+				yields=Yields(food=0, production=2, gold=0, science=0, culture=0, faith=0, housing=0),
+				defense=0,
+				slots=[],
+				specialSlots=SpecialistSlots(SpecialistType.engineer, amount=1),
+				flavors=[
+					Flavor(FlavorType.production, value=7)
+				]
+			)
+		elif self == BuildingType.armory:
+			# https://civilization.fandom.com/wiki/Armory_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_ARMORY_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_ARMORY_EFFECT0",
+					"TXT_KEY_BUILDING_ARMORY_EFFECT1",
+					"TXT_KEY_BUILDING_ARMORY_EFFECT2",
+					"TXT_KEY_BUILDING_ARMORY_EFFECT3",
+					"TXT_KEY_BUILDING_ARMORY_EFFECT4",  #
+					"TXT_KEY_BUILDING_ARMORY_EFFECT5"  #
+				],
+				category=BuildingCategoryType.military,
+				era=EraType.medieval,
+				district=DistrictType.encampment,
+				requiredTech=TechType.militaryEngineering,
+				requiredCivic=None,
+				requiredBuildingsOr=[
+					BuildingType.barracks,
+					BuildingType.stable
+				],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[],
+				productionCost=195,
+				goldCost=195,
+				faithCost=-1,
+				maintenanceCost=2,
+				yields=Yields(food=2, production=0, gold=0, science=0, culture=0, faith=0, housing=0),
+				defense=0,
+				slots=[],
+				specialSlots=SpecialistSlots(SpecialistType.commander, amount=1),
+				flavors=[
+					Flavor(FlavorType.cityDefense, value=6),
+					Flavor(FlavorType.greatPeople, value=3),
+					Flavor(FlavorType.offense, value=8),
+					Flavor(FlavorType.defense, value=4),
+					Flavor(FlavorType.wonder, value=1),
+					Flavor(FlavorType.production, value=1)
+				]
+			)
+		elif self == BuildingType.foreignMinistry:
+			#
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_FOREIGN_MINISTRY_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_FOREIGN_MINISTRY_EFFECT1",  #
+					"TXT_KEY_BUILDING_FOREIGN_MINISTRY_EFFECT2",  #
+					"TXT_KEY_BUILDING_FOREIGN_MINISTRY_EFFECT3",  #
+					"TXT_KEY_BUILDING_FOREIGN_MINISTRY_EFFECT4"  #
+				],
+				category=BuildingCategoryType.government,
+				era=EraType.medieval,
+				district=DistrictType.governmentPlaza,
+				requiredTech=None,
+				requiredCivic=None,
+				requiredBuildingsOr=[],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[
+					BuildingType.grandMastersChapel,
+					BuildingType.intelligenceAgency
+				],
+				productionCost=290,
+				goldCost=290,
+				faithCost=-1,
+				maintenanceCost=2,
+				yields=Yields(food=0, production=0, gold=0),
+				defense=0,
+				slots=[],
+				specialSlots=None,
+				flavors=[
+					Flavor(FlavorType.diplomacy, value=6) # Flavor(FlavorType.cityState, value=6),
+				]
+			)
+		elif self == BuildingType.grandMastersChapel:
+			# https://civilization.fandom.com/wiki/Grand_Master%27s_Chapel_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_GRAND_MASTERS_CHAPEL_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_GRAND_MASTERS_CHAPEL_EFFECT1",
+					"TXT_KEY_BUILDING_GRAND_MASTERS_CHAPEL_EFFECT2",
+					"TXT_KEY_BUILDING_GRAND_MASTERS_CHAPEL_EFFECT3",
+					"TXT_KEY_BUILDING_GRAND_MASTERS_CHAPEL_EFFECT4"
+				],
+				category=BuildingCategoryType.government,
+				era=EraType.medieval,
+				district=DistrictType.governmentPlaza,
+				requiredTech=None,
+				requiredCivic=None,
+				requiredBuildingsOr=[],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[
+					BuildingType.foreignMinistry,
+					BuildingType.intelligenceAgency
+				],
+				productionCost=290,
+				goldCost=290,
+				faithCost=-1,
+				maintenanceCost=2,
+				yields=Yields(food=0, production=0, gold=0, faith=5),
+				defense=0,
+				slots=[],
+				specialSlots=None,
+				flavors=[
+					Flavor(FlavorType.religion, value=6)
+				]
+			)
+		elif self == BuildingType.intelligenceAgency:
+			# https://civilization.fandom.com/wiki/Intelligence_Agency_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_INTELLIGENCE_AGENCY_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_INTELLIGENCE_AGENCY_EFFECT1",
+					"TXT_KEY_BUILDING_INTELLIGENCE_AGENCY_EFFECT2",
+					"TXT_KEY_BUILDING_INTELLIGENCE_AGENCY_EFFECT3"
+				],
+				category=BuildingCategoryType.government,
+				era=EraType.medieval,
+				district=DistrictType.governmentPlaza,
+				requiredTech=None,
+				requiredCivic=None,
+				requiredBuildingsOr=[],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[BuildingType.foreignMinistry, BuildingType.grandMastersChapel],
+				productionCost=290,
+				goldCost=290,
+				faithCost=-1,
+				maintenanceCost=2,
+				yields=Yields(food=0, production=0, gold=0),
+				defense=0,
+				slots=[],
+				specialSlots=None,
+				flavors=[
+					Flavor(FlavorType.diplomacy, value=4)
+				]
+			)
+		elif self == BuildingType.university:
+			# https://civilization.fandom.com/wiki/University_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_UNIVERSITY_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_UNIVERSITY_EFFECT0",
+					"TXT_KEY_BUILDING_UNIVERSITY_EFFECT1",
+					"TXT_KEY_BUILDING_UNIVERSITY_EFFECT2",
+					"TXT_KEY_BUILDING_UNIVERSITY_EFFECT3"
+				],
+				category=BuildingCategoryType.scientific,
+				era=EraType.medieval,
+				district=DistrictType.campus,
+				requiredTech=TechType.education,
+				requiredCivic=None,
+				requiredBuildingsOr=[BuildingType.library],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[],
+				productionCost=250,
+				goldCost=250,
+				faithCost=-1,
+				maintenanceCost=2,
+				yields=Yields(food=0, production=0, gold=0, science=4, housing=1),
+				defense=0,
+				slots=[],
+				specialSlots=SpecialistSlots(SpecialistType.citizen, amount=1),
+				flavors=[
+					Flavor(FlavorType.science, value=8)
+				]
+			)
+
+		# renaissance
 		elif self == BuildingType.renaissanceWalls:
 			# https://civilization.fandom.com/wiki/Renaissance_Walls_(Civ6)
 			return BuildingTypeData(
@@ -775,5 +1082,140 @@ class BuildingType(ExtendedEnum):
 				]
 			)
 
+		elif self == BuildingType.shipyard:
+			# https://civilization.fandom.com/wiki/Shipyard_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_SHIPYARD_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_SHIPYARD_EFFECT0",
+					"TXT_KEY_BUILDING_SHIPYARD_EFFECT1",
+					"TXT_KEY_BUILDING_SHIPYARD_EFFECT2",
+					"TXT_KEY_BUILDING_SHIPYARD_EFFECT3",
+					"TXT_KEY_BUILDING_SHIPYARD_EFFECT4"
+				],
+				category=BuildingCategoryType.maritime,
+				era=EraType.renaissance,
+				district=DistrictType.harbor,
+				requiredTech=TechType.massProduction,
+				requiredCivic=None,
+				requiredBuildingsOr=[BuildingType.lighthouse],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[],
+				productionCost=290,
+				goldCost=290,
+				faithCost=-1,
+				maintenanceCost=2,
+				yields=Yields(food=0, production=0, gold=0, science=0, culture=0, faith=0, housing=0),
+				defense=0,
+				slots=[],
+				specialSlots=SpecialistSlots(SpecialistType.citizen, amount=1),
+				flavors=[
+					Flavor(FlavorType.naval, value=7),
+					Flavor(FlavorType.militaryTraining, value=7)
+				]
+			)
+		elif self == BuildingType.bank:
+			# https://civilization.fandom.com/wiki/Bank_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_BANK_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_BANK_EFFECT0",
+					"TXT_KEY_BUILDING_BANK_EFFECT1",
+					"TXT_KEY_BUILDING_BANK_EFFECT2",
+					"TXT_KEY_BUILDING_BANK_EFFECT3"
+					# "+2 Great Works Slots for any type with Great Merchant Giovanni de' Medici activated." //  #
+				],
+				category=BuildingCategoryType.economic,
+				era=EraType.renaissance,
+				district=DistrictType.commercialHub,
+				requiredTech=TechType.banking,
+				requiredCivic=None,
+				requiredBuildingsOr=[],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[],
+				productionCost=290,
+				goldCost=290,
+				faithCost=-1,
+				maintenanceCost=0,
+				yields=Yields(food=0, production=0, gold=5),
+				defense=0,
+				slots=[],
+				specialSlots=SpecialistSlots(SpecialistType.citizen, amount=1),
+				flavors=[
+					Flavor(FlavorType.gold, value=8)
+				]
+			)
+		elif self == BuildingType.artMuseum:
+			# https://civilization.fandom.com/wiki/Art_Museum_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_ART_MUSEUM_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_ART_MUSEUM_EFFECT1",
+					"TXT_KEY_BUILDING_ART_MUSEUM_EFFECT2",
+					"TXT_KEY_BUILDING_ART_MUSEUM_EFFECT3",  #
+					"TXT_KEY_BUILDING_ART_MUSEUM_EFFECT4",  #
+					"TXT_KEY_BUILDING_ART_MUSEUM_EFFECT5"
+				],
+				category=BuildingCategoryType.cultural,
+				era=EraType.renaissance,
+				district=DistrictType.theatherSquare,
+				requiredTech=None,
+				requiredCivic=CivicType.humanism,
+				requiredBuildingsOr=[],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[BuildingType.archaeologicalMuseum],
+				productionCost=290,
+				goldCost=290,
+				faithCost=-1,
+				maintenanceCost=2,
+				yields=Yields(food=0, production=0, gold=0, culture=2),
+				defense=0,
+				slots=[GreatWorkSlotType.artwork, GreatWorkSlotType.artwork, GreatWorkSlotType.artwork],
+				specialSlots=SpecialistSlots(SpecialistType.citizen, amount=1),
+				flavors=[
+					Flavor(FlavorType.culture, value=7)
+				]
+			)
+		elif self == BuildingType.archaeologicalMuseum:
+			# https://civilization.fandom.com/wiki/Archaeological_Museum_(Civ6)
+			return BuildingTypeData(
+				name="TXT_KEY_BUILDING_ARCHAEOLOGICAL_MUSEUM_TITLE",
+				effects=[
+					"TXT_KEY_BUILDING_ARCHAEOLOGICAL_MUSEUM_EFFECT1",
+					"TXT_KEY_BUILDING_ARCHAEOLOGICAL_MUSEUM_EFFECT2",
+					"TXT_KEY_BUILDING_ARCHAEOLOGICAL_MUSEUM_EFFECT3",  #
+					"TXT_KEY_BUILDING_ARCHAEOLOGICAL_MUSEUM_EFFECT4",  #
+					"TXT_KEY_BUILDING_ARCHAEOLOGICAL_MUSEUM_EFFECT5",
+					"TXT_KEY_BUILDING_ARCHAEOLOGICAL_MUSEUM_EFFECT6"
+				],
+				category=BuildingCategoryType.cultural,
+				era=EraType.renaissance,
+				district=DistrictType.theatherSquare,
+				requiredTech=None,
+				requiredCivic=CivicType.humanism,
+				requiredBuildingsOr=[],
+				requiredGovernmentsOr=[],
+				obsoleteBuildingsOr=[BuildingType.artMuseum],
+				productionCost=290,
+				goldCost=290,
+				faithCost=-1,
+				maintenanceCost=2,
+				yields=Yields(food=0, production=0, gold=0, culture=2),
+				defense=0,
+				slots=[GreatWorkSlotType.artifact, GreatWorkSlotType.artifact, GreatWorkSlotType.artifact],
+				specialSlots=SpecialistSlots(SpecialistType.citizen, amount=1),
+				flavors=[
+					Flavor(FlavorType.culture, value=7)
+				]
+			)
+
+		# industrial
+
 		raise AttributeError(f'cant get data for building {self}')
 
+	def amenities(self) -> int:
+		# @fixme move to data
+		if self == BuildingType.arena:
+			return 1
+
+		return 0

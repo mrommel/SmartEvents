@@ -280,6 +280,7 @@ class HexDirection(ExtendedEnum):
 
 class HexPoint(Point):
 	def __init__(self, x_or_hex_cube, y=None):
+		# super().__init__(x_or_hex_cube, y) - this does not work !!!
 		if isinstance(x_or_hex_cube, int) and isinstance(y, int):
 			x = x_or_hex_cube
 			self.x = x

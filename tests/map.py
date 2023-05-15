@@ -1,4 +1,5 @@
 """ unittest module """
+import sys
 import unittest
 import uuid
 
@@ -341,6 +342,7 @@ class TestMapGenerator(unittest.TestCase):
 
 		def _callback(state):
 			print(f'Progress: {state.value} - {state.message} ')
+			sys.stdout.flush()
 			self.last_state_value = state.value
 
 		options = MapOptions(mapSize=MapSize.DUEL, mapType=MapType.CONTINENTS, leader=LeaderType.trajan)
@@ -370,7 +372,7 @@ class TestPathfinding(unittest.TestCase):
 
 		path = finder.shortestPath(HexPoint(0, 0), HexPoint(2, 3))
 
-		print(path)
+		# print(path)
 		target_path = [HexPoint(0, 0), HexPoint(1, 1), HexPoint(2, 1), HexPoint(2, 2), HexPoint(2, 3), ]
 		self.assertEqual(len(path), 5)
 		for i, n in enumerate(target_path):

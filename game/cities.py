@@ -1,8 +1,10 @@
 import random
-from hmac import new
 from typing import Optional
 
-from game.ai.cities import CityStrategyAI
+from game.ai.cities import CityStrategyAI, CitySpecializationType
+from game.ai.economic_strategies import EconomicStrategyType
+from game.ai.grand_strategies import GrandStrategyAIType
+from game.amenities import AmenitiesState
 from game.buildings import BuildingType, BuildingCategoryType
 from game.civilizations import LeaderWeightList, CivilizationAbility, LeaderAbility, LeaderType, \
 	WeightedCivilizationList, CivilizationType
@@ -12,6 +14,7 @@ from game.governors import GovernorType, GovernorTitle, Governor
 from game.loyalties import LoyaltyState
 from game.policy_cards import PolicyCardType
 from game.religions import PantheonType
+from game.specialists import SpecialistType
 from game.types import EraType, TechType
 from game.unit_types import ImprovementType
 from game.wonders import WonderType
@@ -27,8 +30,14 @@ class CityDistricts:
 	def build(self, district: DistrictType, location: HexPoint):
 		pass
 
+	def hasAny(self) -> bool:
+		return False
+
 	def hasDistrict(self, district: DistrictType) -> bool:
 		return False
+
+	def updateHousing(self):
+		pass
 
 
 class CityBuildings:
@@ -44,7 +53,7 @@ class CityBuildings:
 			raise Exception(f'Error: {building} already build in {self.city.name}')
 
 		self._updateDefense()
-		self._updateHousing()
+		self.updateHousing()
 
 		self._buildings.append(building)
 
@@ -76,10 +85,10 @@ class CityBuildings:
 
 		self._defenseValue = defenseValue
 
-	def housing(self) -> int:
+	def housing(self) -> float:
 		return self._housingValue
 
-	def _updateHousing(self):
+	def updateHousing(self):
 		housingValue = 0.0
 
 		for building in list(BuildingType):
@@ -103,6 +112,9 @@ class CityBuildings:
 class CityWonders:
 	def __init__(self, city):
 		self.city = city
+
+	def hasWonder(self, wonder: WonderType) -> bool:
+		return False
 
 
 class CityProjects:
@@ -166,6 +178,98 @@ class CityCitizens:
 	def doFound(self, simulation):
 		# always work the home plot (center)
 		self.setWorkedAt(self.city.location, worked=True, useUnassignedPool=False)
+
+	def doTurn(self, simulation):
+		self.doVerifyWorkingPlots(simulation)
+
+		if not self.city.player.isHuman():
+
+			if simulation.currentTurn % 8 == 0:
+				self.setFocusType(CityFocusType.goldGrowth)
+				self.setNoAutoAssignSpecialists(True, simulation)
+				self.setForcedAvoidGrowth(False, simulation)
+
+				if self.city.hasOnlySmallFoodSurplus():
+					self.setFocusType(CityFocusType.none)
+					self.setNoAutoAssignSpecialists(True, simulation)
+
+			if self.city.isCapital() and \
+				self.city.cityStrategy.specialization() == CitySpecializationType.productionWonder:
+				
+				self.setFocusType(CityFocusType.none)
+				self.setNoAutoAssignSpecialists(False, simulation)
+				self.setForcedAvoidGrowth(False, simulation)
+
+				if self.city.hasFoodSurplus():
+					self.setFocusType(CityFocusType.food)
+					self.setNoAutoAssignSpecialists(True, simulation)
+
+			elif self.city.cityStrategy.specialization() == CitySpecializationType.productionWonder:
+				self.setFocusType(CityFocusType.production)
+				self.setNoAutoAssignSpecialists(False, simulation)
+				self.setForcedAvoidGrowth(False, simulation)
+
+				if self.city.hasOnlySmallFoodSurplus():
+					self.setFocusType(CityFocusType.none)
+					self.setNoAutoAssignSpecialists(True, simulation)
+					self.setForcedAvoidGrowth(False, simulation)
+
+			elif self.city.population() < 5:
+				# we want a balanced growth
+				self.setFocusType(CityFocusType.none)
+				self.setNoAutoAssignSpecialists(True, simulation)
+				self.setForcedAvoidGrowth(False, simulation)
+			else:
+				# Are we running at a deficit?
+				inDeficit = self.city.player.economicAI.adoptedEconomicStrategy(EconomicStrategyType.losingMoney)
+				if inDeficit:
+					self.setFocusType(CityFocusType.goldGrowth)
+					self.setNoAutoAssignSpecialists(False, simulation)
+					self.setForcedAvoidGrowth(False, simulation)
+
+					if self.city.hasOnlySmallFoodSurplus():
+						self.setFocusType(CityFocusType.none)
+						self.setNoAutoAssignSpecialists(True, simulation)
+
+					elif simulation.currentTurn % 3 == 0 and \
+						self.city.player.grandStrategyAI.activeStrategy == GrandStrategyAIType.culture:
+
+						self.setFocusType(CityFocusType.culture)
+						self.setNoAutoAssignSpecialists(True, simulation)
+						self.setForcedAvoidGrowth(False, simulation)
+
+						if self.city.hasOnlySmallFoodSurplus():
+							self.setFocusType(CityFocusType.none)
+							self.setNoAutoAssignSpecialists(True, simulation)
+
+					else:
+						# we aren't a small city, building a wonder, or going broke
+						self.setNoAutoAssignSpecialists(False, simulation)
+						self.setForcedAvoidGrowth(False, simulation)
+
+						currentSpecialization = self.city.cityStrategy.specialization()
+						if currentSpecialization != CitySpecializationType.none:
+							yieldType = currentSpecialization.yieldType()
+							if yieldType == YieldType.food:
+								self.setFocusType(CityFocusType.food)
+							elif yieldType == YieldType.production:
+								self.setFocusType(CityFocusType.productionGrowth)
+							elif yieldType == YieldType.gold:
+								self.setFocusType(CityFocusType.gold)
+							elif yieldType == YieldType.science:
+								self.setFocusType(CityFocusType.science)
+							else:
+								self.setFocusType(CityFocusType.none)
+						else:
+							self.setFocusType(CityFocusType.none)
+
+		# print("working: \(self.numCitizensWorkingPlots()) + spec: \(self.totalSpecialistCount()) + unassigned: \(self.numUnassignedCitizens()) for \(city.population())")
+
+		self.doReallocateCitizens(simulation)
+
+		sum = self.numberOfCitizensWorkingPlots() + self.totalSpecialistCount() + self.numberOfUnassignedCitizens()
+		assert (sum <= self.city.population(), "Gameplay: More workers than population in the city.")
+		# print("working: \(self.numCitizensWorkingPlots()) + spec: \(self.totalSpecialistCount()) + unassigned: \(self.numUnassignedCitizens()) for \(city.population())")
 
 	def workingTileLocations(self) -> [HexPoint]:
 		locations: [HexPoint] = []
@@ -306,15 +410,15 @@ class CityCitizens:
 			# Have this Building in the City?
 			if self.city.buildings.hasBuilding(building=buildingType):
 				# Don't include Forced guys
-				numSpecialistsToRemove = self.numSpecialistsIn(buildingType) - self.numForcedSpecialistsIn(buildingType)
+				numSpecialistsToRemove = self.numberOfSpecialistsIn(buildingType) - self.numberOfForcedSpecialistsIn(buildingType)
 				# Loop through guys to remove (if there are any)
 				for _ in range(numSpecialistsToRemove):
 					self.doRemoveSpecialistFrom(buildingType, forced=False, simulation=simulation)
 
 		# Remove Default Specialists
-		numDefaultsToRemove = self.numDefaultSpecialists() - self.numForcedDefaultSpecialists()
+		numDefaultsToRemove = self.numberOfDefaultSpecialists() - self.numberOfForcedDefaultSpecialists()
 		for _ in range(numDefaultsToRemove):
-			self.changeNumDefaultSpecialistsBy(delta=-1)
+			self.changeNumberOfDefaultSpecialistsBy(delta=-1)
 
 		# Now put all the unallocated guys back
 		numToAllocate = self.numberOfUnassignedCitizens()
@@ -428,6 +532,101 @@ class CityCitizens:
 	def forceWorkingPlotAt(self, worstPlotPoint, force, simulation):
 		pass
 
+	def doVerifyWorkingPlots(self, simulation):
+		pass
+
+	def setNoAutoAssignSpecialists(self, param, simulation):
+		pass
+
+	def totalSpecialistCount(self) -> int:
+		return 0
+
+	def doRemoveWorstCitizen(self, 
+							 removeForcedStatus: bool = False,
+							 dontChangeSpecialist: SpecialistType = SpecialistType.none,
+							 simulation = None) -> bool:
+		"""Pick the worst Plot to stop working"""
+		# Are all of our guys already not working Plots?
+		if self.numberOfUnassignedCitizens() == self.city.population():
+			return False
+
+		# Find default Specialist to pull off, if there is one
+		if self.numberOfDefaultSpecialists() > 0:
+
+			# Do we either have unforced default specialists we can remove?
+			if self.numberOfDefaultSpecialists() > self.numberOfForcedDefaultSpecialists():
+				self.changeNumberOfDefaultSpecialistsBy(-1)
+				return True
+
+			if self.numberOfDefaultSpecialists() > self.city.population():
+				self.changeNumberOfForcedDefaultSpecialists(-1)
+				self.changeNumberOfDefaultSpecialistsBy(-1)
+				return True
+
+
+		# No Default Specialists, remove a working Pop, if there is one
+		worstPlot, _ = self.bestCityPlotWithValue(wantBest=False, wantWorked=True, simulation=simulation)
+
+		if worstPlot is not None:
+			self.setWorkedAt(worstPlot, worked=False)
+
+			# If we were force - working this Plot, turn it off
+			if removeForcedStatus:
+				if self.isForcedWorkedAt(worstPlot):
+					self.forceWorkingPlotAt(worstPlot, force=False, simulation=simulation)
+
+			return True
+
+		else:
+			# Have to resort to pulling away a good Specialist
+			if self.doRemoveWorstSpecialist(dontChangeSpecialist=dontChangeSpecialist, simulation=simulation):
+				return True
+
+		return False
+
+	def numberOfDefaultSpecialists(self) -> int:
+		return 0
+
+	def doRemoveWorstSpecialist(self, dontChangeSpecialist, simulation):
+		pass
+
+	def numberOfForcedDefaultSpecialists(self) -> int:
+		return 0
+
+	def changeNumberOfDefaultSpecialistsBy(self, delta: int):
+		pass
+
+	def changeNumberOfForcedDefaultSpecialists(self, delta: int):
+		pass
+
+	def bestCityPlotWithValue(self, wantBest, wantWorked, simulation):
+		pass
+
+	def numberOfSpecialistsIn(self, buildingType: BuildingType) -> int:
+		return 0
+
+	def numberOfForcedSpecialistsIn(self, buildingType: BuildingType) -> int:
+		return 0
+
+	def doAddBestCitizenFromUnassigned(self, simulation):
+		pass
+
+	def doRemoveSpecialistFrom(self, buildingType, forced, simulation):
+		pass
+
+	def workableTiles(self, simulation):
+		area = self.city.location.areaWithRadius(radius=City.workRadius)
+		result = []
+
+		for neighbor in area:
+			if not simulation.valid(neighbor):
+				continue
+
+			tile = simulation.tileAt(neighbor)
+			result.append(tile)
+
+		return result
+
 
 class CityGreatWorks:
 	def __init__(self, city):
@@ -511,7 +710,7 @@ class City:
 		self.everCapitalValue = isCapital
 		self._populationValue = 0
 		self.gameTurnFoundedValue = 0
-		self.foodBasketValue = 1.0
+		self._foodBasketValue = 1.0
 
 		self.player = player
 		self.leader = player.leader
@@ -520,9 +719,12 @@ class City:
 
 		self.isFeatureSurroundedValue = False
 		self.threatVal = 0
+		self._garrisonedUnitValue = None
 
 		self.healthPointsValue = 200
 		self.amenitiesForWarWearinessValue = 0
+
+		self._luxuries = []
 
 		self.productionAutomatedValue = False
 		self.baseYieldRateFromSpecialists = YieldList()
@@ -1170,3 +1372,754 @@ class City:
 
 	def _goldFromEnvoys(self, simulation):
 		return 0.0
+
+	def doTurn(self, simulation):
+		if self.damage() > 0:
+			# CvAssertMsg(m_iDamage <= GC.getMAX_CITY_HIT_POINTS(), "Somehow a city has more damage than hit points. Please show this to a gameplay programmer immediately.");
+			hitsHealed = 20  # CITY_HIT_POINTS_HEALED_PER_TURN
+			if self.isCapital():
+				hitsHealed += 1
+
+			self.addHealthPoints(hitsHealed)
+
+		if self.damage() < 0:
+			self.setDamage(0)
+
+		# setDrafted(false);
+		# setAirliftTargeted(false);
+		# setCurrAirlift(0);
+		self.setMadeAttackTo(False)
+		# GetCityBuildings()->SetSoldBuildingThisTurn(false);
+
+		self.updateFeatureSurrounded(simulation)
+
+		self.cityStrategy.doTurn(simulation)
+
+		self.cityCitizens.doTurn(simulation)
+
+		#  AI_doTurn();
+		if not self.player.isHuman():
+			# AI_stealPlots();
+			pass
+
+		# elf.doResistanceTurn();
+
+		allowNoProduction = not self.doCheckProduction(simulation)
+
+		self.doGrowth(simulation)
+
+		# self.doUpdateIndustrialRouteToCapital();
+
+		self.doProduction(allowNoProduction=allowNoProduction, simulation=simulation)
+
+		# self.doDecay();
+		# self.doMeltdown();
+
+		for loopPoint in self.location.areaWithRadius(radius=City.workRadius):
+			loopPlot = simulation.tileAt(loopPoint)
+			if self.cityCitizens.isWorkedAt(loopPoint):
+				loopPlot.doImprovement()
+
+		# Following function also looks at WLTKD stuff
+		# self.doTestResourceDemanded();
+
+		# Culture accumulation
+		currentCulture = self.culturePerTurn(simulation)
+
+		if self.player.religion.pantheon() == PantheonType.religiousSettlements:
+			# Border expansion rate is 15% faster.
+			currentCulture *= 1.15
+
+		if currentCulture > 0:
+			self.updateCultureStoredTo(self.cultureStored() + currentCulture)
+
+		# Enough Culture to acquire a new Plot?
+		if self.cultureStored() >= self.cultureThreshold():
+			self.cultureLevelIncrease(simulation)
+
+		# Resource Demanded Counter
+		# if (GetResourceDemandedCountdown() > 0) {
+		#   ChangeResourceDemandedCountdown(-1)
+		#
+		#   if (GetResourceDemandedCountdown() == 0) {
+		#     # Pick a Resource to demand
+		#     self.doPickResourceDemanded();
+
+		self.updateStrengthValue(simulation)
+		self.updateLoyaltyValue(simulation)
+
+		self.doNearbyEnemy(simulation)
+
+		# Check for Achievements
+		#         /*if(isHuman() && !GC.getGame().isGameMultiPlayer() && GET_PLAYER(GC.getGame().getActivePlayer()).isLocalPlayer()) {
+		#             if(getJONSCulturePerTurn()>=100) {
+		#                 gDLL->UnlockAchievement( ACHIEVEMENT_CITY_100CULTURE );
+		#             }
+		#             if(getYieldRate(YIELD_GOLD)>=100) {
+		#                 gDLL->UnlockAchievement( ACHIEVEMENT_CITY_100GOLD );
+		#             }
+		#             if(getYieldRate(YIELD_SCIENCE)>=100 ) {
+		#                 gDLL->UnlockAchievement( ACHIEVEMENT_CITY_100SCIENCE );
+		#             }
+		#         }*/
+
+		# sending notifications on when routes are connected to the capital
+		if not self.isCapital():
+			#
+			#             /*CvNotifications* pNotifications = GET_PLAYER(m_eOwner).GetNotifications();
+			#             if (pNotifications)
+			#             {
+			#                 CvCity* pPlayerCapital = GET_PLAYER(m_eOwner).getCapitalCity();
+			#                 CvAssertMsg(pPlayerCapital, "No capital city?");
+			#
+			#                 if (m_bRouteToCapitalConnectedLastTurn != m_bRouteToCapitalConnectedThisTurn && pPlayerCapital)
+			#                 {
+			#                     Localization::String strMessage;
+			#                     Localization::String strSummary;
+			#
+			#                     if (m_bRouteToCapitalConnectedThisTurn) // connected this turn
+			#                     {
+			#                         strMessage = Localization::Lookup( "TXT_KEY_NOTIFICATION_TRADE_ROUTE_ESTABLISHED" );
+			#                         strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_SUMMARY_TRADE_ROUTE_ESTABLISHED");
+			#                     }
+			#                     else // lost connection this turn
+			#                     {
+			#                         strMessage = Localization::Lookup( "TXT_KEY_NOTIFICATION_TRADE_ROUTE_BROKEN" );
+			#                         strSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_SUMMARY_TRADE_ROUTE_BROKEN");
+			#                     }
+			#
+			#                     strMessage << getNameKey();
+			#                     strMessage << pPlayerCapital->getNameKey();
+			#                     pNotifications->Add( NOTIFICATION_GENERIC, strMessage.toUTF8(), strSummary.toUTF8(), -1, -1, -1 );
+			#                 }
+			#             }*/
+			self._routeToCapitalConnectedLastTurn = self._routeToCapitalConnectedThisTurn
+
+	def isCapital(self) -> bool:
+		return self.capitalValue
+
+	def hasOnlySmallFoodSurplus(self) -> bool:
+		return False
+
+	def damage(self) -> int:
+		return 0
+
+	def setDamage(self, damage: int):
+		pass
+
+	def setMadeAttackTo(self, madeAttack):
+		pass
+
+	def updateFeatureSurrounded(self, simulation):
+		pass
+
+	def doCheckProduction(self, simulation):
+		pass
+
+	def doGrowth(self, simulation):
+		# update housing value
+		self.buildings.updateHousing()
+		self.districts.updateHousing()
+
+		foodPerTurn = self.foodPerTurn(simulation)
+		self.setLastTurnFoodHarvested(foodPerTurn)
+		foodEatenPerTurn = self.foodConsumption()
+		foodDiff = foodPerTurn - foodEatenPerTurn
+
+		if foodDiff < 0:
+			# notify human about starvation
+			if self.player.isHuman():
+				# @fixme self.player.notifications()?.add(notification: .starving(cityName: self.name, location: self.location))
+				pass
+
+		# modifier
+		modifier = self.housingGrowthModifier(simulation) * self._amenitiesGrowthModifier(simulation)
+		modifier += self.wonderGrowthModifier(simulation)
+		modifier += self.religionGrowthModifier()
+		modifier += self.governmentGrowthModifier()
+
+		foodDiff *= modifier
+
+		self.setLastTurnFoodEarned(foodDiff)
+		self.setFoodBasket(self.foodBasket() + foodDiff)
+
+		if self.foodBasket() >= self.growthThreshold():
+
+			if self.cityCitizens.isForcedAvoidGrowth():
+				# don't grow a city, if we are at avoid growth
+				self.setFoodBasket(self.growthThreshold())
+			else:
+				self.setFoodBasket(0)
+				self.setPopulation(self.population() + 1, simulation=simulation)
+
+				simulation.userInterface.update(city=self)
+
+				# Only show notification if the city is small
+				if self._populationValue <= 5:
+
+					if self.player.isHuman():
+						# @fixme self.player.notifications()?.add(notification:.cityGrowth(cityName: self.name, population: self.population(), location: self.location)
+						pass
+
+				# check for improving city tutorial
+				# if simulation.tutorialInfos() == TutorialType.improvingCity and self.player.isHuman():
+				# 	if int(self._populationValue) >= Tutorials.ImprovingCityTutorial.citizenInCityNeeded and
+				# 		buildings.has(building: .granary) and buildings.has(building:.monument):
+				#
+				# 		gameModel.userInterface?.finish(tutorial:.improvingCity)
+				# 		gameModel.enable(tutorial:.none)
+
+				# moments
+				# if self._populationValue > 10:
+				# 	if not self.player.hasMoment(of:.firstBustlingCity(cityName: self.name)) and
+				# 		not player.hasMoment(of:.worldsFirstBustlingCity(cityName: self.name)):
+				#
+				#         # check if someone else already had a bustling city
+				# 		if gameModel.anyHasMoment(of: .worldsFirstBustlingCity(cityName: self.name)):
+				# 			player.addMoment(of:.firstBustlingCity(cityName: self.name), in: gameModel)
+				# 		else:
+				# 			player.addMoment(of:.worldsFirstBustlingCity(cityName: self.name), in: gameModel)
+
+				# if self._populationValue > 15:
+				# 	if not player.hasMoment(of: .firstLargeCity(cityName: self.name)) and
+				# 		not player.hasMoment(of:.worldsFirstLargeCity(cityName: self.name)):
+				#
+				#         #  check if someone else already had a bustling city
+				# 		if gameModel.anyHasMoment(of: .worldsFirstLargeCity(cityName: self.name)):
+				# 			player.addMoment(of:.firstLargeCity(cityName: self.name), in: gameModel)
+				# 		else:
+				# 			player.addMoment(of:.worldsFirstLargeCity(cityName: self.name), in: gameModel)
+
+				# if self.populationValue > 20:
+				# 	if not self.player.hasMoment(of: .firstEnormousCity(cityName: self.name)) and
+				# 		not self.player.hasMoment(of:.worldsFirstEnormousCity(cityName: self.name)):
+				#
+				#         # check if someone else already had a bustling city
+				# 		if simulation.anyHasMoment(of: .worldsFirstEnormousCity(cityName: self.name)) {
+				# 			player.addMoment(of:.firstEnormousCity(cityName: self.name), in: gameModel)
+				# 		else:
+				# 			player.addMoment(of:.worldsFirstEnormousCity(cityName: self.name), in: gameModel)
+
+				# if self._populationValue > 25:
+				# 	if not self.player.hasMoment(of: .firstGiganticCity(cityName: self.name)) and
+				# 		not player.hasMoment(of:.worldsFirstGiganticCity(cityName: self.name)):
+				#
+				#         # check if someone else already had a bustling city
+				# 		if gameModel.anyHasMoment(of: .worldsFirstGiganticCity(cityName: self.name)):
+				# 			player.addMoment(of:.firstGiganticCity(cityName: self.name), in: gameModel)
+				# 		else:
+				# 			player.addMoment(of:.worldsFirstGiganticCity(cityName: self.name), in: gameModel)
+
+		elif self.foodBasket() < 0:
+			self.setFoodBasket(0)
+
+			if self.population() > 1:
+				self.setPopulation(self.population() - 1, simulation=simulation)
+
+	def doProduction(self, allowNoProduction, simulation):
+		pass
+
+	def culturePerTurn(self, simulation) -> float:
+		return 0.0
+
+	def cultureStored(self) -> float:
+		return 0.0
+
+	def cultureThreshold(self) -> float:
+		return 1000.0
+
+	def updateStrengthValue(self, simulation):
+		pass
+
+	def updateLoyaltyValue(self, simulation):
+		pass
+
+	def doNearbyEnemy(self, simulation):
+		pass
+
+	def foodBasket(self) -> float:
+		return self._foodBasketValue
+
+	def setFoodBasket(self, value):
+		self._foodBasketValue = value
+
+	def setLastTurnFoodEarned(self, foodDiff):
+		pass
+
+	def setLastTurnFoodHarvested(self, foodPerTurn):
+		pass
+
+	def growthThreshold(self) -> float:
+		# https://forums.civfanatics.com/threads/formula-thread.600534/
+		# https://forums.civfanatics.com/threads/mathematical-model-comparison.634332/
+		#  Population growth (food)
+		# 15+8*n+n^1.5 (n is current population-1)
+		# 15+8*(N-1)+(N-1)^1.5
+		# 1=>2 =>> 15+0+0^1.5=15
+		# 2=>3 =>> 15+8+1^1.5=24
+		# 3=>4 =>> 15+16+2^1.5=34
+		tmpPopulationValue = max(1, self._populationValue)
+
+		growthThreshold = 15.0  # BASE_CITY_GROWTH_THRESHOLD
+		growthThreshold += (float(tmpPopulationValue) - 1.0) * 8.0  # CITY_GROWTH_MULTIPLIER
+		growthThreshold += pow(tmpPopulationValue - 1.0, 1.5)  # CITY_GROWTH_EXPONENT
+
+		return growthThreshold
+
+	def foodConsumption(self) -> float:
+		"""Each Citizen6 Citizen living in a city consumes 2 Food per turn, which forms the city's total food
+		consumption."""
+		return float(self.population()) * 2.0
+
+	def housingGrowthModifier(self, simulation) -> float:
+		# https://civilization.fandom.com/wiki/Housing_(Civ6)
+		housing = self.housingPerTurn(simulation)
+		housingDiff = int(housing) - int(self._populationValue)
+
+		if housingDiff >= 2:  # 2 or more    100 %
+			return 1.0
+		elif housingDiff == 1:  # 1    50 %
+			return 0.5
+		elif 0 <= housingDiff <= -4:  # 0 to -4    25 %
+			return 0.25
+		else:  # -5 or less 0 %
+			return 0.0
+
+	def housingPerTurn(self, simulation):
+		housingPerTurn: YieldValues = YieldValues(value=0.0, percentage=1.0)
+
+		housingPerTurn += YieldValues(value=self._baseHousing(simulation))
+		housingPerTurn += YieldValues(value=self._housingFromBuildings())
+		housingPerTurn += YieldValues(value=self._housingFromDistricts(simulation))
+		housingPerTurn += YieldValues(value=self._housingFromWonders(simulation))
+		housingPerTurn += YieldValues(value=self._housingFromImprovements(simulation))
+		housingPerTurn += YieldValues(value=self._housingFromGovernment())
+		housingPerTurn += YieldValues(value=self._housingFromGovernors())
+
+		# cap yields based on loyalty
+		housingPerTurn += YieldValues(value=0.0, percentage=self.loyaltyState().yieldPercentage())
+
+		return housingPerTurn.calc()
+
+	def _baseHousing(self, simulation):
+		tile = simulation.tileAt(self.location)
+
+		for neighbor in self.location.neighbors():
+			neighborTile = simulation.tileAt(neighbor)
+			if tile.isRiverToCrossTowards(neighborTile):
+				return 5
+
+		if simulation.isCoastalAt(self.location):
+			return 3
+
+		return 2
+
+	def _housingFromBuildings(self) -> float:
+		housingFromBuildings: float = 0.0
+
+		housingFromBuildings += self.buildings.housing()
+
+		# audienceChamber - +2 Amenities and +4 Housing in Cities with Governors.
+		if self.buildings.hasBuilding(BuildingType.audienceChamber) and self.governor() is not None:
+			housingFromBuildings += 4
+
+		return housingFromBuildings
+
+	def _housingFromDistricts(self, simulation) -> float:
+		housingFromDistricts: float = 0.0
+
+		# aqueduct district
+		if self.hasDistrict(DistrictType.aqueduct):
+			hasFreshWater: bool = False
+			tile = simulation.tileAt(self.location)
+			for neighbor in self.location.neighbors():
+				neighborTile = simulation.tileAt(neighbor)
+				if tile.isRiverToCrossTowards(neighborTile):
+					hasFreshWater = True
+
+			# Cities that do not yet have existing fresh water receive up to 6 Housing.
+			if not hasFreshWater:
+				housingFromDistricts += 6
+			else:
+				# Cities that already have existing fresh water will instead get 2 Housing.
+				housingFromDistricts += 2
+
+		#for now there can only be one
+		if self.hasDistrict(DistrictType.neighborhood):
+			# A district in your city that provides Housing based on the Appeal of the tile.
+			neighborhoodLocation = self.locationOf(DistrictType.neighborhood)
+			neighborhoodTile = simulation.tileAt(neighborhoodLocation)
+			appeal = neighborhoodTile.appealLevel(simulation)
+			housingFromDistricts += float(appeal.housing())
+
+		if self.hasDistrict(DistrictType.preserve):
+			# Grants up to 3 Housing based on tile's Appeal
+			tile = simulation.tileAt(self.location)
+			appealLevel = tile.appealLevel(simulation)
+			housingFromDistricts += float(appealLevel.housing()) / 2.0
+
+		if self.hasDistrict(DistrictType.holySite):
+			# riverGoddess - +2 Amenities and +2 Housing to cities if they have a Holy Site district adjacent to a River.
+			holySiteLocation = self.locationOf(DistrictType.holySite)
+			isHolySiteAdjacentToRiver = False
+
+			for neighbor in holySiteLocation.neighbors():
+				if simulation.riverAt(neighbor):
+					isHolySiteAdjacentToRiver = True
+					break
+
+			if isHolySiteAdjacentToRiver:
+				housingFromDistricts += 2.0
+
+		# medinaQuarter - +2 Housing in all cities with at least 3 specialty Districts.
+		if self.player.government.hasCard(PolicyCardType.medinaQuarter):
+			if self.districts.numberOfSpecialtyDistricts() >= 3:
+				housingFromDistricts += 2.0
+
+		return housingFromDistricts
+
+	def _housingFromWonders(self, simulation) -> float:
+		housingFromWonders: float = 0.0
+
+		# city has templeOfArtemis: +3 Housing
+		if self.hasWonder(WonderType.templeOfArtemis):
+			housingFromWonders += 3.0
+
+		# city has hangingGardens: +2 Housing
+		if self.hasWonder(WonderType.hangingGardens):
+			housingFromWonders += 2.0
+
+		# player has angkorWat: +1 Housing in all cities.
+		if self.player.hasWonder(WonderType.angkorWat, simulation):
+			housingFromWonders += 2.0
+
+		return housingFromWonders
+
+	def _housingFromImprovements(self, simulation) -> float:
+		# Each Farm, Pasture, Plantation, or Camp supports a small amount of Population — 1 Housing for every 2
+		# such improvements.
+		farms: int = 0
+		pastures: int = 0
+		plantations: int = 0
+		camps: int = 0
+
+		for point in self.cityCitizens.workingTileLocations():
+			if self.cityCitizens.isWorkedAt(point):
+				adjacentTile = simulation.tileAt(point)
+
+				# farms
+				if adjacentTile.hasImprovement(ImprovementType.farm):
+					farms += 1
+
+				# pastures
+				if adjacentTile.hasImprovement(ImprovementType.pasture):
+					pastures += 1
+
+				# plantations
+				if adjacentTile.hasImprovement(ImprovementType.plantation):
+					plantations += 1
+
+				# camps
+				if adjacentTile.hasImprovement(ImprovementType.camp):
+					camps += 1
+
+		housingValue: float = 0.0
+
+		housingValue += float((farms / 2))
+		housingValue += float((pastures / 2))
+		housingValue += float((plantations / 2))
+		housingValue += float((camps / 2))
+
+		return housingValue
+
+	def _housingFromGovernment(self) -> float:
+		housingFromGovernment: float = 0.0
+
+		# All cities with a district receive +1 Housing and +1 Amenity.
+		if self.player.government.currentGovernment() == GovernmentType.classicalRepublic:
+			if self.districts.hasAny():
+				housingFromGovernment += 1.0
+
+		# ..and +1 Housing per District.
+		if self.player.government.currentGovernment() == GovernmentType.democracy:
+			housingFromGovernment += float(self.districts.numberOfBuiltDistricts())
+
+		# +1 Housing in all cities with at least 2 specialty districts.
+		if self.player.government.hasCard(PolicyCardType.insulae):
+			if self.districts.numberOfBuiltDistricts() >= 2:
+				housingFromGovernment += 1.0
+
+		# medievalWalls: +2 Housing under the Monarchy Government.
+		if self.player.government.currentGovernment() == GovernmentType.monarchy:
+			if self.buildings.hasBuilding(BuildingType.medievalWalls):
+				housingFromGovernment += 2.0
+
+		# newDeal - +4 Housing and +2 Amenities to all cities with at least 3 specialty districts.
+		if self.player.government.hasCard(PolicyCardType.newDeal):
+			if self.districts.numberOfBuiltDistricts() >= 3:
+				housingFromGovernment += 4.0
+
+		# collectivism - Farms + 1 Food.
+		# All cities + 2 Housing. +100 % Industrial Zone adjacency bonuses.
+		# BUT: Great People Points earned 50 % slower.
+		if self.player.government.hasCard(PolicyCardType.collectivism):
+			housingFromGovernment += 2.0
+
+		return housingFromGovernment
+
+	def _housingFromGovernors(self) -> float:
+		housingValue: float = 0.0
+
+		# Established Governors with at least 2 Promotions provide +1 Amenity and +2 Housing.
+		if self.player.government.hasCard(PolicyCardType.civilPrestige) and self.numberOfGovernorTitles() >= 2:
+			housingValue += 2.0
+
+		if self.governor() is not None:
+			# Liang - waterWorks - +2 Housing for every Neighborhood and Aqueduct district in this city.
+			if self.governor().type == GovernorType.liang and self.governor().hasTitle(GovernorTitle.waterWorks):
+				numberOfNeighborhoods = 1.0 if self.hasDistrict(DistrictType.neighborhood) else 0.0
+				numberOfAqueducts = 1.0 if self.hasDistrict(DistrictType.aqueduct) else 0.0
+				housingValue += 2.0 * (numberOfNeighborhoods + numberOfAqueducts)
+
+		# civilPrestige - Established Governors with at least 2 Promotions provide +1 Amenity and +2 Housing.
+		if self.player.government.hasCard(PolicyCardType.civilPrestige) and self.governor().titleCount() >= 2:
+			housingValue += 2.0
+
+		return housingValue
+
+	def hasDistrict(self, district: DistrictType) -> bool:
+		if district == DistrictType.cityCenter:
+			return True
+
+		return self.districts.hasDistrict(district)
+
+	def hasWonder(self, wonder: WonderType) -> bool:
+		return self.wonders.hasWonder(wonder)
+
+	def amenitiesNeeded(self) -> float:
+		# first two people don't need amenities
+		return max(0.0, float(self._populationValue) - 2.0) + float(self.amenitiesForWarWearinessValue)
+
+	def amenitiesState(self, simulation) -> AmenitiesState:
+		amenities = self.amenitiesPerTurn(simulation)
+		amenitiesDiff = amenities - self.amenitiesNeeded()
+
+		if amenitiesDiff >= 3.0:
+			return AmenitiesState.ecstatic
+		elif amenitiesDiff == 1.0 or amenitiesDiff == 2.0:
+			return AmenitiesState.happy
+		elif amenitiesDiff == 0.0:
+			return AmenitiesState.content
+		elif amenitiesDiff == -1.0 or amenitiesDiff == -2.0:
+			return AmenitiesState.displeased
+		elif amenitiesDiff == -3.0 or amenitiesDiff == -4.0:
+			return AmenitiesState.unhappy
+		elif amenitiesDiff == -5.0 or amenitiesDiff == -6.0:
+			return AmenitiesState.unrest
+		else:
+			return AmenitiesState.revolt
+
+	def _amenitiesGrowthModifier(self, simulation):
+		# https://civilization.fandom.com/wiki/Amenities_(Civ6)
+		amenitiesStateValue = self.amenitiesState(simulation)
+
+		if amenitiesStateValue == AmenitiesState.ecstatic:
+			return 1.2
+		elif amenitiesStateValue == AmenitiesState.happy:
+			return 1.1
+		elif amenitiesStateValue == AmenitiesState.content:
+			return 1.0
+		elif amenitiesStateValue == AmenitiesState.displeased:
+			return 0.85
+		elif amenitiesStateValue == AmenitiesState.unhappy:
+			return 0.70
+		elif amenitiesStateValue == AmenitiesState.unrest:
+			return 0.0
+		elif amenitiesStateValue == AmenitiesState.revolt:
+			return 0.0
+
+		raise Exception(f'Unhandled AmenitiesState: {amenitiesStateValue}')
+
+	def amenitiesPerTurn(self, simulation):
+		amenitiesPerTurn: float = 0.0
+
+		amenitiesPerTurn += self._amenitiesFromTiles(simulation)
+		amenitiesPerTurn += self._amenitiesFromLuxuries()
+		amenitiesPerTurn += self._amenitiesFromDistrict(simulation)
+		amenitiesPerTurn += self._amenitiesFromBuildings()
+		amenitiesPerTurn += self._amenitiesFromWonders(simulation)
+		amenitiesPerTurn += self._amenitiesFromCivics(simulation)
+
+		return amenitiesPerTurn
+
+	def _amenitiesFromTiles(self, simulation):
+		amenitiesFromTiles: float = 0.0
+
+		hueyTeocalliLocation: HexPoint = HexPoint(-1, -1)
+		if self.player.hasWonder(WonderType.hueyTeocalli, simulation):
+			for point in self.cityCitizens.workingTileLocations():
+				if self.cityCitizens.isWorkedAt(point):
+					adjacentTile = simulation.tileAt(point)
+					if adjacentTile.hasWonder(WonderType.hueyTeocalli):
+						hueyTeocalliLocation = point
+
+		# +1 Amenity from entertainment for each Lake tile within one tile of Huey Teocalli.
+		# (This includes the Lake tile where the wonder is placed.)
+		for point in self.cityCitizens.workingTileLocations():
+			if self.cityCitizens.isWorkedAt(point):
+				if point == hueyTeocalliLocation or point.isNeighborOf(hueyTeocalliLocation):
+					amenitiesFromTiles += 1
+
+		return amenitiesFromTiles
+
+	def _amenitiesFromLuxuries(self):
+		return float(len(self._luxuries))
+
+	def _amenitiesFromDistrict(self, simulation):
+		amenitiesFromDistrict: float = 0.0
+
+		# "All cities with a district receive +1 Housing and +1 Amenity."
+		if self.player.government.currentGovernment() == GovernmentType.classicalRepublic:
+			if self.districts.hasAny():
+				amenitiesFromDistrict += 1.0
+
+		if self.hasDistrict(DistrictType.holySite):
+			# riverGoddess - +2 Amenities and +2 Housing to cities if they have a Holy Site district adjacent to a River.
+			holySiteLocation = self.locationOf(DistrictType.holySite)
+			isHolySiteAdjacentToRiver = False
+
+			for neighbor in holySiteLocation.neighbors():
+				if simulation.riverAt(neighbor):
+					isHolySiteAdjacentToRiver = True
+					break
+
+			if isHolySiteAdjacentToRiver:
+				amenitiesFromDistrict += 2.0
+
+		return amenitiesFromDistrict
+
+	def _amenitiesFromBuildings(self):
+		amenitiesFromBuildings: float = 0.0
+
+		# gather amenities from buildings
+		for building in list(BuildingType):
+			if self.buildings.hasBuilding(building):
+				amenitiesFromBuildings += float(building.amenities())
+
+		# audienceChamber - +2 Amenities and +4 Housing in Cities with Governors.
+		if self.buildings.hasBuilding(BuildingType.audienceChamber) and self.governor() is not None:
+			amenitiesFromBuildings += 2
+
+		return amenitiesFromBuildings
+
+	def _amenitiesFromWonders(self, simulation):
+		locationOfColosseum: HexPoint = HexPoint(-1, -1)
+
+		for cityRef in simulation.citiesOf(self.player):
+			if cityRef.hasWonder(WonderType.colosseum):
+				# this is a hack
+				locationOfColosseum = cityRef.location
+
+		amenitiesFromWonders: float = 0.0
+
+	    # gather amenities from buildingss
+		for wonder in list(WonderType):
+			if self.hasWonder(wonder):
+				amenitiesFromWonders += float(wonder.amenities())
+
+		# temple of artemis
+		if self.hasWonder(WonderType.templeOfArtemis):
+			for loopPoint in self.location.areaWithRadius(radius=3):
+				loopTile = simulation.tileAt(loopPoint)
+				if loopTile.hasImprovement(ImprovementType.camp) or \
+					loopTile.hasImprovement(ImprovementType.pasture) or \
+					loopTile.hasImprovement(ImprovementType.plantation):
+
+					# Each Camp, Pasture, and Plantation improvement within 4 tiles of this wonder provides +1 Amenity.
+					amenitiesFromWonders += 1.0
+
+		# colosseum - +2 Culture, +2 Loyalty, +2 Amenities from entertainment
+		# to each City Center within 6 tiles.
+		if self.hasWonder(WonderType.colosseum) or locationOfColosseum.distance(self.location) <= 6:
+			amenitiesFromWonders += 2.0
+
+		return amenitiesFromWonders
+
+	def _amenitiesFromCivics(self, simulation) -> float:
+		amenitiesFromCivics: float = 0.0
+
+		# Retainers - +1 Amenity in cities with a garrisoned unit.
+		if self.player.government.hasCard(PolicyCardType.retainers):
+			if self._garrisonedUnitValue is not None:
+				amenitiesFromCivics += 1
+
+		# Civil Prestige - +1 Amenity and +2 Housing in cities with established Governors with 2+ promotions.
+		if self.player.government.hasCard(PolicyCardType.retainers):
+			if self.governor() is not None:
+				if self.governor().titlesCount() >= 2:
+					amenitiesFromCivics += 1
+
+		# Liberalism - +1 Amenity in cities with 2 + specialty districts.
+		if self.player.government.hasCard(PolicyCardType.liberalism):
+			if self.districts.numberOfBuiltDistricts() >= 2:
+				amenitiesFromCivics += 1
+
+		# Police State - -2 Spy operation level in your lands. - 1 Amenity in all cities.
+		if self.player.government.hasCard(PolicyCardType.policeState):
+			amenitiesFromCivics -= 1
+
+		# New Deal - +2 Amenities and +4 Housing in all cities with 3 + specialty districts.
+		if self.player.government.hasCard(PolicyCardType.newDeal):
+			if self.districts.numberOfBuiltDistricts() >= 3:
+				amenitiesFromCivics += 2
+
+		# civilPrestige - Established Governors with at least 2 Promotions provide +1 Amenity and +2 Housing.
+		if self.player.government.hasCard(PolicyCardType.civilPrestige):
+			if self.governor() is not None:
+				if self.governor().titlesCount() >= 2:
+					amenitiesFromCivics += 1.0
+
+		# Sports Media + 100 % Theater Square adjacency bonuses, and Stadiums generate + 1 Amenity.
+		# Music Censorship Other civs  Rock Bands cannot enter your territory. -1 Amenities Amenity in all cities.
+
+		# robberBarons - +50 % Gold in cities with a Stock Exchange. +25% Production in cities with a Factory.
+		# BUT: -2 Amenities in all cities.
+		if self.player.government.hasCard(PolicyCardType.robberBarons):
+			amenitiesFromCivics -= 2
+
+		# - Automated Workforce +20% Production towards city projects.
+		# BUT: -1 Amenities and -5 Loyalty in all cities.
+		if self.player.government.hasCard(PolicyCardType.automatedWorkforce):
+			amenitiesFromCivics -= 1
+
+		return amenitiesFromCivics
+
+	def wonderGrowthModifier(self, simulation) -> float:
+		wonderModifier: float = 0.0
+
+		# hangingGardens - Increases growth by 15 % in all cities.
+		if self.player.hasWonder(WonderType.hangingGardens, simulation):
+			wonderModifier += 0.15
+
+		return wonderModifier
+
+	def religionGrowthModifier(self) -> float:
+		religionModifier: float = 0.0
+
+		# fertilityRites - City growth rate is 10 % higher.
+		if self.player.religion.pantheon() == PantheonType.fertilityRites:
+			religionModifier += 0.10
+
+		return religionModifier
+
+	def governmentGrowthModifier(self) -> float:
+		governmentModifier: float = 0.0
+
+		# colonialOffices - +15 % faster growth and 3 Loyalty per turn
+		# for cities not on your original Capital's continent.
+		if self.player.government.hasCard(PolicyCardType.colonialOffices):
+			# @fixme not continent check
+			governmentModifier += 0.15
+
+		return governmentModifier
+	

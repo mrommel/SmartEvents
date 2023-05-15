@@ -82,8 +82,8 @@ class TestGameAssets(unittest.TestCase):
 
 
 class TestCity(unittest.TestCase):
-	def test_city_initial_yields(self):
-		"""Test the initial city yields"""
+
+	def setUp(self) -> None:
 		mapModel = Map(10, 10)
 
 		# center
@@ -108,12 +108,19 @@ class TestCity(unittest.TestCase):
 
 		city = City(name='Berlin', location=HexPoint(1, 1), isCapital=True, player=playerTrajan)
 		city.initialize(simulation)
-		city.setPopulation(2, reassignCitizen=False, simulation=simulation)
+
+		self.city = city
+		self.simulation = simulation
+
+	def test_city_initial_yields(self):
+		"""Test the initial city yields"""
+		# GIVEN
+		self.city.setPopulation(2, reassignCitizen=False, simulation=self.simulation)
 
 		# WHEN
-		foodYield = city.foodPerTurn(simulation=simulation)
-		productionYield = city.productionPerTurn(simulation=simulation)
-		goldYield = city.goldPerTurn(simulation=simulation)
+		foodYield = self.city.foodPerTurn(simulation=self.simulation)
+		productionYield = self.city.productionPerTurn(simulation=self.simulation)
+		goldYield = self.city.goldPerTurn(simulation=self.simulation)
 
 		# THEN
 		self.assertEqual(foodYield, 4.0)
@@ -122,45 +129,33 @@ class TestCity(unittest.TestCase):
 
 	def test_city_worked_yields(self):
 		"""Test the worked city yields"""
-		mapModel = Map(10, 10)
+		self.city.setPopulation(3, reassignCitizen=False, simulation=self.simulation)
 
-		# center
-		centerTile = mapModel.tileAt(HexPoint(1, 1))
-		centerTile.setTerrain(terrain=TerrainType.grass)
-		centerTile.setHills(hills=False)
-		centerTile.setImprovement(improvement=ImprovementType.farm)
-
-		# another
-		anotherTile = mapModel.tileAt(HexPoint(1, 2))
-		anotherTile.setTerrain(terrain=TerrainType.plains)
-		anotherTile.setHills(hills=True)
-		anotherTile.setImprovement(improvement=ImprovementType.mine)
-
-		simulation = Game(mapModel)
-
-		playerTrajan = Player(leader=LeaderType.trajan, human=False)
-		playerTrajan.initialize()
-
-		playerTrajan.government.setGovernment(governmentType=GovernmentType.autocracy, simulation=simulation)
-		playerTrajan.techs.discover(tech=TechType.mining, simulation=simulation)
-
-		city = City(name='Berlin', location=HexPoint(1, 1), isCapital=True, player=playerTrajan)
-		city.initialize(simulation)
-		city.setPopulation(3, reassignCitizen=False, simulation=simulation)
-
-		city.cityCitizens.setWorkedAt(location=HexPoint(1, 0), worked=True)
-		city.cityCitizens.setWorkedAt(location=HexPoint(1, 1), worked=True)
+		self.city.cityCitizens.setWorkedAt(location=HexPoint(1, 0), worked=True)
+		self.city.cityCitizens.setWorkedAt(location=HexPoint(1, 1), worked=True)
 
 		# WHEN
-		foodYield = city.foodPerTurn(simulation=simulation)
-		productionYield = city.productionPerTurn(simulation=simulation)
-		goldYield = city.goldPerTurn(simulation=simulation)
+		foodYield = self.city.foodPerTurn(simulation=self.simulation)
+		productionYield = self.city.productionPerTurn(simulation=self.simulation)
+		goldYield = self.city.goldPerTurn(simulation=self.simulation)
 
 		# THEN
 		self.assertEqual(foodYield, 5.0)
 		self.assertEqual(productionYield, 4.0)
 		self.assertEqual(goldYield, 5.0)
 
+	def test_city_turn(self):
+		# GIVEN
+		self.city.setPopulation(2, reassignCitizen=False, simulation=self.simulation)
+
+		# WHEN
+		foodBefore = self.city.foodBasket()
+		self.city.doTurn(self.simulation)
+		foodAfter = self.city.foodBasket()
+
+		# THEN
+		self.assertEqual(foodBefore, 1.0)
+		self.assertEqual(foodAfter, 1.0)
 
 
 class TestSimulation(unittest.TestCase):

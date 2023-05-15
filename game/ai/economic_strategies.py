@@ -8,9 +8,10 @@ from game.unit_types import OperationType, UnitTaskType
 
 
 class EconomicStrategyType(ExtendedEnum):
-    NEED_RECON = 0
-    EARLY_EXPANSION = 1
-    FOUND_CITY = 2
+    losingMoney = 'losingMoney'
+    needRecon = 'needRecon'
+    earlyExpansion = 'earlyExpansion'
+    foundCity = 'foundCity'
 
     def requiredTech(self):
         return EconomicStrategies().strategy(self).requiredTech
@@ -192,6 +193,32 @@ class FoundCityStrategy(EconomicStrategy):
         return False
 
 
+class LosingMoneyStrategy(EconomicStrategy):
+    def __init__(self):
+        super().__init__('Losing Money')
+        self.checkTriggerTurnCount = 5
+        self.minimumNumTurnsExecuted = 5
+        self.weightThreshold = 2
+        self.firstTurnExecuted = 20
+        # advisor: .economic,
+        #             advisorCounsel: "TXT_KEY_ECONOMICAISTRATEGY_LOSING_MONEY",
+        #             advisorCounselImportance: 2,
+        #             flavors: [
+        #                 Flavor(type: .gold, value: 25),
+        #                 Flavor(type: .offense, value: -10),
+        #                 Flavor(type: .defense, value: -10)
+        #             ],
+        #             flavorThresholdModifiers: []
+
+    def shouldBeActive(self, player, simulation) -> bool:
+        # Need a certain number of turns of history before we can turn this on
+        if simulation.currentTurn <= self.minimumNumTurnsExecuted:
+            return False
+
+        # Is average income below desired threshold over past X turns?
+        return player.treasury.averageIncome(self.minimumNumTurnsExecuted) < float(self.weightThreshold)
+
+
 class EconomicStrategies(object):
     _instance = None
 
@@ -208,12 +235,14 @@ class EconomicStrategies(object):
 
     @classmethod
     def _strategy(cls, economicStrategyType: EconomicStrategyType):
-        if economicStrategyType == EconomicStrategyType.NEED_RECON:
+        if economicStrategyType == EconomicStrategyType.needRecon:
             return NeedReconStrategy()
-        elif economicStrategyType == EconomicStrategyType.EARLY_EXPANSION:
+        elif economicStrategyType == EconomicStrategyType.earlyExpansion:
             return EarlyExpansionStrategy()
-        elif economicStrategyType == EconomicStrategyType.FOUND_CITY:
+        elif economicStrategyType == EconomicStrategyType.foundCity:
             return FoundCityStrategy()
+        elif economicStrategyType == EconomicStrategyType.losingMoney:
+            return LosingMoneyStrategy()
 
         raise InvalidEnumError(economicStrategyType)
 

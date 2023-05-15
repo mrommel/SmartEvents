@@ -8,3 +8,5 @@ class PantheonType(ExtendedEnum):
 	ladyOfTheReedsAndMarshes = 'ladyOfTheReedsAndMarshes'
 	godOfCraftsmen = 'godOfCraftsmen'
 	goddessOfTheHunt = 'goddessOfTheHunt'
+	religiousSettlements = 'religiousSettlements'
+	fertilityRites = 'fertilityRites'
