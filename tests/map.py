@@ -341,8 +341,7 @@ class TestMapGenerator(unittest.TestCase):
 		"""Test the MapGenerator constructor"""
 
 		def _callback(state):
-			print(f'Progress: {state.value} - {state.message} ')
-			sys.stdout.flush()
+			print(f'Progress: {state.value} - {state.message} ', flush=True)
 			self.last_state_value = state.value
 
 		options = MapOptions(mapSize=MapSize.DUEL, mapType=MapType.CONTINENTS, leader=LeaderType.trajan)

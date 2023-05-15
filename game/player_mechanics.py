@@ -56,3 +56,49 @@ class Civics:
 			return 0.0
 
 		return self._progresses.weight(self._currentCivicValue)
+
+
+class BuilderTaskingAI:
+	def __init__(self, player):
+		self.player = player
+
+	def update(self, simulation):
+		pass
+
+
+class TacticalAI:
+	def __init__(self, player):
+		self.player = player
+
+	def doTurn(self, simulation):
+		pass
+
+
+class DiplomacyAI:
+	def __init__(self, player):
+		self.player = player
+
+	def doTurn(self, simulation):
+		pass
+
+	def hasMetWith(self, player) -> bool:
+		return False
+
+	def update(self, simulation):
+		pass
+
+
+class HomelandAI:
+	def __init__(self, player):
+		self.player = player
+
+	def doTurn(self, simulation):
+		pass
+
+
+class DiplomacyRequests:
+	def __init__(self, player):
+		self.player = player
+
+	def endTurn(self):
+		pass

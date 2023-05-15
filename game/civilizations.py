@@ -193,6 +193,7 @@ class LeaderType(ExtendedEnum):
 			return [Trait(TraitType.boldness, 6)]
 		elif self == LeaderType.victoria:
 			return [Trait(TraitType.boldness, 4)]
+
 		elif self == LeaderType.cityState:
 			return []
 		elif self == LeaderType.barbar:

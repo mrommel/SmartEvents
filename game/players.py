@@ -1,16 +1,18 @@
-from game.base_types import CityStateType
+from game.base_types import CityStateType, GameState
 from game.ai.economics import EconomicAI
 from game.ai.grand_strategies import GrandStrategyAI
 from game.ai.militaries import MilitaryAI
 from game.cities import City, AgeType, DedicationType, CityState
+from game.cityConnections import CityConnections
 from game.civilizations import LeaderType
 from game.flavors import Flavors, FlavorType
 from game.governments import PlayerGovernment
 from game.notifications import Notifications, NotificationType, Notification
-from game.player_mechanics import Techs, Civics
+from game.player_mechanics import Techs, Civics, BuilderTaskingAI, TacticalAI, DiplomacyAI, HomelandAI, \
+    DiplomacyRequests
 from game.religions import PantheonType
 from game.types import EraType
-from game.unit_types import UnitMissionType
+from game.unit_types import UnitMissionType, UnitTaskType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.types import Tutorials
@@ -23,6 +25,9 @@ class Player:
 class DiplomaticAI:
     def __init__(self, player):
         self.player = player
+
+    def update(self, simulation):
+        pass
 
     def hasMetWith(self, player):
         return False
@@ -53,18 +58,18 @@ class Player:
         self.leader = leader
         self.cityState = cityState
         self.human = human
-        self.barbarian = False
 
         # ais
-        self.grandStrategyAI = GrandStrategyAI(self)
-        self.economicAI = EconomicAI(self)
-        self.militaryAI = MilitaryAI(self)
-        self.tacticalAI = None
-        self.diplomacyAI = None
-        self.homelandAI = None
-        self.builderTaskingAI = None
+        self.grandStrategyAI = GrandStrategyAI(player=self)
+        self.economicAI = EconomicAI(player=self)
+        self.militaryAI = MilitaryAI(player=self)
+        self.tacticalAI = TacticalAI(player=self)
+        self.diplomacyAI = DiplomacyAI(player=self)
+        self.homelandAI = HomelandAI(player=self)
+        self.builderTaskingAI = BuilderTaskingAI(player=self)
 
         self.notifications = Notifications(self)
+        self.diplomacyRequests = DiplomacyRequests(player=self)
 
         # special ais
         self.techs = Techs(self)
@@ -87,9 +92,10 @@ class Player:
         self.lostCapitalValue = False
         self.conquerorValue = None
 
-        self.government = None
-        self.religion = None
-        self.tradeRoutes = None
+        self.government = PlayerGovernment(player=self)
+        self.religion = PlayerReligion(player=self)
+        self.tradeRoutes = PlayerTradeRoutes(player=self)
+        self.cityConnections = CityConnections(player=self)
         
         self.currentEraVal: EraType = EraType.ancient
         self.currentAgeVal: AgeType = AgeType.normal
@@ -98,15 +104,18 @@ class Player:
         self.numberOfGoldenAgesVal: int = 0
 
     def initialize(self):
-        self.diplomacyAI = DiplomaticAI(player=self)
-        self.government = PlayerGovernment(player=self)
-        self.religion = PlayerReligion(player=self)
-        self.tradeRoutes = PlayerTradeRoutes(player=self)
+        pass
 
     def doTurn(self, simulation):
         self.grandStrategyAI.doTurn(simulation)
         self.economicAI.doTurn(simulation)
         self.militaryAI.doTurn(simulation)
+
+    def doTurnUnits(self, simulation):
+        pass
+
+    def name(self) -> str:
+        return self.leader.name
 
     def foundCity(self, location: HexPoint, name: str, simulation):
         tile = simulation.tileAt(location)
@@ -212,7 +221,7 @@ class Player:
         return self.human
 
     def isBarbarian(self) -> bool:
-        return self.barbarian
+        return self.leader == LeaderType.barbar
 
     def hasMet(self, otherPlayer: Player) -> bool:
         return False
@@ -291,7 +300,7 @@ class Player:
         self.checkWorldCircumnavigated(simulation)
 
     def startTurn(self, simulation):
-        if not self.isTurnActive():
+        if self.isTurnActive():
             print("try to start already active turn")
             return
 
@@ -299,7 +308,7 @@ class Player:
             print(f'--- start turn for HUMAN player {self.leader} ---')
         elif self.isBarbarian():
             print("--- start turn for barbarian player ---")
-        elif self.leader == LeaderType.city_state:
+        elif self.leader == LeaderType.cityState:
             print(f'--- start turn for city state {self.cityState.name()} ---')
         elif self.isMajorAI():
             print(f'--- start turn for AI player {self.leader} ---')
@@ -310,9 +319,9 @@ class Player:
         self.setEndTurnTo(False, simulation)
         self.setAutoMovesTo(False)
 
-        # ////////////// // // // // // // // // // // // // // // /
+        # ##################################################################
         # TURN IS BEGINNING
-        # // // // // // // // // // // // // // // // // // // // // // /
+        # ##################################################################
 
         # self.doUnitAttrition()
         self.verifyAlive(simulation)
@@ -361,10 +370,8 @@ class Player:
     def hasProcessedAutoMoves(self) -> bool:
         return self.processedAutoMovesValue
 
-    def setAutoMovesTo(self, value: bool):
-        if self.autoMovesValue != value:
-            self.autoMovesValue = value
-            self.processedAutoMovesValue = False
+    def setProcessedAutoMovesTo(self, value: bool):
+        self.processedAutoMovesValue = value
 
     def doUnitReset(self, game):
         """Units heal and then get their movement back"""
@@ -412,3 +419,134 @@ class Player:
     def isSuzerainOf(self, cityState: CityState, simulation) -> bool:
         return False
 
+    def isMajorAI(self) -> bool:
+        # return not self.isHuman() and not self.isFreeCity() and not self.isBarbarian() and not self.isCityState()
+        return not self.isHuman() and not self.isBarbarian() and not self.isCityState()
+
+    def isCityState(self) -> bool:
+        return self.leader == LeaderType.cityState
+
+    def setEndTurnTo(self, value: bool, simulation):
+        if not self.isEndTurn() and self.isHuman() and simulation.activePlayer().leader != self.leader:
+            if self.hasBusyUnitOrCity() or self.hasReadyUnit(simulation):
+                return
+        elif not self.isHuman():
+            if self.hasBusyUnitOrCity():
+                return
+
+        if self.isEndTurn() != value:
+            assert(self.isTurnActive(), "isTurnActive is expected to be true")
+
+            self.endTurnValue = value
+
+            if self.isEndTurn():
+                self.setAutoMovesTo(True)
+            else:
+                self.setAutoMovesTo(False)
+        else:
+            # This check is here for the AI.
+            # Currently, the setEndTurn(true) never seems to get called for AI players, the auto moves are just 
+            # set directly
+            # Why is this?  It would be great if all players were processed the same.
+            if not value and self.isAutoMoves():
+                self.setAutoMovesTo(False)
+
+    def isEndTurn(self) -> bool:
+        return self.endTurnValue
+
+    def hasBusyUnitOrCity(self) -> bool:
+        # @fixme
+        return False
+
+    def isAutoMoves(self) -> bool:
+        return self.autoMovesValue
+
+    def setAutoMovesTo(self, value: bool):
+        if self.autoMovesValue != value:
+            self.autoMovesValue = value
+            self.processedAutoMovesValue = False
+
+    def hasReadyUnit(self, simulation) -> bool:
+        activePlayer = simulation.activePlayer()
+
+        for loopUnit in simulation.unitsOf(activePlayer):
+            if loopUnit.readyToMove() and not loopUnit.isDelayedDeath():
+                return True
+
+        return False
+
+    def countReadyUnits(self, simulation) -> int:
+        rtnValue = 0
+        activePlayer = simulation.activePlayer()
+
+        for loopUnit in simulation.unitsOf(activePlayer):
+            if loopUnit.readyToMove() and not loopUnit.isDelayedDeath():
+                rtnValue += 1
+
+        return rtnValue
+
+    def hasUnitsThatNeedAIUpdate(self, simulation) -> bool:
+        for loopUnit in simulation.unitsOf(self):
+            if not loopUnit.processedInTurn() and (loopUnit.isAutomated() and loopUnit.task() != UnitTaskType.none and loopUnit.canMove()):
+                return True
+
+        return False
+
+    def unitUpdate(self, simulation):
+        # CvPlayerAI::AI_unitUpdate()
+        # Now its the homeland AI's turn.
+        if self.isHuman():
+            self.homelandAI.doTurn(simulation)
+        else:
+            # Now let the tactical AI run.  Putting it after the operations update allows units who have
+            # just been handed off to the tactical AI to get a move in the same turn they switch between
+            self.tacticalAI.doTurn(simulation)
+            self.homelandAI.doTurn(simulation)
+
+    def verifyAlive(self, simulation):
+        if self.isAlive():
+            if not self.isBarbarian(): # and not self.isFreeCity():
+                if self.numberOfCities(simulation) == 0 and self.numberOfUnits(simulation) == 0:
+                    self.setAliveTo(False, simulation)
+        else:
+            # if dead but has received units / cities - revive
+            if self.numberOfUnits(simulation) > 0 or self.numberOfCities(simulation) > 0:
+                self.setAliveTo(True, simulation)
+
+    def numberOfCities(self, simulation) -> int:
+        return simulation.citiesOf(player=self)
+
+    def numberOfUnits(self, simulation) -> int:
+        return simulation.unitsOf(player=self)
+
+    def setAliveTo(self, alive, simulation):
+        if self.isAliveVal != alive:
+            self.isAliveVal = alive
+
+            if not alive:
+                # cleanup
+                # killUnits();
+                # killCities();
+                # GC.getGame().GetGameDeals()->DoCancelAllDealsWithPlayer(GetID());
+
+                if self.isHuman():
+                    simulation.setGameStateTo(GameState.over)
+
+                self.endTurn(simulation)
+
+    def setAllUnitsUnprocessed(self, simulation):
+        for unit in simulation.unitsOf(player=self):
+            unit.setTurnProcessedTo(False)
+
+    def updateTimers(self, simulation):
+        for unit in simulation.unitsOf(player=self):
+            unit.updateMission(simulation)
+            unit.doDelayedDeath(simulation)
+
+        self.diplomacyAI.update(simulation)
+
+    def updateNotifications(self, simulation):
+        pass
+
+    def hasActiveDiplomacyRequests(self) -> bool:
+        return False

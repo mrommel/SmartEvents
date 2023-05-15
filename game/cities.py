@@ -425,6 +425,9 @@ class CityCitizens:
 		for _ in range(numToAllocate):
 			self.doAddBestCitizenFromUnassigned(simulation)
 
+	def isForcedAvoidGrowth(self) -> bool:
+		return self._forceAvoidGrowthValue
+
 	def setForcedAvoidGrowth(self, forcedAvoidGrowth: bool, simulation):
 		if self._forceAvoidGrowthValue != forcedAvoidGrowth:
 			self._forceAvoidGrowthValue = forcedAvoidGrowth
@@ -1550,9 +1553,9 @@ class City:
 				self.setFoodBasket(self.growthThreshold())
 			else:
 				self.setFoodBasket(0)
-				self.setPopulation(self.population() + 1, simulation=simulation)
+				self.setPopulation(self.population() + 1, reassignCitizen=True, simulation=simulation)
 
-				simulation.userInterface.update(city=self)
+				simulation.userInterface.updateCity(city=self)
 
 				# Only show notification if the city is small
 				if self._populationValue <= 5:

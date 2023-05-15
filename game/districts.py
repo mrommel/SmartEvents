@@ -9,7 +9,7 @@ from utils.base import ExtendedEnum
 class DistrictTypeData:
 	def __init__(self, name: str, specialty: bool, effects: [str], productionCost: int, maintenanceCost: int,
 	             requiredTech: Optional[TechType], requiredCivic: Optional[CivicType], domesticTradeYields: Yields,
-	             foreignTradeYields: Yields, flavours: [Flavor], oncePerCivilization: bool = False):
+	             foreignTradeYields: Yields, flavors: [Flavor], oncePerCivilization: bool = False):
 		self.name = name
 		self.specialty = specialty
 		self.effects = effects
@@ -21,7 +21,7 @@ class DistrictTypeData:
 		self.domesticTradeYields = domesticTradeYields
 		self.foreignTradeYields = foreignTradeYields
 
-		self.flavours = flavours
+		self.flavors = flavors
 		self.oncePerCivilization = oncePerCivilization
 
 
@@ -40,7 +40,7 @@ class DistrictType(ExtendedEnum):
 	governmentPlaza = 'governmentPlaza'
 	aqueduct = 'aqueduct'
 	industrialZone = 'industrialZone'
-	theatherSquare = 'theatherSquare'
+	theaterSquare = 'theaterSquare'
 
 	def name(self) -> str:
 		return self._data().name
@@ -60,7 +60,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=None,
 				domesticTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
-				flavours=[]
+				flavors=[]
 			)
 		elif self == DistrictType.cityCenter:
 			# https://civilization.fandom.com/wiki/City_Center_(Civ6)
@@ -76,7 +76,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=None,
 				domesticTradeYields=Yields(food=1.0, production=1.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=0.0, gold=3.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.cityDefense, 7)
 				]
 			)
@@ -96,7 +96,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=CivicType.mysticism,
 				domesticTradeYields=Yields(food=0, production=0, gold=0),
 				foreignTradeYields=Yields(food=0, production=0, gold=0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.culture, 6)
 				]
 			)
@@ -122,7 +122,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=None,
 				domesticTradeYields=Yields(food=0.0, production=1.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=1.0, gold=0.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.militaryTraining, value=7),
 					Flavor(FlavorType.cityDefense, value=3)
 				]
@@ -146,7 +146,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=None,
 				domesticTradeYields=Yields(food=1.0, production=0.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=0.0, gold=0.0, science=1.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.science, 8)
 				]
 			)
@@ -168,7 +168,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=CivicType.gamesAndRecreation,
 				domesticTradeYields=Yields(food=1.0, production=0.0, gold=0.0),
 				foreignTradeYields=Yields(food=1.0, production=0.0, gold=0.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.amenities, 7)
 				]
 			)
@@ -190,7 +190,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=None,
 				domesticTradeYields=Yields(food=0.0, production=1.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=0.0, gold=3.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.gold, 7)
 				]
 			)
@@ -219,7 +219,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=None,
 				domesticTradeYields=Yields(food=0.0, production=1.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=0.0, gold=3.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.naval, value=3),
 					Flavor(FlavorType.navalGrowth, value=7)
 				]
@@ -247,7 +247,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=None,
 				domesticTradeYields=Yields(food=1.0, production=0.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=0.0, gold=0.0, faith=1.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.religion, 7)
 				]
 			)
@@ -265,7 +265,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=CivicType.urbanization,
 				domesticTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.growth, 2),
 					Flavor(FlavorType.expansion, 3)
 				]
@@ -286,7 +286,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=CivicType.stateWorkforce,
 				domesticTradeYields=Yields(food=1, production=1, gold=0),
 				foreignTradeYields=Yields(food=0, production=0, gold=2),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.diplomacy, 8)
 				],
 				oncePerCivilization=True
@@ -311,7 +311,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=None,
 				domesticTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.tileImprovement, value=7),
 					Flavor(FlavorType.growth, value=2)
 				]
@@ -335,11 +335,11 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=None,
 				domesticTradeYields=Yields(food=0.0, production=1.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=1.0, gold=0.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.production, value=9)
 				]
 			)
-		elif self == DistrictType.theatherSquare:
+		elif self == DistrictType.theaterSquare:
 			# https://civilization.fandom.com/wiki/Theater_Square_(Civ6)
 			return DistrictTypeData(
 				name="TXT_KEY_DISTRICT_THEATER_SQUARE_TITLE",
@@ -361,7 +361,7 @@ class DistrictType(ExtendedEnum):
 				requiredCivic=CivicType.dramaAndPoetry,
 				domesticTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
 				foreignTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.culture, value=6),
 					Flavor(FlavorType.greatPeople, value=4)
 				]

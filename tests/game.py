@@ -81,6 +81,17 @@ class TestGameAssets(unittest.TestCase):
 		self.assertIn(DistrictType.entertainmentComplex, achievements.districtTypes)
 
 
+class TestUserInterface:
+	def updateCity(self, city):
+		pass
+
+	def updatePlayer(self, player):
+		pass
+
+	def isShown(self, screenType) -> bool:
+		return False
+
+
 class TestCity(unittest.TestCase):
 
 	def setUp(self) -> None:
@@ -99,6 +110,7 @@ class TestCity(unittest.TestCase):
 		anotherTile.setImprovement(improvement=ImprovementType.mine)
 
 		simulation = Game(mapModel)
+		simulation.userInterface = TestUserInterface()
 
 		playerTrajan = Player(leader=LeaderType.trajan, human=False)
 		playerTrajan.initialize()
@@ -143,6 +155,25 @@ class TestCity(unittest.TestCase):
 		self.assertEqual(foodYield, 5.0)
 		self.assertEqual(productionYield, 4.0)
 		self.assertEqual(goldYield, 5.0)
+
+	def test_city_no_growth(self):
+		# GIVEN
+
+		# WHEN
+		self.city.doTurn(self.simulation)
+
+		# THEN
+		self.assertEqual(self.city.population(), 1)
+
+	def test_city_growth_from_food(self):
+		# GIVEN
+		self.city.setFoodBasket(20)
+
+		# WHEN
+		self.city.doTurn(self.simulation)
+
+		# THEN
+		self.assertEqual(self.city.population(), 2)
 
 	def test_city_turn(self):
 		# GIVEN
@@ -201,19 +232,19 @@ class TestSimulation(unittest.TestCase):
 		simulation.players.append(playerAlexander)
 
 		# add UI
-		simulation.userInterface = object()
+		simulation.userInterface = TestUserInterface()
 
 		playerTrajan.foundCity(HexPoint(4, 5), "Berlin", simulation)
 
 		# WHEN
 		iteration = 0
 		while not(playerAlexander.hasProcessedAutoMoves() and playerAlexander.turnFinished()) and iteration < 25:
-			simulation.update()
+			simulation.update()  # the checks happen here
 			print(f'-- loop -- active player: {simulation.activePlayer()} --', flush=True)
 
 			if playerAlexander.isTurnActive():
-				playerAlexander.finishTurn()
-				playerAlexander.setAutoMovesTo(True)
+				playerAlexander.setProcessedAutoMovesTo(True)  # units have moved
+				playerAlexander.finishTurn()  # turn button clicked
 
 			iteration += 1
 

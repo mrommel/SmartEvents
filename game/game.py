@@ -2,7 +2,7 @@ from enum import Enum
 
 from game.ai.barbarians import BarbarianAI
 from game.ai.religions import Religions
-from game.base_types import HandicapType, VictoryType
+from game.base_types import HandicapType, VictoryType, GameState
 from game.cities import City
 from game.civilizations import LeaderType
 from game.players import Player
@@ -21,12 +21,6 @@ class Interface:
 
 class ScreenType(Enum):
     diplomatic = 0
-
-
-class GameState(Enum):
-    on = 0
-    over = 1
-    extended = 2
 
 
 class Game:
@@ -181,6 +175,9 @@ class Game:
     def tutorial(self):
         return None
 
+    def showTutorialInfos(self) -> bool:
+        return False
+
     def isWaitingForBlockingInput(self) -> bool:
         return self.waitDiploPlayer is not None
 
@@ -324,7 +321,7 @@ class Game:
                         if not player.isHuman() and not player.hasBusyUnitOrCity():
 
                             if readyUnitsNow == 0:
-                                player.setAutoMoves(True)
+                                player.setAutoMovesTo(True)
                             else:
                                 if player.hasReadyUnit(self):
                                     waitTime = 5
@@ -385,7 +382,7 @@ class Game:
 
                         # If we completed the processing of the auto - moves, flag it.
                         if player.turnFinished() or not player.isHuman():
-                            player.setProcessedAutoMoves(True)
+                            player.setProcessedAutoMovesTo(True)
 
                     # KWG: This code should go into CheckPlayerTurnDeactivate
                     if not player.turnFinished() and player.isHuman():
@@ -410,10 +407,10 @@ class Game:
             if player.isAlive():
                 player.updateTimers(self)
 
-    def updatePlayers(self, game):
+    def updatePlayers(self, simulation):
         for player in self.players:
             if player.isAlive() and player.isActive():
-                player.updateNotifications(game)
+                player.updateNotifications(simulation)
 
     def checkPlayerTurnDeactivate(self):
         """ Check to see if the player's turn should be deactivated.
@@ -426,6 +423,10 @@ class Game:
             if player.isAlive() and player.isActive():
                 # For some reason, AI players don't set EndTurn, why not?
                 if player.turnFinished() or (not player.isHuman() and not player.hasActiveDiplomacyRequests()):
+                    # debug
+                    if player.isHuman():
+                        print(f'auto moves: {player.hasProcessedAutoMoves()}')
+                    #debug
                     if player.hasProcessedAutoMoves():
                         autoMovesComplete = False
                         if not player.hasBusyUnitOrCity():
@@ -470,3 +471,6 @@ class Game:
 
     def activePlayer(self):
         return next((player for player in self.players if player.isAlive() and player.isActive()), None)
+
+    def updateTacticalAnalysisMap(self, player):
+        pass
