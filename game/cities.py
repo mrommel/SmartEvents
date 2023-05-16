@@ -675,6 +675,7 @@ class MomentType(ExtendedEnum):
 
 
 class DedicationType(ExtendedEnum):
+	penBrushAndVoice = 'penBrushAndVoice'
 	freeInquiry = 'freeInquiry'
 	monumentality = 'monumentality'
 

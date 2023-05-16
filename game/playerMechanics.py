@@ -360,6 +360,48 @@ class PlayerCivics:
 	def currentCivic(self) -> Optional[CivicType]:
 		return self._currentCivicValue
 
+	def inspirationTriggeredFor(self, civic: CivicType):
+		return self._inspirations.triggeredFor(civic)
+
+	def triggerInspirationFor(self, civic: CivicType, simulation):
+		# check if eureka is still needed
+		if self.hasCivic(civic):
+			return
+
+		# check if already active
+		if self._inspirations.triggeredFor(civic):
+			return
+
+		self._inspirations.triggerFor(civic)
+
+		# update progress
+		inspirationBoost = 0.5
+
+		# penBrushAndVoice + golden - Inspiration provide an additional 10% of Civic costs.
+		if self.player.currentAge() == AgeType.golden and self.player.hasDedication(DedicationType.penBrushAndVoice):
+			inspirationBoost += 0.1
+
+		self._progresses.addWeight(float(civic.cost()) * inspirationBoost, civic)
+
+		# penBrushAndVoice + normal - Gain + 1 Era Score when you trigger an Inspiration
+		if self.player.currentAge() == AgeType.normal and self.player.hasDedication(DedicationType.penBrushAndVoice):
+			# self.player.addMoment(of:.dedicationTriggered(dedicationType:.penBrushAndVoice), in: gameModel)
+			pass
+
+		# check quests
+		# for quest in player.ownQuests( in: gameModel):
+		# 	if case.triggerInspiration(civic: let questCivicType) = quest.type
+		# 		if civic == questCivicType
+		# 			cityStatePlayer = simulation.cityStatePlayer(for: quest.cityState)
+		# 			cityStatePlayer.fulfillQuest(by: player.leader, in: gameModel)
+
+		# trigger event to user
+		if self.player.isHuman():
+			# simulation.userInterface?.showPopup(popupType:.inspirationTriggered(civic: civicType))
+			pass
+
+		return
+
 
 class BuilderTaskingAI:
 	def __init__(self, player):

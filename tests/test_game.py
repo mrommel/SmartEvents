@@ -321,28 +321,28 @@ class TestPlayerCivics(unittest.TestCase):
 		# THEN
 		self.assertEqual(playerCivics.currentCivic(), CivicType.foreignTrade)
 
-	# def test_eureka(self):
-	# 	# GIVEN
-	# 	map = Map(10, 10)
-	# 	simulation = Game(map=map)
-	#
-	# 	player = Player(leader=LeaderType.alexander, cityState=None, human=False)
-	# 	player.initialize()
-	#
-	# 	playerTech = PlayerTechs(player=player)
-	# 	playerTech.discover(tech=TechType.pottery, simulation=simulation)
-	#
-	# 	playerTech.setCurrentTech(TechType.writing, simulation)
-	# 	progressBefore = playerTech.currentScienceProgress()
-	#
-	# 	# WHEN
-	# 	playerTech.triggerEurekaFor(tech=TechType.writing, simulation=simulation)
-	# 	progressAfter = playerTech.currentScienceProgress()
-	#
-	# 	# THEN
-	# 	self.assertEqual(playerTech.eurekaTriggeredFor(TechType.writing), True)
-	# 	self.assertEqual(progressBefore, 0.0)
-	# 	self.assertEqual(progressAfter, 25.0)
+	def test_inspiration(self):
+		# GIVEN
+		map = Map(10, 10)
+		simulation = Game(map=map)
+
+		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
+		player.initialize()
+
+		playerCivics = PlayerCivics(player=player)
+		playerCivics.discover(civic=CivicType.codeOfLaws, simulation=simulation)
+
+		playerCivics.setCurrentCivic(CivicType.foreignTrade, simulation)
+		progressBefore = playerCivics.currentCultureProgress()
+
+		# WHEN
+		playerCivics.triggerInspirationFor(civic=CivicType.foreignTrade, simulation=simulation)
+		progressAfter = playerCivics.currentCultureProgress()
+
+		# THEN
+		self.assertEqual(playerCivics.inspirationTriggeredFor(CivicType.foreignTrade), True)
+		self.assertEqual(progressBefore, 0.0)
+		self.assertEqual(progressAfter, 20.0)
 
 
 class TestSimulation(unittest.TestCase):
