@@ -1,6 +1,6 @@
 import sys
 
-from game.unit_types import UnitTaskType, UnitType
+from game.unitTypes import UnitTaskType, UnitType
 from map.base import HexPoint, HexArea
 
 

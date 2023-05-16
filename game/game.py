@@ -2,12 +2,12 @@ from enum import Enum
 
 from game.ai.barbarians import BarbarianAI
 from game.ai.religions import Religions
-from game.base_types import HandicapType, VictoryType, GameState
+from game.baseTypes import HandicapType, VictoryType, GameState
 from game.cities import City
 from game.civilizations import LeaderType
 from game.players import Player
 from game.types import TechType
-from game.unit_types import BuildType
+from game.unitTypes import BuildType
 from game.units import Unit
 from map.base import HexPoint
 from map.map import Map, Tile
@@ -157,9 +157,9 @@ class Game:
             # self.userInterface.refreshTile(neighborTile)
 
         # update eureka
-        if not city.player.techs.eurekaTriggeredForTech(TechType.sailing):
+        if not city.player.techs.eurekaTriggeredFor(TechType.sailing):
             if self._map.isCoastalAt(city.location):
-                city.player.techs.triggerEurekaForTech(TechType.sailing, self)
+                city.player.techs.triggerEurekaFor(TechType.sailing, self)
 
         self._map.addCity(city, simulation=self)
 

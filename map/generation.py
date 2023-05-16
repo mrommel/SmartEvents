@@ -5,12 +5,12 @@ from typing import Optional
 
 from bitarray import bitarray
 
-from game.base_types import CityStateType
+from game.baseTypes import CityStateType
 from game.civilizations import LeaderType
 from map.base import HexPoint, HexDirection, Array2D, HexArea
 from map.map import Map, Tile, Continent, ContinentType
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, MoveTypeIgnoreUnitsPathfinderDataSource, AStarPathfinder
-from map.perlin_noise.perlin_noise import PerlinNoise
+from map.perlin_noise.perlinNoise import PerlinNoise
 from map.types import TerrainType, MapType, MapAge, MapSize, ResourceType, ClimateZone, FeatureType, ResourceUsage, \
     UnitMovementType
 from utils.base import WeightedStringList

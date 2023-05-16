@@ -1,6 +1,6 @@
 import gettext
 
-from game.base_types import LeaderType
+from game.baseTypes import LeaderType
 from map.generation import MapGenerator, MapOptions
 from map.types import MapSize, MapType
 from game import Game

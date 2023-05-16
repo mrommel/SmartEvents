@@ -2,9 +2,9 @@ import abc
 
 from game.flavors import Flavor, FlavorType, Flavors
 from utils.base import ExtendedEnum, InvalidEnumError
-from game.ai.grand_strategies import GrandStrategyAIType
-from game.ai.military_strategies import MilitaryStrategyType, ReconStateType
-from game.unit_types import OperationType, UnitTaskType
+from game.ai.grandStrategies import GrandStrategyAIType
+from game.ai.militaryStrategies import MilitaryStrategyType, ReconStateType
+from game.unitTypes import OperationType, UnitTaskType
 
 
 class EconomicStrategyType(ExtendedEnum):

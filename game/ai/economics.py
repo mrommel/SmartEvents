@@ -1,6 +1,6 @@
 from utils.base import InvalidEnumError
-from game.ai.economic_strategies import EconomicStrategyType
-from game.ai.military_strategies import ReconStateType
+from game.ai.economicStrategies import EconomicStrategyType
+from game.ai.militaryStrategies import ReconStateType
 
 
 class EconomicStrategyAdoptionItem:

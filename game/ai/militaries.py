@@ -1,11 +1,11 @@
 from enum import Enum
 
 from game.civilizations import TraitType
-from game.unit_types import UnitDomainType, UnitTaskType
+from game.unitTypes import UnitDomainType, UnitTaskType
 from utils.base import InvalidEnumError
-from game.base_types import FlavorType
-from game.ai.grand_strategies import GrandStrategyAIType
-from game.ai.military_strategies import MilitaryStrategyType
+from game.baseTypes import FlavorType
+from game.ai.grandStrategies import GrandStrategyAIType
+from game.ai.militaryStrategies import MilitaryStrategyType
 
 
 class MilitaryThreatType(Enum):

@@ -1,9 +1,5 @@
 """ unittest module """
-import sys
 import unittest
-import uuid
-
-import pytest
 
 from game.civilizations import LeaderType
 from game.players import Player

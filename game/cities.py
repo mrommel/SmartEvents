@@ -2,8 +2,8 @@ import random
 from typing import Optional
 
 from game.ai.cities import CityStrategyAI, CitySpecializationType
-from game.ai.economic_strategies import EconomicStrategyType
-from game.ai.grand_strategies import GrandStrategyAIType
+from game.ai.economicStrategies import EconomicStrategyType
+from game.ai.grandStrategies import GrandStrategyAIType
 from game.amenities import AmenitiesState
 from game.buildings import BuildingType, BuildingCategoryType
 from game.civilizations import LeaderWeightList, CivilizationAbility, LeaderAbility, LeaderType, \
@@ -11,12 +11,13 @@ from game.civilizations import LeaderWeightList, CivilizationAbility, LeaderAbil
 from game.districts import DistrictType
 from game.governments import GovernmentType
 from game.governors import GovernorType, GovernorTitle, Governor
+from game.greatPersons import GreatPersonType
 from game.loyalties import LoyaltyState
-from game.policy_cards import PolicyCardType
+from game.policyCards import PolicyCardType
 from game.religions import PantheonType
 from game.specialists import SpecialistType
 from game.types import EraType, TechType
-from game.unit_types import ImprovementType
+from game.unitTypes import ImprovementType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType
@@ -655,6 +656,7 @@ class CityTourism:
 
 
 class AgeType(ExtendedEnum):
+	golden = 'golden'
 	normal = 'normal'
 
 
@@ -673,6 +675,7 @@ class MomentType(ExtendedEnum):
 
 
 class DedicationType(ExtendedEnum):
+	freeInquiry = 'freeInquiry'
 	monumentality = 'monumentality'
 
 
@@ -2025,7 +2028,7 @@ class City:
 
 		amenitiesFromWonders: float = 0.0
 
-	    # gather amenities from buildingss
+		# gather amenities from buildingss
 		for wonder in list(WonderType):
 			if self.hasWonder(wonder):
 				amenitiesFromWonders += float(wonder.amenities())
@@ -2125,4 +2128,225 @@ class City:
 			governmentModifier += 0.15
 
 		return governmentModifier
-	
+
+	def sciencePerTurn(self, simulation) -> float:
+		sciencePerTurn: YieldValues = YieldValues(value=0.0, percentage=1.0)
+
+		sciencePerTurn += YieldValues(value=self._scienceFromTiles(simulation))
+		sciencePerTurn += self._scienceFromGovernmentType()
+		sciencePerTurn += YieldValues(value=self._scienceFromBuildings())
+		sciencePerTurn += self._scienceFromDistricts(simulation)
+		sciencePerTurn += YieldValues(value=self._scienceFromWonders())
+		sciencePerTurn += YieldValues(value=self._scienceFromPopulation())
+		sciencePerTurn += YieldValues(value=self._scienceFromTradeRoutes(simulation))
+		sciencePerTurn += self._scienceFromGovernors()
+		# this is broken - not sure why
+		# sciencePerTurn += YieldValues(value=self.baseYieldRateFromSpecialists.weight(of:.science))
+		sciencePerTurn += self._scienceFromEnvoys(simulation)
+
+		# cap yields based on loyalty
+		sciencePerTurn += YieldValues(value=0.0, percentage=self.loyaltyState().yieldPercentage())
+
+		return sciencePerTurn.calc()
+
+	def _scienceFromTiles(self, simulation) -> float:
+		scienceFromTiles: float = 0.0
+
+		centerTile = simulation.tileAt(self.location)
+		scienceFromTiles += centerTile.yields(self.player, ignoreFeature=False).science
+
+		for point in self.cityCitizens.workingTileLocations():
+			if self.cityCitizens.isWorkedAt(point):
+				adjacentTile = simulation.tileAt(point)
+				scienceFromTiles += adjacentTile.yields(self.player, ignoreFeature=False).science
+
+				# mausoleumAtHalicarnassus
+				if adjacentTile.terrain() == TerrainType.shore and self.hasWonder(WonderType.mausoleumAtHalicarnassus):
+					# +1 Science, +1 Faith, and +1 Culture to all Coast tiles in this city.
+					scienceFromTiles += 1.0
+
+				# etemenanki - +2 Science and +1 Production to all Marsh tiles in your empire.
+				if adjacentTile.hasFeature(FeatureType.marsh) and self.player.hasWonder(WonderType.etemenanki, simulation):
+					scienceFromTiles += 2.0
+
+				# etemenanki - +1 Science and +1 Production on all Floodplains tiles in this city.
+				if adjacentTile.hasFeature(FeatureType.floodplains) and self.hasWonder(WonderType.etemenanki):
+					scienceFromTiles += 1.0
+
+		return scienceFromTiles
+
+	def _scienceFromGovernmentType(self):
+		scienceFromGovernmentValue: YieldValues = YieldValues(value=0.0, percentage=0.0)
+
+		# yields from government
+		# https://civilization.fandom.com/wiki/Autocracy_(Civ6)
+		# +1 to all yields for each government building and Palace in a city.
+		if self.player.government.currentGovernment() == GovernmentType.autocracy:
+			scienceFromGovernmentValue += float(self.buildings.numberOfBuildingsOf(BuildingCategoryType.government))
+
+		# militaryResearch - Military Academies, Seaports, and Renaissance Walls generate +2 Science.
+		if self.player.government.hasCard(PolicyCardType.militaryResearch):
+			if self.buildings.hasBuilding(BuildingType.militaryAcademy):
+				scienceFromGovernmentValue += 2.0
+
+			if self.buildings.hasBuilding(BuildingType.seaport):
+				scienceFromGovernmentValue += 2.0
+
+			if self.buildings.hasBuilding(BuildingType.renaissanceWalls):
+				scienceFromGovernmentValue += 2.0
+
+		# despoticPaternalism - +4 Loyalty per turn in cities with Governors.
+		# BUT: -15% Science and -15% Culture in all cities without an established Governor.
+		if self.player.government.hasCard(PolicyCardType.despoticPaternalism):
+			if self.governor() is None:
+				scienceFromGovernmentValue.percentage += -0.15
+
+		return scienceFromGovernmentValue
+
+	def _scienceFromBuildings(self) -> float:
+		scienceFromBuildings: float = 0.0
+
+		# gather yields from builds
+		for building in list(BuildingType):
+			if self.buildings.hasBuilding(building):
+				scienceFromBuildings += building.yields().science
+
+			# Libraries provide + 1 Science.
+			# https://civilization.fandom.com/wiki/Hypatia_(Civ6)
+			if building == BuildingType.library and self.player.greatPeople.hasRetired(GreatPersonType.hypatia):
+				scienceFromBuildings += 1
+
+		return scienceFromBuildings
+
+	def _scienceFromDistricts(self, simulation):
+		scienceFromDistricts: YieldValues = YieldValues(value=0.0, percentage=0.0)
+		policyCardModifier: float = 1.0
+
+		# yields from cards
+		# naturalPhilosophy - +100% Campus district adjacency bonuses.
+		if self.player.government.hasCard(PolicyCardType.naturalPhilosophy):
+			policyCardModifier += 1.0
+
+		# fiveYearPlan - +100 % Campus and Industrial Zone district adjacency bonuses.
+		if self.player.government.hasCard(PolicyCardType.fiveYearPlan):
+			policyCardModifier += 1.0
+
+		# district
+		if self.districts.hasDistrict(DistrictType.campus):
+			campusLocation = self.locationOf(DistrictType.campus)
+
+			for neighbor in campusLocation.neighbors():
+				neighborTile = simulation.tileAt(neighbor)
+
+				# Major bonus(+2 Science) for each adjacent Geothermal Fissure and Reef tile.
+				if neighborTile.hasFeature(FeatureType.geyser) or neighborTile.hasFeature(FeatureType.reef):
+					scienceFromDistricts += 2.0 * policyCardModifier
+
+				# Major bonus(+2 Science) for each adjacent Great Barrier Reef tile.
+				if neighborTile.hasFeature(FeatureType.greatBarrierReef):
+					scienceFromDistricts += 2.0 * policyCardModifier
+
+				# Standard bonus(+1 Science) for each adjacent Mountain tile.
+				if neighborTile.hasFeature(FeatureType.mountains):
+					scienceFromDistricts += 1.0 * policyCardModifier
+
+				# Minor bonus(+½ Science) for each adjacent Rainforest and district tile.
+				if neighborTile.hasFeature(FeatureType.rainforest) or neighborTile.district() != DistrictType.none:
+					scienceFromDistricts += 0.5 * policyCardModifier
+
+		# freeInquiry + golden - Commercial Hubs and Harbors provide Science equal to their Gold bonus.
+		if self.player.currentAge() == AgeType.golden and self.player.hasDedication(DedicationType.freeInquiry):
+			if self.districts.hasDistrict(DistrictType.commercialHub):
+				scienceFromDistricts += 2.0 # not exactly what the bonus says
+
+			if self.districts.hasDistrict(DistrictType.harbor):
+				scienceFromDistricts += 2.0 # not exactly what the bonus says
+
+		# monasticism - +75% Science in cities with a Holy Site.
+		# BUT: -25% Culture in all cities.
+		if self.player.government.hasCard(PolicyCardType.monasticism) and self.districts.hasDistrict(DistrictType.holySite):
+			scienceFromDistricts.percentage += 0.75
+
+		return scienceFromDistricts
+
+	def _scienceFromWonders(self) -> float:
+		scienceFromWonders: float = 0.0
+
+		# greatLibrary - +2 Science
+		if self.wonders.hasWonder(WonderType.greatLibrary):
+			scienceFromWonders += 2.0
+
+		return scienceFromWonders
+
+	def _scienceFromPopulation(self) -> float:
+		# science & culture from population
+		return self._populationValue * 0.5
+
+	def _scienceFromTradeRoutes(self, simulation) -> float:
+		scienceFromTradeRoutes: float = 0.0
+
+		for tradeRoute in self.player.tradeRoutes.tradeRoutesStartingAt(city=self):
+			scienceFromTradeRoutes += tradeRoute.yields(simulation).science
+
+		return scienceFromTradeRoutes
+
+	def _scienceFromGovernors(self) -> float:
+		scienceFromGovernors: YieldValues = YieldValues(value=0.0, percentage=0.0)
+
+		# +1 Science per turn for each Citizen in the city.
+		if self.hasGovernorTitle(GovernorTitle.researcher):
+			scienceFromGovernors += YieldValues(value=float(self.population()))
+
+		# 15 % increase in Science and Culture generated by the city.
+		if self.hasGovernorTitle(GovernorTitle.librarian):
+			scienceFromGovernors += YieldValues(value=0.0, percentage=0.15)
+
+		return scienceFromGovernors
+
+	def _scienceFromEnvoys(self, simulation) -> float:
+		# var scienceFromEnvoys: YieldValues = YieldValues(value: 0.0, percentage: 0.0)
+		# 
+		#         for effect in effects {
+		# 
+		#             // +2 Science Science in the Capital Capital.
+		#             if effect.isEqual(category: .scientific, at: .first) && self.capitalValue {
+		#                 scienceFromEnvoys += YieldValues(value: 2.0)
+		#             }
+		# 
+		#             // +2 Science Science in every Library building.
+		#             if effect.isEqual(category: .scientific, at: .third) && self.has(building: .library) {
+		#                 scienceFromEnvoys += YieldValues(value: 2.0)
+		#             }
+		# 
+		#             // +2 Science Science in every University building.
+		#             if effect.isEqual(category: .scientific, at: .sixth) && self.has(building: .university) {
+		#                 scienceFromEnvoys += YieldValues(value: 2.0)
+		#             }
+		# 
+		#             // taruga suzerain effect
+		#             // Your cities receive +5% [Science] Science for each different Strategic Resource they have.
+		#             if effect.cityState == .taruga && effect.level == .suzerain {
+		#                 let differentResources = Double(self.numberOfDifferentStrategicResources(in: gameModel))
+		#                 scienceFromEnvoys += YieldValues(value: 5.0 * differentResources)
+		#             }
+		# 
+		#             // geneva suzerain effect
+		#             // Your cities earn +15% [Science] Science whenever you are not at war with any civilization.
+		#             if effect.cityState == .geneva && effect.level == .suzerain {
+		#                 if player.atWarCount() == 0 {
+		#                     scienceFromEnvoys += YieldValues(value: 0.0, percentage: 0.15)
+		#                 }
+		#             }
+		#         }
+		# 
+		#         return scienceFromEnvoys
+		return 0.0
+
+	def hasGovernorTitle(self, title: GovernorTitle) -> bool:
+		if self.governor() is not None:
+			if self.governor().defaultTitle() == title:
+				return True
+
+			return self.governor().hasTitle(title)
+
+		return False

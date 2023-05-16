@@ -3,7 +3,7 @@ from typing import Optional
 
 from game.cities import City
 from game.players import Player
-from game.unit_types import BuildType, ImprovementType
+from game.unitTypes import BuildType, ImprovementType
 from game.units import Unit
 from map.base import HexPoint, HexDirection, Size, Array2D
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \

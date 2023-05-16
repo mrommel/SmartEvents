@@ -1,7 +1,7 @@
 from typing import Optional
 
 from game.flavors import Flavor, FlavorType
-from game.policy_cards import PolicyCardType
+from game.policyCards import PolicyCardType
 from game.types import CivicType, EraType
 from utils.base import ExtendedEnum
 

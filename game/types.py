@@ -152,8 +152,22 @@ class TechType(ExtendedEnum):
 	def required(self) -> []:
 		return self._data().required
 
+	def era(self) -> EraType:
+		return self._data().era
+
 	def cost(self) -> int:
 		return self._data().cost
+
+	def flavorValue(self, flavorType: FlavorType) -> int:
+		flavorOfTech = next((flavor for flavor in self._data().flavors if flavor.flavorType == flavorType), None)
+
+		if flavorOfTech is not None:
+			return flavorOfTech.value
+
+		return 0
+
+	def isGoodyTech(self) -> bool:
+		return self.era() == EraType.ancient
 
 	def _data(self):
 		if self == TechType.none:
@@ -1472,8 +1486,11 @@ class CivicType(ExtendedEnum):
 	def envoys(self) -> int:
 		return self._data().envoys
 
-	def governorTitle(self) -> bool:
+	def hasGovernorTitle(self) -> bool:
 		return self._data().governorTitle
+
+	def era(self) -> EraType:
+		return self._data().era
 
 	def _data(self):
 		# default

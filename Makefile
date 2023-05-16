@@ -17,8 +17,9 @@ venv: $(VENV)/bin/activate
 	# --disable=C0303,R0903,R0915,C0103,E1101,E0102,R0913,W0123,R0912,R0801 simulation map population
 #	./$(VENV)/bin/pylint
 
-tests: venv
-	./$(VENV)/bin/pytest
+pytests: venv
+	./$(VENV)/bin/pytest -v ./tests/test_game.py
+	./$(VENV)/bin/pytest -v ./tests/test_map.py
 
 run: venv
 	./$(VENV)/bin/python3 main.py

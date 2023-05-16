@@ -1,18 +1,20 @@
-from game.base_types import CityStateType, GameState
+from game.baseTypes import CityStateType, GameState
 from game.ai.economics import EconomicAI
-from game.ai.grand_strategies import GrandStrategyAI
+from game.ai.grandStrategies import GrandStrategyAI
 from game.ai.militaries import MilitaryAI
-from game.cities import City, AgeType, DedicationType, CityState
+from game.cities import City, AgeType, DedicationType, CityState, YieldValues
 from game.cityConnections import CityConnections
 from game.civilizations import LeaderType
 from game.flavors import Flavors, FlavorType
 from game.governments import PlayerGovernment
+from game.greatPersons import GreatPersonType
 from game.notifications import Notifications, NotificationType, Notification
-from game.player_mechanics import Techs, Civics, BuilderTaskingAI, TacticalAI, DiplomacyAI, HomelandAI, \
+from game.playerMechanics import PlayerTechs, PlayerCivics, BuilderTaskingAI, TacticalAI, DiplomacyAI, HomelandAI, \
     DiplomacyRequests
+from game.policyCards import PolicyCardType
 from game.religions import PantheonType
 from game.types import EraType
-from game.unit_types import UnitMissionType, UnitTaskType
+from game.unitTypes import UnitMissionType, UnitTaskType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.types import Tutorials
@@ -45,6 +47,14 @@ class PlayerTradeRoutes:
         return []
 
 
+class PlayerGreatPeople:
+    def __init__(self, player):
+        self.player = player
+
+    def hasRetired(self, greatPerson: GreatPersonType) -> bool:
+        return False
+
+
 class PlayerReligion:
     def __init__(self, player):
         self.player = player
@@ -72,8 +82,8 @@ class Player:
         self.diplomacyRequests = DiplomacyRequests(player=self)
 
         # special ais
-        self.techs = Techs(self)
-        self.civics = Civics(self)
+        self.techs = PlayerTechs(self)
+        self.civics = PlayerCivics(self)
 
         self.personalityFlavors = Flavors()
         # state values
@@ -96,6 +106,7 @@ class Player:
         self.religion = PlayerReligion(player=self)
         self.tradeRoutes = PlayerTradeRoutes(player=self)
         self.cityConnections = CityConnections(player=self)
+        self.greatPeople = PlayerGreatPeople(player=self)
         
         self.currentEraVal: EraType = EraType.ancient
         self.currentAgeVal: AgeType = AgeType.normal
@@ -275,7 +286,36 @@ class Player:
         return self.citiesFoundValue
 
     def science(self, simulation) -> float:
-        pass
+        value: YieldValues = YieldValues(value=0.0, percentage=1.0)
+
+        # Science from our Cities
+        value += self.scienceFromCities(simulation)
+        value += self.scienceFromCityStates(simulation)
+
+        return max(value.calc(), 0)
+
+    def scienceFromCities(self, simulation) -> YieldValues:
+        scienceVal: YieldValues = YieldValues(value=0.0, percentage=0.0)
+
+        for city in simulation.citiesOf(player=self):
+            scienceVal += city.sciencePerTurn(simulation)
+
+        return scienceVal
+
+    def scienceFromCityStates(self, simulation) -> YieldValues:
+        scienceVal = 0.0
+        scienceModifier = 0.0
+
+        # internationalSpaceAgency - 5% Science per City-State you are the Suzerain of.
+        if self.government.hasCard(PolicyCardType.internationalSpaceAgency):
+            numberOfCityStatesMet: int = 0
+            for cityState in self.metCityStates(simulation):
+                if self.isSuzerainOf(cityState, simulation):
+                    numberOfCityStatesMet += 1
+
+            scienceModifier += 0.05 * float(numberOfCityStatesMet)
+
+        return YieldValues(value=scienceVal, percentage=scienceModifier)
 
     def culture(self, simulation, consume: bool) -> float:
         pass
@@ -550,3 +590,6 @@ class Player:
 
     def hasActiveDiplomacyRequests(self) -> bool:
         return False
+
+    def doUpdateTradeRouteCapacity(self, simulation):
+        pass

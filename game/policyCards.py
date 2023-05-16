@@ -90,7 +90,7 @@ class PolicyCardType(ExtendedEnum):
 	# simultaneum
 	# religiousOrders
 	# logistics
-	# triangularTrade
+	triangularTrade = 'triangularTrade'
 	# drillManuals
 	# rationalism
 	# freeMarket
@@ -101,7 +101,19 @@ class PolicyCardType(ExtendedEnum):
 	# industrial
 	# nativeConquest
 	# grandeArmee
-	# ...
+	# nationalIdentity
+	# colonialTaxes
+	# raj
+	# publicWorks
+	# skyscrapers,
+	# grandOpera
+	# symphonies
+	# publicTransport
+	militaryResearch = 'militaryResearch'
+	# forceModernization
+	# totalWar
+	# expropriation
+	# militaryOrganization
 
 	# modern
 	# resourceManagement
@@ -114,7 +126,7 @@ class PolicyCardType(ExtendedEnum):
 	# scienceFoundations
 	# nuclearEspionage
 	# economicUnion
-	# theirFinestHour
+	theirFinestHour = 'theirFinestHour'
 	# arsenalOfDemocracy
 	newDeal = 'newDeal'
 	# lightningWarfare
@@ -135,13 +147,13 @@ class PolicyCardType(ExtendedEnum):
 	# militaryFirst
 	# satelliteBroadcasts
 	# musicCensorship
-	# integratedSpaceCell
+	integratedSpaceCell = 'integratedSpaceCell'
 	# secondStrikeCapability
 
 	# information
-	# strategicAirForce
-	# ecommerce
-	# internationalSpaceAgency
+	strategicAirForce = 'strategicAirForce'
+	ecommerce = 'ecommerce'
+	internationalSpaceAgency = 'internationalSpaceAgency'
 	# onlineCommunities
 	# collectiveActivism
 	# afterActionReports
@@ -162,14 +174,14 @@ class PolicyCardType(ExtendedEnum):
 	collectivism = 'collectivism'
 	# cyberWarfare
 	# decentralization
-	# despoticPaternalism
+	despoticPaternalism = 'despoticPaternalism'
 	# disinformationCampaign
 	# eliteForces
 	# flowerPower
 	# inquisition
 	# isolationism
 	# lettersOfMarque
-	# monasticism
+	monasticism = 'monasticism'
 	robberBarons = 'robberBarons'
 	# rogueState
 	# samoderzhaviye
@@ -681,7 +693,17 @@ class PolicyCardType(ExtendedEnum):
 		# simultaneum
 		# religiousOrders
 		# logistics
-		# triangularTrade
+		elif self == PolicyCardType.triangularTrade:
+			# https://civilization.fandom.com/wiki/Triangular_Trade_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_TRIANGULAR_TRADE_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_TRIANGULAR_TRADE_BONUS",
+				slot=PolicyCardSlot.economic,
+				requiredCivic=CivicType.mercantilism,
+				obsoleteCivic=CivicType.globalization,
+				replace=[PolicyCardType.ecommerce],
+				flavors=[]
+			)
 		# drillManuals
 		# rationalism
 		# freeMarket
@@ -698,6 +720,33 @@ class PolicyCardType(ExtendedEnum):
 			)
 		# wisselbanken
 		# pressGangs
+
+		# industrial
+		# nativeConquest
+		# grandeArmee
+		# nationalIdentity
+		# colonialTaxes
+		# raj
+		# publicWorks
+		# skyscrapers,
+		# grandOpera
+		# symphonies
+		# publicTransport
+		elif self == PolicyCardType.militaryResearch:
+			# https://civilization.fandom.com/wiki/Military_Research_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_MILITARY_RESEARCH_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_MILITARY_RESEARCH_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.urbanization,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.integratedSpaceCell],
+				flavors=[]
+			)
+		# forceModernization
+		# totalWar
+		# expropriation
+		# militaryOrganization
 
 		# modern
 		# resourceManagement
@@ -720,7 +769,17 @@ class PolicyCardType(ExtendedEnum):
 		# scienceFoundations
 		# nuclearEspionage
 		# economicUnion
-		# theirFinestHour
+		elif self == PolicyCardType.theirFinestHour:
+			# https://civilization.fandom.com/wiki/Their_Finest_Hour_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_THEIR_FINEST_HOUR_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_THEIR_FINEST_HOUR_BONUS",
+				slot=PolicyCardSlot.wildcard,
+				requiredCivic=CivicType.suffrage,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.strategicAirForce],
+				flavors=[]
+			)
 		# arsenalOfDemocracy
 		elif self == PolicyCardType.newDeal:
 			# https://civilization.fandom.com/wiki/New_Deal_(Civ6)
@@ -755,6 +814,28 @@ class PolicyCardType(ExtendedEnum):
 		# patrioticWar
 		# defenseOfTheMotherland
 
+		# atomic
+		# cryptography
+		# internationalWaters
+		# containment
+		# heritageTourism
+		# sportsMedia
+		# militaryFirst
+		# satelliteBroadcasts
+		# musicCensorship
+		elif self == PolicyCardType.integratedSpaceCell:
+			# https://civilization.fandom.com/wiki/Integrated_Space_Cell_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_INTEGRATED_SPACE_CELL_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_INTEGRATED_SPACE_CELL_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.spaceRace,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.militaryResearch],
+				flavors=[]
+			)
+		# secondStrikeCapability
+
 		# dark age
 		elif self == PolicyCardType.automatedWorkforce:
 			# https://civilization.fandom.com/wiki/Automated_Workforce_(Civ6)
@@ -786,14 +867,40 @@ class PolicyCardType(ExtendedEnum):
 			)
 		# cyberWarfare
 		# decentralization
-		# despoticPaternalism
+		elif self == PolicyCardType.despoticPaternalism:
+			# https://civilization.fandom.com/wiki/Despotic_Paternalism_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_DESPOTIC_PATERNALISM_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_DESPOTIC_PATERNALISM_BONUS",
+				slot=PolicyCardSlot.wildcard,
+				requiredCivic=None,
+				obsoleteCivic=None,
+				startEra=EraType.industrial,
+				endEra=EraType.information,
+				replace=[],
+				flavors=[],
+				requiresDarkAge=True
+			)
 		# disinformationCampaign
 		# eliteForces
 		# flowerPower
 		# inquisition
 		# isolationism
 		# lettersOfMarque
-		# monasticism
+		elif self == PolicyCardType.monasticism:
+			# https://civilization.fandom.com/wiki/Monasticism_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_MONASTICISM_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_MONASTICISM_BONUS",
+				slot=PolicyCardSlot.wildcard,
+				requiredCivic=None,
+				obsoleteCivic=None,
+				startEra=EraType.classical,
+				endEra=EraType.medieval,
+				replace=[],
+				flavors=[],
+				requiresDarkAge=True
+			)
 		elif self == PolicyCardType.robberBarons:
 			# https://civilization.fandom.com/wiki/Robber_Barons_(Civ6)
 			return PolicyCardTypeData(
@@ -812,6 +919,41 @@ class PolicyCardType(ExtendedEnum):
 		# samoderzhaviye
 		# softTargets
 		# twilightValor
+
+		# information
+		elif self == PolicyCardType.strategicAirForce:
+			# https://civilization.fandom.com/wiki/Strategic_Air_Force_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_STRATEGIC_AIR_FORCE_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_STRATEGIC_AIR_FORCE_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.globalization,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.theirFinestHour],
+				flavors=[]
+			)
+		elif self == PolicyCardType.ecommerce:
+			# https://civilization.fandom.com/wiki/Ecommerce_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_ECOMMERCE_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_ECOMMERCE_BONUS",
+				slot=PolicyCardSlot.economic,
+				requiredCivic=CivicType.globalization,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.triangularTrade],
+				flavors=[]
+			)
+		elif self == PolicyCardType.internationalSpaceAgency:
+			# https://civilization.fandom.com/wiki/International_Space_Agency_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_INTERNATIONAL_SPACE_AGENCY_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_INTERNATIONAL_SPACE_AGENCY_BONUS",
+				slot=PolicyCardSlot.diplomatic,
+				requiredCivic=CivicType.globalization,
+				obsoleteCivic=None,
+				replace=[],
+				flavors=[]
+			)
 
 		raise AttributeError(f'cant get data for policy card {self}')
 

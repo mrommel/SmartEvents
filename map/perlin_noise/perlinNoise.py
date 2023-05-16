@@ -4,7 +4,7 @@ import random
 from collections.abc import Iterable
 from typing import Dict, Optional, Tuple, Union
 
-from .rand_vec import RandVec
+from .randVec import RandVec
 from .tools import each_with_each, hasher
 
 

@@ -61,6 +61,9 @@ class WonderType(ExtendedEnum):
 	def requiredCivic(self) -> Optional[CivicType]:
 		return self._data().requiredCivic
 
+	def requiredTech(self) -> Optional[TechType]:
+		return self._data().requiredTech
+
 	def _data(self) -> WonderTypeData:
 		# default
 		if self == WonderType.none:

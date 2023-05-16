@@ -143,6 +143,9 @@ class BuildingType(ExtendedEnum):
 	def requiredCivic(self) -> CivicType:
 		return self._data().requiredCivic
 
+	def requiredTech(self) -> TechType:
+		return self._data().requiredTech
+
 	def yields(self) -> Yields:
 		return self._data().yields
 

@@ -272,14 +272,16 @@ class ImprovementType(Enum):
 
 class BuildTypeData:
 	# noinspection PyShadowingNames
-	def __init__(self, name: str, repair: bool=False, required: TechType=None, era: EraType=None, improvement: ImprovementType=None, route: RouteType=None, removeRoad: bool = False, duration: int = 0, isWater: bool = True):
+	def __init__(self, name: str, repair: bool=False, requiredTech: Optional[TechType]=None, era: EraType=None,
+	             improvement: ImprovementType=None, route: RouteType=None, removeRoad: bool = False,
+	             duration: int = 0, isWater: bool = True):
 		"""
 
-		:type required: object
+		:type requiredTech: object
 		"""
 		self.name = name
 		self.repair = repair
-		self.required = required
+		self.requiredTech = requiredTech
 		self.era = era
 		self.improvement = improvement
 		self.route = route
@@ -316,6 +318,12 @@ class BuildType(ExtendedEnum):
 	quarry = 12
 	plantation = 13
 	pasture = 14
+
+	def name(self) -> str:
+		return self._data().name
+
+	def requiredTech(self) -> Optional[TechType]:
+		return self._data().requiredTech
 
 	def canRemove(self, feature: FeatureType) -> bool:
 		featureBuild = next((build for build in self._data().featureBuilds if build.featureType == feature), None)
@@ -356,7 +364,7 @@ class BuildType(ExtendedEnum):
 		elif self == BuildType.removeRoad:
 			return BuildTypeData(
 				name="Remove Road",
-				required=TechType.wheel,
+				requiredTech=TechType.wheel,
 				removeRoad=True,
 				duration=300
 			)
@@ -401,7 +409,7 @@ class BuildType(ExtendedEnum):
 		elif self == BuildType.mine:
 			mineBuild = BuildTypeData(
 				name="Mine",
-				required=TechType.mining,
+				requiredTech=TechType.mining,
 				improvement=ImprovementType.mine,
 				duration=600
 			)
@@ -415,7 +423,7 @@ class BuildType(ExtendedEnum):
 		elif self == BuildType.quarry:
 			quarryBuild = BuildTypeData(
 				name="Quarry",
-				required=TechType.mining,
+				requiredTech=TechType.mining,
 				improvement=ImprovementType.quarry,
 				duration=700
 			)
@@ -429,7 +437,7 @@ class BuildType(ExtendedEnum):
 			# https://civilization.fandom.com/wiki/Plantation_(Civ6)
 			plantationBuild = BuildTypeData(
 				name="Plantation",
-				required=TechType.irrigation,
+				requiredTech=TechType.irrigation,
 				improvement=ImprovementType.plantation,
 				duration=500
 			)
@@ -442,7 +450,7 @@ class BuildType(ExtendedEnum):
 		elif self == BuildType.camp:
 			campBuild = BuildTypeData(
 				name="Camp",
-				required=TechType.animalHusbandry,
+				requiredTech=TechType.animalHusbandry,
 				improvement=ImprovementType.camp,
 				duration=600
 			)
@@ -456,7 +464,7 @@ class BuildType(ExtendedEnum):
 			# https://civilization.fandom.com/wiki/Pasture_(Civ6)
 			pastureBuild = BuildTypeData(
 				name="Pasture",
-				required=TechType.animalHusbandry,
+				requiredTech=TechType.animalHusbandry,
 				improvement=ImprovementType.pasture,
 				duration=700
 			)
@@ -470,7 +478,7 @@ class BuildType(ExtendedEnum):
 		elif self == BuildType.fishingBoats:
 			fishingBoatsBuild = BuildTypeData(
 				name="Fishing Boats",
-				required=TechType.sailing,
+				requiredTech=TechType.sailing,
 				improvement=ImprovementType.fishingBoats,
 				duration=700,
 				isWater=True
@@ -680,8 +688,11 @@ class UnitType(ExtendedEnum):
 	def civilization(self):
 		return self._data().civilization
 
-	def requiredCivic(self):
+	def requiredCivic(self) -> CivicType:
 		return self._data().requiredCivic
+
+	def requiredTech(self) -> TechType:
+		return self._data().requiredTech
 
 	def _data(self) -> UnitTypeData:
 		# default ------------------------------

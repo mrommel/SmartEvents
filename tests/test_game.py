@@ -1,18 +1,18 @@
 import unittest
 
-import pytest
-
-from game.achievements import CivicAchievements
-from game.base_types import HandicapType
+from game.achievements import CivicAchievements, TechAchievements
+from game.baseTypes import HandicapType
 from game.buildings import BuildingType
 from game.cities import City
 from game.civilizations import LeaderType
 from game.districts import DistrictType
 from game.game import Game
 from game.governments import GovernmentType
+from game.playerMechanics import PlayerTechs, PlayerCivics
 from game.players import Player
+from game.policyCards import PolicyCardType
 from game.types import CivicType, TechType
-from game.unit_types import ImprovementType
+from game.unitTypes import ImprovementType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.map import Map
@@ -56,7 +56,7 @@ class TestGameAssets(unittest.TestCase):
 
 		for civic_with_envoys in civics_with_envoys:
 			self.assertGreater(civic_with_envoys.envoys(), 0,
-			                   f'envoys of {civic_with_envoys} should be greater than zero')
+							   f'envoys of {civic_with_envoys} should be greater than zero')
 
 	def test_civics_governors(self):
 		# Civic Tree - There are a total of 13 civics that will grant 1 Governor Title. They are State Workforce,
@@ -71,14 +71,29 @@ class TestGameAssets(unittest.TestCase):
 		]
 
 		for civic_with_governors in civics_with_governors:
-			self.assertTrue(civic_with_governors.governorTitle(), f'envoys of {civic_with_governors} should be True')
+			self.assertTrue(civic_with_governors.hasGovernorTitle(), f'envoys of {civic_with_governors} should be True')
 
 	def test_civic_achievements(self):
 		achievements = CivicAchievements(CivicType.gamesAndRecreation)
 
-		self.assertIn(BuildingType.arena, achievements.buildingTypes)
-		self.assertIn(WonderType.colosseum, achievements.wonderTypes)
-		self.assertIn(DistrictType.entertainmentComplex, achievements.districtTypes)
+		self.assertCountEqual(achievements.buildingTypes, [BuildingType.arena])
+		self.assertCountEqual(achievements.wonderTypes, [WonderType.colosseum])
+		self.assertCountEqual(achievements.districtTypes, [DistrictType.entertainmentComplex])
+		self.assertCountEqual(achievements.policyCards, [PolicyCardType.insulae])
+		self.assertCountEqual(achievements.governments, [])
+
+	def test_tech_achievements(self):
+		achievements = TechAchievements(TechType.writing)
+
+		self.assertCountEqual(achievements.buildingTypes, [BuildingType.library])
+		self.assertCountEqual(achievements.unitTypes, [])
+		self.assertCountEqual(achievements.wonderTypes, [WonderType.etemenanki])
+		self.assertCountEqual(achievements.buildTypes, [])
+		self.assertCountEqual(achievements.districtTypes, [DistrictType.campus])
+
+	def test_governments_data(self):
+		for government in list(GovernmentType):
+			_ = government.name()
 
 
 class TestUserInterface:
@@ -189,9 +204,149 @@ class TestCity(unittest.TestCase):
 		self.assertEqual(foodAfter, 1.0)
 
 
+class TestPlayerTechs(unittest.TestCase):
+	def test_possible_techs(self):
+		# GIVEN
+		map = Map(10, 10)
+		simulation = Game(map=map)
+
+		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
+		player.initialize()
+
+		playerTechs = PlayerTechs(player=player)
+		playerTechs.discover(tech=TechType.pottery, simulation=simulation)
+		playerTechs.discover(tech=TechType.animalHusbandry, simulation=simulation)
+		playerTechs.discover(tech=TechType.mining, simulation=simulation)
+		playerTechs.discover(tech=TechType.sailing, simulation=simulation)
+		playerTechs.discover(tech=TechType.astrology, simulation=simulation)
+		playerTechs.discover(tech=TechType.irrigation, simulation=simulation)
+		playerTechs.discover(tech=TechType.writing, simulation=simulation)
+		playerTechs.discover(tech=TechType.bronzeWorking, simulation=simulation)
+
+		# WHEN
+		possibleTechs = playerTechs.possibleTechs()
+
+		# THEN
+		# self.assertEqual(playerTech.currentTech(), None)
+		expected = [
+			TechType.masonry,
+			TechType.archery,
+			TechType.wheel,
+			TechType.celestialNavigation,
+			TechType.horsebackRiding,
+			TechType.currency,
+			TechType.ironWorking,
+			TechType.shipBuilding
+		]
+		self.assertCountEqual(possibleTechs, expected)
+
+	def test_current_tech(self):
+		# GIVEN
+		map = Map(10, 10)
+		simulation = Game(map=map)
+
+		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
+		player.initialize()
+
+		playerTechs = PlayerTechs(player=player)
+		playerTechs.discover(tech=TechType.pottery, simulation=simulation)
+
+		# WHEN
+		playerTechs.setCurrentTech(TechType.writing, simulation)
+
+		# THEN
+		self.assertEqual(playerTechs.currentTech(), TechType.writing)
+
+	def test_eureka(self):
+		# GIVEN
+		map = Map(10, 10)
+		simulation = Game(map=map)
+
+		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
+		player.initialize()
+
+		playerTechs = PlayerTechs(player=player)
+		playerTechs.discover(tech=TechType.pottery, simulation=simulation)
+
+		playerTechs.setCurrentTech(TechType.writing, simulation)
+		progressBefore = playerTechs.currentScienceProgress()
+
+		# WHEN
+		playerTechs.triggerEurekaFor(tech=TechType.writing, simulation=simulation)
+		progressAfter = playerTechs.currentScienceProgress()
+
+		# THEN
+		self.assertEqual(playerTechs.eurekaTriggeredFor(TechType.writing), True)
+		self.assertEqual(progressBefore, 0.0)
+		self.assertEqual(progressAfter, 25.0)
+
+
+class TestPlayerCivics(unittest.TestCase):
+	def test_possible_civics(self):
+		# GIVEN
+		map = Map(10, 10)
+		simulation = Game(map=map)
+
+		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
+		player.initialize()
+
+		playerCivics = PlayerCivics(player=player)
+		playerCivics.discover(civic=CivicType.codeOfLaws, simulation=simulation)
+
+		# WHEN
+		possibleCivics = playerCivics.possibleCivics()
+
+		# THEN
+		# self.assertEqual(playerCivics.currentCivic(), None)
+		expected = [
+			CivicType.foreignTrade,
+			CivicType.craftsmanship
+		]
+		self.assertCountEqual(possibleCivics, expected)
+
+	def test_current_civic(self):
+		# GIVEN
+		map = Map(10, 10)
+		simulation = Game(map=map)
+
+		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
+		player.initialize()
+
+		playerCivics = PlayerCivics(player=player)
+		playerCivics.discover(civic=CivicType.codeOfLaws, simulation=simulation)
+
+		# WHEN
+		playerCivics.setCurrentCivic(CivicType.foreignTrade, simulation)
+
+		# THEN
+		self.assertEqual(playerCivics.currentCivic(), CivicType.foreignTrade)
+
+	# def test_eureka(self):
+	# 	# GIVEN
+	# 	map = Map(10, 10)
+	# 	simulation = Game(map=map)
+	#
+	# 	player = Player(leader=LeaderType.alexander, cityState=None, human=False)
+	# 	player.initialize()
+	#
+	# 	playerTech = PlayerTechs(player=player)
+	# 	playerTech.discover(tech=TechType.pottery, simulation=simulation)
+	#
+	# 	playerTech.setCurrentTech(TechType.writing, simulation)
+	# 	progressBefore = playerTech.currentScienceProgress()
+	#
+	# 	# WHEN
+	# 	playerTech.triggerEurekaFor(tech=TechType.writing, simulation=simulation)
+	# 	progressAfter = playerTech.currentScienceProgress()
+	#
+	# 	# THEN
+	# 	self.assertEqual(playerTech.eurekaTriggeredFor(TechType.writing), True)
+	# 	self.assertEqual(progressBefore, 0.0)
+	# 	self.assertEqual(progressAfter, 25.0)
+
+
 class TestSimulation(unittest.TestCase):
 	def test_found_capital(self):
-		"""Test the Simulation constructor"""
 		# GIVEN
 		map = Map(10, 10)
 		simulation = Game(map)
@@ -214,7 +369,6 @@ class TestSimulation(unittest.TestCase):
 		self.assertEqual(totalCitiesFoundedAfter, 1)
 
 	def test_player_turn(self):
-		"""Test the Simulation constructor"""
 		# GIVEN
 		map = Map(10, 10)
 		simulation = Game(map, handicap=HandicapType.chieftain)

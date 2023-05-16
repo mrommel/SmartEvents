@@ -186,7 +186,8 @@ class HandicapType(Enum):
             return [UnitType.settler, UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior,
                     UnitType.warrior, UnitType.warrior, UnitType.warrior, UnitType.builder, UnitType.builder]
 
+
 class GameState(Enum):
-    on = 0
-    over = 1
-    extended = 2
+    on = 'on'
+    over = 'over'
+    extended = 'extended'
