@@ -188,6 +188,9 @@ class PolicyCardType(ExtendedEnum):
 	# softTargets
 	# twilightValor
 
+	def name(self) -> str:
+		return self._data().name
+
 	def requiredCivic(self) -> Optional[CivicType]:
 		return self._data().requiredCivic
 

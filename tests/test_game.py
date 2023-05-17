@@ -4,10 +4,11 @@ from game.achievements import CivicAchievements, TechAchievements
 from game.baseTypes import HandicapType
 from game.buildings import BuildingType
 from game.cities import City
-from game.civilizations import LeaderType
+from game.civilizations import LeaderType, CivilizationType
 from game.districts import DistrictType
 from game.game import Game
 from game.governments import GovernmentType
+from game.moments import MomentType
 from game.players import Player
 from game.policyCards import PolicyCardType
 from game.types import CivicType, TechType
@@ -16,7 +17,7 @@ from game.wonders import WonderType
 from map.base import HexPoint
 from map.map import Map, Tile
 from map.types import TerrainType
-from tests.testBasics import UserInterfaceMock
+from tests.testBasics import UserInterfaceMock, MapMock
 
 
 class TestGameAssets(unittest.TestCase):
@@ -39,6 +40,22 @@ class TestGameAssets(unittest.TestCase):
 	def test_buildings_data(self):
 		for building in list(BuildingType):
 			_ = building.name()
+
+	def test_improvements_data(self):
+		for improvement in list(ImprovementType):
+			_ = improvement.name()
+
+	def test_builds_data(self):
+		for build in list(BuildType):
+			_ = build.name()
+
+	def test_policyCard_data(self):
+		for policyCard in list(PolicyCardType):
+			_ = policyCard.name()
+
+	def test_moment_data(self):
+		for moment in list(MomentType):
+			_ = moment.name()
 
 	def test_civics_envoys(self):
 		# https://civilization.fandom.com/wiki/Envoy_(Civ6)
@@ -346,11 +363,33 @@ class TestPlayerCivics(unittest.TestCase):
 		self.assertEqual(afterEureka, True)
 
 
+class TestPlayerMoments(unittest.TestCase):
+	def test_met_civilization(self):
+		# GIVEN
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+		simulation = Game(mapModel)
+
+		player = Player(LeaderType.trajan, human=True)
+		player.initialize()
+
+		otherPlayer = Player(LeaderType.alexander, human=False)
+		otherPlayer.initialize()
+
+		simulation.userInterface = UserInterfaceMock()
+
+		# WHEN
+		player.doFirstContactWith(otherPlayer, simulation)
+
+		# THEN
+		self.assertEqual(player.hasMomentType(MomentType.metNewCivilization, civilization=CivilizationType.greek), True)
+		self.assertEqual(player.hasMomentType(MomentType.metNewCivilization, civilization=CivilizationType.english), False)
+
+
 class TestSimulation(unittest.TestCase):
 	def test_found_capital(self):
 		# GIVEN
-		map = Map(10, 10)
-		simulation = Game(map)
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+		simulation = Game(mapModel)
 		player = Player(LeaderType.trajan, human=True)
 		player.initialize()
 

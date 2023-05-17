@@ -1,19 +1,22 @@
+from typing import Optional
+
 from game.baseTypes import CityStateType, GameState
 from game.ai.economics import EconomicAI
 from game.ai.grandStrategies import GrandStrategyAI
 from game.ai.militaries import MilitaryAI
 from game.cities import City, AgeType, DedicationType, CityState, YieldValues
 from game.cityConnections import CityConnections
-from game.civilizations import LeaderType
+from game.civilizations import LeaderType, CivilizationType
 from game.flavors import Flavors, FlavorType
 from game.governments import PlayerGovernment
 from game.greatPersons import GreatPersonType
+from game.moments import MomentType
 from game.notifications import Notifications, NotificationType, Notification
 from game.playerMechanics import PlayerTechs, PlayerCivics, BuilderTaskingAI, TacticalAI, DiplomacyAI, HomelandAI, \
-    DiplomacyRequests
+    DiplomacyRequests, PlayerMoments
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType
-from game.types import EraType
+from game.types import EraType, TechType
 from game.unitTypes import UnitMissionType, UnitTaskType
 from game.wonders import WonderType
 from map.base import HexPoint
@@ -81,9 +84,10 @@ class Player:
         self.notifications = Notifications(self)
         self.diplomacyRequests = DiplomacyRequests(player=self)
 
-        # special ais
+        # special
         self.techs = PlayerTechs(self)
         self.civics = PlayerCivics(self)
+        self.moments = PlayerMoments(self)
 
         self.personalityFlavors = Flavors()
         # state values
@@ -153,20 +157,20 @@ class Player:
                 city.cityStrategyAI.doTurn(simulation)
 
                 if self.isActive():
-                    self.notifications.add(Notification(NotificationType.PRODUCTION_NEEDED, city=city))
+                    self.notifications.add(Notification(NotificationType.productionNeeded, city=city))
 
                 city.doFoundMessage()
 
                 # If this is the first city (or we still aren't getting tech for some other reason) notify the player
                 if self.techs.needToChooseTech() and self.science(simulation) > 0.0:
-                    self.notifications.add(Notification(NotificationType.TECH_NEEDED))
+                    self.notifications.add(Notification(NotificationType.techNeeded))
 
                 # If this is the first city (or ..) notify the player
                 if self.civics.needToChooseCivic() and self.culture(simulation, consume=False) > 0.0:
-                    self.notifications.add(Notification(NotificationType.CIVIC_NEEDED))
+                    self.notifications.add(Notification(NotificationType.civicNeeded))
 
                 if isCapital:
-                    self.notifications.add(Notification(NotificationType.POLICY_NEEDED))
+                    self.notifications.add(Notification(NotificationType.policyNeeded))
             else:
                 city.doFoundMessage()
 
@@ -596,3 +600,45 @@ class Player:
 
     def envoyEffects(self, simulation):
         return []
+
+    def doFirstContactWith(self, otherPlayer, simulation):
+        self.diplomacyAI.doFirstContactWith(otherPlayer, simulation)
+        otherPlayer.diplomacyAI.doFirstContactWith(self, simulation)
+
+        if otherPlayer.isMajorAI() or otherPlayer.isHuman():
+            # moment
+            self.addMoment(MomentType.metNewCivilization, civilization=otherPlayer.leader.civilization(), simulation=simulation)
+
+        # update eurekas
+        if not self.techs.eurekaTriggeredFor(TechType.writing):
+            self.techs.triggerEurekaFor(TechType.writing, simulation)
+
+        if self.isCityState():
+            self.doQuests(simulation)
+
+        if otherPlayer.isCityState():
+            otherPlayer.doQuests(simulation)
+
+        return
+
+    def addMoment(self, momentType: MomentType, civilization: Optional[CivilizationType] = None, simulation = None):
+        if simulation is None:
+            raise Exception('simulation not provided')
+
+        if not momentType.minEra() <= self.currentEraVal <= momentType.maxEra():
+            return
+
+        self.moments.addMomentOf(momentType, simulation.currentTurn, civilization=civilization)
+
+        # also show a notification, when the moment brings era score
+        if momentType.eraScore() > 0:
+            if self.isHuman():
+                self.notifications.addNotification(NotificationType.momentAdded, momentType=momentType)
+
+    def hasMomentType(self, momentType: MomentType, civilization: Optional[CivilizationType] = None) -> bool:
+        # @fixme move to PlayerMoments
+        for moment in self.moments.moments():
+            if moment.type == MomentType.metNewCivilization and momentType == MomentType.metNewCivilization:
+                return moment.civilization == civilization
+
+        return False

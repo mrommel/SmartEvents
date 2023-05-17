@@ -2,7 +2,9 @@ import random
 from typing import Optional
 
 from game.cities import AgeType, DedicationType
+from game.civilizations import CivilizationType
 from game.flavors import FlavorType
+from game.moments import Moment, MomentType
 from game.types import TechType, CivicType, EraType
 from utils.base import WeightedBaseList
 
@@ -490,6 +492,9 @@ class DiplomacyAI:
 	def update(self, simulation):
 		pass
 
+	def doFirstContactWith(self, otherPlayer, simulation):
+		pass
+
 
 class HomelandAI:
 	def __init__(self, player):
@@ -505,3 +510,28 @@ class DiplomacyRequests:
 
 	def endTurn(self):
 		pass
+
+
+class PlayerMoments:
+	def __init__(self, player):
+		self.player = player
+		self._momentsArray: [Moment] = []
+		self._currentEraScore: int = 0
+
+	def add(self, moment: Moment):
+		self._momentsArray.append(moment)
+		self._currentEraScore += moment.type.eraScore()
+
+	def addMomentOf(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None):
+		self._momentsArray.append(Moment(momentType, turn, civilization))
+
+		self._currentEraScore += momentType.eraScore()
+
+	def moments(self) -> [Moment]:
+		return self._momentsArray
+
+	def eraScore(self) -> int:
+		return self._currentEraScore
+
+	def resetEraScore(self):
+		self._currentEraScore = 0

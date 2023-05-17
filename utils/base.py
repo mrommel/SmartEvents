@@ -30,13 +30,14 @@ class WeightedBaseList(dict):
 		top3Dict = dict()
 
 		for key, value in self.items():
-			# if
+			# if not populated, fill it up
 			if len(top3Dict) < 3:
 				top3Dict[key] = value
 				continue
 
 			smallestTop3Key = None
 
+			# find the smallest in top3
 			for top3Key, top3Value in top3Dict.items():
 				if smallestTop3Key is None:
 					smallestTop3Key = top3Key
@@ -45,6 +46,7 @@ class WeightedBaseList(dict):
 				if self[smallestTop3Key] > top3Value:
 					smallestTop3Key = top3Key
 
+			# if current value is bigger than smallest in top3, replace it
 			if self[smallestTop3Key] < value:
 				del top3Dict[smallestTop3Key]
 				top3Dict[key] = value

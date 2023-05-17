@@ -37,6 +37,37 @@ class EraType(ExtendedEnum):
 
 		raise AttributeError(f'cant get name of {self}')
 
+	def value(self) -> int:
+		if self == EraType.ancient:
+			return 0
+		elif self == EraType.classical:
+			return 1
+		elif self == EraType.medieval:
+			return 2
+		elif self == EraType.renaissance:
+			return 3
+		elif self == EraType.industrial:
+			return 4
+		elif self == EraType.modern:
+			return 5
+		elif self == EraType.atomic:
+			return 6
+		elif self == EraType.information:
+			return 7
+		elif self == EraType.future:
+			return 8
+
+		raise AttributeError(f'cant get value of {self}')
+
+	# def __eq__(self, other):
+	# 	if self.ft == other.ft and self.inch == other.inch:
+	# 		return "both objects are equal"
+	# 	else:
+	# 		return "both objects are not equal"
+
+	def __le__(self, other):
+		return self.value() <= other.value()
+
 
 class TechType:
 	pass

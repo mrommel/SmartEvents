@@ -671,12 +671,6 @@ class GossipType(ExtendedEnum):
 	districtConstructed = 'districtConstructed'
 
 
-class MomentType(ExtendedEnum):
-	dedicationTriggered = 'dedicationTriggered'
-	worldsFirstNeighborhood = 'worldsFirstNeighborhood'
-	firstNeighborhoodCompleted = 'firstNeighborhoodCompleted'
-
-
 class DedicationType(ExtendedEnum):
 	penBrushAndVoice = 'penBrushAndVoice'
 	freeInquiry = 'freeInquiry'

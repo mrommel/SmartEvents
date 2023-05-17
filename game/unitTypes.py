@@ -48,6 +48,15 @@ class ImprovementType(Enum):
 				civilization=None,
 				flavors=[]
 			)
+		elif self == ImprovementType.barbarianCamp:
+			#
+			return ImprovementTypeData(
+				name="Barbarian camp",
+				effects=[],
+				requiredTech=None,
+				civilization=None,
+				flavors=[]
+			)
 		elif self == ImprovementType.mine:
 			# https://civilization.fandom.com/wiki/Mine_(Civ6)
 			return ImprovementTypeData(
@@ -147,6 +156,18 @@ class ImprovementType(Enum):
 					"+1 [Production] Production (Robotics)"
 				],
 				requiredTech=TechType.animalHusbandry,
+				civilization=None,
+				flavors=[]
+			)
+		elif self == ImprovementType.oilWell:
+			# https://civilization.fandom.com/wiki/Oil_Well_(Civ6)
+			return ImprovementTypeData(
+				name="Oil well",
+				effects=[
+					"-1 Appeal",
+					"+2 [Production] Production"
+				],
+				requiredTech=TechType.steel,
 				civilization=None,
 				flavors=[]
 			)
