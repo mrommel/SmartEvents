@@ -1,3 +1,4 @@
+import random
 from typing import Optional
 
 from game.cities import AgeType, DedicationType
@@ -227,6 +228,55 @@ class PlayerTechs:
 			return 0.0
 
 		return float(tech.flavorValue(flavor) * self.player.leader.flavor(flavor))
+
+	def chooseNextTech(self) -> Optional[TechType]:
+		weightedTechs: WeightedTechList = WeightedTechList()
+		weightedTechs.removeAll()
+
+		possibleTechsList = self.possibleTechs()
+
+		for possibleTech in possibleTechsList:
+			weightByFlavor = 0.0
+
+			# weight of current tech
+			for flavor in list(FlavorType):
+				weightByFlavor += self.flavorWeightedOf(possibleTech, flavor)
+
+			# add techs that can be research with this tech, but only with a little less weight
+			for activatedTech in possibleTech.leadsTo():
+
+				for flavor in list(FlavorType):
+					weightByFlavor += self.flavorWeightedOf(activatedTech, flavor) * 0.75
+
+				for secondActivatedTech in activatedTech.leadsTo():
+
+					for flavor in list(FlavorType):
+						weightByFlavor += self.flavorWeightedOf(secondActivatedTech, flavor) * 0.5
+
+					for thirdActivatedTech in secondActivatedTech.leadsTo():
+
+						for flavor in list(FlavorType):
+							weightByFlavor += self.flavorWeightedOf(thirdActivatedTech, flavor) * 0.25
+
+			# revalue based on cost / number of turns
+			numberOfTurnsLeft = self.turnsRemainingFor(possibleTech)
+			additionalTurnCostFactor = 0.015 * float(numberOfTurnsLeft)
+			totalCostFactor = 0.15 + additionalTurnCostFactor
+			weightDivisor = pow(float(numberOfTurnsLeft), totalCostFactor)
+
+			# modify weight
+			weightByFlavor = float(weightByFlavor) / weightDivisor
+
+			weightedTechs.addWeight(weightByFlavor, possibleTech)
+
+		# select one
+		selectedIndex = random.randrange(100)
+
+		weightedTechs = weightedTechs.top3()
+		weightedTechsArray = weightedTechs.distributeByWeight()
+		selectedTech = weightedTechsArray[selectedIndex]
+
+		return selectedTech
 
 
 class WeightedCivicList(WeightedBaseList):

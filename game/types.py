@@ -169,6 +169,15 @@ class TechType(ExtendedEnum):
 	def isGoodyTech(self) -> bool:
 		return self.era() == EraType.ancient
 
+	def leadsTo(self) -> [TechType]:
+		leadingTo: [TechType] = []
+
+		for tech in list(TechType):
+			if self in tech.required():
+				leadingTo.append(tech)
+
+		return leadingTo
+
 	def _data(self):
 		if self == TechType.none:
 			return TechTypeData(

@@ -593,3 +593,6 @@ class Player:
 
     def doUpdateTradeRouteCapacity(self, simulation):
         pass
+
+    def envoyEffects(self, simulation):
+        return []

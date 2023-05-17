@@ -54,6 +54,7 @@ class WonderType(ExtendedEnum):
 	hueyTeocalli = 'hueyTeocalli'
 	stBasilsCathedral = 'stBasilsCathedral'
 	angkorWat = 'angkorWat'
+	chichenItza = 'chichenItza'
 
 	def name(self) -> str:
 		return self._data().name
@@ -540,6 +541,24 @@ class WonderType(ExtendedEnum):
 				flavors=[
 					Flavor(FlavorType.growth, value=10),
 					Flavor(FlavorType.religion, value=2)
+				]
+			)
+		elif self == WonderType.chichenItza:
+			# https://civilization.fandom.com/wiki/Chichen_Itza_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_CHICHEN_ITZA_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_CHICHEN_ITZA_EFFECT1"
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=None,
+				requiredCivic=CivicType.guilds,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.production, value=4)
 				]
 			)
 

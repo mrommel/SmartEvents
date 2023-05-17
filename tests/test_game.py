@@ -8,7 +8,6 @@ from game.civilizations import LeaderType
 from game.districts import DistrictType
 from game.game import Game
 from game.governments import GovernmentType
-from game.playerMechanics import PlayerTechs, PlayerCivics
 from game.players import Player
 from game.policyCards import PolicyCardType
 from game.types import CivicType, TechType
@@ -17,6 +16,7 @@ from game.wonders import WonderType
 from map.base import HexPoint
 from map.map import Map, Tile
 from map.types import TerrainType
+from tests.testBasics import UserInterfaceMock
 
 
 class TestGameAssets(unittest.TestCase):
@@ -96,17 +96,6 @@ class TestGameAssets(unittest.TestCase):
 			_ = government.name()
 
 
-class TestUserInterface:
-	def updateCity(self, city):
-		pass
-
-	def updatePlayer(self, player):
-		pass
-
-	def isShown(self, screenType) -> bool:
-		return False
-
-
 class TestCity(unittest.TestCase):
 
 	def setUp(self) -> None:
@@ -125,7 +114,7 @@ class TestCity(unittest.TestCase):
 		anotherTile.setImprovement(improvement=ImprovementType.mine)
 
 		simulation = Game(mapModel)
-		simulation.userInterface = TestUserInterface()
+		simulation.userInterface = UserInterfaceMock()
 
 		playerTrajan = Player(leader=LeaderType.trajan, human=False)
 		playerTrajan.initialize()
@@ -205,26 +194,28 @@ class TestCity(unittest.TestCase):
 
 
 class TestPlayerTechs(unittest.TestCase):
+	def setUp(self) -> None:
+		self.map = Map(10, 10)
+		self.simulation = Game(map=self.map)
+
+		self.player = Player(leader=LeaderType.alexander, cityState=None, human=False)
+		self.player.initialize()
+
+		self.playerTechs = self.player.techs
+
 	def test_possible_techs(self):
 		# GIVEN
-		map = Map(10, 10)
-		simulation = Game(map=map)
-
-		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
-		player.initialize()
-
-		playerTechs = PlayerTechs(player=player)
-		playerTechs.discover(tech=TechType.pottery, simulation=simulation)
-		playerTechs.discover(tech=TechType.animalHusbandry, simulation=simulation)
-		playerTechs.discover(tech=TechType.mining, simulation=simulation)
-		playerTechs.discover(tech=TechType.sailing, simulation=simulation)
-		playerTechs.discover(tech=TechType.astrology, simulation=simulation)
-		playerTechs.discover(tech=TechType.irrigation, simulation=simulation)
-		playerTechs.discover(tech=TechType.writing, simulation=simulation)
-		playerTechs.discover(tech=TechType.bronzeWorking, simulation=simulation)
+		self.playerTechs.discover(tech=TechType.pottery, simulation=self.simulation)
+		self.playerTechs.discover(tech=TechType.animalHusbandry, simulation=self.simulation)
+		self.playerTechs.discover(tech=TechType.mining, simulation=self.simulation)
+		self.playerTechs.discover(tech=TechType.sailing, simulation=self.simulation)
+		self.playerTechs.discover(tech=TechType.astrology, simulation=self.simulation)
+		self.playerTechs.discover(tech=TechType.irrigation, simulation=self.simulation)
+		self.playerTechs.discover(tech=TechType.writing, simulation=self.simulation)
+		self.playerTechs.discover(tech=TechType.bronzeWorking, simulation=self.simulation)
 
 		# WHEN
-		possibleTechs = playerTechs.possibleTechs()
+		possibleTechs = self.playerTechs.possibleTechs()
 
 		# THEN
 		# self.assertEqual(playerTech.currentTech(), None)
@@ -242,41 +233,41 @@ class TestPlayerTechs(unittest.TestCase):
 
 	def test_current_tech(self):
 		# GIVEN
-		map = Map(10, 10)
-		simulation = Game(map=map)
-
-		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
-		player.initialize()
-
-		playerTechs = PlayerTechs(player=player)
-		playerTechs.discover(tech=TechType.pottery, simulation=simulation)
+		self.playerTechs.discover(tech=TechType.pottery, simulation=self.simulation)
 
 		# WHEN
-		playerTechs.setCurrentTech(TechType.writing, simulation)
+		self.playerTechs.setCurrentTech(TechType.writing, self.simulation)
 
 		# THEN
-		self.assertEqual(playerTechs.currentTech(), TechType.writing)
+		self.assertEqual(self.playerTechs.currentTech(), TechType.writing)
+
+	def test_choose_next_techs(self):
+		# GIVEN
+
+		# WHEN
+		nextTech = self.playerTechs.chooseNextTech()
+
+		# THEN
+		expected = [
+			TechType.mining,
+			TechType.pottery,
+			TechType.animalHusbandry
+		]
+		self.assertTrue(nextTech in expected, f'{nextTech} not in {expected}')
 
 	def test_eureka(self):
 		# GIVEN
-		map = Map(10, 10)
-		simulation = Game(map=map)
+		self.playerTechs.discover(tech=TechType.pottery, simulation=self.simulation)
 
-		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
-		player.initialize()
-
-		playerTechs = PlayerTechs(player=player)
-		playerTechs.discover(tech=TechType.pottery, simulation=simulation)
-
-		playerTechs.setCurrentTech(TechType.writing, simulation)
-		progressBefore = playerTechs.currentScienceProgress()
+		self.playerTechs.setCurrentTech(TechType.writing, self.simulation)
+		progressBefore = self.playerTechs.currentScienceProgress()
 
 		# WHEN
-		playerTechs.triggerEurekaFor(tech=TechType.writing, simulation=simulation)
-		progressAfter = playerTechs.currentScienceProgress()
+		self.playerTechs.triggerEurekaFor(tech=TechType.writing, simulation=self.simulation)
+		progressAfter = self.playerTechs.currentScienceProgress()
 
 		# THEN
-		self.assertEqual(playerTechs.eurekaTriggeredFor(TechType.writing), True)
+		self.assertEqual(self.playerTechs.eurekaTriggeredFor(TechType.writing), True)
 		self.assertEqual(progressBefore, 0.0)
 		self.assertEqual(progressAfter, 25.0)
 
@@ -396,7 +387,7 @@ class TestSimulation(unittest.TestCase):
 		simulation.players.append(playerAlexander)
 
 		# add UI
-		simulation.userInterface = TestUserInterface()
+		simulation.userInterface = UserInterfaceMock()
 
 		playerTrajan.foundCity(HexPoint(4, 5), "Berlin", simulation)
 

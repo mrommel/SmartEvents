@@ -3,7 +3,7 @@ from enum import Enum
 
 from game.types import TechType
 from map.base import ExtendedEnum, Size
-from utils.base import InvalidEnumError
+from utils.base import InvalidEnumError, WeightedBaseList
 from utils.translation import gettext_lazy as _
 
 
@@ -114,11 +114,11 @@ class YieldType(Enum):
 	faith = 5
 
 
-class YieldList(dict):
+class YieldList(WeightedBaseList):
 	def __init__(self):
 		super().__init__()
 		for yieldType in list(YieldType):
-			self[yieldType.name] = 0
+			self[yieldType] = 0
 
 
 class TerrainData:
@@ -209,7 +209,7 @@ class TerrainType(ExtendedEnum):
 		elif self == TerrainType.land:
 			return TerrainData(
 				name='',
-				yields=Yields(),
+				yields=Yields(food=0, production=0, gold=0),
 				isWater=False,
 				domain=UnitDomainType.land,
 				antiquityPriority=0
@@ -217,7 +217,7 @@ class TerrainType(ExtendedEnum):
 		elif self == TerrainType.sea:
 			return TerrainData(
 				name='',
-				yields=Yields(),
+				yields=Yields(food=0, production=0, gold=0),
 				isWater=False,
 				domain=UnitDomainType.land,
 				antiquityPriority=0
@@ -317,8 +317,10 @@ class FeatureType(ExtendedEnum):
 	mountEverest = 'mountEverest'
 	mountKilimanjaro = 'mountEverest'
 	greatBarrierReef = 'greatBarrierReef'
+	cliffsOfDover = 'cliffsOfDover'
+	uluru = 'uluru'
 
-	def data(self):
+	def _data(self):
 		if self == FeatureType.none:
 			return FeatureData('None', Yields(food=0, production=0, gold=0), False)
 		if self == FeatureType.forest:
@@ -530,7 +532,7 @@ class FeatureType(ExtendedEnum):
 		return True
 
 	def isNaturalWonder(self):
-		return self.data().is_wonder
+		return self._data().is_wonder
 
 	def textures(self):
 		if self == FeatureType.none:
@@ -1152,6 +1154,30 @@ class UnitMovementType(ExtendedEnum):
 	swimShallow = 'swimShallow'
 
 	max = 1000
+
+class AppealLevel:
+	pass
+
+
+class AppealLevel(ExtendedEnum):
+	breathtaking = 'breathtaking'
+	charming = 'charming'
+	average = 'average'
+	uninviting = 'uninviting'
+	disgusting = 'disgusting'
+
+	@classmethod
+	def fromAppeal(cls, appeal: int) -> AppealLevel:
+		if appeal >= 4:
+			return AppealLevel.breathtaking
+		elif appeal >= 2:
+			return AppealLevel.charming
+		elif appeal >= -1:
+			return AppealLevel.average
+		elif appeal >= -3:
+			return AppealLevel.uninviting
+		else:
+			return AppealLevel.disgusting
 
 
 class RouteType(ExtendedEnum):

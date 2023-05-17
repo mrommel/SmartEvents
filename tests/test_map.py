@@ -2,12 +2,14 @@
 import unittest
 
 from game.civilizations import LeaderType
+from game.game import Game
 from game.players import Player
 from map.base import Array2D, HexPoint, HexCube, HexDirection, Size
 from map.generation import MapOptions, MapGenerator, HeightMap
 from map.map import Tile, Map
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, AStarPathfinder, MoveTypeIgnoreUnitsPathfinderDataSource
-from map.types import FeatureType, TerrainType, UnitMovementType, MapSize, MapType
+from map.types import FeatureType, TerrainType, UnitMovementType, MapSize, MapType, AppealLevel
+from tests.testBasics import UserInterfaceMock, MapMock
 
 
 class TestArray2D(unittest.TestCase):
@@ -326,6 +328,23 @@ class TestMap(unittest.TestCase):
 		self.assertEqual(len(map_points), 4)
 		for index in range(4):
 			self.assertEqual(map_points[index], expected[index])
+
+	def test_average_tile_appeal(self):
+		# GIVEN
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+
+		simulation = Game(mapModel)
+		simulation.userInterface = UserInterfaceMock()
+
+		tile = mapModel.tileAt(HexPoint(3, 3))
+
+		# WHEN
+		appeal = tile.appeal(simulation)
+		appealLevel = tile.appealLevel(simulation)
+
+		# GIVEN
+		self.assertEqual(appeal, 0)
+		self.assertEqual(appealLevel, AppealLevel.average)
 
 
 class TestMapGenerator(unittest.TestCase):

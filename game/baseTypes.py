@@ -17,15 +17,15 @@ class CityStateCategoryData:
 
 
 class CityStateCategory(Enum):
-    CULTURAL = 0
-    INDUSTRIAL = 1
-    MILITARISTIC = 2
-    RELIGIOUS = 3
-    SCIENTIFIC = 4
-    TRADE = 5
+    cultural = 'cultural'
+    industrial = 'industrial'
+    militaristic = 'militaristic'
+    religious = 'religious'
+    scientific = 'scientific'
+    trade = 'trade'
 
     def _data(self):
-        if self == CityStateCategory.CULTURAL:
+        if self == CityStateCategory.cultural:
             return CityStateCategoryData(
                 name=_("TXT_KEY_CITY_STATE_CATEGORY_CULTURAL_NAME"),
                 color=Color.MAGENTA,
@@ -33,15 +33,15 @@ class CityStateCategory(Enum):
                 thirdEnvoyBonus=_("TXT_KEY_CITY_STATE_CATEGORY_CULTURAL_THIRD_ENVOY_BONUS"),
                 sixthEnvoyBonus=_("TXT_KEY_CITY_STATE_CATEGORY_CULTURAL_SIXTH_ENVOY_BONUS")
             )
-        elif self == CityStateCategory.INDUSTRIAL:
+        elif self == CityStateCategory.industrial:
             return CityStateCategoryData()
-        elif self == CityStateCategory.MILITARISTIC:
+        elif self == CityStateCategory.militaristic:
             return CityStateCategoryData()
-        elif self == CityStateCategory.RELIGIOUS:
+        elif self == CityStateCategory.religious:
             return CityStateCategoryData()
-        elif self == CityStateCategory.SCIENTIFIC:
+        elif self == CityStateCategory.scientific:
             return CityStateCategoryData()
-        elif self == CityStateCategory.TRADE:
+        elif self == CityStateCategory.trade:
             return CityStateCategoryData()
         else:
             raise InvalidEnumError(self)
@@ -125,7 +125,7 @@ class CityStateType(Enum):
         if self == CityStateType.AKKAD:
             return CityStateData(
                 name=_("TXT_KEY_CITY_STATE_AKKAD_NAME"),
-                category=CityStateCategory.MILITARISTIC,
+                category=CityStateCategory.militaristic,
                 suzerainBonus=_("TXT_KEY_CITY_STATE_AKKAD_SUZERAIN")
             )
         else:

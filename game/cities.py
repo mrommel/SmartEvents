@@ -5,10 +5,12 @@ from game.ai.cities import CityStrategyAI, CitySpecializationType
 from game.ai.economicStrategies import EconomicStrategyType
 from game.ai.grandStrategies import GrandStrategyAIType
 from game.amenities import AmenitiesState
+from game.baseTypes import CityStateCategory
 from game.buildings import BuildingType, BuildingCategoryType
 from game.civilizations import LeaderWeightList, CivilizationAbility, LeaderAbility, LeaderType, \
 	WeightedCivilizationList, CivilizationType
 from game.districts import DistrictType
+from game.envoys import EnvoyEffectLevel
 from game.governments import GovernmentType
 from game.governors import GovernorType, GovernorTitle, Governor
 from game.greatPersons import GreatPersonType
@@ -19,6 +21,7 @@ from game.specialists import SpecialistType
 from game.types import EraType, TechType
 from game.unitTypes import ImprovementType
 from game.wonders import WonderType
+from map import constants
 from map.base import HexPoint
 from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType
 from utils.base import ExtendedEnum
@@ -1063,7 +1066,7 @@ class City:
 					productionValue += 1.0
 
 				# ladyOfTheReedsAndMarshes - +2 Production from Marsh, Oasis, and Desert Floodplains.
-				if (workedTile.hasFeature(FeatureType.marsh) or workedTile.hasFeature(FeatureType.oasis) or \
+				if (workedTile.hasFeature(FeatureType.marsh) or workedTile.hasFeature(FeatureType.oasis) or
 					workedTile.hasFeature(FeatureType.floodplains)) and \
 					self.player.religion.pantheon() == PantheonType.ladyOfTheReedsAndMarshes:
 					productionValue += 1.0
@@ -1627,10 +1630,29 @@ class City:
 		pass
 
 	def culturePerTurn(self, simulation) -> float:
-		return 0.0
+		culturePerTurn: YieldValues = YieldValues(value=0.0, percentage=1.0)
+
+		culturePerTurn += YieldValues(value=self._cultureFromTiles(simulation))
+		culturePerTurn += self._cultureFromGovernmentType()
+		culturePerTurn += YieldValues(value=self._cultureFromDistricts(simulation))
+		culturePerTurn += YieldValues(value=self._cultureFromBuildings())
+		culturePerTurn += YieldValues(value=self._cultureFromWonders(simulation))
+		culturePerTurn += YieldValues(value=self._cultureFromPopulation())
+		culturePerTurn += YieldValues(value=self._cultureFromTradeRoutes(simulation))
+		culturePerTurn += self._cultureFromGovernors()
+		culturePerTurn += YieldValues(value=self.baseYieldRateFromSpecialists.weight(YieldType.culture))
+		culturePerTurn += YieldValues(value=self._cultureFromEnvoys(simulation))
+
+		# cap yields based on loyalty
+		culturePerTurn += YieldValues(value=0.0, percentage=self.loyaltyState().yieldPercentage())
+
+		return culturePerTurn.calc()
 
 	def cultureStored(self) -> float:
 		return 0.0
+
+	def updateCultureStoredTo(self, value: float):
+		pass
 
 	def cultureThreshold(self) -> float:
 		return 1000.0
@@ -2351,3 +2373,215 @@ class City:
 			return self.governor().hasTitle(title)
 
 		return False
+
+	def _cultureFromTiles(self, simulation) -> float:
+		cultureFromTiles: float = 0.0
+		hasStBasilsCathedral = self.player.hasWonder(WonderType.stBasilsCathedral, simulation)
+
+		centerTile = simulation.tileAt(self.location)
+		cultureFromTiles += centerTile.yields(self.player, ignoreFeature=False).culture
+
+		for point in self.cityCitizens.workingTileLocations():
+			if self.cityCitizens.isWorkedAt(point):
+				adjacentTile = simulation.tileAt(point)
+				cultureFromTiles += adjacentTile.yields(self.player, ignoreFeature=False).culture
+
+				# city has mausoleumAtHalicarnassus: +1 Science, +1 Faith,
+				# and +1 Culture to all Coast tiles in this city.
+				if adjacentTile.terrain() == TerrainType.shore and self.hasWonder(WonderType.mausoleumAtHalicarnassus):
+					cultureFromTiles += 1.0
+
+				# city has chichenItza: +2 Culture and +1 Production to all Rainforest tiles for this city.
+				if adjacentTile.hasFeature(FeatureType.rainforest) and self.hasWonder(WonderType.chichenItza):
+					cultureFromTiles += 2.0
+
+				# stBasilsCathedral
+				if adjacentTile.terrain() == TerrainType.tundra and hasStBasilsCathedral:
+					# +1 Food, +1 Production, and +1 Culture on all Tundra tiles for this city.
+					cultureFromTiles += 1.0
+
+				# godOfTheOpenSky - +1 Culture from Pastures.
+				if adjacentTile.improvement() == ImprovementType.pasture and \
+					self.player.religion.pantheon() == PantheonType.godOfTheOpenSky:
+					cultureFromTiles += 1.0
+
+				# goddessOfFestivals - +1 Culture from Plantations.
+				if adjacentTile.improvement() == ImprovementType.plantation and \
+					self.player.religion.pantheon() == PantheonType.goddessOfFestivals:
+					cultureFromTiles += 1.0
+
+		return cultureFromTiles
+
+	def _cultureFromGovernmentType(self) -> YieldValues:
+		"""yields from government"""
+		cultureFromGovernmentValue: YieldValues = YieldValues(value=0.0, percentage=0.0)
+
+		# https://civilization.fandom.com/wiki/Autocracy_(Civ6)
+		# +1 to all yields for each government building and Palace in a city.
+		if self.player.government.currentGovernment() == GovernmentType.autocracy:
+			cultureFromGovernmentValue += float(self.buildings.numberOfBuildingsOf(BuildingCategoryType.government))
+
+		# thirdAlternative - +2 Culture and +4 Gold from each Research Lab, Military Academy, Coal Power Plant, 
+		# Oil Power Plant, and Nuclear Power Plant.
+		if self.player.government.hasCard(PolicyCardType.thirdAlternative):
+			if self.buildings.hasBuilding(BuildingType.researchLab):
+				cultureFromGovernmentValue += 2
+
+			if self.buildings.hasBuilding(BuildingType.militaryAcademy):
+				cultureFromGovernmentValue += 2
+
+			if self.buildings.hasBuilding(BuildingType.coalPowerPlant):
+				cultureFromGovernmentValue += 2
+		
+			if self.buildings.hasBuilding(BuildingType.oilPowerPlant):
+				cultureFromGovernmentValue += 2
+
+			if self.buildings.hasBuilding(BuildingType.nuclearPowerPlant):
+				cultureFromGovernmentValue += 2
+
+		# despoticPaternalism - +4 Loyalty per turn in cities with Governors.
+		# BUT: -15% Science and -15% Culture in all cities without an established Governor.
+		if self.player.government.hasCard(PolicyCardType.despoticPaternalism):
+			if self.governor() is None:
+				cultureFromGovernmentValue.percentage -= 0.15
+
+		# monasticism - +75% Science in cities with a Holy Site.
+		# BUT: -25% Culture in all cities.
+		if self.player.government.hasCard(PolicyCardType.monasticism):
+			cultureFromGovernmentValue.percentage -= 0.25
+
+		return cultureFromGovernmentValue
+
+	def _cultureFromDistricts(self, simulation):
+		cultureFromDistricts: float = 0.0
+		policyCardModifier: float = 1.0
+
+		# yields from cards
+		# aesthetics - +100 % Theater Square district adjacency bonuses.
+		if self.player.government.hasCard(PolicyCardType.aesthetics):
+			policyCardModifier += 1.0
+
+		# meritocracy - Each city receives +1 Culture for each specialty District it constructs.
+		if self.player.government.hasCard(PolicyCardType.meritocracy):
+			cultureFromDistricts += 1.0 * float(self.districts.numberOfSpecialtyDistricts())
+
+		# district
+		if self.districts.hasDistrict(DistrictType.theaterSquare):
+			theaterSquareLocation = self.locationOf(DistrictType.theaterSquare)
+
+			for neighbor in theaterSquareLocation.neighbors():
+				neighborTile = simulation.tileAt(neighbor)
+
+				# Major bonus(+2 Culture) for each adjacent Wonder
+				if neighborTile.feature().isNaturalWonder():
+					cultureFromDistricts += 2.0 * policyCardModifier
+
+				# Major bonus(+2 Culture) for each adjacent Water Park or Entertainment Complex district tile
+				if neighborTile.district() == DistrictType.entertainmentComplex:
+					cultureFromDistricts += 2.0 * policyCardModifier
+
+				# Major bonus(+2 Culture) for each adjacent Pamukkale tile
+
+				# Minor bonus (+½ Culture) for each adjacent district tile
+				if neighborTile.district() != DistrictType.none:
+					cultureFromDistricts += 0.5 * policyCardModifier
+
+		# penBrushAndVoice + golden - +1 Culture per Specialty District for each city.
+		if self.player.currentAge() == AgeType.golden and self.player.hasDedication(DedicationType.penBrushAndVoice):
+			for districtType in list(DistrictType):
+				if self.districts.hasDistrict(districtType):
+					if districtType.isSpecialty():
+						cultureFromDistricts += 1.0
+
+		return cultureFromDistricts
+
+	def _cultureFromBuildings(self):
+		cultureFromBuildings: float = 0.0
+
+		# gather yields from buildings
+		for building in list(BuildingType):
+			if self.buildings.hasBuilding(building):
+				cultureFromBuildings += building.yields().culture
+
+		# Monument: +1 additional Culture if city is at maximum Loyalty.
+		if self.buildings.hasBuilding(BuildingType.monument) and self.loyaltyState() == LoyaltyState.loyal:
+			cultureFromBuildings += 1
+
+		return cultureFromBuildings
+
+	def _cultureFromWonders(self, simulation):
+		cultureFromWonders: float = 0.0
+		locationOfColosseum: HexPoint = constants.invalidHexPoint
+
+		for city in simulation.citiesOf(self.player):
+			if city.hasWonder(WonderType.colosseum):
+				locationOfColosseum = city.location
+
+		# pyramids
+		if self.hasWonder(WonderType.pyramids):
+			# +2 Culture
+			cultureFromWonders += 2.0
+
+		# oracle
+		if self.hasWonder(WonderType.oracle):
+			# +1 Culture
+			cultureFromWonders += 1.0
+
+		# colosseum - +2 Culture for every city in 6 tiles
+		if self.hasWonder(WonderType.colosseum) or locationOfColosseum.distance(self.location) <= 6:
+			cultureFromWonders += 2.0
+
+		return cultureFromWonders
+
+	def _cultureFromPopulation(self) -> float:
+		# science & culture from population
+		return self._populationValue * 0.3
+
+	def _cultureFromTradeRoutes(self, simulation):
+		cultureFromTradeRoutes: float = 0.0
+
+		tradeRoutes = self.player.tradeRoutes.tradeRoutesStartingAt(self)
+
+		for tradeRoute in tradeRoutes:
+			cultureFromTradeRoutes += tradeRoute.yields(simulation).culture
+
+		return cultureFromTradeRoutes
+
+	def _cultureFromGovernors(self):
+		cultureFromGovernors: YieldValues = YieldValues(value=0.0, percentage=0.0)
+
+		# connoisseur - +1 Culture per turn for each Citizen in the city.
+		if self.hasGovernorTitle(GovernorTitle.connoisseur):
+			cultureFromGovernors += YieldValues(value=float(self.population()))
+
+		# 15% increase in Science and Culture generated by the city.
+		if self.hasGovernorTitle(GovernorTitle.librarian):
+			cultureFromGovernors += YieldValues(value=0.0, percentage=0.15)
+
+		return cultureFromGovernors
+
+	def _cultureFromEnvoys(self, simulation):
+		cultureFromEnvoys: float = 0.0
+		effects = self.player.envoyEffects(simulation)
+
+		for effect in effects:
+			# +2 Culture in the Capital.
+			if effect.isEqual(category=CityStateCategory.cultural, at=EnvoyEffectLevel.first) and self.capitalValue:
+				cultureFromEnvoys += 2.0
+
+			# +2 Culture in every Amphitheater building.
+			if effect.isEqual(category=CityStateCategory.cultural, at=EnvoyEffectLevel.third) and \
+				self.buildings.hasBuilding(BuildingType.amphitheater):
+				cultureFromEnvoys += 2.0
+
+			# +2 Culture in every Art Museum and Archaeological Museum building.
+			if effect.isEqual(category=CityStateCategory.cultural, at=EnvoyEffectLevel.sixth):
+				raise Exception("not handled")
+				# if self.has(building: .museum)
+				# 	cultureFromEnvoys += 2.0
+				#
+				# if self.has(building: .arch)
+				# 	cultureFromEnvoys += 2.0
+
+		return cultureFromEnvoys
+	

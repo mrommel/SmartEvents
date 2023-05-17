@@ -14,9 +14,16 @@ class GovernorTitle(ExtendedEnum):
 	# ???
 	researcher = 'researcher'
 	librarian = 'librarian'
+	connoisseur = 'connoisseur'
 
 
 class Governor:
 	def __init__(self, type: GovernorType):
 		self._type = type
 		self._location = constants.invalidHexPoint
+
+	def type(self) -> GovernorType:
+		return self._type
+
+	def defaultTitle(self) -> GovernorTitle:
+		return self._type.defaultTitle()

@@ -2,13 +2,16 @@ from enum import Enum
 from typing import Optional
 
 from game.cities import City
+from game.districts import DistrictType
+from game.governors import GovernorType, GovernorTitle
 from game.players import Player
 from game.types import TechType, CivicType
 from game.unitTypes import BuildType, ImprovementType
 from game.units import Unit
+from game.wonders import WonderType
 from map.base import HexPoint, HexDirection, Size, Array2D
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
-	Tutorials, Yields
+	Tutorials, Yields, AppealLevel
 from utils.base import WeightedBaseList
 
 
@@ -52,7 +55,8 @@ class Tile:
 		self.discovered = dict()
 		self.visible = dict()
 		self.cityValue = None
-		self.districtValue = None
+		self._districtValue = None
+		self._wonderValue = WonderType.none
 		self._owner = None
 		self._workingCity = None
 		self._buildProgressList = WeightedBuildList()
@@ -335,6 +339,12 @@ class Tile:
 	def setHills(self, hills: bool):
 		self._isHills = hills
 
+	def hasAnyImprovement(self) -> bool:
+		return self._improvement != ImprovementType.none
+
+	def hasImprovement(self, improvement: ImprovementType) -> bool:
+		return self._improvement == improvement
+
 	def route(self) -> RouteType:
 		return self._route
 
@@ -347,8 +357,14 @@ class Tile:
 	def setImprovement(self, improvement: ImprovementType):
 		self._improvement = improvement
 
-	def buildDistrict(self, district):
-		self.districtValue = district
+	def hasAnyWonder(self) -> bool:
+		return self._wonderValue != WonderType.none
+
+	def hasDistrict(self, district: DistrictType) -> bool:
+		return self._districtValue == district
+
+	def buildDistrict(self, district: DistrictType):
+		self._districtValue = district
 
 	def setOwner(self, player):
 		self._owner = player
@@ -503,6 +519,131 @@ class Tile:
 				player.civics.triggerInspirationFor(CivicType.craftsmanship, simulation)
 
 		return
+
+	def appeal(self, simulation) -> int:
+		# Mountain tiles have a base Appeal of Breathtaking (4),
+		# which is unaffected by surrounding features.
+		if self._featureValue == FeatureType.mountains:
+			return 4
+
+		# Natural wonder tiles have a base Appeal of Breathtaking (5),
+		# which is also unaffected by surrounding features.
+		if self._featureValue.isNaturalWonder():
+			return 5
+
+		appealValue: int = 0
+		nextRiverOrLake: bool = simulation.riverAt(self.point)
+		neighborCliffsOfDoverOrUluru: bool = False
+		neighborPillagedCount: int = 0
+		neighborBadFeaturesCount: int = 0
+		neighborBadImprovementsCount: int = 0
+		neighborBadDistrictsCount: int = 0
+		neighborGoodTerrainsCount: int = 0
+		neighborGoodDistrictsCount: int = 0
+		neighborWondersCount: int = 0
+		neighborNaturalWondersCount: int = 0
+
+		for neighbor in self.point.neighbors():
+
+			neighborTile = simulation.tileAt(neighbor)
+
+			if neighborTile.hasFeature(FeatureType.lake):
+				nextRiverOrLake = True
+
+			if neighborTile.hasFeature(FeatureType.rainforest) or \
+				neighborTile.hasFeature(FeatureType.marsh) or \
+				neighborTile.hasFeature(FeatureType.floodplains):
+				neighborBadFeaturesCount += 1
+
+			if neighborTile.hasFeature(FeatureType.cliffsOfDover) or neighborTile.hasFeature(FeatureType.uluru):
+				neighborCliffsOfDoverOrUluru = True
+
+			if neighborTile.feature().isNaturalWonder() and \
+				not (neighborTile.hasFeature(FeatureType.cliffsOfDover) or neighborTile.hasFeature(FeatureType.uluru)):
+				neighborNaturalWondersCount += 1
+
+			if neighborTile.isImprovementPillaged():
+				neighborPillagedCount += 1
+
+			if neighborTile.hasImprovement(ImprovementType.barbarianCamp) or \
+				neighborTile.hasImprovement(ImprovementType.mine) or \
+				neighborTile.hasImprovement(ImprovementType.quarry) or \
+				neighborTile.hasImprovement(ImprovementType.oilWell):
+
+				neighborBadImprovementsCount += 1
+
+			if neighborTile.hasDistrict(DistrictType.industrialZone) or \
+				neighborTile.hasDistrict(DistrictType.encampment) or \
+				neighborTile.hasDistrict(DistrictType.spaceport):  # neighborTile.hasDistrict(DistrictType.aerodrome) or
+
+				neighborBadDistrictsCount += 1
+
+			if simulation.isCoastalAt(neighbor) or \
+				neighborTile.hasFeature(FeatureType.mountains) or \
+				neighborTile.hasFeature(FeatureType.forest) or \
+				neighborTile.hasFeature(FeatureType.oasis):
+
+				neighborGoodTerrainsCount += 1
+
+			if neighborTile.hasAnyFeature() and not neighborTile.hasAnyImprovement():
+				# check for governor effects of reyna
+				city = neighborTile.workingCity()
+				if city is not None and city.governor() is not None:
+					if city.governor().type == GovernorType.reyna:
+						# forestryManagement - Tiles adjacent to unimproved features receive +1 Appeal in this city.
+						if city.governor().hasTitle(GovernorTitle.forestryManagement):
+							neighborGoodTerrainsCount += 1
+
+			if neighborTile.hasAnyWonder():
+				neighborWondersCount += 1
+
+			if neighborTile.hasDistrict(DistrictType.holySite) or \
+				neighborTile.hasDistrict(DistrictType.theaterSquare) or \
+				neighborTile.hasDistrict(DistrictType.entertainmentComplex) or \
+				neighborTile.hasDistrict(DistrictType.waterPark) or \
+				neighborTile.hasDistrict(DistrictType.preserve):  # dam canal
+
+				neighborGoodDistrictsCount += 1
+
+		# +2 for each adjacent Sphinx (in Gathering Storm), Ice Hockey Rink, City Park, or natural wonder (except the
+		# ones that provide a larger bonus).
+		appealValue += neighborNaturalWondersCount * 2
+
+		# +1 for each adjacent Holy Site, Theater Square, Entertainment Complex, Water Park, Dam, Canal, Preserve,
+		# or wonder.
+		appealValue += neighborGoodDistrictsCount
+		appealValue += neighborWondersCount
+
+		# +1 for each adjacent Sphinx (in vanilla Civilization VI and Rise and Fall), Château, Pairidaeza, Golf Course,
+		# Nazca Line, or Rock-Hewn Church.
+		#
+
+		# +1 for each adjacent Mountain, Coast, Woods, or Oasis.
+		appealValue += neighborGoodTerrainsCount
+
+		# -1 for each adjacent barbarian outpost, Mine, Quarry, Oil Well, Offshore Oil Rig, Airstrip, Industrial Zone,
+		# Encampment, Aerodrome, or Spaceport.
+		appealValue -= neighborBadImprovementsCount
+		appealValue -= neighborBadDistrictsCount
+
+		# -1 for each adjacent Rainforest, Marsh, or Floodplain.
+		appealValue -= neighborBadFeaturesCount
+
+		# -1 for each adjacent pillaged tile.
+		appealValue -= neighborPillagedCount
+
+		# +1 if the tile is next to a River or Lake.
+		if nextRiverOrLake:
+			appealValue += 1
+
+		# +4 if adjacent to the Cliffs of Dover (in Gathering Storm) or Uluru.
+		if neighborCliffsOfDoverOrUluru:
+			appealValue += 4
+
+		return appealValue
+
+	def appealLevel(self, simulation) -> AppealLevel:
+		return AppealLevel.fromAppeal(self.appeal(simulation))
 
 
 class TileStatistics:
@@ -725,7 +866,7 @@ class Map:
 		else:
 			raise AttributeError(f'Map.modifyTerrainAt with wrong attributes: {x_or_hex} / {y_or_terrain} / {feature}')
 
-	def riverAt(self, x_or_hex, y=None):
+	def riverAt(self, x_or_hex, y=None) -> bool:
 		"""@return True, if this tile has a river - False otherwise"""
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex

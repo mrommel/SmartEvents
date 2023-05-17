@@ -24,6 +24,8 @@ class ImprovementTypeData:
 class ImprovementType(Enum):
 	none = 'none'
 
+	barbarianCamp = 'barbarianCamp'
+
 	mine = 'mine'
 	plantation = 'plantation'
 	farm = 'farm'
@@ -31,6 +33,7 @@ class ImprovementType(Enum):
 	camp = 'camp'
 	fishingBoats = 'fishingBoats'
 	pasture = 'pasture'
+	oilWell = 'oilWell'
 	fort = 'fort'
 
 	def name(self):

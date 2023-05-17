@@ -130,7 +130,7 @@ class PolicyCardType(ExtendedEnum):
 	# arsenalOfDemocracy
 	newDeal = 'newDeal'
 	# lightningWarfare
-	# thirdAlternative
+	thirdAlternative = 'thirdAlternative'
 	# martialLaw
 	# gunboatDiplomacy
 	fiveYearPlan = 'fiveYearPlan'
@@ -796,7 +796,17 @@ class PolicyCardType(ExtendedEnum):
 				flavors=[]
 			)
 		# lightningWarfare
-		# thirdAlternative
+		elif self == PolicyCardType.thirdAlternative:
+			# https://civilization.fandom.com/wiki/Third_Alternative_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_THIRD_ALTERNATIVE_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_THIRD_ALTERNATIVE_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.totalitarianism,
+				obsoleteCivic=None,
+				replace=[],
+				flavors=[]
+			)
 		# martialLaw
 		# gunboatDiplomacy
 		elif self == PolicyCardType.fiveYearPlan:

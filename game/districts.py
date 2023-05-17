@@ -41,6 +41,8 @@ class DistrictType(ExtendedEnum):
 	aqueduct = 'aqueduct'
 	industrialZone = 'industrialZone'
 	theaterSquare = 'theaterSquare'
+	spaceport = 'spaceport'
+	waterPark = 'waterPark'
 
 	def name(self) -> str:
 		return self._data().name
@@ -367,6 +369,43 @@ class DistrictType(ExtendedEnum):
 				flavors=[
 					Flavor(FlavorType.culture, value=6),
 					Flavor(FlavorType.greatPeople, value=4)
+				]
+			)
+		elif self == DistrictType.spaceport:
+			# https://civilization.fandom.com/wiki/Spaceport_(Civ6)
+			return DistrictTypeData(
+				name="TXT_KEY_DISTRICT_SPACEPORT_TITLE",
+				specialty=False,
+				effects=[
+					"TXT_KEY_DISTRICT_SPACEPORT_EFFECT1"
+				],
+				productionCost=1800,
+				maintenanceCost=0,
+				requiredTech=TechType.rocketry,
+				requiredCivic=None,
+				domesticTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
+				foreignTradeYields=Yields(food=0.0, production=0.0, gold=0.0),
+				flavors=[
+					Flavor(FlavorType.science, value=7)
+				]
+			)
+		elif self == DistrictType.waterPark:
+			# https://civilization.fandom.com/wiki/Water_Park_(Civ6)
+			return DistrictTypeData(
+				name="TXT_KEY_DISTRICT_WATER_PARK_TITLE",
+				specialty=True,
+				effects=[
+					"TXT_KEY_DISTRICT_WATER_PARK_EFFECT1"
+				],
+				productionCost=54,
+				maintenanceCost=1,
+				requiredTech=None,
+				requiredCivic=CivicType.naturalHistory,
+				domesticTradeYields=Yields(food=1.0, production=0.0, gold=0.0),
+				foreignTradeYields=Yields(food=1.0, production=0.0, gold=0.0),
+				flavors=[
+					Flavor(FlavorType.growth, value=4),
+					Flavor(FlavorType.amenities, value=5)
 				]
 			)
 

@@ -166,6 +166,9 @@ class Game:
     def tileAt(self, location) -> Tile:
         return self._map.tileAt(location)
 
+    def riverAt(self, location) -> bool:
+        return self._map.riverAt(location)
+
     def valid(self, point: HexPoint) -> bool:
         return self._map.valid(point)
 
