@@ -3,15 +3,24 @@ from typing import Optional
 
 from game.cities import City
 from game.players import Player
+from game.types import TechType, CivicType
 from game.unitTypes import BuildType, ImprovementType
 from game.units import Unit
 from map.base import HexPoint, HexDirection, Size, Array2D
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
 	Tutorials, Yields
+from utils.base import WeightedBaseList
 
 
 class Tile:
 	pass
+
+
+class WeightedBuildList(WeightedBaseList):
+	def __init__(self):
+		super().__init__()
+		for build in list(BuildType):
+			self.setWeight(0.0, build)
 
 
 # noinspection PyRedeclaration
@@ -46,6 +55,7 @@ class Tile:
 		self.districtValue = None
 		self._owner = None
 		self._workingCity = None
+		self._buildProgressList = WeightedBuildList()
 
 	def isWater(self):
 		"""
@@ -87,6 +97,9 @@ class Tile:
 				return self._resourceValue
 
 		return ResourceType.none
+
+	def hasAnyResourceFor(self, player) -> bool:
+		return self.resourceFor(player) != ResourceType.none
 
 	def isImpassable(self, movement_ype):
 		# start with terrain cost
@@ -322,6 +335,9 @@ class Tile:
 	def setHills(self, hills: bool):
 		self._isHills = hills
 
+	def route(self) -> RouteType:
+		return self._route
+
 	def setRoute(self, route: RouteType):
 		self._route = route
 
@@ -363,6 +379,130 @@ class Tile:
 
 	def isImprovementPillaged(self):
 		return False
+
+	def changeBuildProgressOf(self, build: BuildType, change: int, player: Player, simulation) -> bool:
+		"""Returns true if build finished ..."""
+		finished = False
+
+		if change < 0:
+			raise Exception(f'change must be bigger than zero but is {change}')
+
+		if change > 0:
+			self._buildProgressList.addWeight(change, build)
+
+			if self.buildProgressFor(build) >= build.buildTimeOn(self):
+				self._buildProgressList.setWeight(0, build)
+
+				# Constructed Improvement
+				if build.improvement() is not None and build.improvement() != ImprovementType.none:
+					# eurekas
+					self.updateEurekas(build.improvement(), player, simulation)
+
+					self.setImprovement(build.improvement())
+
+				# Constructed Route
+				if build.route() is not None:
+					self.setRoute(build.route())
+
+				# Remove Feature
+				if self.hasAnyFeature():
+					if not build.keepsFeature(self.feature()) and build.canRemoveFeature(self.feature()):
+
+						production, city = self.featureProductionBy(build, player)
+
+						if production > 0:
+							if city is None:
+								raise Exception("no city found")
+
+							city.changeFeatureProduction(float(production))
+
+							if city.player.isHuman():
+								# simulation.userInterface.showTooltip(at: self.point,
+								# 	type:.clearedFeature(feature: self.feature(), production: production, cityName: city.name),
+								# 	delay: 3)
+								pass
+
+						self.setFeature(FeatureType.none)
+
+				# Repairing a Pillaged Tile
+				if build.willRepair():
+					if self.isImprovementPillaged():
+						self.setImprovementPillaged(False)
+					elif self.isRoutePillaged():
+						self.setRoutePillaged(False)
+
+				if build.willRemoveRoute():
+					self.setRoute(RouteType.none)
+
+				finished = True
+
+		return finished
+
+	def buildProgressFor(self, build: BuildType) -> int:
+		return int(self._buildProgressList.weight(build))
+
+	def updateEurekas(self, improvement: ImprovementType, player, simulation):
+		# Techs
+		# -----------------------------------------------------
+
+		# Masonry - To Boost: Build a quarry
+		if not player.techs.eurekaTriggeredFor(TechType.masonry):
+			if improvement == ImprovementType.quarry:
+				player.techs.triggerEurekaFor(TechType.masonry, simulation)
+
+		# Wheel - To Boost: Mine a resource
+		if not player.techs.eurekaTriggeredFor(TechType.wheel):
+			if improvement == ImprovementType.mine and self.hasAnyResourceFor(player):
+				player.techs.triggerEurekaFor(TechType.wheel, simulation)
+
+		# Irrigation - To Boost: Farm a resource
+		if not player.techs.eurekaTriggeredFor(TechType.irrigation):
+			if improvement == ImprovementType.farm and self.hasAnyResourceFor(player):
+				player.techs.triggerEureka(TechType.irrigation, simulation)
+
+		# Horseback Riding - To Boost: Build a pasture
+		if not player.techs.eurekaTriggeredFor(TechType.horsebackRiding):
+			if improvement == ImprovementType.pasture:
+				player.techs.triggerEureka(TechType.horsebackRiding, simulation)
+
+		# Iron Working - To Boost: Build an Iron Mine
+		if not player.techs.eurekaTriggeredFor(TechType.ironWorking):
+			if improvement == ImprovementType.mine and self._resourceValue == ResourceType.iron:
+				player.techs.triggerEurekaFor(TechType.ironWorking, simulation)
+
+		# Apprenticeship - To Boost: Build 3 mines
+		if not player.techs.eurekaTriggeredFor(TechType.apprenticeship):
+			if improvement == ImprovementType.mine:
+				player.techs.changeEurekaValue(TechType.apprenticeship, change=1)
+
+				if player.techs.eurekaValue(TechType.apprenticeship) >= 3:
+					player.techs.triggerEurekaFor(TechType.apprenticeship, simulation)
+
+		# Ballistics - To Boost: Build 2 Forts
+		if not player.techs.eurekaTriggeredFor(TechType.ballistics):
+			if improvement == ImprovementType.fort:
+				player.techs.changeEurekaValue(TechType.ballistics, change=1)
+
+				if player.techs.eurekaValue(TechType.ballistics) >= 2:
+					player.techs.triggerEurekaFor(TechType.ballistics)
+
+		# Rifling - To Boost: Build a Niter Mine
+		if not player.techs.eurekaTriggeredFor(TechType.rifling):
+			if improvement == ImprovementType.mine and self._resourceValue == ResourceType.niter:
+				player.techs.triggerEurekaFor(TechType.rifling)
+
+		# Civics
+		# -----------------------------------------------------
+
+		# Craftsmanship - To Boost: Improve 3 tiles
+		if not player.civics.inspirationTriggeredFor(CivicType.craftsmanship):
+			# increase for any improvement
+			player.civics.changeInspirationValueFor(CivicType.craftsmanship, change=1)
+
+			if player.civics.inspirationValueOf(CivicType.craftsmanship) >= 3:
+				player.civics.triggerInspirationFor(CivicType.craftsmanship, simulation)
+
+		return
 
 
 class TileStatistics:

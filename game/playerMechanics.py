@@ -239,18 +239,20 @@ class WeightedCivicList(WeightedBaseList):
 class CivicInspirations:
 	def __init__(self):
 		self._inspirationTrigger = WeightedCivicList()
+		self._inspirationCount = WeightedCivicList()
 
 	def triggerFor(self, civic: CivicType):
 		self._inspirationTrigger.setWeight(1.0, civic)
+		self._inspirationCount.setWeight(0.0, civic)
 
 	def triggeredFor(self, civic: CivicType) -> bool:
 		return self._inspirationTrigger.weight(civic) > 0.0
 
-	def triggerIncreaseFor(self, civic: CivicType):
-		self._inspirationTrigger.addWeight(1.0, civic)
+	def triggerIncreaseFor(self, civic: CivicType, change: int = 1):
+		self._inspirationCount.addWeight(float(change), civic)
 
 	def triggerCountFor(self, civic: CivicType) -> int:
-		return int(self._inspirationTrigger.weight(civic))
+		return int(self._inspirationCount.weight(civic))
 
 
 class PlayerCivics:
@@ -401,6 +403,12 @@ class PlayerCivics:
 			pass
 
 		return
+
+	def changeInspirationValueFor(self, civic: CivicType, change: int):
+		self._inspirations.triggerIncreaseFor(civic, change)
+
+	def inspirationValueOf(self, civic: CivicType) -> int:
+		return self._inspirations.triggerCountFor(civic)
 
 
 class BuilderTaskingAI:

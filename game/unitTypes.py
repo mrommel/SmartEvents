@@ -1,3 +1,4 @@
+import sys
 from enum import Enum
 from typing import Optional
 
@@ -30,6 +31,7 @@ class ImprovementType(Enum):
 	camp = 'camp'
 	fishingBoats = 'fishingBoats'
 	pasture = 'pasture'
+	fort = 'fort'
 
 	def name(self):
 		return self._data().name
@@ -142,6 +144,18 @@ class ImprovementType(Enum):
 					"+1 [Production] Production (Robotics)"
 				],
 				requiredTech=TechType.animalHusbandry,
+				civilization=None,
+				flavors=[]
+			)
+		elif self == ImprovementType.fort:
+			# https://civilization.fandom.com/wiki/Fort_(Civ6)
+			return ImprovementTypeData(
+				name="Fort",
+				effects=[
+					"Occupying unit receives +4 Defense Strength and 2 turns of fortification.",
+					"Built by a Military Engineer."
+				],
+				requiredTech=TechType.siegeTactics,
 				civilization=None,
 				flavors=[]
 			)
@@ -273,7 +287,7 @@ class ImprovementType(Enum):
 class BuildTypeData:
 	# noinspection PyShadowingNames
 	def __init__(self, name: str, repair: bool=False, requiredTech: Optional[TechType]=None, era: EraType=None,
-	             improvement: ImprovementType=None, route: RouteType=None, removeRoad: bool = False,
+	             improvement: Optional[ImprovementType]=None, route: RouteType=None, removeRoad: bool = False,
 	             duration: int = 0, isWater: bool = True):
 		"""
 
@@ -533,6 +547,42 @@ class BuildType(ExtendedEnum):
 			)
 
 			return removeMarshBuild
+
+	def buildTimeOn(self, tile) -> int:
+		time = self._data().duration
+
+		for feature in list(FeatureType):
+			if feature == FeatureType.none:
+				continue
+
+			if tile.hasFeature(feature) and not self.keepsFeature(feature):
+				featureBuild = next((fb for fb in self._data().featureBuilds if fb.featureType == feature), None)
+
+				if featureBuild is not None:
+					time += featureBuild.duration
+				else:
+					# build cant handle feature
+					return sys.maxsize
+
+		return time
+
+	def keepsFeature(self, feature: FeatureType) -> bool:
+		if feature in self._data().featuresKept:
+			return True
+
+		return False
+
+	def improvement(self) -> ImprovementType:
+		return self._data().improvement
+
+	def route(self):
+		return self._data().route
+
+	def willRepair(self) -> bool:
+		return self._data().repair
+
+	def willRemoveRoute(self) -> bool:
+		return self._data().removeRoad
 
 
 class UnitTaskType(ExtendedEnum):

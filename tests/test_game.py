@@ -12,10 +12,10 @@ from game.playerMechanics import PlayerTechs, PlayerCivics
 from game.players import Player
 from game.policyCards import PolicyCardType
 from game.types import CivicType, TechType
-from game.unitTypes import ImprovementType
+from game.unitTypes import ImprovementType, BuildType
 from game.wonders import WonderType
 from map.base import HexPoint
-from map.map import Map
+from map.map import Map, Tile
 from map.types import TerrainType
 
 
@@ -282,19 +282,21 @@ class TestPlayerTechs(unittest.TestCase):
 
 
 class TestPlayerCivics(unittest.TestCase):
+	def setUp(self) -> None:
+		self.map = Map(10, 10)
+		self.simulation = Game(map=self.map)
+
+		self.player = Player(leader=LeaderType.alexander, cityState=None, human=False)
+		self.player.initialize()
+
+		self.playerCivics = self.player.civics
+
 	def test_possible_civics(self):
 		# GIVEN
-		map = Map(10, 10)
-		simulation = Game(map=map)
-
-		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
-		player.initialize()
-
-		playerCivics = PlayerCivics(player=player)
-		playerCivics.discover(civic=CivicType.codeOfLaws, simulation=simulation)
+		self.playerCivics.discover(civic=CivicType.codeOfLaws, simulation=self.simulation)
 
 		# WHEN
-		possibleCivics = playerCivics.possibleCivics()
+		possibleCivics = self.playerCivics.possibleCivics()
 
 		# THEN
 		# self.assertEqual(playerCivics.currentCivic(), None)
@@ -306,43 +308,51 @@ class TestPlayerCivics(unittest.TestCase):
 
 	def test_current_civic(self):
 		# GIVEN
-		map = Map(10, 10)
-		simulation = Game(map=map)
-
-		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
-		player.initialize()
-
-		playerCivics = PlayerCivics(player=player)
-		playerCivics.discover(civic=CivicType.codeOfLaws, simulation=simulation)
+		self.playerCivics.discover(civic=CivicType.codeOfLaws, simulation=self.simulation)
 
 		# WHEN
-		playerCivics.setCurrentCivic(CivicType.foreignTrade, simulation)
+		self.playerCivics.setCurrentCivic(CivicType.foreignTrade, self.simulation)
 
 		# THEN
-		self.assertEqual(playerCivics.currentCivic(), CivicType.foreignTrade)
+		self.assertEqual(self.playerCivics.currentCivic(), CivicType.foreignTrade)
 
 	def test_inspiration(self):
 		# GIVEN
-		map = Map(10, 10)
-		simulation = Game(map=map)
+		self.playerCivics.discover(civic=CivicType.codeOfLaws, simulation=self.simulation)
 
-		player = Player(leader=LeaderType.alexander, cityState=None, human=False)
-		player.initialize()
-
-		playerCivics = PlayerCivics(player=player)
-		playerCivics.discover(civic=CivicType.codeOfLaws, simulation=simulation)
-
-		playerCivics.setCurrentCivic(CivicType.foreignTrade, simulation)
-		progressBefore = playerCivics.currentCultureProgress()
+		self.playerCivics.setCurrentCivic(CivicType.foreignTrade, self.simulation)
+		progressBefore = self.playerCivics.currentCultureProgress()
 
 		# WHEN
-		playerCivics.triggerInspirationFor(civic=CivicType.foreignTrade, simulation=simulation)
-		progressAfter = playerCivics.currentCultureProgress()
+		self.playerCivics.triggerInspirationFor(civic=CivicType.foreignTrade, simulation=self.simulation)
+		progressAfter = self.playerCivics.currentCultureProgress()
 
 		# THEN
-		self.assertEqual(playerCivics.inspirationTriggeredFor(CivicType.foreignTrade), True)
+		self.assertEqual(self.playerCivics.inspirationTriggeredFor(CivicType.foreignTrade), True)
 		self.assertEqual(progressBefore, 0.0)
 		self.assertEqual(progressAfter, 20.0)
+
+	def test_eureka_of_craftsmanship(self):
+		# GIVEN
+		self.playerCivics.discover(CivicType.codeOfLaws, simulation=self.simulation)
+
+		tile0: Tile = self.map.tileAt(HexPoint(0, 0))
+		tile0.setOwner(self.player)
+		tile1: Tile = self.map.tileAt(HexPoint(1, 0))
+		tile1.setOwner(self.player)
+		tile2: Tile = self.map.tileAt(HexPoint(0, 1))
+		tile2.setOwner(self.player)
+
+		# WHEN
+		beforeEureka = self.playerCivics.inspirationTriggeredFor(CivicType.craftsmanship)
+		tile0.changeBuildProgressOf(BuildType.farm, change=1000, player=self.player, simulation=self.simulation)
+		tile1.changeBuildProgressOf(BuildType.farm, change=1000, player=self.player, simulation=self.simulation)
+		tile2.changeBuildProgressOf(BuildType.farm, change=1000, player=self.player, simulation=self.simulation)
+		afterEureka = self.playerCivics.inspirationTriggeredFor(CivicType.craftsmanship)
+
+		# THEN
+		self.assertEqual(beforeEureka, False)
+		self.assertEqual(afterEureka, True)
 
 
 class TestSimulation(unittest.TestCase):
