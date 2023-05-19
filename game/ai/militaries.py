@@ -9,7 +9,36 @@ from game.ai.militaryStrategies import MilitaryStrategyType
 
 
 class MilitaryThreatType(Enum):
-    NONE = 0
+    none = 'none'
+
+    minor = 'minor'
+    major = 'major'
+    severe = 'severe'
+    critical = 'critical'
+
+    def value(self) -> int:
+        if self == MilitaryThreatType.none:
+            return 0
+        elif self == MilitaryThreatType.minor:
+            return 1
+        elif self == MilitaryThreatType.major:
+            return 2
+        elif self == MilitaryThreatType.severe:
+            return 3
+        elif self == MilitaryThreatType.critical:
+            return 4
+
+    def weight(self) -> int:
+        if self == MilitaryThreatType.none:
+            return 0
+        elif self == MilitaryThreatType.minor:
+            return 1
+        elif self == MilitaryThreatType.major:
+            return 3
+        elif self == MilitaryThreatType.severe:
+            return 6
+        elif self == MilitaryThreatType.critical:
+            return 10
 
 
 class MilitaryStrategyAdoptionItem:
@@ -141,7 +170,7 @@ class MilitaryAI:
 
         # Scale up or down based on true threat level and a bit by flavors(multiplier should range from about 0.5 to
         # about 1.5)
-        multiplier = (0.40 + float(self.highestThreat(simulation).value) + flavorOffense + flavorDefense) / 100.0
+        multiplier = (0.40 + float(self.highestThreat(simulation).value()) + flavorOffense + flavorDefense) / 100.0
 
         # first get the number of defenders that we think we need
 
@@ -183,7 +212,7 @@ class MilitaryAI:
 
     def highestThreat(self, simulation):
         # See if the threats we are facing have changed
-        highestThreatByPlayer: MilitaryThreatType = MilitaryThreatType.NONE
+        highestThreatByPlayer: MilitaryThreatType = MilitaryThreatType.none
 
         for otherPlayer in simulation.players:
             if otherPlayer.leader == self.player.leader:

@@ -186,6 +186,33 @@ class HandicapType(Enum):
             return [UnitType.settler, UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior,
                     UnitType.warrior, UnitType.warrior, UnitType.warrior, UnitType.builder, UnitType.builder]
 
+    def firstImpressionBaseValue(self):
+        # // -3 - +3
+        # Deity -2 to -8
+        # Immortal -1 to -7
+        # Emperor 0 a -6
+        # King1 to -5
+        # Prince 2 to -4
+        # https://forums.civfanatics.com/threads/first-impression-of-you.613161/ */
+        if self == HandicapType.settler:
+            return 2
+        elif self == HandicapType.chieftain:
+            return 1
+        elif self == HandicapType.warlord:
+            return 0
+        elif self == HandicapType.prince:
+            return -1
+        elif self == HandicapType.king:
+            return -2
+        elif self == HandicapType.emperor:
+            return -3
+        elif self == HandicapType.immortal:
+            return -4
+        elif self == HandicapType.deity:
+            return -5
+
+        raise InvalidEnumError(self)
+
 
 class GameState(Enum):
     on = 'on'

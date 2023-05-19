@@ -1,12 +1,13 @@
 import random
 from typing import Optional
 
+from game.ai.militaries import MilitaryThreatType
 from game.cities import AgeType, DedicationType
-from game.civilizations import CivilizationType
+from game.civilizations import CivilizationType, LeaderType
 from game.flavors import FlavorType
 from game.moments import Moment, MomentType
 from game.types import TechType, CivicType, EraType
-from utils.base import WeightedBaseList
+from utils.base import WeightedBaseList, ExtendedEnum, InvalidEnumError
 
 
 class WeightedTechList(WeightedBaseList):
@@ -479,12 +480,356 @@ class TacticalAI:
 		pass
 
 
+class ApproachType(ExtendedEnum):
+	firstImpression = 'firstImpression'
+
+
+class AccessLevel(ExtendedEnum):
+	none = 'none'
+
+
+class PlayerOpinionType(ExtendedEnum):
+	none = 'none'
+
+
+class StrengthType(ExtendedEnum):
+	immense = 'immense'
+	powerful = 'powerful'
+	strong = 'strong'
+	average = 'average'
+	poor = 'poor'
+	weak = 'weak'
+	pathetic = 'pathetic'
+
+
+class DiplomaticPact:
+	def __init__(self, duration: int = 25):
+		self.duration = duration
+
+
+class PlayerProximityType(ExtendedEnum):
+	none = 'none'
+
+
+class PlayerWarFaceType(ExtendedEnum):
+	none = 'none'
+
+
+class WarGoalType(ExtendedEnum):
+	none = 'none'
+
+
+class PlayerWarStateType(ExtendedEnum):
+	none = 'none'
+
+
+class PlayerTargetValueType(ExtendedEnum):
+	none = 'none'
+
+
+class WarDamageLevelType(ExtendedEnum):
+	none = 'none'
+
+
+class WarProjectionType(ExtendedEnum):
+	unknown = 'unknown'
+
+
+class LandDisputeLevelType(ExtendedEnum):
+	none = 'none'
+
+
+class AggressivePostureType(ExtendedEnum):
+	none = 'none'
+
+
+class PeaceTreatyType(ExtendedEnum):
+	none = 'none'
+
+
+class LeaderAgendaType(ExtendedEnum):
+	pass
+
+
+class ApproachModifierTypeData:
+	def __init__(self, summary: str, initialValue: int, reductionTurns: int, reductionValue: int,
+				 hiddenAgenda: Optional[LeaderAgendaType]):
+		self.summary = summary
+		self.initialValue = initialValue
+		self.reductionTurns = reductionTurns
+		self.reductionValue = reductionValue
+		self.hiddenAgenda = hiddenAgenda
+
+
+class ApproachModifierType(ExtendedEnum):
+	delegation = 'delegation'  # STANDARD_DIPLOMATIC_DELEGATION
+	embassy = 'embassy'  # STANDARD_DIPLOMACY_RESIDENT_EMBASSY
+	declaredFriend = 'declaredFriend'  # STANDARD_DIPLOMATIC_DECLARED_FRIEND
+	denounced = 'denounced'  # STANDARD_DIPLOMATIC_DENOUNCED
+	firstImpression = 'firstImpression'  # STANDARD_DIPLOMACY_RANDOM ??
+	establishedTradeRoute = 'establishedTradeRoute'  # STANDARD_DIPLOMACY_TRADE_RELATIONS
+	nearBorder = 'nearBorder'  # STANDARD_DIPLOMATIC_NEAR_BORDER_WARNING
+
+	def initialValue(self) -> int:
+		return self._data().initialValue
+
+	def reductionTurns(self) -> int:
+		return self._data().reductionTurns
+
+	def reductionValue(self) -> int:
+		return self._data().reductionValue
+
+	def _data(self) -> ApproachModifierTypeData:
+		if self == ApproachModifierType.delegation:
+			return ApproachModifierTypeData(
+				summary="TXT_KEY_DIPLOMACY_MODIFIER_DELEGATION",
+				initialValue=3,
+				reductionTurns=-1,
+				reductionValue=0,
+				hiddenAgenda=None
+			)
+		elif self == ApproachModifierType.embassy:
+			return ApproachModifierTypeData(
+				summary="TXT_KEY_DIPLOMACY_MODIFIER_RESIDENT_EMBASSY",
+				initialValue=5,
+				reductionTurns=-1,
+				reductionValue=0,
+				hiddenAgenda=None
+			)
+		elif self == ApproachModifierType.declaredFriend:
+			return ApproachModifierTypeData(
+				summary="TXT_KEY_DIPLOMACY_MODIFIER_DECLARED_FRIEND",
+				initialValue=-9,
+				reductionTurns=10,
+				reductionValue=-1,
+				hiddenAgenda=None
+			)
+		elif self == ApproachModifierType.denounced:
+			return ApproachModifierTypeData(
+				summary="TXT_KEY_DIPLOMACY_MODIFIER_DENOUNCED",
+				initialValue=-9,
+				reductionTurns=10,
+				reductionValue=-1,
+				hiddenAgenda=None
+			)
+		elif self == ApproachModifierType.firstImpression:
+			return ApproachModifierTypeData(
+				summary="TXT_KEY_DIPLOMACY_MODIFIER_FIRST_IMPRESSION",
+				initialValue=0,  # overriden
+				reductionTurns=10,
+				reductionValue=-1,  # overriden
+				hiddenAgenda=None
+			)
+		elif self == ApproachModifierType.establishedTradeRoute:
+			return ApproachModifierTypeData(
+				summary="TXT_KEY_DIPLOMACY_MODIFIER_ESTABLISHED_TRADE_ROUTE",
+				initialValue=2,
+				reductionTurns=1,
+				reductionValue=-1,
+				hiddenAgenda=None
+			)
+		elif self == ApproachModifierType.nearBorder:
+			return ApproachModifierTypeData(
+				summary="TXT_KEY_DIPLOMACY_MODIFIER_NEAR_BORDER_WARNING",
+				initialValue=-2,
+				reductionTurns=20,
+				reductionValue=-1,
+				hiddenAgenda=None
+			)
+
+		raise InvalidEnumError(self)
+
+
+class DiplomaticAIPlayerApproachItem:
+	def __init__(self, approachModifierType: ApproachModifierType, initialValue: Optional[int] = None,
+				 reductionValue: Optional[int] = None):
+		self.approachModifierType = approachModifierType
+
+		if initialValue is not None:
+			self.value = initialValue
+		else:
+			self.value = approachModifierType.initialValue()
+
+		self.remainingTurn = approachModifierType.reductionTurns()
+
+		if reductionValue is not None:
+			self.reductionValue = reductionValue
+		else:
+			self.reductionValue = approachModifierType.reductionValue()
+
+		self.expiredValue = False
+
+
+class DiplomaticAIPlayerItem:
+	def __init__(self, leader: LeaderType, turnOfFirstContact: int):
+		self.leader = leader
+		self.turnOfFirstContact = turnOfFirstContact
+		self.accessLevel = AccessLevel.none
+		self.gossipItems = []
+		self.opinion = PlayerOpinionType.none
+		self.militaryStrengthComparedToUs = StrengthType.average
+		self.militaryThreat = MilitaryThreatType.none
+		self.economicStrengthComparedToUs = StrengthType.average
+		self.approachItems = []
+
+		self.approach = 50  # default
+		self.warFace = PlayerWarFaceType.none
+		self.warState = PlayerWarStateType.none
+		self.warGoal = WarGoalType.none
+		self.targetValue = PlayerTargetValueType.none
+		self.warDamageLevel = WarDamageLevelType.none
+		self.warProjection = WarProjectionType.unknown
+		self.lastWarProjection = WarProjectionType.unknown
+		self.warValueLost = 0
+		self.warWeariness = 0
+
+		self.hasDelegationValue = False
+		self.hasEmbassyValue = False
+
+		self.landDisputeLevel = LandDisputeLevelType.none
+		self.lastTurnLandDisputeLevel = LandDisputeLevelType.none
+
+		self.militaryAggressivePosture = AggressivePostureType.none
+		self.lastTurnMilitaryAggressivePosture = AggressivePostureType.none
+		self.expansionAggressivePosture = AggressivePostureType.none
+		self.plotBuyingAggressivePosture = AggressivePostureType.none
+
+		# pacts
+		self.declarationOfWar = DiplomaticPact()
+		self.declarationOfFriendship = DiplomaticPact()
+		self.openBorderAgreement = DiplomaticPact(duration=15)  # has a runtime of 15 turns
+		self.defensivePact = DiplomaticPact(duration=15)  # has a runtime of 15 turns
+		self.peaceTreaty = DiplomaticPact(duration=15)  # has a runtime of 15 turns
+		self.alliance = DiplomaticPact()
+
+		# deals
+		self.deals = []
+
+		self.hasDenounced = False
+		self.isRecklessExpander = False
+
+		self.proximity = PlayerProximityType.none
+
+		# counter
+		self.turnsAtWar = 0
+		self.recentTradeValue = 0
+
+		self.turnOfLastMeeting = -1
+		self.numTurnsLockedIntoWar = 0
+		self.wantPeaceCounter = 0
+		self.musteringForAttack = False
+
+		# agreements
+		self.coopAgreements = None # DiplomaticPlayerArray < CoopWarState > ()
+		self.workingAgainstAgreements = None # DiplomaticPlayerArray < Bool > ()
+
+		# peace treaty willingness
+		self.peaceTreatyWillingToOffer = PeaceTreatyType.none
+		self.peaceTreatyWillingToAccept = PeaceTreatyType.none
+
+
+class DiplomaticPlayerDict:
+	def __init__(self):
+		self.items: [DiplomaticAIPlayerItem] = []
+
+	def initContactWith(self, otherPlayer, turn: int):
+		otherLeader = otherPlayer.leader
+
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.turnOfFirstContact = turn
+		else:
+			self.items.append(DiplomaticAIPlayerItem(otherLeader, turnOfFirstContact=turn))
+
+	def updateMilitaryStrengthComparedToUsOf(self, otherPlayer, strength: StrengthType):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.militaryStrengthComparedToUs = strength
+		else:
+			raise Exception("not gonna happen")
+
+	def addApproachOf(self, approachModifierType: ApproachModifierType, initialValue: int, reductionValue: int, otherPlayer):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			approachItem = DiplomaticAIPlayerApproachItem(approachModifierType, initialValue, reductionValue)
+			item.approachItems.append(approachItem)
+		else:
+			raise Exception("not gonna happen")
+
+
 class DiplomacyAI:
 	def __init__(self, player):
+		self.playerDict = DiplomaticPlayerDict()
 		self.player = player
+		self.greetPlayers = []
 
 	def doTurn(self, simulation):
-		pass
+		# Military Stuff
+		self.doLockedIntoWarDecay(simulation)
+		self.doWarDamageDecay(simulation)
+		self.doUpdateWarDamageLevel(simulation)
+		self.updateMilitaryStrengths(simulation)
+		self.updateEconomicStrengths(simulation)
+
+		# DoUpdateWarmongerThreats();
+		self.updateMilitaryThreats(simulation)
+		self.updateTargetValue(simulation)  # DoUpdatePlayerTargetValues
+		self.updateWarStates(simulation)
+		self.doUpdateWarProjections(simulation)
+		self.doUpdateWarGoals(simulation)
+
+		self.doUpdatePeaceTreatyWillingness(simulation)
+
+		# Issues of Dispute
+		self.doUpdateLandDisputeLevels(simulation)
+		# DoUpdateVictoryDisputeLevels();
+		# DoUpdateWonderDisputeLevels();
+		# DoUpdateMinorCivDisputeLevels();
+
+		# Has any player gone back on any promises he made?
+		# DoTestPromises();
+
+		# What we think other Players are up to
+		# self.doUpdateOtherPlayerWarDamageLevel(simulation)
+		# DoUpdateEstimateOtherPlayerLandDisputeLevels();
+		# DoUpdateEstimateOtherPlayerVictoryDisputeLevels();
+		# DoUpdateEstimateOtherPlayerMilitaryThreats();
+		# DoEstimateOtherPlayerOpinions();
+		# LogOtherPlayerGuessStatus();
+
+		# Look at the situation
+		self.doUpdateMilitaryAggressivePostures(simulation)
+		self.doUpdateExpansionAggressivePostures(simulation)
+		self.doUpdatePlotBuyingAggressivePosture(simulation)
+
+		# Player Opinion & Approach
+		# DoUpdateApproachTowardsUsGuesses();
+
+		self.doHiddenAgenda(simulation)
+		self.updateOpinions(simulation)
+		self.updateApproaches(simulation)
+		# DoUpdateMinorCivApproaches();
+
+		self.updateProximities(simulation)
+
+		# These functions actually DO things, and we don't want the shadow AI behind a human player doing things for him
+		if not self.player.isHuman():
+			# MakeWar();
+			# DoMakePeaceWithMinors();
+
+			# DoUpdateDemands();
+
+			# DoUpdatePlanningExchanges();
+			# DoContactMinorCivs();
+			self.doContactMajorCivs(simulation)
+
+		# Update Counters
+		self.doCounters(simulation)
 
 	def hasMetWith(self, player) -> bool:
 		return False
@@ -493,7 +838,101 @@ class DiplomacyAI:
 		pass
 
 	def doFirstContactWith(self, otherPlayer, simulation):
-		pass
+		if self.hasMetWith(otherPlayer):
+			return
+
+		if self.player.isBarbarian() or otherPlayer.isBarbarian():
+			return
+
+		self.playerDict.initContactWith(otherPlayer, simulation.currentTurn)
+		self.updateMilitaryStrengthOf(otherPlayer, simulation)
+
+		impression = simulation.handicap.firstImpressionBaseValue() + random.randrange(-3, 3)
+		self.playerDict.addApproachOf(ApproachModifierType.firstImpression, impression, 1 if impression > 0 else -1, otherPlayer)
+
+		# Humans don't say hi to ai player automatically
+		if not self.player.isHuman():
+			# Should fire off a diplo message, when we meet a human
+			if otherPlayer.isHuman():
+				# Put in the list of people to greet human, when the human turn comes up.
+				self.greetPlayers.append(otherPlayer)
+
+		return
+
+	def doLockedIntoWarDecay(self, simulation):
+		for loopPlayer in simulation.players:
+			if loopPlayer.isAlive() and not loopPlayer.isEqualTo(self.player) and loopPlayer.hasMetWith(self.player):
+				# decay
+				if self.numTurnsLockedIntoWarWith(loopPlayer) > 0:
+					self.changeNumTurnsLockedIntoWarWith(loopPlayer, -1)
+
+	def doWarDamageDecay(self, simulation):
+		"""Every turn we're at peace war damage goes down a bit"""
+		# Loop through all (known) Players
+		for loopPlayer in simulation.players:
+			if loopPlayer.isAlive() and not loopPlayer.isEqualTo(self.player) and loopPlayer.hasMetWith(self.player):
+				# Update war damage we've suffered
+				if not self.isAtWarWith(loopPlayer):
+					value = self.warValueLostWith(loopPlayer)
+
+					if value > 0:
+						# Go down by 1/20th every turn at peace
+						value /= 20
+
+						# Make sure it's changing by at least 1
+						value = max(1, value)
+
+						self.changeWarValueLostWith(loopPlayer, -value)
+
+				# Update war damage other players have suffered from our viewpoint
+				# /*for(iThirdPlayerLoop = 0; iThirdPlayerLoop < MAX_CIV_PLAYERS; iThirdPlayerLoop++)
+				# {
+				#     eLoopThirdPlayer = (PlayerTypes) iThirdPlayerLoop;
+				#     eLoopThirdTeam = GET_PLAYER(eLoopThirdPlayer).getTeam();
+				#
+				#     // These two players not at war?
+				#     if(!GET_TEAM(eLoopThirdTeam).isAtWar(eLoopTeam))
+				#     {
+				#         iValue = GetOtherPlayerWarValueLost(eLoopPlayer, eLoopThirdPlayer);
+				#
+				#         if(iValue > 0)
+				#         {
+				#             // Go down by 1/20th every turn at peace
+				#             iValue /= 20;
+				#
+				#             // Make sure it's changing by at least 1
+				#             iValue = max(1, iValue);
+				#
+				#             ChangeOtherPlayerWarValueLost(eLoopPlayer, eLoopThirdPlayer, -iValue);
+				#         }
+				#     }
+				# }*/
+		return
+
+	def updateMilitaryStrengths(self,simulation):
+		for otherPlayer in simulation.players:
+			if otherPlayer.leader != self.player.leader and self.player.hasMetWith(otherPlayer):
+				self.updateMilitaryStrengthOf(otherPlayer, simulation)
+
+	def updateMilitaryStrengthOf(self, otherPlayer, simulation):
+		ownMilitaryStrength = self.player.militaryMight(simulation) + 30
+		otherMilitaryStrength = otherPlayer.militaryMight(simulation) + 30
+		militaryRatio = otherMilitaryStrength * 100 / ownMilitaryStrength
+
+		if militaryRatio >= 250:
+			self.playerDict.updateMilitaryStrengthComparedToUsOf(otherPlayer, StrengthType.immense)
+		elif militaryRatio >= 165:
+			self.playerDict.updateMilitaryStrengthComparedToUsOf(otherPlayer, StrengthType.powerful)
+		elif militaryRatio >= 115:
+			self.playerDict.updateMilitaryStrengthComparedToUsOf(otherPlayer, StrengthType.strong)
+		elif militaryRatio >= 85:
+			self.playerDict.updateMilitaryStrengthComparedToUsOf(otherPlayer, StrengthType.average)
+		elif militaryRatio >= 60:
+			self.playerDict.updateMilitaryStrengthComparedToUsOf(otherPlayer, StrengthType.poor)
+		elif militaryRatio >= 40:
+			self.playerDict.updateMilitaryStrengthComparedToUsOf(otherPlayer, StrengthType.weak)
+		else:
+			self.playerDict.updateMilitaryStrengthComparedToUsOf(otherPlayer, StrengthType.pathetic)
 
 
 class HomelandAI:

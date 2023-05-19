@@ -1,3 +1,4 @@
+import math
 from typing import Optional
 
 from game.baseTypes import CityStateType, GameState
@@ -58,6 +59,14 @@ class PlayerGreatPeople:
         return False
 
 
+class PlayerTreasury:
+    def __init__(self, player):
+        self.player = player
+
+    def value(self) -> float:
+        return 0.0
+
+
 class PlayerReligion:
     def __init__(self, player):
         self.player = player
@@ -111,6 +120,7 @@ class Player:
         self.tradeRoutes = PlayerTradeRoutes(player=self)
         self.cityConnections = CityConnections(player=self)
         self.greatPeople = PlayerGreatPeople(player=self)
+        self.treasury = PlayerTreasury(player=self)
         
         self.currentEraVal: EraType = EraType.ancient
         self.currentAgeVal: AgeType = AgeType.normal
@@ -642,3 +652,21 @@ class Player:
                 return moment.civilization == civilization
 
         return False
+
+    def militaryMight(self, simulation) -> int:
+        might = 0.0
+
+        # Current combat strength
+        for unit in simulation.unitsOf(player=self):
+            might += float(unit.power())
+
+        # Simplistic increase based on player's gold
+        # 500 gold will increase might by 22%, 2000 by 45%, 8000 gold by 90%
+        treasureValue = max(0.0, self.treasury.value())
+        goldMultiplier = 1.0 + math.sqrt(treasureValue) / 100.0
+        if goldMultiplier > 2.0:
+            goldMultiplier = 2.0
+
+        might *= goldMultiplier
+
+        return int(might)

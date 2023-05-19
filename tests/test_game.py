@@ -390,17 +390,24 @@ class TestSimulation(unittest.TestCase):
 		# GIVEN
 		mapModel = MapMock(10, 10, TerrainType.ocean)
 		simulation = Game(mapModel)
-		player = Player(LeaderType.trajan, human=True)
-		player.initialize()
+		
+		playerTrajan = Player(LeaderType.trajan, human=True)
+		playerTrajan.initialize()
 
-		capitalBefore = simulation.capitalOf(player)
-		totalCitiesFoundedBefore = player.numberOfCitiesFounded()
+		playerAlexander = Player(LeaderType.alexander, human=False)
+		playerAlexander.initialize()
+
+		simulation.players.append(playerAlexander)
+		simulation.players.append(playerTrajan)
+
+		capitalBefore = simulation.capitalOf(playerTrajan)
+		totalCitiesFoundedBefore = playerTrajan.numberOfCitiesFounded()
 
 		# WHEN
-		player.foundCity(HexPoint(4, 5), "Berlin", simulation)
+		playerTrajan.foundCity(HexPoint(4, 5), "Berlin", simulation)
 
-		capitalAfter = simulation.capitalOf(player)
-		totalCitiesFoundedAfter = player.numberOfCitiesFounded()
+		capitalAfter = simulation.capitalOf(playerTrajan)
+		totalCitiesFoundedAfter = playerTrajan.numberOfCitiesFounded()
 
 		# THEN
 		self.assertIsNone(capitalBefore)
