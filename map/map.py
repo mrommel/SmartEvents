@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional
 
 from game.cities import City
+from game.civilizations import LeaderType
 from game.districts import DistrictType
 from game.governors import GovernorType, GovernorTitle
 from game.players import Player
@@ -60,6 +61,12 @@ class Tile:
 		self._owner = None
 		self._workingCity = None
 		self._buildProgressList = WeightedBuildList()
+
+	def owner(self) -> Player:
+		return self._owner
+
+	def hasOwner(self) -> bool:
+		return self._owner is not None
 
 	def isWater(self):
 		"""

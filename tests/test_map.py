@@ -346,6 +346,45 @@ class TestMap(unittest.TestCase):
 		self.assertEqual(appeal, 0)
 		self.assertEqual(appealLevel, AppealLevel.average)
 
+	def test_discovery(self):
+		# GIVEN
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+		simulation = Game(mapModel)
+
+		player = Player(LeaderType.trajan, human=True)
+		player.initialize()
+
+		tile = mapModel.tileAt(HexPoint(3, 1))
+
+		# WHEN
+		discoveredBefore = tile.isDiscoveredBy(player)
+		tile.discoverBy(player, simulation)
+		discoveredAfter = tile.isDiscoveredBy(player)
+		# tile.sightBy(player)
+
+		# THEN
+		self.assertEqual(discoveredBefore, False)
+		self.assertEqual(discoveredAfter, True)
+
+	def test_sight(self):
+		# GIVEN
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+		simulation = Game(mapModel)
+
+		player = Player(LeaderType.trajan, human=True)
+		player.initialize()
+
+		tile = mapModel.tileAt(HexPoint(3, 1))
+
+		# WHEN
+		discoveredBefore = tile.isVisibleTo(player)
+		tile.sightBy(player)
+		discoveredAfter = tile.isVisibleTo(player)
+
+		# THEN
+		self.assertEqual(discoveredBefore, False)
+		self.assertEqual(discoveredAfter, True)
+
 
 class TestMapGenerator(unittest.TestCase):
 

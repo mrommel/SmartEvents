@@ -59,14 +59,14 @@ class MilitaryStrategyType(ExtendedEnum):
     def notBeforeTurnElapsed(self) -> int:
         return self._data().notBeforeTurnElapsed
 
-    def __str__(self):
-        return self._data().name
+    def flavorModifiers(self) -> [Flavor]:
+        return self._data().flavors
 
     def _data(self) -> MilitaryStrategyTypeData:
         if self == MilitaryStrategyType.needRanged:
             #
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_NONE',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=25,
@@ -80,7 +80,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.enoughRanged:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_ENOUGH_RANGED',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=25,
@@ -104,7 +104,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.enoughMilitaryUnits:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_ENOUGH_MILITARY_UNITS',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=25,
@@ -118,7 +118,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.needNavalUnits:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_NEED_NAVAL_UNITS',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=50,
@@ -128,7 +128,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.needNavalUnitsCritical:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_NEED_NAVAL_UNITS_CRITICAL',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=50,
@@ -138,7 +138,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.enoughNavalUnits:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_ENOUGH_NAVAL_UNITS',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=50,
@@ -148,7 +148,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.empireDefense:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_EMPIRE_DEFENSE',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=25,
@@ -158,7 +158,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.empireDefenseCritical:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_EMPIRE_DEFENSE_CRITICAL',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=25,
@@ -168,7 +168,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.atWar:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_AT_WAR',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=-1,
@@ -184,7 +184,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.warMobilization:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_WAR_MOBILIZATION',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=-1,
@@ -199,7 +199,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.eradicateBarbarians:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_ERADICATE_BARBARIANS',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=25,
@@ -211,7 +211,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.winningWars:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_WINNING_WARS',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=-1,
@@ -224,7 +224,7 @@ class MilitaryStrategyType(ExtendedEnum):
             )
         elif self == MilitaryStrategyType.losingWars:
             return MilitaryStrategyTypeData(
-                name='',
+                name='TXT_KEY_MILITARY_STRATEGY_LOSING_WARS',
                 requiredTech=None,
                 obsoleteTech=None,
                 notBeforeTurnElapsed=-1,

@@ -373,15 +373,19 @@ class TestPlayerStrategies(unittest.TestCase):
 
 		player = Player(LeaderType.trajan, human=True)
 		player.initialize()
+		simulation.players.append(player)
 
 		barbarianPlayer = Player(LeaderType.barbar, human=False)
 		barbarianPlayer.initialize()
+		simulation.players.append(barbarianPlayer)
 
 		simulation.userInterface = UserInterfaceMock()
 		simulation.currentTurn = 30  # not before 25 and check every 5 turns
 
 		tile0 = simulation.tileAt(HexPoint(3, 3))
-		tile0.sightBy(player)
+		# tile0.sightBy(player)
+		tile0.discoverBy(player, simulation)
+		tile0.setOwner(player)
 		tile0.setImprovement(ImprovementType.barbarianCamp)
 
 		tile1 = simulation.tileAt(HexPoint(3, 4))

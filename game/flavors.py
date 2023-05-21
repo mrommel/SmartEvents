@@ -64,3 +64,19 @@ class Flavors:
             return item.value
 
         return 0
+
+    def __iadd__(self, other):
+        if isinstance(other, Flavors):
+            for flavorType in list(FlavorType):
+                self.set(flavorType, self.value(flavorType) + other.value(flavorType))
+
+            return self
+        elif isinstance(other, Flavor):
+            item = next((flavor for flavor in self._items if flavor.flavorType == other.flavorType), None)
+
+            if item is not None:
+                item.value += other.value
+
+            return self
+        else:
+            raise Exception(f'type is not accepted {type(other)}')

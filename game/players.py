@@ -160,6 +160,12 @@ class Player:
     def name(self) -> str:
         return self.leader.name
 
+    def isEqualTo(self, otherPlayer) -> bool:
+        if otherPlayer is None:
+            return False
+
+        return self.leader == otherPlayer.leader
+
     def foundCity(self, location: HexPoint, name: str, simulation):
         tile = simulation.tileAt(location)
 

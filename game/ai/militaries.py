@@ -257,7 +257,7 @@ class MilitaryAI:
                     self._barbarianDataValue.barbarianCampCount += 1
 
                     # Count it as 5 camps if sitting inside our territory, that is annoying!
-                    if tile.owner().leader == self.player.leader:
+                    if self.player.isEqualTo(tile.owner()):
                         self._barbarianDataValue.barbarianCampCount += 4
 
             if tile.isVisibleTo(self.player):
@@ -358,4 +358,4 @@ class MilitaryAI:
         for militaryStrategyType in list(MilitaryStrategyType):
             if self.militaryStrategyAdoption.adopted(militaryStrategyType):
                 for militaryStrategyTypeFlavor in militaryStrategyType.flavorModifiers():
-                    self.flavors += militaryStrategyTypeFlavor
+                    self._flavors += militaryStrategyTypeFlavor
