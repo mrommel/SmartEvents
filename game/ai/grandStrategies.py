@@ -1,8 +1,9 @@
 import random
 
 from game.civilizations import TraitType
+from game.flavors import FlavorType, Flavor
+from game.states.victories import VictoryType
 from utils.base import InvalidEnumError, ExtendedEnum
-from game.baseTypes import FlavorType, Flavor, VictoryType
 
 
 class GrandStrategyAIType(ExtendedEnum):

@@ -1,8 +1,7 @@
 from enum import Enum
 
-from game.flavors import FlavorType, Flavor
 from game.units import UnitType
-from utils.base import ExtendedEnum, InvalidEnumError
+from utils.base import InvalidEnumError
 from utils.theming import Color
 from utils.translation import gettext_lazy as _
 
@@ -130,11 +129,6 @@ class CityStateType(Enum):
             )
         else:
             raise InvalidEnumError(self)
-
-
-class VictoryType(Enum):
-    domination = 0
-    cultural = 1
 
 
 class HandicapType(Enum):

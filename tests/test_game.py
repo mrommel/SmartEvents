@@ -1,6 +1,7 @@
 import unittest
 
 from game.achievements import CivicAchievements, TechAchievements
+from game.ai.baseTypes import MilitaryStrategyType
 from game.baseTypes import HandicapType
 from game.buildings import BuildingType
 from game.cities import City
@@ -12,7 +13,8 @@ from game.moments import MomentType
 from game.players import Player
 from game.policyCards import PolicyCardType
 from game.types import CivicType, TechType
-from game.unitTypes import ImprovementType, BuildType
+from game.unitTypes import ImprovementType, BuildType, UnitType
+from game.units import Unit
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.map import Map, Tile
@@ -361,6 +363,38 @@ class TestPlayerCivics(unittest.TestCase):
 		# THEN
 		self.assertEqual(beforeEureka, False)
 		self.assertEqual(afterEureka, True)
+
+
+class TestPlayerStrategies(unittest.TestCase):
+	def test_eradicate_barbarian(self):
+		# GIVEN
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+		simulation = Game(mapModel)
+
+		player = Player(LeaderType.trajan, human=True)
+		player.initialize()
+
+		barbarianPlayer = Player(LeaderType.barbar, human=False)
+		barbarianPlayer.initialize()
+
+		simulation.userInterface = UserInterfaceMock()
+		simulation.currentTurn = 30  # not before 25 and check every 5 turns
+
+		tile0 = simulation.tileAt(HexPoint(3, 3))
+		tile0.sightBy(player)
+		tile0.setImprovement(ImprovementType.barbarianCamp)
+
+		tile1 = simulation.tileAt(HexPoint(3, 4))
+		tile1.sightBy(player)
+
+		barbarianWarrior = Unit(HexPoint(3, 4), UnitType.barbarianWarrior, player)
+		simulation.addUnit(barbarianWarrior)
+
+		# WHEN
+		player.doTurn(simulation)
+
+		# THEN
+		self.assertEqual(player.militaryAI.adopted(MilitaryStrategyType.eradicateBarbarians), True)
 
 
 class TestPlayerMoments(unittest.TestCase):

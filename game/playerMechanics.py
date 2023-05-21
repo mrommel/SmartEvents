@@ -1,11 +1,13 @@
 import random
 from typing import Optional
 
+from game.ai.baseTypes import PlayerStateAllWars, WarGoalType
 from game.ai.militaries import MilitaryThreatType
-from game.cities import AgeType, DedicationType
 from game.civilizations import CivilizationType, LeaderType
 from game.flavors import FlavorType
 from game.moments import Moment, MomentType
+from game.states.ages import AgeType
+from game.states.dedications import DedicationType
 from game.types import TechType, CivicType, EraType
 from utils.base import WeightedBaseList, ExtendedEnum, InvalidEnumError
 
@@ -515,10 +517,6 @@ class PlayerWarFaceType(ExtendedEnum):
 	none = 'none'
 
 
-class WarGoalType(ExtendedEnum):
-	none = 'none'
-
-
 class PlayerWarStateType(ExtendedEnum):
 	none = 'none'
 
@@ -761,10 +759,29 @@ class DiplomaticPlayerDict:
 		else:
 			raise Exception("not gonna happen")
 
+	def militaryThreatOf(self, otherPlayer) -> MilitaryThreatType:
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			return item.militaryThreat
+		else:
+			raise Exception("not gonna happen")
+
+	def updateMilitaryThreatOf(self, otherPlayer, strength: StrengthType):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.militaryStrength = strength
+		else:
+			raise Exception("not gonna happen")
+
 
 class DiplomacyAI:
 	def __init__(self, player):
 		self.playerDict = DiplomaticPlayerDict()
+		self.stateOfAllWars = PlayerStateAllWars.neutral
 		self.player = player
 		self.greetPlayers = []
 
@@ -933,6 +950,93 @@ class DiplomacyAI:
 			self.playerDict.updateMilitaryStrengthComparedToUsOf(otherPlayer, StrengthType.weak)
 		else:
 			self.playerDict.updateMilitaryStrengthComparedToUsOf(otherPlayer, StrengthType.pathetic)
+
+	def militaryThreatOf(self, otherPlayer) -> MilitaryThreatType:
+		return self.playerDict.militaryThreatOf(otherPlayer)
+
+	def updateMilitaryThreats(self, simulation):
+		ownMilitaryMight = self.player.militaryMight(simulation)
+
+		if ownMilitaryMight == 0:
+			ownMilitaryMight = 1
+
+		# Add in City Defensive Strength per city
+		for city in simulation.citiesOf(self.player):
+			damageFactor = (25.0 - float(city.damage())) / 25.0
+
+			cityStrengthModifier = int(float(city.power(simulation)) * damageFactor)
+			cityStrengthModifier *= 33
+			cityStrengthModifier /= 100
+			cityStrengthModifier /= 10
+
+			ownMilitaryMight += cityStrengthModifier
+
+		# Loop through all(known) Players
+		for otherPlayer in simulation.players:
+			if otherPlayer.leader != self.player.leader and self.player.hasMetWith(otherPlayer):
+				otherMilitaryMight = otherPlayer.militaryMight(simulation)
+
+				# If another player has double the Military strength of us, the Ratio will be 200
+				militaryRatio = otherMilitaryMight * 100 / ownMilitaryMight
+				militaryThreat = militaryRatio
+
+				# At war: what is the current status of things?
+				if self.isAtWarWith(otherPlayer):
+					warStateValue = self.warStateTowards(otherPlayer)
+
+					if warStateValue == PlayerWarStateType.none:
+						# NOOP
+						pass
+					elif warStateValue == PlayerWarStateType.nearlyDefeated:
+						militaryThreat += 150  # MILITARY_THREAT_WAR_STATE_NEARLY_DEFEATED
+					elif warStateValue == PlayerWarStateType.defensive:
+						militaryThreat += 80  # MILITARY_THREAT_WAR_STATE_DEFENSIVE
+					elif warStateValue == PlayerWarStateType.stalemate:
+						militaryThreat += 30  # MILITARY_THREAT_WAR_STATE_STALEMATE
+					elif warStateValue == PlayerWarStateType.calm:
+						militaryThreat += 0  # MILITARY_THREAT_WAR_STATE_CALM
+					elif warStateValue == PlayerWarStateType.offensive:
+						militaryThreat += -40  # MILITARY_THREAT_WAR_STATE_OFFENSIVE
+					elif warStateValue == PlayerWarStateType.nearlyWon:
+						militaryThreat += -100  # MILITARY_THREAT_WAR_STATE_NEARLY_WON
+
+				# Factor in Friends this player has
+
+				# TBD
+
+				# Factor in distance
+				proximityValue = self.proximityTo(otherPlayer)
+
+				if proximityValue == PlayerProximityType.none:
+					# NOOP
+					pass
+				elif proximityValue == PlayerProximityType.neighbors:
+					militaryThreat += 100  # MILITARY_THREAT_NEIGHBORS
+				elif proximityValue == PlayerProximityType.close:
+					militaryThreat += 40  # MILITARY_THREAT_CLOSE
+				elif proximityValue == PlayerProximityType.far:
+					militaryThreat += -40  # MILITARY_THREAT_FAR
+				elif proximityValue == PlayerProximityType.distant:
+					militaryThreat += -100  # MILITARY_THREAT_DISTANT
+
+				# Don't factor in # of players attacked or at war with now if we ARE at war with this guy already
+
+				# FIXME
+
+				# Now do the final assessment
+				if militaryThreat >= 300:
+					# MILITARY_THREAT_CRITICAL_THRESHOLD
+					self.playerDict.updateMilitaryThreatOf(otherPlayer, MilitaryThreatType.critical)
+				elif militaryThreat >= 220:  # MILITARY_THREAT_SEVERE_THRESHOLD
+					self.playerDict.updateMilitaryThreatOf(otherPlayer, MilitaryThreatType.severe)
+				elif militaryThreat >= 170:  # MILITARY_THREAT_MAJOR_THRESHOLD
+					self.playerDict.updateMilitaryThreatOf(otherPlayer, MilitaryThreatType.major)
+				elif militaryThreat >= 100:  # MILITARY_THREAT_MINOR_THRESHOLD
+					self.playerDict.updateMilitaryThreatOf(otherPlayer, MilitaryThreatType.minor)
+				else:
+					self.playerDict.updateMilitaryThreatOf(otherPlayer, MilitaryThreatType.none)
+
+		return
 
 
 class HomelandAI:

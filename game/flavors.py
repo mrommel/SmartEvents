@@ -46,6 +46,9 @@ class Flavors:
     def isEmpty(self):
         return len(self._items) == 0
 
+    def reset(self):
+        self._items = []
+
     def set(self, flavorType: FlavorType, value: int):
         item = next((flavor for flavor in self._items if flavor.flavorType == flavorType), None)
 

@@ -15,9 +15,12 @@ from game.governments import GovernmentType
 from game.governors import GovernorType, GovernorTitle, Governor
 from game.greatPersons import GreatPersonType
 from game.loyalties import LoyaltyState
+from game.moments import MomentType
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType
 from game.specialists import SpecialistType
+from game.states.ages import AgeType
+from game.states.dedications import DedicationType
 from game.types import EraType, TechType
 from game.unitTypes import ImprovementType
 from game.wonders import WonderType
@@ -658,23 +661,12 @@ class CityTourism:
 		self.city = city
 
 
-class AgeType(ExtendedEnum):
-	golden = 'golden'
-	normal = 'normal'
-
-
 class RouteType(ExtendedEnum):
 	ancientRoad = 'ancientRoad'
 
 
 class GossipType(ExtendedEnum):
 	districtConstructed = 'districtConstructed'
-
-
-class DedicationType(ExtendedEnum):
-	penBrushAndVoice = 'penBrushAndVoice'
-	freeInquiry = 'freeInquiry'
-	monumentality = 'monumentality'
 
 
 class YieldValues:

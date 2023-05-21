@@ -1,11 +1,11 @@
 from enum import Enum
 
+from game.ai.baseTypes import MilitaryStrategyType
 from game.civilizations import TraitType
-from game.unitTypes import UnitDomainType, UnitTaskType
+from game.flavors import Flavors, FlavorType
+from game.unitTypes import UnitDomainType, UnitTaskType, ImprovementType, UnitMapType
 from utils.base import InvalidEnumError
-from game.baseTypes import FlavorType
 from game.ai.grandStrategies import GrandStrategyAIType
-from game.ai.militaryStrategies import MilitaryStrategyType
 
 
 class MilitaryThreatType(Enum):
@@ -69,9 +69,9 @@ class MilitaryStrategyAdoptions:
                      adoptionItem.militaryStrategyType == militaryStrategyType), None)
 
         if item is not None:
-            return item.turnOfAdoption(militaryStrategyType)
+            return item.turnOfAdoption
 
-        raise InvalidEnumError
+        raise Exception()
 
     def adopt(self, militaryStrategyType: MilitaryStrategyType, turnOfAdoption: int):
         item = next((adoptionItem for adoptionItem in self.adoptions if
@@ -80,8 +80,9 @@ class MilitaryStrategyAdoptions:
         if item is not None:
             item.adopted = True
             item.turnOfAdoption = turnOfAdoption
+            return
 
-        raise InvalidEnumError
+        raise InvalidEnumError(militaryStrategyType)
 
     def abandon(self, militaryStrategyType: MilitaryStrategyType):
         item = next((adoptionItem for adoptionItem in self.adoptions if
@@ -90,8 +91,9 @@ class MilitaryStrategyAdoptions:
         if item is not None:
             item.adopted = False
             item.turnOfAdoption = -1
+            return
 
-        raise InvalidEnumError
+        raise InvalidEnumError(militaryStrategyType)
 
 
 class MilitaryBaseData:
@@ -122,11 +124,23 @@ class MilitaryBaseData:
         self.mandatoryReserveSize = 0
 
 
+class BarbarianData:
+    def __str__(self):
+        self.barbarianCampCount = 0
+        self.visibleBarbarianCount = 0
+
+    def reset(self):
+        self.barbarianCampCount = 0
+        self.visibleBarbarianCount = 0
+
+
 class MilitaryAI:
     def __init__(self, player):
         self.player = player
         self.militaryStrategyAdoption = MilitaryStrategyAdoptions()
         self.baseData = MilitaryBaseData()
+        self._barbarianDataValue = BarbarianData()
+        self._flavors = Flavors()
 
     def doTurn(self, simulation):
         self.updateBaseData(simulation)
@@ -146,7 +160,7 @@ class MilitaryAI:
 
         for unit in simulation.unitsOf(self.player):
             # Don't count exploration units
-            if unit.task() == UnitTaskType.explore or unit.task() == UnitTaskType.explore_sea:
+            if unit.task() == UnitTaskType.explore or unit.task() == UnitTaskType.exploreSea:
                 continue
 
             # Don't count civilians
@@ -221,24 +235,127 @@ class MilitaryAI:
             if not self.player.hasMet(otherPlayer):
                 continue
 
-            threat = self.player.diplomacyAI.militaryThreat(otherPlayer)
+            threat = self.player.diplomacyAI.militaryThreatOf(otherPlayer)
 
             if highestThreatByPlayer.value < threat.value:
                 highestThreatByPlayer = threat
 
         return highestThreatByPlayer
 
+    def barbarianData(self) -> BarbarianData:
+        return self._barbarianDataValue
+
     def updateBarbarianData(self, simulation):
-        pass
+        self._barbarianDataValue.reset()
+
+        for point in simulation.points():
+            tile = simulation.tileAt(point)
+
+            if tile.isDiscoveredBy(self.player):
+
+                if tile.hasImprovement(ImprovementType.barbarianCamp):
+                    self._barbarianDataValue.barbarianCampCount += 1
+
+                    # Count it as 5 camps if sitting inside our territory, that is annoying!
+                    if tile.owner().leader == self.player.leader:
+                        self._barbarianDataValue.barbarianCampCount += 4
+
+            if tile.isVisibleTo(self.player):
+                unit = simulation.unitAt(point, UnitMapType.combat)
+                if unit is not None:
+                    if unit.isBarbarian() and unit.unitType == UnitMapType.combat:
+                        self._barbarianDataValue.visibleBarbarianCount += 1
+
 
     def updateDefenseState(self, simulation):
         pass
 
+    def adopted(self, militaryStrategy: MilitaryStrategyType) -> bool:
+        return self.militaryStrategyAdoption.adopted(militaryStrategy)
+
     def updateMilitaryStrategies(self, simulation):
-        pass
+        for militaryStrategyType in list(MilitaryStrategyType):
+            # Minor Civs can't run some Strategies
+            # FIXME
+
+            # check tech
+            requiredTech = militaryStrategyType.requiredTech()
+            isTechGiven = True if requiredTech is None else self.player.hasTech(requiredTech)
+            obsoleteTech = militaryStrategyType.obsoleteTech()
+            isTechObsolete = False if obsoleteTech is None else self.player.hasTech(obsoleteTech)
+
+            # Do we already have this EconomicStrategy adopted?
+            shouldCityStrategyStart = True
+            if self.militaryStrategyAdoption.adopted(militaryStrategyType):
+                shouldCityStrategyStart = False
+            elif not isTechGiven:
+                shouldCityStrategyStart = False
+            elif simulation.currentTurn < militaryStrategyType.notBeforeTurnElapsed():  # Not time to check this yet?
+                shouldCityStrategyStart = False
+
+            shouldCityStrategyEnd = False
+            if self.militaryStrategyAdoption.adopted(militaryStrategyType):
+                if militaryStrategyType.checkEachTurns() > 0:
+                    # Is it a turn where we want to check to see if this Strategy is maintained?
+                    if simulation.currentTurn - self.militaryStrategyAdoption.turnOfAdoptionOf(militaryStrategyType) % militaryStrategyType.checkEachTurns() == 0:
+                        shouldCityStrategyEnd = True
+
+                if shouldCityStrategyEnd and militaryStrategyType.minimumAdoptionTurns() > 0:
+                    # Has the minimum # of turns passed for this Strategy?
+                    if simulation.currentTurn < self.militaryStrategyAdoption.turnOfAdoptionOf(militaryStrategyType) + militaryStrategyType.minimumAdoptionTurns():
+                        shouldCityStrategyEnd = False
+
+            # Check EconomicStrategy Triggers
+            # Functionality and existence of specific CityStrategies is hardcoded here, but data is stored in XML
+            # so it's easier to modify
+            if shouldCityStrategyStart or shouldCityStrategyEnd:
+                # Has the Tech which obsoletes this Strategy? If so, Strategy should be deactivated regardless of other factors
+                strategyShouldBeActive = False
+
+                # Strategy isn't obsolete, so test triggers as normal
+                if not isTechObsolete:
+                    strategyShouldBeActive = militaryStrategyType.shouldBeActiveFor(self.player, simulation)
+
+                # This variable keeps track of whether or not we should be doing something(i.e.Strategy is active now
+                # but should be turned off, OR Strategy is inactive and should be enabled)
+                bAdoptOrEndStrategy = False
+
+                # Strategy should be on, and if it's not, turn it on
+                if strategyShouldBeActive:
+                    if shouldCityStrategyStart:
+                        bAdoptOrEndStrategy = True
+                    elif shouldCityStrategyEnd:
+                        bAdoptOrEndStrategy = False
+                else:
+                    # Strategy should be off, and if it's not, turn it off
+                    if shouldCityStrategyStart:
+                        bAdoptOrEndStrategy = False
+                    elif shouldCityStrategyEnd:
+                        bAdoptOrEndStrategy = True
+
+                if bAdoptOrEndStrategy:
+                    if shouldCityStrategyStart:
+                        self.militaryStrategyAdoption.adopt(militaryStrategyType, turnOfAdoption=simulation.currentTurn)
+                        print(f'Player {self.player.leader} has adopted {militaryStrategyType} in turn {simulation.currentTurn}')
+                    elif shouldCityStrategyEnd:
+                        self.militaryStrategyAdoption.abandon(militaryStrategyType)
+                        print(f'Player {self.player.leader} has abandoned {militaryStrategyType} in turn {simulation.currentTurn}')
+
+        self.updateFlavors()
+
+        # print("military strategy flavors")
+        # print(self.flavors)
 
     def updateThreats(self, simulation):
         pass
 
     def updateOperations(self, simulation):
         pass
+
+    def updateFlavors(self):
+        self._flavors.reset()
+
+        for militaryStrategyType in list(MilitaryStrategyType):
+            if self.militaryStrategyAdoption.adopted(militaryStrategyType):
+                for militaryStrategyTypeFlavor in militaryStrategyType.flavorModifiers():
+                    self.flavors += militaryStrategyTypeFlavor

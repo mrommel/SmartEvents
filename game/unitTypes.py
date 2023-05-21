@@ -10,7 +10,6 @@ from utils.base import ExtendedEnum
 from utils.base import InvalidEnumError
 # from utils.translation import gettext_lazy as _
 
-
 class ImprovementTypeData:
 	def __init__(self, name: str, effects: [str], requiredTech: Optional[TechType],
 				 civilization: Optional[CivilizationType], flavors: [Flavor]):
@@ -609,6 +608,17 @@ class BuildType(ExtendedEnum):
 		return self._data().removeRoad
 
 
+class PromotionType(ExtendedEnum):
+	helmsman = 'helmsman'
+	redeploy = 'redeploy'
+	pursuit = 'pursuit'
+
+
+class UnitMapType(ExtendedEnum):
+	civilian = 'civilian'
+	combat = 'combat'
+
+
 class UnitTaskType(ExtendedEnum):
 	reserveSea = 'reserveSea'
 	escortSea = 'escortSea'
@@ -673,7 +683,7 @@ class UnitTypeData:
 	             supportDistance: int, strength: int, targetType: UnitClassType, flags: Optional[BitArray],
 	             meleeAttack: int, rangedAttack: int, moves: int, requiredTech: Optional[TechType],
 	             obsoleteTech: Optional[TechType], requiredCivic: Optional[CivicType],
-	             upgradesFrom: [UnitType], flavours: [Flavor]):
+	             upgradesFrom: [UnitType], flavors: [Flavor]):
 		self.name = name
 		self.baseType = baseType
 		self.domain = domain
@@ -702,7 +712,7 @@ class UnitTypeData:
 		self.obsoleteTech = obsoleteTech
 		self.requiredCivic = requiredCivic
 		self.upgradesFrom = upgradesFrom
-		self.flavours = flavours
+		self.flavors = flavors
 
 
 class UnitType(ExtendedEnum):
@@ -756,6 +766,13 @@ class UnitType(ExtendedEnum):
 	# naval ranged ------------------------------
 	quadrireme = 'quadrireme'  # classical
 
+	# player overrides
+
+	# barbarians  ------------------------------
+
+	barbarianWarrior = 'barbarianWarrior'
+	barbarianArcher = 'barbarianArcher'
+
 	def name(self):
 		return self._data().name
 
@@ -767,6 +784,15 @@ class UnitType(ExtendedEnum):
 
 	def requiredTech(self) -> TechType:
 		return self._data().requiredTech
+
+	def defaultTask(self) -> UnitTaskType:
+		return self._data().defaultTask
+
+	def unitTasks(self) -> [UnitTaskType]:
+		return self._data().unitTasks
+
+	def domain(self) -> UnitDomainType:
+		return self._data().domain
 
 	def _data(self) -> UnitTypeData:
 		# default ------------------------------
@@ -800,7 +826,7 @@ class UnitType(ExtendedEnum):
 				requiredCivic=None,
 				obsoleteTech=None,
 				upgradesFrom=None,
-				flavours=[]
+				flavors=[]
 			)
 
 		# civilians ------------------------------
@@ -837,7 +863,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.expansion, value=9)
 				]
 			)
@@ -874,7 +900,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.tileImprovement, value=10),
 					Flavor(FlavorType.amenities, value=7),
 					Flavor(FlavorType.expansion, value=4),
@@ -922,7 +948,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=CivicType.foreignTrade,
 				upgradesFrom=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.gold, value=10)
 				]
 			)
@@ -960,7 +986,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.recon, value=8),
 					Flavor(FlavorType.defense, value=2)
 				]
@@ -998,7 +1024,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[UnitType.scout],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.recon, value=8),
 					Flavor(FlavorType.offense, value=1),
 					Flavor(FlavorType.defense, value=1)
@@ -1038,7 +1064,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.offense, value=3),
 					Flavor(FlavorType.recon, value=3),
 					Flavor(FlavorType.defense, value=3)
@@ -1076,7 +1102,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[UnitType.warrior],
-				flavours=[]
+				flavors=[]
 			)
 		elif self == UnitType.manAtArms:
 			return UnitTypeData(
@@ -1110,7 +1136,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[UnitType.swordman],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.recon, value=1),
 					Flavor(FlavorType.offense, value=8),
 					Flavor(FlavorType.defense, value=1)
@@ -1150,7 +1176,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.ranged, value=8),
 					Flavor(FlavorType.recon, value=10),
 					Flavor(FlavorType.offense, value=3),
@@ -1189,7 +1215,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[UnitType.slinger],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.ranged, value=6),
 					Flavor(FlavorType.recon, value=3),
 					Flavor(FlavorType.offense, value=1),
@@ -1229,7 +1255,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[UnitType.archer],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.recon, value=1),
 					Flavor(FlavorType.offense, value=7),
 					Flavor(FlavorType.defense, value=2)
@@ -1269,7 +1295,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.defense, value=4),
 					Flavor(FlavorType.recon, value=2),
 					Flavor(FlavorType.offense, value=2)
@@ -1307,7 +1333,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[UnitType.spearman],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.recon, value=1),
 					Flavor(FlavorType.offense, value=3),
 					Flavor(FlavorType.defense, value=6)
@@ -1352,7 +1378,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[]
+				flavors=[]
 			)
 		# elif self == UnitType.courser:
 		# 	return UnitTypeData(
@@ -1384,7 +1410,7 @@ class UnitType(ExtendedEnum):
 		# 		requiredCivic=None,
 		# 		obsoleteTech=None,
 		# 		upgradesFrom=None,
-		# 		flavours=[]
+		# 		flavors=[]
 		# 	)
 		# cavalry  # industrial
 
@@ -1422,7 +1448,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.recon, value=9),
 					Flavor(FlavorType.ranged, value=5),
 					Flavor(FlavorType.mobile, value=10),
@@ -1462,7 +1488,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[UnitType.heavyChariot],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.recon, value=1),
 					Flavor(FlavorType.offense, value=9)
 				]
@@ -1504,7 +1530,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.ranged, value=8),
 					Flavor(FlavorType.offense, value=2)
 				]
@@ -1543,7 +1569,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[UnitType.catapult],
-				flavours=[
+				flavors=[
 					Flavor(FlavorType.ranged, value=8),
 					Flavor(FlavorType.offense, value=2)
 				]
@@ -1592,7 +1618,7 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[]
+				flavors=[]
 			)
 		# caravel  # renaissance
 		# ironclad  # industrial
@@ -1631,7 +1657,78 @@ class UnitType(ExtendedEnum):
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],
-				flavours=[]
+				flavors=[]
+			)
+
+		# player overrides
+
+		# barbarians  ------------------------------
+
+		elif self == UnitType.barbarianWarrior:
+			#
+			return UnitTypeData(
+				name="Barbarian Warrior",
+				baseType=UnitType.warrior,
+				domain=UnitDomainType.land,
+				effects=[],
+				abilities=[UnitAbilityType.canCapture],
+				era=EraType.ancient,
+				requiredResource=None,
+				civilization=CivilizationType.barbarian,
+				unitTasks=[UnitTaskType.attack],
+				defaultTask=UnitTaskType.attack,
+				movementType=UnitMovementType.walk,
+				productionCost=-1,
+				purchaseCost=-1,
+				faithCost=-1,
+				maintenanceCost=0,
+				sight=2,
+				range=0,
+				supportDistance=0,
+				strength=10,
+				targetType=UnitClassType.melee,
+				flags=None,
+				meleeAttack=15,
+				rangedAttack=0,
+				moves=2,
+				requiredTech=None,
+				obsoleteTech=None,
+				requiredCivic=None,
+				upgradesFrom=[],
+				flavors=[]
+			)
+		elif self == UnitType.barbarianArcher:
+			#
+			return UnitTypeData(
+				name="Barbarian Archer",
+				baseType=UnitType.archer,
+				domain=UnitDomainType.land,
+				effects=[],
+				abilities=[UnitAbilityType.canCapture],
+				era=EraType.ancient,
+				requiredResource=None,
+				civilization=CivilizationType.barbarian,
+				unitTasks=[UnitTaskType.ranged],
+				defaultTask=UnitTaskType.ranged,
+				movementType=UnitMovementType.walk,
+				productionCost=-1,
+				purchaseCost=-1,
+				faithCost=-1,
+				maintenanceCost=0,
+				sight=2,
+				range=1,
+				supportDistance=2,
+				strength=10,
+				targetType=UnitClassType.ranged,
+				flags=None,
+				meleeAttack=15,
+				rangedAttack=20,
+				moves=2,
+				requiredTech=TechType.archery,
+				obsoleteTech=None,
+				requiredCivic=None,
+				upgradesFrom=[],
+				flavors=[]
 			)
 
 		raise AttributeError(f'cant get data for unit {self}')

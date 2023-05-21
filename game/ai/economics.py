@@ -61,7 +61,7 @@ class EconomicAI:
         self.player = player
         self.economicStrategyAdoptions = EconomicStrategyAdoptions()
         self.flavors = []
-        self.reconStateValue = ReconStateType.NEEDED
+        self.reconStateValue = ReconStateType.needed
 
     def doTurn(self, simulation):
         for economicStrategyType in list(EconomicStrategyType):

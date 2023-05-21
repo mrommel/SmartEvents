@@ -1,13 +1,15 @@
 from enum import Enum
+from typing import Optional
 
 from game.ai.barbarians import BarbarianAI
 from game.ai.religions import Religions
-from game.baseTypes import HandicapType, VictoryType, GameState
+from game.baseTypes import HandicapType, GameState
 from game.cities import City
 from game.civilizations import LeaderType
 from game.players import Player
+from game.states.victories import VictoryType
 from game.types import TechType
-from game.unitTypes import BuildType
+from game.unitTypes import BuildType, UnitMapType
 from game.units import Unit
 from map.base import HexPoint
 from map.map import Map, Tile
@@ -123,11 +125,20 @@ class Game:
     def capitalOf(self, player: Player) -> City:
         return self._map.capitalOf(player)
 
+    def points(self) -> [HexPoint]:
+        return self._map.points()
+
     def unitsOf(self, player: Player) -> [Unit]:
         return self._map.unitsOf(player)
 
     def unitsAt(self, location) -> [Unit]:
         return self._map.unitsAt(location)
+
+    def unitAt(self, location, unitMapType: UnitMapType) -> Optional[Unit]:
+        return self._map.unitAt(location, unitMapType)
+
+    def addUnit(self, unit):
+        self._map.addUnit(unit)
 
     def citiesOf(self, player) -> [City]:
         return self._map.citiesOf(player)

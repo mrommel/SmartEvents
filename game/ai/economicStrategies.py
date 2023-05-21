@@ -1,9 +1,10 @@
 import abc
 
+from game.ai.baseTypes import MilitaryStrategyType
 from game.flavors import Flavor, FlavorType, Flavors
 from utils.base import ExtendedEnum, InvalidEnumError
 from game.ai.grandStrategies import GrandStrategyAIType
-from game.ai.militaryStrategies import MilitaryStrategyType, ReconStateType
+from game.ai.militaryStrategies import ReconStateType
 from game.unitTypes import OperationType, UnitTaskType
 
 
@@ -114,10 +115,10 @@ class NeedReconStrategy(EconomicStrategy):
         militaryStrategyAdoption = player.militaryAI.militaryStrategyAdoption
 
         # Never desperate for explorers, if we are at war
-        if militaryStrategyAdoption.adopted(MilitaryStrategyType.AT_WAR):
+        if militaryStrategyAdoption.adopted(MilitaryStrategyType.atWar):
             return False
 
-        return player.economicAI.reconState() == ReconStateType.NEEDED
+        return player.economicAI.reconState() == ReconStateType.needed
 
 
 class FoundCityStrategy(EconomicStrategy):

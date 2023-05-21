@@ -5,7 +5,7 @@ from game.baseTypes import CityStateType, GameState
 from game.ai.economics import EconomicAI
 from game.ai.grandStrategies import GrandStrategyAI
 from game.ai.militaries import MilitaryAI
-from game.cities import City, AgeType, DedicationType, CityState, YieldValues
+from game.cities import City, CityState, YieldValues
 from game.cityConnections import CityConnections
 from game.civilizations import LeaderType, CivilizationType
 from game.flavors import Flavors, FlavorType
@@ -17,6 +17,8 @@ from game.playerMechanics import PlayerTechs, PlayerCivics, BuilderTaskingAI, Ta
     DiplomacyRequests, PlayerMoments
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType
+from game.states.ages import AgeType
+from game.states.dedications import DedicationType
 from game.types import EraType, TechType
 from game.unitTypes import UnitMissionType, UnitTaskType
 from game.wonders import WonderType
@@ -63,8 +65,24 @@ class PlayerTreasury:
     def __init__(self, player):
         self.player = player
 
+        # internal
+        self._goldChangeForTurn = []
+
     def value(self) -> float:
         return 0.0
+
+    def averageIncome(self, numberOfTurns: int) -> float:
+        """Average change in gold balance over N turns"""
+        if numberOfTurns <= 0:
+            raise Exception(f'Number of turn to check must be positive and not {numberOfTurns}')
+
+        if len(self._goldChangeForTurn) == 0:
+            return 0.0
+
+        numberOfElements = min(numberOfTurns, len(self._goldChangeForTurn))
+        total = sum(self._goldChangeForTurn[-numberOfElements:])
+
+        return float(total) / float(numberOfElements)
 
 
 class PlayerReligion:
@@ -249,6 +267,9 @@ class Player:
         return self.leader == LeaderType.barbar
 
     def hasMet(self, otherPlayer: Player) -> bool:
+        if self.isBarbarian() or otherPlayer.isBarbarian():
+            return False
+
         return False
 
     def canFinishTurn(self) -> bool:

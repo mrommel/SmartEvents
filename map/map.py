@@ -6,7 +6,7 @@ from game.districts import DistrictType
 from game.governors import GovernorType, GovernorTitle
 from game.players import Player
 from game.types import TechType, CivicType
-from game.unitTypes import BuildType, ImprovementType
+from game.unitTypes import BuildType, ImprovementType, UnitMapType
 from game.units import Unit
 from game.wonders import WonderType
 from map.base import HexPoint, HexDirection, Size, Array2D
@@ -919,6 +919,12 @@ class Map:
 
 	def unitsAt(self, location) -> [Unit]:
 		return list(filter(lambda unit: unit.location == location, self._units))
+
+	def unitAt(self, location, unitMapType: UnitMapType) -> Optional[Unit]:
+		return next(filter(lambda unit: unit.location == location and unit.unitType == unitMapType, self._units), None)
+
+	def addUnit(self, unit):
+		self._units.append(unit)
 
 	def citiesOf(self, player) -> [City]:
 		return list(filter(lambda city: city.player.leader == player.leader, self._cities))
