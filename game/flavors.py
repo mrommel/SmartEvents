@@ -76,7 +76,17 @@ class Flavors:
 
             if item is not None:
                 item.value += other.value
+            else:
+                self._items.append(other)
 
             return self
         else:
             raise Exception(f'type is not accepted {type(other)}')
+
+    def addFlavor(self, flavorType: FlavorType, value: float):
+        item = next((flavor for flavor in self._items if flavor.flavorType == flavorType), None)
+
+        if item is not None:
+            item.value += value
+        else:
+            self._items.append(Flavor(flavorType, value))
