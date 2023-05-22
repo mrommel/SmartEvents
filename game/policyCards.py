@@ -57,8 +57,17 @@ class PolicyCardType(ExtendedEnum):
 
 	# classical
 	insulae = 'insulae'
-	#
+	charismaticLeader = 'charismaticLeader'
+	diplomaticLeague = 'diplomaticLeague'
+	literaryTradition = 'literaryTradition'
+	raid = 'raid'
+	veterancy = 'veterancy'
+	equestrianOrders = 'equestrianOrders'
+	bastions = 'bastions'
+	limes = 'limes'
 	naturalPhilosophy = 'naturalPhilosophy'
+	scripture = 'scripture'
+	praetorium = 'praetorium'
 
 	# medieval
 	navalInfrastructure = 'navalInfrastructure'
@@ -118,7 +127,7 @@ class PolicyCardType(ExtendedEnum):
 	# modern
 	# resourceManagement
 	# propaganda
-	# leveeEnMasse
+	leveeEnMasse = 'leveeEnMasse'
 	# laissezFaire
 	# marketEconomy
 	policeState = 'policeState'
@@ -454,6 +463,94 @@ class PolicyCardType(ExtendedEnum):
 					Flavor(FlavorType.tileImprovement, value=2)
 				]
 			)
+		elif self == PolicyCardType.charismaticLeader:
+			# https://civilization.fandom.com/wiki/Charismatic_Leader_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_CHARISMATIC_LEADER_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_CHARISMATIC_LEADER_BONUS",  #
+				slot=PolicyCardSlot.diplomatic,
+				requiredCivic=CivicType.politicalPhilosophy,
+				obsoleteCivic=CivicType.totalitarianism,
+				replace=[],
+				flavors=[]
+			)
+		elif self == PolicyCardType.diplomaticLeague:
+			# https://civilization.fandom.com/wiki/Diplomatic_League_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_DIPLOMATIC_LEAGUE_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_DIPLOMATIC_LEAGUE_BONUS",  #
+				slot=PolicyCardSlot.diplomatic,
+				requiredCivic=CivicType.politicalPhilosophy,
+				obsoleteCivic=None,
+				replace=[],
+				flavors=[]
+			)
+		elif self == PolicyCardType.literaryTradition:
+			# https://civilization.fandom.com/wiki/Literary_Tradition_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_LITERARY_TRADITION_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_LITERARY_TRADITION_BONUS",
+				slot=PolicyCardSlot.wildcard,
+				requiredCivic=CivicType.dramaAndPoetry,
+				obsoleteCivic=None,
+				replace=[],
+				flavors=[]
+			)
+		elif self == PolicyCardType.raid:
+			# https://civilization.fandom.com/wiki/Raid_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_RAID_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_RAID_BONUS",  #
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.militaryTraining,
+				obsoleteCivic=CivicType.scorchedEarth,
+				replace=[],
+				flavors=[]
+			)
+		elif self == PolicyCardType.veterancy:
+			# https://civilization.fandom.com/wiki/Veterancy_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_VETERANCY_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_VETERANCY_BONUS",  #
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.militaryTraining,
+				obsoleteCivic=None,
+				replace=[],
+				flavors=[]
+			)
+		elif self == PolicyCardType.equestrianOrders:
+			# https://civilization.fandom.com/wiki/Equestrian_Orders_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_EQUESTRIAN_ORDERS_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_EQUESTRIAN_ORDERS_BONUS",  #
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.militaryTraining,
+				obsoleteCivic=None,
+				replace=[],
+				flavors=[]
+			)
+		elif self == PolicyCardType.bastions:
+			# https://civilization.fandom.com/wiki/Bastions_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_BASTIONS_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_BASTIONS_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.defensiveTactics,
+				obsoleteCivic=CivicType.civilEngineering,
+				replace=[],
+				flavors=[]
+			)
+		elif self == PolicyCardType.limes:
+			# https://civilization.fandom.com/wiki/Limes_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_LIMES_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_LIMES_BONUS",  #
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.defensiveTactics,
+				obsoleteCivic=CivicType.totalitarianism,
+				replace=[],
+				flavors=[]
+			)
 		elif self == PolicyCardType.naturalPhilosophy:
 			# https://civilization.fandom.com/wiki/Natural_Philosophy_(Civ6)
 			return PolicyCardTypeData(
@@ -464,6 +561,28 @@ class PolicyCardType(ExtendedEnum):
 				obsoleteCivic=CivicType.classStruggle,
 				replace=[],
 				flavors=[]
+			)
+		elif self == PolicyCardType.scripture:
+			# https://civilization.fandom.com/wiki/Scripture_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_SCRIPTURE_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_SCRIPTURE_BONUS",  #
+				slot=PolicyCardSlot.economic,
+				requiredCivic=CivicType.theology,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.godKing],
+				flavors=[]
+			)
+		elif self == PolicyCardType.praetorium:
+			# https://civilization.fandom.com/wiki/Praetorium_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_PRAETORIUM_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_PRAETORIUM_BONUS",
+				slot=PolicyCardSlot.diplomatic,
+				requiredCivic=CivicType.recordedHistory,
+				obsoleteCivic=CivicType.socialMedia,
+				replace=[],
+				flavors=[Flavor(FlavorType.growth, value=4)]
 			)
 
 		# medieval
@@ -754,7 +873,17 @@ class PolicyCardType(ExtendedEnum):
 		# modern
 		# resourceManagement
 		# propaganda
-		# leveeEnMasse
+		elif self == PolicyCardType.leveeEnMasse:
+			# https://civilization.fandom.com/wiki/Lev%C3%A9e_en_Masse_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_LEVEE_EN_MASSE_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_LEVEE_EN_MASSE_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.mobilization,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.conscription],
+				flavors=[]
+			)
 		# laissezFaire
 		# marketEconomy
 		elif self == PolicyCardType.policeState:

@@ -53,6 +53,9 @@ class DistrictType(ExtendedEnum):
 	def requiredTech(self) -> Optional[TechType]:
 		return self._data().requiredTech
 
+	def maintenanceCost(self) -> float:
+		return self._data().maintenanceCost
+
 	def _data(self) -> DistrictTypeData:
 		if self == DistrictType.none:
 			return DistrictTypeData(

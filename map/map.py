@@ -6,11 +6,13 @@ from game.civilizations import LeaderType
 from game.districts import DistrictType
 from game.governors import GovernorType, GovernorTitle
 from game.players import Player
+from game.states.builds import BuildType
 from game.types import TechType, CivicType
-from game.unitTypes import BuildType, ImprovementType, UnitMapType
+from game.unitTypes import UnitMapType
 from game.units import Unit
 from game.wonders import WonderType
 from map.base import HexPoint, HexDirection, Size, Array2D
+from map.improvements import ImprovementType
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
 	Tutorials, Yields, AppealLevel
 from utils.base import WeightedBaseList

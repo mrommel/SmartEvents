@@ -24,7 +24,7 @@ from game.types import EraType, TechType, CivicType
 from game.unitTypes import UnitMissionType, UnitTaskType
 from game.wonders import WonderType
 from map.base import HexPoint
-from map.types import Tutorials
+from map.types import Tutorials, Yields
 
 
 class Player:
@@ -53,6 +53,9 @@ class PlayerTradeRoutes:
     def tradeRoutesStartingAt(self, city) -> [TradeRoute]:
         return []
 
+    def yields(self, simulation) -> Yields:
+        return Yields(0, 0, 0)
+
 
 class PlayerGreatPeople:
     def __init__(self, player):
@@ -77,7 +80,7 @@ class PlayerTreasury:
         self._gold += amount
 
     def doTurn(self, simulation):
-        goldChange = self.player.calculateGoldPerTurn(simulation)
+        goldChange = self.calculateGrossGold(simulation)
 
         self._goldChangeForTurn.append(goldChange)
 
@@ -107,6 +110,84 @@ class PlayerTreasury:
 
         return float(total) / float(numberOfElements)
 
+    def calculateGrossGold(self, simulation):
+        netGold = 0.0
+
+        # Income
+        # //////////////////
+        
+        # Gold from Cities
+        netGold += self.goldFromCities(simulation)
+
+        # Gold per Turn from Diplomacy
+        netGold += self.goldPerTurnFromDiplomacy(simulation)
+
+        # City connection bonuses
+        netGold += self.goldFromTradeRoutes(simulation)
+
+        # Costs
+        # //////////////////
+
+        # Gold for Unit Maintenance
+        netGold -= self.goldForUnitMaintenance(simulation)
+
+        # Gold for Building Maintenance
+        netGold -= self.goldForBuildingMaintenance(simulation)
+
+        # Gold per Turn for Diplomacy
+        netGold += self.goldPerTurnForDiplomacy(simulation)
+
+        return netGold
+
+    def goldFromCities(self, simulation) -> float:
+        """Gold from Cities"""
+        goldValue = 0.0
+
+        for city in simulation.citiesOf(self.player):
+            goldValue += city.goldPerTurn(simulation)
+
+        return goldValue
+
+    def goldPerTurnFromDiplomacy(self, simulation) -> float:
+        return 0.0
+
+    def goldFromTradeRoutes(self, simulation) -> float:
+        return self.player.tradeRoutes.yields(simulation).gold
+
+    def goldForUnitMaintenance(self, simulation) -> float:
+        maintenanceCost = 0.0
+
+        for unit in simulation.unitsOf(self.player):
+            unitMaintenanceCost: float = float(unit.unitType.maintenanceCost())
+
+            # conscription - Unit maintenance reduced by 1 Gold per turn, per unit.
+            if self.player.government.hasCard(PolicyCardType.conscription):
+                unitMaintenanceCost = max(0.0, unitMaintenanceCost - 1.0)
+
+            # leveeEnMasse - Unit maintenance cost reduced by 2 Gold per unit.
+            if self.player.government.hasCard(PolicyCardType.leveeEnMasse):
+                unitMaintenanceCost = max(0.0, unitMaintenanceCost - 2.0)
+
+            # eliteForces - +100 % combat experience for all units.
+            # BUT: +2 Gold to maintain each military unit.
+            if unit.unitType.maintenanceCost() > 0 and self.player.government.hasCard(PolicyCardType.eliteForces):
+                unitMaintenanceCost += 2.0
+
+            maintenanceCost += unitMaintenanceCost
+
+        return maintenanceCost
+
+    def goldForBuildingMaintenance(self, simulation) -> float:
+        maintenanceCost = 0.0
+
+        for city in simulation.citiesOf(self.player):
+            maintenanceCost += city.maintenanceCostsPerTurn()
+
+        return maintenanceCost
+
+    def goldPerTurnForDiplomacy(self, simulation) -> float:
+        return 0.0
+
 
 class PlayerReligion:
     def __init__(self, player):
@@ -132,6 +213,14 @@ class PlayerGovernors:
         pass
 
 
+class CitySpecializationAI:
+    def __init__(self, player):
+        self.player = player
+
+    def doTurn(self, simulation):
+        pass
+
+
 class Player:
     def __init__(self, leader: LeaderType, cityState: CityStateType = None, human: bool = False):
         self.leader = leader
@@ -146,6 +235,7 @@ class Player:
         self.diplomacyAI = DiplomacyAI(player=self)
         self.homelandAI = HomelandAI(player=self)
         self.builderTaskingAI = BuilderTaskingAI(player=self)
+        self.citySpecializationAI = CitySpecializationAI(player=self)
 
         self.notifications = Notifications(self)
         self.diplomacyRequests = DiplomacyRequests(player=self)
@@ -848,4 +938,22 @@ class Player:
         pass
 
     def doCityAmenities(self, simulation):
+        pass
+
+    def doCivics(self, simulation):
+        pass
+
+    def doTechs(self, simulation):
+        pass
+
+    def doGovernment(self, simulation):
+        pass
+
+    def doFaith(self, simulation):
+        pass
+
+    def doGreatPeople(self, simulation):
+        pass
+
+    def doTurnPost(self):
         pass

@@ -12,11 +12,13 @@ from game.governments import GovernmentType
 from game.moments import MomentType
 from game.players import Player
 from game.policyCards import PolicyCardType
+from game.states.builds import BuildType
 from game.types import CivicType, TechType
-from game.unitTypes import ImprovementType, BuildType, UnitType
+from game.unitTypes import UnitType
 from game.units import Unit
 from game.wonders import WonderType
 from map.base import HexPoint
+from map.improvements import ImprovementType
 from map.map import Map, Tile
 from map.types import TerrainType
 from tests.testBasics import UserInterfaceMock, MapMock

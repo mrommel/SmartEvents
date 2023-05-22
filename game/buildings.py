@@ -149,6 +149,9 @@ class BuildingType(ExtendedEnum):
 	def yields(self) -> Yields:
 		return self._data().yields
 
+	def maintenanceCost(self) -> float:
+		return self._data().maintenanceCost
+
 	def _data(self) -> BuildingTypeData:
 		# default
 		if self == BuildingType.none:

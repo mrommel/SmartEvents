@@ -3,7 +3,8 @@ from enum import Enum
 from game.ai.baseTypes import MilitaryStrategyType
 from game.civilizations import TraitType
 from game.flavors import Flavors, FlavorType
-from game.unitTypes import UnitDomainType, UnitTaskType, ImprovementType, UnitMapType
+from game.unitTypes import UnitDomainType, UnitTaskType, UnitMapType
+from map.improvements import ImprovementType
 from utils.base import InvalidEnumError
 from game.ai.grandStrategies import GrandStrategyAIType
 

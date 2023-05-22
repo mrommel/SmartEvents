@@ -2,7 +2,8 @@ from game.buildings import BuildingType
 from game.districts import DistrictType
 from game.governments import GovernmentType
 from game.policyCards import PolicyCardType
-from game.unitTypes import UnitType, BuildType
+from game.states.builds import BuildType
+from game.unitTypes import UnitType
 from game.wonders import WonderType
 
 

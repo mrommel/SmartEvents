@@ -9,11 +9,14 @@ from game.civilizations import LeaderType
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.players import Player
+from game.states.builds import BuildType
+from game.states.ui import ScreenType
 from game.states.victories import VictoryType
 from game.types import TechType
-from game.unitTypes import BuildType, UnitMapType, ImprovementType, UnitAbilityType, PromotionType
+from game.unitTypes import UnitMapType, UnitAbilityType, PromotionType
 from game.units import Unit
 from map.base import HexPoint
+from map.improvements import ImprovementType
 from map.map import Map, Tile, ContinentType, Continent
 from map.types import FeatureType
 

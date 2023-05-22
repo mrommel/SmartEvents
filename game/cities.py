@@ -22,10 +22,12 @@ from game.specialists import SpecialistType
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.types import EraType, TechType
-from game.unitTypes import ImprovementType
+from game.unitTypes import UnitType
+from game.units import Unit
 from game.wonders import WonderType
 from map import constants
 from map.base import HexPoint
+from map.improvements import ImprovementType
 from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType
 from utils.base import ExtendedEnum
 
@@ -698,7 +700,6 @@ class CityState(ExtendedEnum):
 
 class City:
 	workRadius = 3
-
 	def __init__(self, name: str, location: HexPoint, isCapital: bool, player):
 		self.name = name
 		self.location = location
@@ -932,6 +933,9 @@ class City:
 				self.cityCitizens.changeNumberOfUnassignedCitizensBy(populationChange)
 
 		self._populationValue = float(newPopulation)
+
+	def power(self, simulation) -> int:
+		return int(pow(float(self.defensiveStrengthAgainst(unit=None, tile=None, ranged=False, simulation=simulation)) / 100.0, 1.5))
 
 	def doUpdateCheapestPlotInfluence(self, simulation):
 		pass
@@ -2570,4 +2574,64 @@ class City:
 				# 	cultureFromEnvoys += 2.0
 
 		return cultureFromEnvoys
-	
+
+	def defensiveStrengthAgainst(self, unit, tile, ranged, simulation):
+		strengthValue = 0
+
+		# Base strength, equal to that of the strongest melee unit your civilization
+		# currently possesses minus 10, or to the unit which is garrisoned inside
+		# the city(whichever is greater). Note also that
+		# Corps or Army units are capable of pushing this number higher than otherwise possible
+		# for this Era, so when you station such a unit in a city, its CS will increase accordingly;
+		if self.garrisonedUnit() is not None:
+			unitStrength = self.garrisonedUnit().attackStrengthAgainst(unit=None, city=None, tile=None, simulation=simulation)
+			warriorStrength = UnitType.warrior.meleeStrength() - 10
+			strengthValue = max(warriorStrength, unitStrength)
+		else:
+			strengthValue = UnitType.warrior.meleeStrength() - 10
+
+
+		# Building Defense
+		# Wall defenses add + 3 CS per each level of Walls(up to + 9 for Renaissance Walls);
+		# this bonus is lost if /when the walls are brought down.Note that this bonus is only valid for
+		# 'ancient defenses' (i.e.pre-Urban Defenses Walls).If a city never built any walls and then got Urban Defenses,
+		# it will never get this bonus, despite actually having modern defensive capabilities.
+
+		# The Capital gains an additional boost of 3 CS thanks to its Palace; this is called "Palace Guard" in the
+		# strength breakdown. This can increase to + 8 when Victor has moved to the city(takes 3 turns).
+		buildingDefense = self.buildings.defense()
+		strengthValue += buildingDefense
+
+		# Terrain mod
+		# Bonus if the city is built on a Hill; this is the normal + 3 bonus which is native to Hills.
+		if tile is not None:
+			if tile.isHills():
+				strengthValue += 3 # CITY_STRENGTH_HILL_MOD
+
+		# +6 City Defense Strength.
+		if self.player.government.hasCard(PolicyCardType.bastions):
+			strengthValue += 6
+
+		# Increases city garrison Strength Combat Strength by + 5
+		if self.hasGovernorTitle(GovernorTitle.redoubt):
+			strengthValue += 5
+
+		return strengthValue
+
+	def garrisonedUnit(self) -> Optional[Unit]:
+		return None
+
+	def maintenanceCostsPerTurn(self) -> float:
+		costs = 0.0
+
+		# gather costs from districts
+		for district in list(DistrictType):
+			if self.districts.hasDistrict(district):
+				costs += float(district.maintenanceCost())
+
+		# gather costs from buildings
+		for building in list(BuildingType):
+			if self.buildings.hasBuilding(building):
+				costs += float(building.maintenanceCost())
+
+		return costs
