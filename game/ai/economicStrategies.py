@@ -14,6 +14,9 @@ class EconomicStrategyType(ExtendedEnum):
     earlyExpansion = 'earlyExpansion'
     foundCity = 'foundCity'
 
+    def name(self) -> str:
+        return EconomicStrategies().strategy(self).name
+
     def requiredTech(self):
         return EconomicStrategies().strategy(self).requiredTech
 

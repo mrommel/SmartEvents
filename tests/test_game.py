@@ -2,6 +2,7 @@ import unittest
 
 from game.achievements import CivicAchievements, TechAchievements
 from game.ai.baseTypes import MilitaryStrategyType
+from game.ai.economicStrategies import EconomicStrategyType
 from game.baseTypes import HandicapType
 from game.buildings import BuildingType
 from game.cities import City
@@ -12,8 +13,9 @@ from game.governments import GovernmentType
 from game.moments import MomentType
 from game.players import Player
 from game.policyCards import PolicyCardType
+from game.states.ages import AgeType
 from game.states.builds import BuildType
-from game.types import CivicType, TechType
+from game.types import CivicType, TechType, EraType
 from game.unitTypes import UnitType
 from game.units import Unit
 from game.wonders import WonderType
@@ -25,6 +27,15 @@ from tests.testBasics import UserInterfaceMock, MapMock
 
 
 class TestGameAssets(unittest.TestCase):
+
+	def test_era_data(self):
+		for era in list(EraType):
+			_ = era.name()
+
+	def test_age_data(self):
+		for age in list(AgeType):
+			_ = age.name()
+
 	def test_techs_data(self):
 		for tech in list(TechType):
 			_ = tech.name()
@@ -115,6 +126,26 @@ class TestGameAssets(unittest.TestCase):
 	def test_governments_data(self):
 		for government in list(GovernmentType):
 			_ = government.name()
+
+	def test_military_state_data(self):
+		for militaryStrategy in list(MilitaryStrategyType):
+			_ = militaryStrategy.name()
+
+	def test_economic_state_data(self):
+		for economicStrategy in list(EconomicStrategyType):
+			_ = economicStrategy.name()
+
+	def test_civilization_data(self):
+		for civilization in list(CivilizationType):
+			_ = civilization.name()
+
+	def test_leader_data(self):
+		for leader in list(LeaderType):
+			_ = leader.name()
+
+	def test_unit_data(self):
+		for unit in list(UnitType):
+			_ = unit.name()
 
 
 class TestCity(unittest.TestCase):

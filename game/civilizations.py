@@ -3,7 +3,7 @@ from utils.base import ExtendedEnum, InvalidEnumError, WeightedBaseList
 
 
 class TraitType(ExtendedEnum):
-	boldness = 0
+	boldness = 'boldness'
 
 
 class Trait:
@@ -18,14 +18,27 @@ class CivilizationAbility(ExtendedEnum):
 	allRoadsLeadToRome = 'allRoadsLeadToRome'
 
 
-class CivilizationType(ExtendedEnum):
-	barbarian = -3
-	free = -2
-	cityState = -1
+class CivilizationData:
+	def __init__(self, name: str, ability: CivilizationAbility):
+		self.name = name
+		self.ability = ability
 
-	greek = 0
-	roman = 1
-	english = 2
+
+class CivilizationType(ExtendedEnum):
+	none = 'none'
+	barbarian = 'barbarian'
+	free = 'free'
+	cityState = 'cityState'
+
+	greek = 'greek'
+	roman = 'roman'
+	english = 'english'
+
+	def name(self) -> str:
+		return self._data().name
+
+	def ability(self) -> CivilizationAbility:
+		return self._data().ability
 
 	def startingBias(self, tile, grid) -> int:
 		# https://civilization.fandom.com/wiki/Starting_bias_(Civ5)
@@ -38,15 +51,45 @@ class CivilizationType(ExtendedEnum):
 
 		return 0  # rest
 
-	def ability(self):
-		if self == CivilizationType.greek:
-			return CivilizationAbility.none
-		elif self == CivilizationType.roman:
-			return CivilizationAbility.allRoadsLeadToRome
-		elif self == CivilizationType.english:
-			return CivilizationAbility.none
+	def _data(self) -> CivilizationData:
+		if self == CivilizationType.none:
+			return CivilizationData(
+				name='None',
+				ability=CivilizationAbility.none
+			)
+		elif self == CivilizationType.barbarian:
+			return CivilizationData(
+				name='Barbarian',
+				ability=CivilizationAbility.none
+			)
+		elif self == CivilizationType.free:
+			return CivilizationData(
+				name='Free',
+				ability=CivilizationAbility.none
+			)
+		elif self == CivilizationType.cityState:
+			return CivilizationData(
+				name='CityState',
+				ability=CivilizationAbility.none
+			)
 
-		return None
+		elif self == CivilizationType.greek:
+			return CivilizationData(
+				name='Greek',
+				ability=CivilizationAbility.none
+			)
+		elif self == CivilizationType.roman:
+			return CivilizationData(
+				name='Roman',
+				ability=CivilizationAbility.allRoadsLeadToRome
+			)
+		elif self == CivilizationType.english:
+			return CivilizationData(
+				name='English',
+				ability=CivilizationAbility.none
+			)
+
+		raise InvalidEnumError(self)
 
 
 class WeightedCivilizationList(WeightedBaseList):
@@ -61,34 +104,33 @@ class LeaderAbility(ExtendedEnum):
 	trajansColumn = 'trajansColumn'
 
 
-class LeaderType(ExtendedEnum):
-	barbar = -2
-	cityState = -1
-	none = 0
+class LeaderTypeData:
+	def __init__(self, name: str, civilization: CivilizationType, ability: LeaderAbility, flavors: [Flavor],
+	             traits: [Trait]):
+		self.name = name
+		self.civilization = civilization
+		self.ability = ability
+		self.flavors = flavors
+		self.traits = traits
 
-	alexander = 1
-	trajan = 2
-	victoria = 3
+
+class LeaderType(ExtendedEnum):
+	barbar = 'barbar'
+	cityState = 'cityState'
+	none = 'none'
+
+	alexander = 'alexander'
+	trajan = 'trajan'
+	victoria = 'victoria'
+
+	def name(self) -> str:
+		return self._data().name
 
 	def civilization(self) -> CivilizationType:
-		if self == LeaderType.alexander:
-			return CivilizationType.greek
-		elif self == LeaderType.trajan:
-			return CivilizationType.roman
-		elif self == LeaderType.victoria:
-			return CivilizationType.english
-
-		raise Exception(f'Enum not handled: {self}')
+		return self._data().civilization
 
 	def ability(self) -> LeaderAbility:
-		if self == LeaderType.alexander:
-			return LeaderAbility.none
-		elif self == LeaderType.trajan:
-			return LeaderAbility.trajansColumn
-		elif self == LeaderType.victoria:
-			return LeaderAbility.none
-
-		raise InvalidEnumError(f'Enum not handled: {self}')
+		return self._data().ability
 
 	def flavor(self, flavorType: FlavorType) -> int:
 		item = next((flavor for flavor in self._flavors() if flavor.flavorType == flavorType), None)
@@ -99,84 +141,7 @@ class LeaderType(ExtendedEnum):
 		return 0
 
 	def _flavors(self) -> [Flavor]:
-		if self == LeaderType.alexander:
-			return [
-				Flavor(FlavorType.cityDefense, 5),
-				Flavor(FlavorType.culture, 7),
-				Flavor(FlavorType.defense, 5),
-				Flavor(FlavorType.diplomacy, 9),
-				Flavor(FlavorType.expansion, 8),
-				Flavor(FlavorType.gold, 3),
-				Flavor(FlavorType.growth, 4),
-				Flavor(FlavorType.amenities, 5),
-				Flavor(FlavorType.infrastructure, 4),
-				Flavor(FlavorType.militaryTraining, 5),
-				Flavor(FlavorType.mobile, 8),
-				Flavor(FlavorType.naval, 5),
-				Flavor(FlavorType.navalGrowth, 6),
-				Flavor(FlavorType.navalRecon, 5),
-				Flavor(FlavorType.navalTileImprovement, 6),
-				Flavor(FlavorType.offense, 8),
-				Flavor(FlavorType.production, 5),
-				Flavor(FlavorType.recon, 5),
-				Flavor(FlavorType.science, 6),
-				Flavor(FlavorType.tileImprovement, 4),
-				Flavor(FlavorType.wonder, 6)
-			]
-		elif self == LeaderType.trajan:
-			return [
-				Flavor(FlavorType.cityDefense, 5),
-				Flavor(FlavorType.culture, 5),
-				Flavor(FlavorType.defense, 6),
-				Flavor(FlavorType.diplomacy, 5),
-				Flavor(FlavorType.expansion, 8),
-				Flavor(FlavorType.gold, 6),
-				Flavor(FlavorType.growth, 5),
-				Flavor(FlavorType.amenities, 8),
-				Flavor(FlavorType.infrastructure, 8),
-				Flavor(FlavorType.militaryTraining, 7),
-				Flavor(FlavorType.mobile, 4),
-				Flavor(FlavorType.naval, 5),
-				Flavor(FlavorType.navalGrowth, 4),
-				Flavor(FlavorType.navalRecon, 5),
-				Flavor(FlavorType.navalTileImprovement, 4),
-				Flavor(FlavorType.offense, 5),
-				Flavor(FlavorType.production, 6),
-				Flavor(FlavorType.recon, 3),
-				Flavor(FlavorType.science, 5),
-				Flavor(FlavorType.tileImprovement, 7),
-				Flavor(FlavorType.wonder, 6)
-			]
-		elif self == LeaderType.victoria:
-			return [
-				Flavor(FlavorType.cityDefense, 6),
-				Flavor(FlavorType.culture, 6),
-				Flavor(FlavorType.defense, 6),
-				Flavor(FlavorType.diplomacy, 6),
-				Flavor(FlavorType.expansion, 6),
-				Flavor(FlavorType.gold, 8),
-				Flavor(FlavorType.growth, 4),
-				Flavor(FlavorType.amenities, 5),
-				Flavor(FlavorType.infrastructure, 5),
-				Flavor(FlavorType.militaryTraining, 5),
-				Flavor(FlavorType.mobile, 3),
-				Flavor(FlavorType.naval, 8),
-				Flavor(FlavorType.navalGrowth, 7),
-				Flavor(FlavorType.navalRecon, 8),
-				Flavor(FlavorType.navalTileImprovement, 7),
-				Flavor(FlavorType.offense, 3),
-				Flavor(FlavorType.production, 6),
-				Flavor(FlavorType.recon, 6),
-				Flavor(FlavorType.science, 6),
-				Flavor(FlavorType.tileImprovement, 6),
-				Flavor(FlavorType.wonder, 5)
-			]
-		elif self == LeaderType.cityState:
-			return []
-		elif self == LeaderType.barbar:
-			return []
-
-		raise InvalidEnumError(self)
+		return self._data().flavors
 
 	def traitValue(self, traitType: TraitType) -> int:
 		item = next((trait for trait in self._traits() if trait.traitType == traitType), None)
@@ -187,17 +152,124 @@ class LeaderType(ExtendedEnum):
 		return 0
 
 	def _traits(self) -> [Trait]:
-		if self == LeaderType.alexander:
-			return [Trait(TraitType.boldness, 8)]
-		elif self == LeaderType.trajan:
-			return [Trait(TraitType.boldness, 6)]
-		elif self == LeaderType.victoria:
-			return [Trait(TraitType.boldness, 4)]
+		return self._data().traits
 
+	def _data(self) -> LeaderTypeData:
+		if self == LeaderType.alexander:
+			return LeaderTypeData(
+				name='Alexander',
+				civilization=CivilizationType.greek,
+				ability=LeaderAbility.none,
+				flavors=[
+					Flavor(FlavorType.cityDefense, 5),
+					Flavor(FlavorType.culture, 7),
+					Flavor(FlavorType.defense, 5),
+					Flavor(FlavorType.diplomacy, 9),
+					Flavor(FlavorType.expansion, 8),
+					Flavor(FlavorType.gold, 3),
+					Flavor(FlavorType.growth, 4),
+					Flavor(FlavorType.amenities, 5),
+					Flavor(FlavorType.infrastructure, 4),
+					Flavor(FlavorType.militaryTraining, 5),
+					Flavor(FlavorType.mobile, 8),
+					Flavor(FlavorType.naval, 5),
+					Flavor(FlavorType.navalGrowth, 6),
+					Flavor(FlavorType.navalRecon, 5),
+					Flavor(FlavorType.navalTileImprovement, 6),
+					Flavor(FlavorType.offense, 8),
+					Flavor(FlavorType.production, 5),
+					Flavor(FlavorType.recon, 5),
+					Flavor(FlavorType.science, 6),
+					Flavor(FlavorType.tileImprovement, 4),
+					Flavor(FlavorType.wonder, 6)
+				],
+				traits=[Trait(TraitType.boldness, 8)]
+			)
+		elif self == LeaderType.trajan:
+			return LeaderTypeData(
+				name='Trajan',
+				civilization=CivilizationType.roman,
+				ability=LeaderAbility.trajansColumn,
+				flavors=[
+					Flavor(FlavorType.cityDefense, 5),
+					Flavor(FlavorType.culture, 5),
+					Flavor(FlavorType.defense, 6),
+					Flavor(FlavorType.diplomacy, 5),
+					Flavor(FlavorType.expansion, 8),
+					Flavor(FlavorType.gold, 6),
+					Flavor(FlavorType.growth, 5),
+					Flavor(FlavorType.amenities, 8),
+					Flavor(FlavorType.infrastructure, 8),
+					Flavor(FlavorType.militaryTraining, 7),
+					Flavor(FlavorType.mobile, 4),
+					Flavor(FlavorType.naval, 5),
+					Flavor(FlavorType.navalGrowth, 4),
+					Flavor(FlavorType.navalRecon, 5),
+					Flavor(FlavorType.navalTileImprovement, 4),
+					Flavor(FlavorType.offense, 5),
+					Flavor(FlavorType.production, 6),
+					Flavor(FlavorType.recon, 3),
+					Flavor(FlavorType.science, 5),
+					Flavor(FlavorType.tileImprovement, 7),
+					Flavor(FlavorType.wonder, 6)
+				],
+				traits=[Trait(TraitType.boldness, 6)]
+			)
+		elif self == LeaderType.victoria:
+			return LeaderTypeData(
+				name='Alexander',
+				civilization=CivilizationType.english,
+				ability=LeaderAbility.none,
+				flavors=[
+					Flavor(FlavorType.cityDefense, 6),
+					Flavor(FlavorType.culture, 6),
+					Flavor(FlavorType.defense, 6),
+					Flavor(FlavorType.diplomacy, 6),
+					Flavor(FlavorType.expansion, 6),
+					Flavor(FlavorType.gold, 8),
+					Flavor(FlavorType.growth, 4),
+					Flavor(FlavorType.amenities, 5),
+					Flavor(FlavorType.infrastructure, 5),
+					Flavor(FlavorType.militaryTraining, 5),
+					Flavor(FlavorType.mobile, 3),
+					Flavor(FlavorType.naval, 8),
+					Flavor(FlavorType.navalGrowth, 7),
+					Flavor(FlavorType.navalRecon, 8),
+					Flavor(FlavorType.navalTileImprovement, 7),
+					Flavor(FlavorType.offense, 3),
+					Flavor(FlavorType.production, 6),
+					Flavor(FlavorType.recon, 6),
+					Flavor(FlavorType.science, 6),
+					Flavor(FlavorType.tileImprovement, 6),
+					Flavor(FlavorType.wonder, 5)
+				],
+				traits=[Trait(TraitType.boldness, 4)]
+			)
+
+		elif self == LeaderType.none:
+			return LeaderTypeData(
+				name='None',
+				civilization=CivilizationType.none,
+				ability=LeaderAbility.none,
+				flavors=[],
+				traits=[]
+			)
 		elif self == LeaderType.cityState:
-			return []
+			return LeaderTypeData(
+				name='CityState',
+				civilization=CivilizationType.cityState,
+				ability=LeaderAbility.none,
+				flavors=[],
+				traits=[]
+			)
 		elif self == LeaderType.barbar:
-			return []
+			return LeaderTypeData(
+				name='Barbar',
+				civilization=CivilizationType.barbarian,
+				ability=LeaderAbility.none,
+				flavors=[],
+				traits=[]
+			)
 
 		raise InvalidEnumError(self)
 
