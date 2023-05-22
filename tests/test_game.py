@@ -17,7 +17,7 @@ from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.types import CivicType, TechType, EraType
 from game.unitTypes import UnitType
-from game.units import Unit
+from game.units import Unit, UnitActivityType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.improvements import ImprovementType
@@ -488,8 +488,8 @@ class TestSimulation(unittest.TestCase):
 
 	def test_player_turn(self):
 		# GIVEN
-		map = Map(10, 10)
-		simulation = Game(map, handicap=HandicapType.chieftain)
+		mapModel = MapMock(20, 10, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
 
 		playerBarbar = Player(LeaderType.barbar, human=False)
 		playerBarbar.initialize()
@@ -523,3 +523,69 @@ class TestSimulation(unittest.TestCase):
 		# THEN
 		self.assertLess(iteration, 25, 'maximum iterations reached')
 
+
+class TestUsecases(unittest.TestCase):
+	def test_first_city_build(self):
+		# GIVEN
+		mapModel = MapMock(20, 10, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+
+		# players
+		playerBarbar = Player(LeaderType.barbar, human=False)
+		playerBarbar.initialize()
+		simulation.players.append(playerBarbar)
+
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		playerAlexander = Player(LeaderType.alexander, human=True)
+		playerAlexander.initialize()
+		simulation.players.append(playerAlexander)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# initial units
+		playerAlexanderWarrior = Unit(HexPoint(5, 6), UnitType.warrior, playerAlexander)
+		simulation.addUnit(playerAlexanderWarrior)
+
+		playerAugustusSettler = Unit(HexPoint(15, 15), UnitType.settler, playerTrajan)
+		simulation.addUnit(playerAugustusSettler)
+
+		playerAugustusWarrior = Unit(HexPoint(15, 16), UnitType.warrior, playerTrajan)
+		simulation.addUnit(playerAugustusWarrior)
+
+		playerBarbarianWarrior = Unit(HexPoint(10, 10), UnitType.barbarianWarrior, playerBarbar)
+		simulation.addUnit(playerBarbarianWarrior)
+
+		# this is cheating
+		mapModel.discover(playerAlexander, simulation)
+		mapModel.discover(playerTrajan, simulation)
+		mapModel.discover(playerBarbar, simulation)
+
+		numberOfCitiesBefore = len(simulation.citiesOf(playerTrajan))
+		numberOfUnitsBefore = len(simulation.unitsOf(playerTrajan))
+
+		# WHEN
+		iteration = 0
+		while not(playerAlexander.hasProcessedAutoMoves() and playerAlexander.turnFinished()) and iteration < 25:
+			simulation.update()
+			print(f'-- loop -- active player: {simulation.activePlayer()} --', flush=True)
+
+			if playerAlexander.isTurnActive():
+				playerAlexander.setProcessedAutoMovesTo(True)  # units have moved
+				playerAlexander.finishTurn()  # turn button clicked
+
+			iteration += 1
+
+		# THEN
+		self.assertEqual(numberOfCitiesBefore, 0)
+		self.assertEqual(numberOfUnitsBefore, 2)
+		numberOfCitiesAfter = len(simulation.citiesOf(playerTrajan))
+		numberOfUnitsAfter = len(simulation.unitsOf(playerTrajan))
+		self.assertEqual(numberOfCitiesAfter, 1)
+		self.assertEqual(numberOfUnitsAfter, 1)
+
+		self.assertEqual(playerAugustusWarrior.activityType(), UnitActivityType.none)  # warrior has skipped
+		# XCTAssertEqual(playerAugustusWarrior.peekMission()!.buildType, BuildType.repair)

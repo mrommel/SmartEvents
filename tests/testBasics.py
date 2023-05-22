@@ -9,6 +9,11 @@ class MapMock(Map):
 		for point in self.points():
 			self.modifyTerrainAt(point, terrain)
 
+	def discover(self, player, simulation):
+		for point in self.points():
+			tile = self.tileAt(point)
+			tile.discoverBy(player, simulation)
+
 
 class UserInterfaceMock:
 	def updateCity(self, city):

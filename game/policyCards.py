@@ -98,7 +98,7 @@ class PolicyCardType(ExtendedEnum):
 	# warsOfReligion
 	# simultaneum
 	# religiousOrders
-	# logistics
+	logistics = 'logistics'
 	triangularTrade = 'triangularTrade'
 	# drillManuals
 	# rationalism
@@ -122,7 +122,7 @@ class PolicyCardType(ExtendedEnum):
 	# forceModernization
 	# totalWar
 	# expropriation
-	# militaryOrganization
+	militaryOrganization = 'militaryOrganization'
 
 	# modern
 	# resourceManagement
@@ -814,7 +814,17 @@ class PolicyCardType(ExtendedEnum):
 		# warsOfReligion
 		# simultaneum
 		# religiousOrders
-		# logistics
+		elif self == PolicyCardType.logistics:
+			# https://civilization.fandom.com/wiki/Logistics_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_LOGISTICS_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_LOGISTICS_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.mercantilism,
+				obsoleteCivic=None,
+				replace=[],
+				flavors=[]
+			)
 		elif self == PolicyCardType.triangularTrade:
 			# https://civilization.fandom.com/wiki/Triangular_Trade_(Civ6)
 			return PolicyCardTypeData(
@@ -868,7 +878,17 @@ class PolicyCardType(ExtendedEnum):
 		# forceModernization
 		# totalWar
 		# expropriation
-		# militaryOrganization
+		elif self == PolicyCardType.militaryOrganization:
+			# https://civilization.fandom.com/wiki/Military_Organization_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_MILITARY_ORGANIZATION_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_MILITARY_ORGANIZATION_BONUS",
+				slot=PolicyCardSlot.wildcard,
+				requiredCivic=CivicType.scorchedEarth,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.strategos],
+				flavors=[]
+			)
 
 		# modern
 		# resourceManagement

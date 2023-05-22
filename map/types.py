@@ -8,6 +8,7 @@ from utils.translation import gettext_lazy as _
 
 
 class UnitDomainType(ExtendedEnum):
+	none = 'none'
 	sea = 'sea'
 	land = 'land'
 

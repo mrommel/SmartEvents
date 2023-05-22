@@ -12,6 +12,7 @@ from utils.base import InvalidEnumError
 
 
 class PromotionType(ExtendedEnum):
+	commando = 'commando'
 	helmsman = 'helmsman'
 	redeploy = 'redeploy'
 	pursuit = 'pursuit'
@@ -24,6 +25,8 @@ class UnitMapType(ExtendedEnum):
 
 
 class UnitTaskType(ExtendedEnum):
+	unknown = 'unknown'
+
 	reserveSea = 'reserveSea'
 	escortSea = 'escortSea'
 	exploreSea = 'exploreSea'
@@ -37,7 +40,6 @@ class UnitTaskType(ExtendedEnum):
 	attack = 'attack'
 	work = 'work'
 	settle = 'settle'
-	none = 'none'
 
 
 class UnitAbilityType(ExtendedEnum):
@@ -182,6 +184,9 @@ class UnitType(ExtendedEnum):
 
 	def civilization(self):
 		return self._data().civilization
+
+	def era(self) -> EraType:
+		return self._data().era
 
 	def requiredCivic(self) -> CivicType:
 		return self._data().requiredCivic

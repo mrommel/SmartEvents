@@ -1,6 +1,7 @@
 import math
 from typing import Optional
 
+from game.ai.homeland import HomelandAI
 from game.baseTypes import CityStateType, GameState
 from game.ai.economics import EconomicAI
 from game.ai.grandStrategies import GrandStrategyAI
@@ -13,7 +14,7 @@ from game.governments import PlayerGovernment
 from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import Notifications, NotificationType, Notification
-from game.playerMechanics import PlayerTechs, PlayerCivics, BuilderTaskingAI, TacticalAI, DiplomacyAI, HomelandAI, \
+from game.playerMechanics import PlayerTechs, PlayerCivics, BuilderTaskingAI, TacticalAI, DiplomacyAI, \
     DiplomacyRequests, PlayerMoments
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType
@@ -662,17 +663,17 @@ class Player:
     def setProcessedAutoMovesTo(self, value: bool):
         self.processedAutoMovesValue = value
 
-    def doUnitReset(self, game):
+    def doUnitReset(self, simulation):
         """Units heal and then get their movement back"""
-        for loopUnit in game.unitsOf(self):
+        for loopUnit in simulation.unitsOf(self):
             # HEAL UNIT?
             if not loopUnit.isEmbarked():
-                if not loopUnit.hasMoved(game):
+                if not loopUnit.hasMoved(simulation):
                     if loopUnit.isHurt():
-                        loopUnit.doHeal(game)
+                        loopUnit.doHeal(simulation)
 
             # Finally(now that healing is done), restore movement points
-            loopUnit.resetMoves(game)
+            loopUnit.resetMoves(simulation)
             # pLoopUnit->SetIgnoreDangerWakeup(false);
             loopUnit.setMadeAttackTo(False)
             # pLoopUnit->setMadeInterception(false);
@@ -783,7 +784,7 @@ class Player:
 
     def unitUpdate(self, simulation):
         # CvPlayerAI::AI_unitUpdate()
-        # Now its the homeland AI's turn.
+        # Now it's the homeland AI's turn.
         if self.isHuman():
             self.homelandAI.doTurn(simulation)
         else:

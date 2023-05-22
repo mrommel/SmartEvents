@@ -142,3 +142,6 @@ class EconomicAI:
             if self.economicStrategyAdoptions.adopted(economicStrategyType):
                 for economicStrategyTypeFlavor in economicStrategyType.flavors():
                     self.flavors += economicStrategyTypeFlavor
+
+    def updatePlots(self, simulation):
+        pass

@@ -1,10 +1,27 @@
 import sys
+from typing import Optional
 
 from game.policyCards import PolicyCardType
+from game.states.ages import AgeType
+from game.states.dedications import DedicationType
 from game.types import EraType
-from game.unitTypes import UnitTaskType, UnitType, PromotionType
+from game.unitTypes import UnitTaskType, UnitType, PromotionType, MoveOptions, UnitMissionType
 from map.base import HexPoint, HexArea
 from map.types import UnitDomainType
+from utils.base import ExtendedEnum
+
+
+class UnitActivityType(ExtendedEnum):
+	none = 'none'
+
+
+class UnitAutomationType(ExtendedEnum):
+	none = 'none'
+
+
+class UnitMission:
+	def __init__(self, type: UnitMissionType):
+		self.type = type
 
 
 class Unit:
@@ -16,8 +33,12 @@ class Unit:
 		self.player = player
 		self.taskValue = unitType.defaultTask()
 
-		self._movesValue = 0
+		self._movesValue = unitType.moves()
 		self._healthPointsValue = Unit.maxHealth
+		self._activityTypeValue = UnitActivityType.none
+		self._automationType = UnitAutomationType.none
+		self._processedInTurnValue = False
+		self._missions = []
 
 	def hasTask(self, task: UnitTaskType) -> bool:
 		return task in self.unitType.unitTasks()
@@ -73,7 +94,7 @@ class Unit:
 		self._movesValue = self.maxMoves(simulation)
 
 	def maxMoves(self, simulation) -> int:
-		moveVal = self.baseMoves(simulation)
+		moveVal = self.baseMovesInto(UnitDomainType.none, simulation)
 
 		if (self.unitType.era() == EraType.classical or self.unitType.era() == EraType.medieval) and \
 			self.domain() == UnitDomainType.land:
@@ -131,6 +152,20 @@ class Unit:
 
 		return moveVal
 
+	def baseMovesInto(self, domain: UnitDomainType, simulation) -> int:
+		if (domain == UnitDomainType.sea and self.canEmbark(simulation)) or \
+			(domain == UnitDomainType.none and self.isEmbarked()):
+			return 2  # EMBARKED_UNIT_MOVEMENT
+
+		extraNavalMoves = 0
+		if domain == UnitDomainType.sea:
+			extraNavalMoves = self.extraNavalMoves(simulation)
+
+		extraGoldenAgeMoves = 0
+
+		extraUnitCombatTypeMoves = 0  # ???
+		return self.unitType.moves() + extraNavalMoves + extraGoldenAgeMoves + extraUnitCombatTypeMoves
+
 	def power(self) -> int:
 		"""Current power of unit (raw unit type power adjusted for health)"""
 		powerVal: float = float(self.unitType.power())
@@ -161,3 +196,75 @@ class Unit:
 
 	def experienceLevel(self) -> int:
 		return 1
+
+	def activityType(self) -> UnitActivityType:
+		return self._activityTypeValue
+
+	def setTurnProcessedTo(self, turnProcessed: bool):
+		self._processedInTurnValue = turnProcessed
+
+	def processedInTurn(self) -> bool:
+		return self._processedInTurnValue
+
+	def updateMission(self, simulation):
+		pass
+
+	def doDelayedDeath(self, simulation):
+		pass
+
+	def isDelayedDeath(self) -> bool:
+		return False
+
+	def readyToMove(self) -> bool:
+		if not self.canMove():
+			return False
+
+		if self.isGarrisoned():
+			return False
+
+		if len(self._missions) > 0:
+			return False
+
+		if self._activityTypeValue != UnitActivityType.none and self._activityTypeValue != UnitActivityType.awake:
+			return False
+
+		if self._automationType != UnitActivityType.none:
+			return False
+
+		# / * if self.isbusy()
+		# {
+		# return False
+		# } * /
+
+		return True
+
+	def canMove(self) -> bool:
+		return self.moves() > 0
+
+	def isAutomated(self) -> bool:
+		return self._automationType != UnitAutomationType.none
+
+	def autoMission(self, simulation):
+		pass
+
+	def peekMission(self) -> Optional[UnitMission]:
+		return None
+
+	def isEmbarked(self) -> bool:
+		return False
+
+	def setMadeAttackTo(self, value):
+		pass
+
+	def army(self):
+		return None
+
+	def isGarrisoned(self):
+		return False
+
+	def damage(self) -> int:
+		return max(0, int(Unit.maxHealth) - self._healthPointsValue)
+
+	def isHurt(self) -> bool:
+		return self.damage() > 0
+

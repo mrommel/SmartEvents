@@ -1340,14 +1340,6 @@ class DiplomacyAI:
 		pass
 
 
-class HomelandAI:
-	def __init__(self, player):
-		self.player = player
-
-	def doTurn(self, simulation):
-		pass
-
-
 class DiplomacyRequests:
 	def __init__(self, player):
 		self.player = player
