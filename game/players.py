@@ -19,7 +19,8 @@ from game.policyCards import PolicyCardType
 from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
-from game.types import EraType, TechType
+from game.states.ui import ScreenType
+from game.types import EraType, TechType, CivicType
 from game.unitTypes import UnitMissionType, UnitTaskType
 from game.wonders import WonderType
 from map.base import HexPoint
@@ -66,10 +67,32 @@ class PlayerTreasury:
         self.player = player
 
         # internal
+        self._gold = 0.0
         self._goldChangeForTurn = []
 
     def value(self) -> float:
-        return 0.0
+        return self._gold
+
+    def changeGoldBy(self, amount: float):
+        self._gold += amount
+
+    def doTurn(self, simulation):
+        goldChange = self.player.calculateGoldPerTurn(simulation)
+
+        self._goldChangeForTurn.append(goldChange)
+
+        # predict treasury
+        goldAfterThisTurn = self._gold + goldChange
+
+        # check if we are running low
+        if goldAfterThisTurn < 0:
+            self._gold = 0
+
+            if goldAfterThisTurn <= -5: # DEFICIT_UNIT_DISBANDING_THRESHOLD
+                # player.doDeficit()
+                pass
+        else:
+            self.changeGoldBy(goldChange)
 
     def averageIncome(self, numberOfTurns: int) -> float:
         """Average change in gold balance over N turns"""
@@ -91,6 +114,22 @@ class PlayerReligion:
 
     def pantheon(self) -> PantheonType:
         return PantheonType.none
+
+
+class PlayerTourism:
+    def __init__(self, player):
+        self.player = player
+
+    def doTurn(self, simulation):
+        pass
+
+
+class PlayerGovernors:
+    def __init__(self, player):
+        self.player = player
+
+    def doTurn(self, simulation):
+        pass
 
 
 class Player:
@@ -139,6 +178,8 @@ class Player:
         self.cityConnections = CityConnections(player=self)
         self.greatPeople = PlayerGreatPeople(player=self)
         self.treasury = PlayerTreasury(player=self)
+        self.tourism = PlayerTourism(player=self)
+        self.governors = PlayerGovernors(player=self)
         
         self.currentEraVal: EraType = EraType.ancient
         self.currentAgeVal: AgeType = AgeType.normal
@@ -150,9 +191,86 @@ class Player:
         pass
 
     def doTurn(self, simulation):
-        self.grandStrategyAI.doTurn(simulation)
-        self.economicAI.doTurn(simulation)
-        self.militaryAI.doTurn(simulation)
+        self.doEurekas(simulation)
+        self.doResourceStockpile(simulation)
+        self.doSpaceRace(simulation)
+        self.tourism.doTurn(simulation)
+
+        # inform ui about new notifications
+        self.notifications.update(simulation)
+
+        hasActiveDiploRequest = False
+        if self.isAlive():
+            if not self.isBarbarian() and not self.isFreeCity() and not self.isCityState():
+
+                # self.doUnitDiversity()
+                self.doUpdateCramped(simulation)
+                # DoUpdateUprisings();
+                # DoUpdateCityRevolts();
+                # CalculateNetHappiness();
+                # SetBestWonderCities();
+                self.doUpdateTradeRouteCapacity(simulation)
+
+                self.grandStrategyAI.doTurn(simulation)
+
+                # Do diplomacy for toward everyone
+                self.diplomacyAI.doTurn(simulation)
+                self.governors.doTurn(simulation)
+
+                if self.isHuman():
+                    hasActiveDiploRequest = self.hasActiveDiploRequestWithHuman()
+
+            if self.isCityState():
+                self.doQuests(simulation)
+
+        if (hasActiveDiploRequest or simulation.userInterface.isShown(ScreenType.diplomatic)) and not self.isHuman():
+            simulation.setWaitingForBlockingInputOf(self)
+        else:
+            self.doTurnPostDiplomacy(simulation)
+
+    def doTurnPostDiplomacy(self, simulation):
+        if self.isAlive():
+            if not self.isBarbarian() and not self.isFreeCity():
+                self.economicAI.doTurn(simulation)
+                self.militaryAI.doTurn(simulation)
+                self.citySpecializationAI.doTurn(simulation)
+
+        # Golden Age
+        self.doProcessAge(simulation)
+
+        self.doUpdateWarWeariness(simulation)
+
+        # balance amenities
+        self.doCityAmenities(simulation)
+
+        # Do turn for all Cities
+        for city in simulation.citiesOf(self):
+            city.doTurn(simulation)
+
+        # Gold GetTreasury()->DoGold();
+        self.treasury.doTurn(simulation)
+
+        # Culture / Civics
+        self.doCivics(simulation)
+
+        # Science / Techs
+        self.doTechs(simulation)  # doResearch
+
+        # government
+        self.doGovernment(simulation)
+
+        # faith / religion
+        self.doFaith(simulation)
+
+        # great people
+        self.doGreatPeople(simulation)
+
+        self.doTurnPost()
+
+        return
+
+    def isFreeCity(self) -> bool:
+        return False
 
     def doTurnUnits(self, simulation):
         pass
@@ -272,11 +390,11 @@ class Player:
     def isBarbarian(self) -> bool:
         return self.leader == LeaderType.barbar
 
-    def hasMet(self, otherPlayer: Player) -> bool:
+    def hasMetWith(self, otherPlayer: Player) -> bool:
         if self.isBarbarian() or otherPlayer.isBarbarian():
             return False
 
-        return False
+        return self.diplomacyAI.hasMetWith(otherPlayer)
 
     def canFinishTurn(self) -> bool:
         if not self.isHuman():
@@ -697,3 +815,37 @@ class Player:
         might *= goldMultiplier
 
         return int(might)
+
+    def doEurekas(self, simulation):
+        if not self.civics.inspirationTriggeredFor(CivicType.earlyEmpire):
+            if self.population(simulation) >= 6:
+                self.civics.triggerInspirationFor(CivicType.earlyEmpire, simulation)
+
+    def population(self, simulation) -> int:
+        populationVal = 0
+
+        for city in simulation.citiesOf(self):
+            populationVal += city.population()
+
+        return populationVal
+
+    def doResourceStockpile(self, simulation):
+        pass
+
+    def doSpaceRace(self, simulation):
+        pass
+
+    def doUpdateCramped(self, simulation):
+        pass
+
+    def hasActiveDiploRequestWithHuman(self) -> bool:
+        return False
+
+    def doProcessAge(self, simulation):
+        pass
+
+    def doUpdateWarWeariness(self, simulation):
+        pass
+
+    def doCityAmenities(self, simulation):
+        pass

@@ -232,7 +232,7 @@ class MilitaryAI:
             if otherPlayer.leader == self.player.leader:
                 continue
 
-            if not self.player.hasMet(otherPlayer):
+            if not self.player.hasMetWith(otherPlayer):
                 continue
 
             threat = self.player.diplomacyAI.militaryThreatOf(otherPlayer)

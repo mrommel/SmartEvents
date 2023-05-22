@@ -159,7 +159,7 @@ class GrandStrategyAI:
 				if self.player.leader == otherPlayer.leader:
 					continue
 
-				if self.player.hasMet(otherPlayer):
+				if self.player.hasMetWith(otherPlayer):
 					metAnybody = True
 
 			if not metAnybody:

@@ -786,7 +786,7 @@ class City:
 		# Update Proximity between this Player and all others
 		for otherPlayer in simulation.players:
 			if otherPlayer.leader != self.player.leader:
-				if otherPlayer.isAlive() and self.player.diplomacyAI.hasMetWith(player=otherPlayer):
+				if otherPlayer.isAlive() and self.player.diplomacyAI.hasMetWith(otherPlayer):
 					# Fixme
 					# Players do NOT have to know one another in order to calculate proximity.
 					# Having this info available(even when they haven't met) can be useful

@@ -37,7 +37,7 @@ class MomentType(ExtendedEnum):
 	# cityStateArmyLeviedNearEnemy 9
 	# climateChangePhase 10
 	# darkAgeBegins  # 11
-	# discoveryOfANaturalWonder(naturalWonder: FeatureType)  # 12
+	discoveryOfANaturalWonder = 'discoveryOfANaturalWonder'  # (naturalWonder: FeatureType)  # 12
 	# emergencyCompletedSuccessfully 13
 	# emergencySuccessfullyDefended 14
 	# enemyCityAdoptsOurReligion  # 15 #
@@ -207,6 +207,16 @@ class MomentType(ExtendedEnum):
 		return self._data().maxEra
 
 	def _data(self) -> MomentTypeData:
+		# ...
+		if self == MomentType.discoveryOfANaturalWonder:  # (naturalWonder: FeatureType)
+			# 12
+			return MomentTypeData(
+				name="TXT_KEY_MOMENT_DISCOVERY_OF_A_NATURAL_WONDER_TITLE",
+				summary="TXT_KEY_MOMENT_DISCOVERY_OF_A_NATURAL_WONDER_SUMMARY",
+				instanceText=None,
+				category=MomentCategory.major,
+				eraScore=1
+			)
 		# ..
 		if self == MomentType.firstNeighborhoodCompleted:
 			# 46

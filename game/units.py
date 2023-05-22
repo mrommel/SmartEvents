@@ -8,6 +8,8 @@ from map.types import UnitDomainType
 
 
 class Unit:
+	maxHealth = 100.0
+
 	def __init__(self, location: HexPoint, unitType: UnitType, player):
 		self.location = location
 		self.unitType = unitType
@@ -15,6 +17,7 @@ class Unit:
 		self.taskValue = unitType.defaultTask()
 
 		self._movesValue = 0
+		self._healthPointsValue = Unit.maxHealth
 
 	def hasTask(self, task: UnitTaskType) -> bool:
 		return task in self.unitType.unitTasks()
@@ -128,6 +131,15 @@ class Unit:
 
 		return moveVal
 
+	def power(self) -> int:
+		"""Current power of unit (raw unit type power adjusted for health)"""
+		powerVal: float = float(self.unitType.power())
+
+		# Take promotions into account: unit with 4 promotions worth ~50% more
+		powerVal = powerVal * pow(float(self.experienceLevel()), 0.3)
+
+		ratio = float(self._healthPointsValue) / (2.0 * Unit.maxHealth) + 0.5
+		return int(powerVal * ratio)
 
 	def hasMoved(self, simulation) -> bool:
 		return self.moves() < self.maxMoves(simulation)
@@ -146,3 +158,6 @@ class Unit:
 
 	def publishQueuedVisualizationMoves(self, simulation):
 		pass
+
+	def experienceLevel(self) -> int:
+		return 1

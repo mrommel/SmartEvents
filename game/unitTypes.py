@@ -34,6 +34,7 @@ class ImprovementType(Enum):
 	pasture = 'pasture'
 	oilWell = 'oilWell'
 	fort = 'fort'
+	goodyHut = 'goodyHut'
 
 	def name(self):
 		return self._data().name
@@ -182,6 +183,15 @@ class ImprovementType(Enum):
 				civilization=None,
 				flavors=[]
 			)
+		elif self == ImprovementType.goodyHut:
+			#
+			return ImprovementTypeData(
+				name="Goodyhut",
+				effects=[],
+				requiredTech=None,
+				civilization=None,
+				flavors=[]
+			)
 
 		raise InvalidEnumError(self)
 
@@ -310,8 +320,8 @@ class ImprovementType(Enum):
 class BuildTypeData:
 	# noinspection PyShadowingNames
 	def __init__(self, name: str, repair: bool=False, requiredTech: Optional[TechType]=None, era: EraType=None,
-	             improvement: Optional[ImprovementType]=None, route: RouteType=None, removeRoad: bool = False,
-	             duration: int = 0, isWater: bool = True):
+				 improvement: Optional[ImprovementType]=None, route: RouteType=None, removeRoad: bool = False,
+				 duration: int = 0, isWater: bool = True):
 		"""
 
 		:type requiredTech: object
@@ -612,6 +622,7 @@ class PromotionType(ExtendedEnum):
 	helmsman = 'helmsman'
 	redeploy = 'redeploy'
 	pursuit = 'pursuit'
+	sentry = 'sentry'
 
 
 class UnitMapType(ExtendedEnum):
@@ -676,14 +687,14 @@ class UnitType:
 
 class UnitTypeData:
 	def __init__(self, name: str, baseType: Optional[UnitType], domain: UnitDomainType, effects: [str],
-	             abilities: [UnitAbilityType], era: EraType, requiredResource: Optional[ResourceType],
-	             civilization: Optional[CivilizationType], unitTasks: [UnitTaskType],
-	             defaultTask: UnitTaskType, movementType: UnitMovementType, productionCost: int,
-	             purchaseCost: int, faithCost: int, maintenanceCost: int, sight: int, range: int,
-	             supportDistance: int, strength: int, targetType: UnitClassType, flags: Optional[BitArray],
-	             meleeAttack: int, rangedAttack: int, moves: int, requiredTech: Optional[TechType],
-	             obsoleteTech: Optional[TechType], requiredCivic: Optional[CivicType],
-	             upgradesFrom: [UnitType], flavors: [Flavor]):
+				 abilities: [UnitAbilityType], era: EraType, requiredResource: Optional[ResourceType],
+				 civilization: Optional[CivilizationType], unitTasks: [UnitTaskType],
+				 defaultTask: UnitTaskType, movementType: UnitMovementType, productionCost: int,
+				 purchaseCost: int, faithCost: int, maintenanceCost: int, sight: int, range: int,
+				 supportDistance: int, strength: int, targetType: UnitClassType, flags: Optional[BitArray],
+				 meleeAttack: int, rangedAttack: int, moves: int, requiredTech: Optional[TechType],
+				 obsoleteTech: Optional[TechType], requiredCivic: Optional[CivicType],
+				 upgradesFrom: [UnitType], flavors: [Flavor]):
 		self.name = name
 		self.baseType = baseType
 		self.domain = domain
@@ -793,6 +804,53 @@ class UnitType(ExtendedEnum):
 
 	def domain(self) -> UnitDomainType:
 		return self._data().domain
+
+	def moves(self) -> int:
+		return self._data().moves
+
+	def range(self) -> int:
+		return self._data().range
+
+	def meleeStrength(self) -> int:
+		return self._data().meleeAttack
+
+	def rangedStrength(self) -> int:
+		if self.range() > 0:
+			return self._data().rangedAttack
+
+		return 0
+
+	def power(self) -> int:
+		powerVal = 0
+
+		# ***************
+		# Main Factors - Strength & Moves
+		# ***************
+
+		#  We want a Unit that has twice the strength to be roughly worth 3x as much with regards to Power
+		powerVal = int(pow(float(self.meleeStrength()), 1.5))
+
+		# Ranged Strength
+		rangedPower = int(pow(float(self.rangedStrength()), 1.45))
+
+		# Naval ranged attacks are less useful
+		if self.domain() == UnitDomainType.sea:
+			rangedPower /= 2
+
+		if rangedPower > 0:
+			powerVal = rangedPower
+
+		# We want Movement rate to be important, but not a dominating factor; a Unit with double the moves of a similarly-strengthed Unit should be ~1.5x as Powerful
+		powerVal = int(float(powerVal) * pow(float(self.moves()), 0.3))
+
+		# ***************
+		# ability modifiers
+		# ***************
+
+		# for ability in self.abilities():
+		# FIXME
+
+		return powerVal
 
 	def _data(self) -> UnitTypeData:
 		# default ------------------------------

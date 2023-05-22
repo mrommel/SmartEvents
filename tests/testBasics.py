@@ -19,3 +19,6 @@ class UserInterfaceMock:
 
 	def isShown(self, screenType) -> bool:
 		return False
+
+	def refreshTile(self, tile):
+		pass

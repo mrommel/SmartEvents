@@ -312,6 +312,9 @@ class HexPoint(Point):
 			self.neighbor(HexDirection.northWest)
 		]
 
+	def isNeighborOf(self, other: HexPoint) -> bool:
+		return other in self.neighbors()
+
 	def directionTowards(self, target: HexPoint) -> HexDirection:
 		"""
             returns the direction of the neighbor

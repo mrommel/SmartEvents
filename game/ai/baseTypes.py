@@ -310,7 +310,7 @@ class MilitaryStrategyType(ExtendedEnum):
 
         # Also don't bother, if we're building up for a sneak attack
         for loopPlayer in simulation.players:
-            if not player.isEqualTo(loopPlayer) and loopPlayer.isAlive() and player.hasMet(loopPlayer):
+            if not player.isEqualTo(loopPlayer) and loopPlayer.isAlive() and player.hasMetWith(loopPlayer):
                 if player.diplomacyAI.warGoalTowards(loopPlayer) == WarGoalType.prepare:
                     return False
 

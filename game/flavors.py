@@ -38,6 +38,12 @@ class Flavor:
         self.flavorType = flavorType
         self.value = value
 
+    def __str__(self) -> str:
+        return f'Flavor({self.flavorType}, {self.value})'
+
+    def __repr__(self) -> str:
+        return f'Flavor({self.flavorType}, {self.value})'
+
 
 class Flavors:
     def __init__(self):
@@ -83,7 +89,7 @@ class Flavors:
         else:
             raise Exception(f'type is not accepted {type(other)}')
 
-    def addFlavor(self, flavorType: FlavorType, value: float):
+    def addFlavor(self, flavorType: FlavorType, value: int):
         item = next((flavor for flavor in self._items if flavor.flavorType == flavorType), None)
 
         if item is not None:

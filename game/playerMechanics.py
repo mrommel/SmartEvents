@@ -1,4 +1,5 @@
 import random
+from functools import reduce
 from typing import Optional
 
 from game.ai.baseTypes import PlayerStateAllWars, WarGoalType
@@ -6,8 +7,10 @@ from game.ai.militaries import MilitaryThreatType
 from game.civilizations import CivilizationType, LeaderType
 from game.flavors import FlavorType
 from game.moments import Moment, MomentType
+from game.notifications import NotificationType
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
+from game.states.diplomaticMessages import DiplomaticRequestState, DiplomaticRequestMessage, LeaderEmotionType
 from game.types import TechType, CivicType, EraType
 from utils.base import WeightedBaseList, ExtendedEnum, InvalidEnumError
 
@@ -482,12 +485,61 @@ class TacticalAI:
 		pass
 
 
+class ApproachType:
+	pass
+
 class ApproachType(ExtendedEnum):
-	firstImpression = 'firstImpression'
+	none = 'none'
+
+	allied = 'allied'
+	declaredFriend = 'declaredFriend'
+	friendly = 'friendly'
+	neutral = 'neutral'
+	unfriendly = 'unfriendly'
+	denounced = 'denounced'
+	war = 'war'
+
+	@classmethod
+	def fromValue(cls, value) -> ApproachType:
+		if value > 91:
+			return ApproachType.allied
+		elif value > 74:
+			return ApproachType.declaredFriend
+		elif value > 58:
+			return ApproachType.friendly
+		elif value > 41:
+			return ApproachType.neutral
+		elif value > 24:
+			return ApproachType.unfriendly
+		elif value > 8:
+			return ApproachType.denounced
+		else:
+			return ApproachType.war
+
+
+class AccessLevel:
+	pass
 
 
 class AccessLevel(ExtendedEnum):
 	none = 'none'
+
+	limited = 'limited'
+	open = 'open'
+	secret = 'secret'
+	topSecret = 'topSecret'
+
+	def increased(self):
+		if self == AccessLevel.none:
+			return AccessLevel.limited
+		elif self == AccessLevel.limited:
+			return AccessLevel.open
+		elif self == AccessLevel.open:
+			return AccessLevel.secret
+		elif self == AccessLevel.secret:
+			return AccessLevel.topSecret
+		elif self == AccessLevel.topSecret:
+			return AccessLevel.topSecret
 
 
 class PlayerOpinionType(ExtendedEnum):
@@ -510,6 +562,7 @@ class DiplomaticPact:
 
 
 class PlayerProximityType(ExtendedEnum):
+	neighbors = 'neighbors'
 	none = 'none'
 
 
@@ -732,13 +785,21 @@ class DiplomaticPlayerDict:
 
 	def initContactWith(self, otherPlayer, turn: int):
 		otherLeader = otherPlayer.leader
-
 		item = next((item for item in self.items if item.leader == otherLeader), None)
 
 		if item is not None:
 			item.turnOfFirstContact = turn
 		else:
 			self.items.append(DiplomaticAIPlayerItem(otherLeader, turnOfFirstContact=turn))
+
+	def hasMetWith(self, otherPlayer) -> bool:
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			return item.turnOfFirstContact != -1
+		else:
+			return False
 
 	def updateMilitaryStrengthComparedToUsOf(self, otherPlayer, strength: StrengthType):
 		otherLeader = otherPlayer.leader
@@ -748,6 +809,19 @@ class DiplomaticPlayerDict:
 			item.militaryStrengthComparedToUs = strength
 		else:
 			raise Exception("not gonna happen")
+
+	def approachTowards(self, otherPlayer) -> ApproachType:
+		value = self.approachValueTowards(otherPlayer)
+		return ApproachType.fromValue(value)
+
+	def approachValueTowards(self, otherPlayer) -> int:
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			return item.approach
+
+		return 50  # default
 
 	def addApproachOf(self, approachModifierType: ApproachModifierType, initialValue: int, reductionValue: int, otherPlayer):
 		otherLeader = otherPlayer.leader
@@ -774,6 +848,60 @@ class DiplomaticPlayerDict:
 
 		if item is not None:
 			item.militaryStrength = strength
+		else:
+			raise Exception("not gonna happen")
+
+	def accessLevelTowards(self, otherPlayer) -> AccessLevel:
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			return item.accessLevel
+
+		return AccessLevel.none
+
+	def hasSentDelegationTo(self, otherPlayer) -> bool:
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			return item.hasDelegationValue
+
+		return False
+
+	def sendDelegationTo(self, otherPlayer, send):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.hasDelegationValue = send
+		else:
+			raise Exception("not gonna happen")
+
+	def addApproach(self, approachModifier: ApproachModifierType, initialValue: Optional[int] = None,
+	                reductionValue: Optional[int] = None, otherPlayer = None):
+		if otherPlayer is None:
+			raise Exception('otherPlayer must be filled')
+
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			approachItem = DiplomaticAIPlayerApproachItem(
+				approachModifierType=approachModifier,
+				initialValue=initialValue,
+				reductionValue=reductionValue
+			)
+			item.approachItems.append(approachItem)
+		else:
+			raise Exception("not gonna happen")
+
+	def updateAccessLevelTo(self, accessLevel: AccessLevel, otherPlayer):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.accessLevel = accessLevel
 		else:
 			raise Exception("not gonna happen")
 
@@ -848,11 +976,84 @@ class DiplomacyAI:
 		# Update Counters
 		self.doCounters(simulation)
 
-	def hasMetWith(self, player) -> bool:
-		return False
+	def hasMetWith(self, otherPlayer) -> bool:
+		return self.playerDict.hasMetWith(otherPlayer)
 
 	def update(self, simulation):
-		pass
+		activePlayer = simulation.activePlayer()
+		if activePlayer is not None:
+			# check if activePlayer is in greetPlayers
+			if reduce(lambda b0, b1: b0 or b1, map(lambda player: activePlayer.isEqualTo(player), self.greetPlayers), False):
+				if self.player.isCityState() or activePlayer.isCityState():
+					if activePlayer.isHuman() and self.player.isCityState():
+						cityState = self.player.cityState
+						# is `activePlayer the first major player to meet this city state
+						if simulation.countMajorCivilizationsMetWith(cityState) == 1:
+							# first player gets a free envoy
+							activePlayer.changeUnassignedEnvoysBy(1)
+
+							# this free envoy is assigned to
+							activePlayer.assignEnvoyTo(cityState, simulation)
+
+							# inform human player
+							activePlayer.notifications().addNotification(
+								NotificationType.metCityState,
+								cityState=cityState,
+								first=True
+							)
+						else:
+							activePlayer.notifications().addNotification(
+								NotificationType.metCityState,
+								cityState=cityState,
+								first=False
+							)
+
+						# reveal city state to player
+						cityStateCapital = simulation.capitalOf(self.player)
+						if cityStateCapital is not None:
+							simulation.discoverAt(cityStateCapital.location, sight=3, player=activePlayer)
+
+					elif activePlayer.isCityState() and self.player.isHuman():
+						cityState = activePlayer.cityState
+
+						# is ´player´ the first major player to meet this city state
+						if simulation.countMajorCivilizationsMetWith(cityState) == 1:
+							# first player gets a free envoy
+							self.player.changeUnassignedEnvoysBy(1)
+
+							# this free envoy is assigned to
+							self.player.assignEnvoyTo(cityState, simulation)
+
+							# inform human player
+							self.player.notifications().addNotification(
+								NotificationType.metCityState,
+								cityState=cityState,
+								first=True
+							)
+						else:
+							self.player.notifications().addNotification(
+								NotificationType.metCityState,
+								cityState=cityState,
+								first=False
+							)
+
+						# reveal city state to player
+						cityStateCapital = simulation.capitalOf(activePlayer)
+						if cityStateCapital is not None:
+							simulation.discoverAt(cityStateCapital.location, sight=3, player=self.player)
+
+					else:
+						self.player.diplomacyRequests.sendRequest(
+							activePlayer.leader,
+							state=DiplomaticRequestState.intro,
+							message=DiplomaticRequestMessage.messageIntro,
+							emotion=LeaderEmotionType.neutral,
+							simulation=simulation
+						)
+
+					self.greetPlayers =	[item for item in self.greetPlayers if not activePlayer.isEqualTo(item)]
+
+		return
 
 	def doFirstContactWith(self, otherPlayer, simulation):
 		if self.hasMetWith(otherPlayer):
@@ -1037,6 +1238,106 @@ class DiplomacyAI:
 					self.playerDict.updateMilitaryThreatOf(otherPlayer, MilitaryThreatType.none)
 
 		return
+
+	def accessLevelTowards(self, otherPlayer) -> AccessLevel:
+		return self.playerDict.accessLevelTowards(otherPlayer)
+
+	def doSendDelegationTo(self, otherPlayer, simulation):
+		if self.canSendDelegationTo(otherPlayer, simulation):
+			self.playerDict.sendDelegationTo(otherPlayer, send=True)
+			self.playerDict.addApproach(ApproachModifierType.delegation, otherPlayer=otherPlayer)
+
+			# sight capital - our guys are there
+			capital = simulation.capitalOf(otherPlayer)
+			simulation.sightAt(capital.location, sight=3, player=self.player)
+
+			# update access level
+			self.increaseAccessLevelTowards(otherPlayer)
+		
+		return
+
+	def canSendDelegationTo(self, otherPlayer, simulation) -> bool:
+		# you can only send a delegation, if the `otherPlayer` has a capital
+		if simulation.capitalOf(otherPlayer) is None:
+			return False
+
+		if self.player.treasury.value() < 25:
+			return False
+
+		if self.hasSentDelegationTo(otherPlayer):
+			return False
+
+		if self.player.civics.hasCivic(CivicType.diplomaticService):
+			return False
+
+		approach = self.approachTowards(otherPlayer)
+		if approach == ApproachType.neutral or approach == ApproachType.friendly or \
+			approach == ApproachType.declaredFriend or approach == ApproachType.allied:
+			return True
+
+		return False
+
+	def hasSentDelegationTo(self, otherPlayer):
+		return self.playerDict.hasSentDelegationTo(otherPlayer)
+
+	def approachTowards(self, otherPlayer) -> ApproachType:
+		return self.playerDict.approachTowards(otherPlayer)
+
+	def increaseAccessLevelTowards(self, otherPlayer):
+		currentAccessLevel = self.accessLevelTowards(otherPlayer)
+		increasedAccessLevel = currentAccessLevel.increased()
+		self.playerDict.updateAccessLevelTo(increasedAccessLevel, otherPlayer)
+
+	def doUpdateWarDamageLevel(self, simulation):
+		pass
+
+	def updateEconomicStrengths(self, simulation):
+		pass
+
+	def updateTargetValue(self, simulation):
+		pass
+
+	def updateWarStates(self, simulation):
+		pass
+
+	def doUpdateWarProjections(self, simulation):
+		pass
+
+	def doUpdateWarGoals(self, simulation):
+		pass
+
+	def doUpdatePeaceTreatyWillingness(self, simulation):
+		pass
+
+	def doUpdateLandDisputeLevels(self, simulation):
+		pass
+
+	def doUpdateMilitaryAggressivePostures(self, simulation):
+		pass
+
+	def doUpdateExpansionAggressivePostures(self, simulation):
+		pass
+
+	def doUpdatePlotBuyingAggressivePosture(self, simulation):
+		pass
+
+	def doHiddenAgenda(self, simulation):
+		pass
+
+	def updateOpinions(self, simulation):
+		pass
+
+	def updateApproaches(self, simulation):
+		pass
+
+	def updateProximities(self, simulation):
+		pass
+
+	def doContactMajorCivs(self, simulation):
+		pass
+
+	def doCounters(self, simulation):
+		pass
 
 
 class HomelandAI:

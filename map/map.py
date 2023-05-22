@@ -82,6 +82,21 @@ class Tile:
 		"""
 		return self._terrainValue.isLand()
 
+	def seeThroughLevel(self) -> int:
+		# https://civilization.fandom.com/wiki/Sight_(Civ6)
+		level = 0
+
+		if self.isHills():
+			level += 1
+
+		if self.hasFeature(FeatureType.mountains):
+			level += 3
+
+		if self.hasFeature(FeatureType.forest) or self.hasFeature(FeatureType.rainforest):
+			level += 1
+
+		return level
+
 	def resourceFor(self, player) -> ResourceType:
 		"""
 			returns the resource of this tile for player
@@ -300,6 +315,33 @@ class Tile:
 
 	def sightBy(self, player):
 		self.visible[str(player.leader)] = True
+
+	def canSeeTile(self, otherTile, player, range: int, hasSentry: bool, simulation) -> bool:
+		if otherTile.point == self.point:
+			return True
+
+		# wrappedX: Int = gameModel.wrappedX() ? gameModel.mapSize().width(): -1
+		if self.point.isNeighborOf(otherTile.point):
+			return True
+
+		seeThruLevel = 2 if hasSentry else 1
+
+		distance = self.point.distance(otherTile.point)
+		if distance <= range:
+			tmpPoint = self.point
+
+			while not tmpPoint.isNeighborOf(otherTile.point):
+				direction = tmpPoint.directionTowards(otherTile.point)
+				tmpPoint = tmpPoint.neighbor(direction)
+				# tmpPoint = gameModel.wrap(point: tmpPoint)
+
+				tmpTile = simulation.tileAt(tmpPoint)
+				if tmpTile.seeThroughLevel() > seeThruLevel:
+					return False
+
+			return True
+
+		return False
 
 	def concealTo(self, player):
 		self.visible[str(player.leader)] = False
