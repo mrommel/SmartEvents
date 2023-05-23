@@ -977,6 +977,9 @@ class Map:
 	def addUnit(self, unit):
 		self._units.append(unit)
 
+	def cityAt(self, location: HexPoint) -> Optional[City]:
+		return next(filter(lambda city: city.location == location, self._cities), None)
+
 	def citiesOf(self, player) -> [City]:
 		return list(filter(lambda city: city.player.leader == player.leader, self._cities))
 

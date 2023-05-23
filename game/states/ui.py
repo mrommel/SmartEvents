@@ -17,6 +17,9 @@ class Interface:
 	def refreshTile(self, tile):
 		pass
 
+	def refreshUnit(self, unit):
+		pass
+
 
 class ScreenType(ExtendedEnum):
 	diplomatic = 'diplomatic'

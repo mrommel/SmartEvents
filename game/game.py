@@ -6,6 +6,7 @@ from game.ai.religions import Religions
 from game.baseTypes import HandicapType, GameState
 from game.cities import City
 from game.civilizations import LeaderType
+from game.evaluators import CitySiteEvaluator
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.players import Player
@@ -557,3 +558,6 @@ class Game:
 			return self._map.continent(identifier)
 
 		return None
+
+	def citySiteEvaluator(self) -> CitySiteEvaluator:
+		return CitySiteEvaluator(self._map)

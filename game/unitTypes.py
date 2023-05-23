@@ -25,6 +25,7 @@ class UnitMapType(ExtendedEnum):
 
 
 class UnitTaskType(ExtendedEnum):
+	none = 'none'
 	unknown = 'unknown'
 
 	reserveSea = 'reserveSea'
@@ -40,6 +41,7 @@ class UnitTaskType(ExtendedEnum):
 	attack = 'attack'
 	work = 'work'
 	settle = 'settle'
+	workerSea = 'workerSea'
 
 
 class UnitAbilityType(ExtendedEnum):
@@ -252,6 +254,15 @@ class UnitType(ExtendedEnum):
 
 	def maintenanceCost(self) -> int:
 		return self._data().maintenanceCost
+
+	def canFound(self) -> bool:
+		return self.hasAbility(UnitAbilityType.canFound)
+
+	def hasAbility(self, ability) -> bool:
+		return ability in self.abilities()
+
+	def abilities(self) -> [UnitAbilityType]:
+		return self._data().abilities
 
 	def _data(self) -> UnitTypeData:
 		# default ------------------------------
@@ -1194,10 +1205,38 @@ class UnitType(ExtendedEnum):
 
 
 class MoveOptions(Enum):
-	NONE = 0
+	none = 'none'
+
+
+class UnitMissionTypeData:
+	def __init__(self, name: str, needsTarget: bool):
+		self.name = name
+		self.needsTarget = needsTarget
 
 
 class UnitMissionType(Enum):
-	NONE = 0
+	heal = 'heal'
+	fortify = 'fortify'
+	sleep = 'sleep'
+	moveTo = 'moveTo'
+	rangedAttack = 'rangedAttack'
+	skip = 'skip'
+	found = 'found'
+	build = 'build'
+	alert = 'alert'
 
-	rangedAttack = 1
+	def name(self) -> str:
+		return self._data().name
+
+	def needsTarget(self) -> bool:
+		return self._data().needsTarget
+
+	def _data(self) -> UnitMissionTypeData:
+		if self == UnitMissionType.rangedAttack:
+			return UnitMissionTypeData('RangedAttack', True)
+		elif self == UnitMissionType.skip:
+			return UnitMissionTypeData('Skip', False)
+		elif self == UnitMissionType.found:
+			return UnitMissionTypeData('Found', False)
+
+		raise InvalidEnumError(self)

@@ -1,5 +1,6 @@
 import math
 import uuid
+from typing import Optional
 
 from utils.base import ExtendedEnum
 
@@ -124,6 +125,9 @@ class HexArea:
 			return HexPoint(-1, -1)
 
 		return HexPoint(int(sum_x / num), int(sum_y / num))
+
+	def first(self) -> Optional[HexPoint]:
+		return next(iter(self.points), None)
 
 	def divideHorizontally(self, dx: int) -> (HexArea, HexArea):
 		# puts all points left of dx in first area and all points right of dx in second area

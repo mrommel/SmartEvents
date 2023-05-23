@@ -188,7 +188,7 @@ class PolicyCardType(ExtendedEnum):
 	# eliteForces
 	# flowerPower
 	# inquisition
-	# isolationism
+	isolationism = 'isolationism'
 	# lettersOfMarque
 	monasticism = 'monasticism'
 	robberBarons = 'robberBarons'
@@ -1047,7 +1047,20 @@ class PolicyCardType(ExtendedEnum):
 		# eliteForces
 		# flowerPower
 		# inquisition
-		# isolationism
+		elif self == PolicyCardType.isolationism:
+			# https://civilization.fandom.com/wiki/Isolationism_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_ISOLATIONISM_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_ISOLATIONISM_BONUS",
+				slot=PolicyCardSlot.wildcard,
+				requiredCivic=None,
+				obsoleteCivic=None,
+				startEra=EraType.classical,
+				endEra=EraType.industrial,
+				replace=[],
+				flavors=[],
+				requiresDarkAge=True
+			)
 		# lettersOfMarque
 		elif self == PolicyCardType.monasticism:
 			# https://civilization.fandom.com/wiki/Monasticism_(Civ6)

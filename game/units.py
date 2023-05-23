@@ -3,6 +3,7 @@ from typing import Optional
 
 from game.policyCards import PolicyCardType
 from game.states.ages import AgeType
+from game.states.builds import BuildType
 from game.states.dedications import DedicationType
 from game.types import EraType
 from game.unitTypes import UnitTaskType, UnitType, PromotionType, MoveOptions, UnitMissionType
@@ -12,22 +13,128 @@ from utils.base import ExtendedEnum
 
 
 class UnitActivityType(ExtendedEnum):
+	heal = 'heal'
+	sleep = 'sleep'
 	none = 'none'
+	awake = 'awake'
+	mission = 'mission'
+	hold = 'hold'
 
 
 class UnitAutomationType(ExtendedEnum):
+	build = 'build'
+	explore = 'explore'
 	none = 'none'
 
 
+class HexPath:
+	pass
+
+
 class UnitMission:
-	def __init__(self, type: UnitMissionType):
-		self.type = type
+	def __init__(self, missionType: UnitMissionType, buildType: Optional[BuildType] = None,
+				 target: Optional[HexPoint] = None, path: Optional[HexPath] = None,
+				 options: Optional[MoveOptions] = None):
+		self.missionType = missionType
+		self.buildType = buildType
+		self.target = target
+		self.path = path
+		self.options = options
+		self.unit = None
+
+		self.startedInTurn: int = -1
+
+		if missionType.needsTarget() and (target is None and path is None):
+			raise Exception("need target")
+
+	def start(self, simulation):
+		"""Initiate a mission"""
+		self.startedInTurn = simulation.currentTurn
+
+		delete = False
+		notify = False
+		action = False
+
+		if self.unit.canMove():
+			self.unit.setActivityType(UnitActivityType.mission, simulation)
+		else:
+			self.unit.setActivityType(UnitActivityType.hold, simulation)
+
+		if not self.unit.canStartMission(self, simulation):
+			delete = True
+		else:
+			if self.missionType == UnitMissionType.skip:
+				self.unit.setActivityType(UnitActivityType.hold, simulation)
+				delete = True
+			elif self.missionType == UnitMissionType.sleep:
+				self.unit.setActivityType(UnitActivityType.sleep, simulation)
+				delete = True
+				notify = True
+			elif self.missionType == UnitMissionType.fortify:
+				self.unit.setActivityType(UnitActivityType.sleep, simulation)
+				delete = True
+				notify = True
+			elif self.missionType == UnitMissionType.heal:
+				self.unit.setActivityType(UnitActivityType.heal, simulation)
+				delete = True
+				notify = True
+
+			if self.unit.canMove():
+
+				if self.missionType == UnitMissionType.fortify or self.missionType == UnitMissionType.heal or \
+					self.missionType == UnitMissionType.alert or self.missionType == UnitMissionType.skip:
+
+					self.unit.setFortifiedThisTurnTo(True, simulation)
+
+					# start the animation right now to give feedback to the player
+					if not self.unit.isFortified() and not self.unit.hasMoved(simulation) and \
+						self.unit.canFortifyAt(self.unit.location, simulation):
+						simulation.userInterface.refreshUnit(self.unit)
+				elif self.unit.isFortified():
+					# unfortify for any other mission
+					simulation.userInterface.refreshUnit(self.unit)
+
+				# ---------- now the real missions with action -----------------------
+
+				if self.missionType == UnitMissionType.embark or self.missionType == UnitMissionType.disembark:
+					action = True
+
+				# FIXME nuke, paradrop, airlift
+				elif self.missionType == UnitMissionType.rebase:
+					if self.unit.doRebaseTo(self.target):
+						action = True
+				elif self.missionType == UnitMissionType.rangedAttack:
+					if not self.unit.canRangeStrikeAt(self.target, needWar=False, noncombatAllowed=False, simulation=simulation):
+						# Invalid, delete the mission
+						delete = True
+				elif self.missionType == UnitMissionType.pillage:
+					if self.unit.doPillage(simulation):
+						action = True
+				elif self.missionType == UnitMissionType.found:
+					if self.unit.doFoundWith(None, simulation):
+						action = True
+
+		if action and self.unit.player.isHuman():
+			timer = self.calculateMissionTimerFor(self.unit)
+			self.unit.setMissionTimerTo(timer)
+
+		if delete:
+			self.unit.popMission()
+		elif self.unit.activityType() == UnitActivityType.mission:
+			self.continueMissionSteps(0, simulation)
+
+		return
+
+
+class Army:
+	pass
 
 
 class Unit:
 	maxHealth = 100.0
 
 	def __init__(self, location: HexPoint, unitType: UnitType, player):
+		self._name = unitType.name()
 		self.location = location
 		self.unitType = unitType
 		self.player = player
@@ -39,6 +146,9 @@ class Unit:
 		self._automationType = UnitAutomationType.none
 		self._processedInTurnValue = False
 		self._missions = []
+
+	def name(self) -> str:
+		return self._name
 
 	def hasTask(self, task: UnitTaskType) -> bool:
 		return task in self.unitType.unitTasks()
@@ -209,6 +319,14 @@ class Unit:
 	def updateMission(self, simulation):
 		pass
 
+	def pushMission(self, mission, simulation):
+		self._missions.append(mission)
+
+		print(f">>> pushed mission: {mission.missionType} {mission.target} for {self.unitType}")
+
+		mission.unit = self
+		mission.start(simulation)
+
 	def doDelayedDeath(self, simulation):
 		pass
 
@@ -250,21 +368,123 @@ class Unit:
 	def peekMission(self) -> Optional[UnitMission]:
 		return None
 
+	def canStartMission(self, mission: UnitMission, simulation):
+		"""Eligible to start a new mission?"""
+		if mission.missionType == UnitMissionType.found:
+			if self.canFoundAt(mission.unit.location, simulation):
+				return True
+		elif mission.missionType == UnitMissionType.moveTo:
+			if simulation.valid(mission.target):
+				return True
+		elif mission.missionType == UnitMissionType.garrison:
+			if self.canGarrisonAt(mission.target, simulation):
+				return True
+			elif self.canGarrisonAt(self.location, simulation):
+				return True
+		elif mission.missionType == UnitMissionType.pillage:
+			if self.canPillageAt(self.location, simulation):
+				return True
+		elif mission.missionType == UnitMissionType.skip:
+			if self.canHoldAt(mission.unit.location, simulation):
+				return True
+		elif mission.missionType == UnitMissionType.rangedAttack:
+			if self.canRangeStrikeAt(mission.target, needWar=False, noncombatAllowed=False, simulation=simulation):
+				return True
+		elif mission.missionType == UnitMissionType.sleep:
+			pass
+			# FIXME
+			# if self.canSleep()
+			# return True
+		elif mission.missionType == UnitMissionType.fortify:
+			if self.canFortifyAt(self.location, simulation):
+				return True
+		elif mission.missionType == UnitMissionType.alert:
+			if self.canSentry(simulation):
+				return True
+		elif mission.missionType == UnitMissionType.airPatrol:
+			pass
+			# FIXME
+		elif mission.missionType == UnitMissionType.heal:
+			if self.canHeal(simulation):
+				return True
+		elif mission.missionType == UnitMissionType.embark:
+			if self.canEmbarkInto(mission.target, simulation):
+				return True
+		elif mission.missionType == UnitMissionType.disembark:
+			if self.canDisembarkInto(mission.target, simulation):
+				return True
+		elif mission.missionType == UnitMissionType.rebase:
+			if mission.target is not None:
+				return self.canTransferToAnotherCity()
+		elif mission.missionType == UnitMissionType.build:
+			if self.canBuild(mission.buildType, mission.unit.location, simulation):
+				return True
+		elif mission.missionType == UnitMissionType.routeTo:
+			if simulation.valid(mission.target) and mission.unit.pathTowards(mission.target, options=None, simulation=simulation) is not None:
+				return True
+		elif mission.missionType == UnitMissionType.followPath:
+			if mission.path is not None:
+				return True
+		# elif mission.missionType == UnitMissionType.swapUnits:
+		# elif mission.missionType == UnitMissionType.moveToUnit:
+
+		return False
+
 	def isEmbarked(self) -> bool:
 		return False
 
 	def setMadeAttackTo(self, value):
 		pass
 
-	def army(self):
+	def army(self) -> Optional[Army]:
 		return None
 
 	def isGarrisoned(self):
 		return False
 
 	def damage(self) -> int:
-		return max(0, int(Unit.maxHealth) - self._healthPointsValue)
+		return max(0, int(Unit.maxHealth) - int(self._healthPointsValue))
+
+	def healthPoints(self) -> int:
+		return int(self._healthPointsValue)
+
+	def maxHealthPoints(self) -> int:
+		return int(Unit.maxHealth)
 
 	def isHurt(self) -> bool:
 		return self.damage() > 0
 
+	def isFound(self) -> bool:
+		return self.unitType.canFound()
+
+	def canFoundAt(self, location, simulation) -> bool:
+		if not self.unitType.canFound():
+			return False
+
+		if not self.player.canFoundAt(location, simulation):
+			return False
+
+		# isolationism - Domestic routes provide +2 Food, +2 Production.
+		# BUT: Can't train or buy Settlers nor settle new cities.
+		if self.player.government.hasCard(PolicyCardType.isolationism):
+			return False
+
+		return True
+
+	def setActivityType(self, activityType: UnitActivityType, simulation):
+		oldActivity = self._activityTypeValue
+
+		if oldActivity != activityType:
+			self.activityTypeValue = activityType
+
+			# If we're waking up a Unit then remove it's fortification bonus
+			if activityType == UnitActivityType.awake:
+				self.setFortifyTurns(0, simulation)
+
+
+			simulation.userInterface.refreshUnit(self)
+
+		return
+
+	def isHuman(self) -> bool:
+		return self.player.isHuman()

@@ -3,10 +3,11 @@ from typing import Optional
 
 from game.cities import City
 from game.flavors import FlavorType
-from game.unitTypes import UnitTaskType
-from game.units import Unit
+from game.unitTypes import UnitTaskType, UnitMapType, UnitMissionType
+from game.units import Unit, UnitAutomationType, UnitMission
 from map.base import HexPoint
 from map.improvements import ImprovementType
+from map.types import UnitDomainType
 from utils.base import ExtendedEnum, InvalidEnumError
 
 
@@ -157,6 +158,7 @@ class HomelandTarget:
 	- Arises during processing of CvHomelandAI::FindHomelandTargets()
 	- Targets are reexamined each turn (so shouldn't need to be serialized)
 	"""
+
 	def __init__(self, targetType: HomelandTargetType):
 		self.targetType = targetType
 		self.target: Optional[HexPoint] = None
@@ -191,7 +193,7 @@ class HomelandAI:
 		self.movePriorityList: [HomelandMove] = []
 		self.movePriorityTurn: int = 0
 
-		self.currentBestMoveUnit: Optional[Unit]
+		self.currentBestMoveUnit: Optional[Unit] = None
 		self.currentBestMoveUnitTurns: int = sys.maxsize
 		self.currentBestMoveHighPriorityUnit: Optional[Unit]
 		self.currentBestMoveHighPriorityUnitTurns: int = sys.maxsize
@@ -248,7 +250,8 @@ class HomelandAI:
 
 	def establishHomelandPriorities(self, simulation):
 		"""Choose which moves to emphasize this turn"""
-		flavorDefense = int(float(self.player.valueOfPersonalityFlavor(FlavorType.defense)) * HomelandAI.flavorDampening)
+		flavorDefense = int(
+			float(self.player.valueOfPersonalityFlavor(FlavorType.defense)) * HomelandAI.flavorDampening)
 		# flavorOffense = Int(Double(player.valueOfPersonalityFlavor(of:.offense)) *self.flavorDampening)
 		flavorExpand = self.player.valueOfPersonalityFlavor(FlavorType.expansion)
 		flavorImprove = 0
@@ -275,7 +278,8 @@ class HomelandAI:
 			if priority >= 0:
 
 				# Defensive moves
-				if homelandMoveType in [HomelandMoveType.garrison, HomelandMoveType.heal, HomelandMoveType.toSafety,
+				if homelandMoveType in [
+					HomelandMoveType.garrison, HomelandMoveType.heal, HomelandMoveType.toSafety,
 					HomelandMoveType.mobileReserve, HomelandMoveType.sentry, HomelandMoveType.aircraftToTheFront]:
 					priority += flavorDefense
 
@@ -310,119 +314,512 @@ class HomelandAI:
 	def findHomelandTargets(self, simulation):
 		"""Make lists of everything we might want to target with the homeland AI this turn"""
 		# Clear out target lists since we rebuild them each turn
-		self.targetedCities.removeAll()
-		self.targetedSentryPoints.removeAll()
-		self.targetedForts.removeAll()
-		self.targetedNavalResources.removeAll()
-		self.targetedHomelandRoads.removeAll()
-		self.targetedAncientRuins.removeAll()
+		self.targetedCities = []
+		self.targetedSentryPoints = []
+		self.targetedForts = []
+		self.targetedNavalResources = []
+		self.targetedHomelandRoads = []
+		self.targetedAncientRuins = []
 
 		# Look at every tile on map
-		# CvMap & theMap = GC.getMap();
-		mapSize = simulation.mapSize()
-		for x in 0.. < mapSize.width() {
-		for y in 0..< mapSize.height() {
+		for point in simulation.points():
+			tile = simulation.tileAt(point)
 
-		let point = HexPoint(x, y)
-		guard
-		let
-		tile = simulation.tileAt(point) else {
-		continue
-		}
+			if tile.isVisibleTo(self.player):
+				# get some values
+				civilianUnit = simulation.unitAt(point, UnitMapType.civilian)
+				combatUnit = simulation.unitAt(point, UnitMapType.combat)
 
-		if tile.isVisible(to: player) {
+				# Have a...
+				# ... friendly city?
+				city = simulation.cityAt(point)
+				if city is not None and city.player.leader == self.player.leader:
+					# Don't send another unit, if the tactical AI already sent a garrison here
+					addTarget = False
 
-		# Have a...
-		# ... friendly city?
-		if let city = simulation.cityAt(point) {
+					unit = simulation.unitAt(point, UnitMapType.combat)
+					if unit is not None:
+						if unit.isUnderTacticalControl():
+							addTarget = True
+					else:
+						addTarget = True
 
-		if city.player?.leader == player.leader
-		{
+					if addTarget:
+						newTarget = HomelandTarget(HomelandTargetType.city)
+						newTarget.target = point
+						newTarget.city = city
+						newTarget.threatValue = city.threatValue()
+						self.targetedCities.append(newTarget)
 
-		# Don't send another unit, if the tactical AI already sent a garrison here
-		addTarget = False
-		if let
-		unit = simulation.unitAt(point, .combat) {
+				elif tile.terrain().isWater() and not tile.hasAnyImprovement():
+					# ... naval resource?
+					if tile.hasAnyResourceFor(self.player):
+						workingCity = tile.workingCity()
+						if workingCity is not None and workingCity.player.leader == self.player.leader:
+							# Find proper improvement
+							improvement = next(iter(tile.possibleImprovements()), None)
+							if improvement is not None:
+								newTarget = HomelandTarget(HomelandTargetType.navalResource)
+								newTarget.target = point
+								newTarget.improvement = improvement
+								self.targetedNavalResources.append(newTarget)
 
-		if unit.isUnderTacticalControl()
-		{
-			addTarget = true
-		}
-		} else {
-			addTarget = true
-		}
+				elif tile.hasImprovement(ImprovementType.goodyHut):
+					# ... un-popped goody hut?
+					newTarget = HomelandTarget(HomelandTargetType.ancientRuin)
+					newTarget.target = point
+					self.targetedAncientRuins.append(newTarget)
 
-		if addTarget {
+				elif civilianUnit is not None:
+					# ... enemy civilian(or embarked) unit?
+					if self.player.diplomacyAI.isAtWarWith(civilianUnit.player) and not civilianUnit.canDefend():
+						newTarget = HomelandTarget(HomelandTargetType.ancientRuin)
+						newTarget.target = point
+						self.targetedAncientRuins.append(newTarget)
 
-		let newTarget = HomelandTarget(targetType: .city)
-		newTarget.target = point
-		newTarget.city = city
-		newTarget.threatValue = city.threatValue()
-		self.targetedCities.append(newTarget)
-		}
-		}
-		} elif tile.terrain().isWater() and tile.has(improvement: .
-			none) {
-			      # ... naval resource?
-		if tile.hasAnyResource(for: player) {
+				elif tile.terrain().isLand() and combatUnit is None:
+					# ... possible sentry point? (must be empty or only have friendly units)
 
-		if let
-		workingCity = tile.workingCity(), workingCity.player?.leader == player.leader
-		{
+					# Must be at least adjacent to our land
+					if tile.owner().leader == self.player.leader or tile.owner() is None:
+						# FIXME
+						pass
 
-		# Find proper improvement
-		if let
-		improvement = tile.possibleImprovements().first
-		{
-
-			let
-		newTarget = HomelandTarget(targetType:.navalResource)
-		newTarget.target = point
-		newTarget.improvement = improvement
-		self.targetedNavalResources.append(newTarget)
-		}
-		}
-		}
-		} elif tile.hasImprovement(ImprovementType.goodyHut) {
-
-			          # ... unpopped goody hut?
-		newTarget = HomelandTarget(targetType:.ancientRuin)
-		newTarget.target = point
-		self.targetedAncientRuins.append(newTarget)
-
-		} elif let targetUnit = simulation.unitAt(point, of:.civilian) {
-
-		# ... enemy civilian( or embarked) unit?
-		if diplomacyAI.isAtWar(with: targetUnit.player) and not targetUnit.canDefend()
-		{
-
-			newTarget = HomelandTarget(targetType:.ancientRuin)
-		newTarget.target = point
-		self.targetedAncientRuins.append(newTarget)
-		}
-		} else if tile.terrain().isLand() and gameModel.unitAt(point, .combat) is None
-		{
-
-		# ... possible sentry point? (must be empty or only have friendly units)
-
-		       # Must be at least adjacent to our land
-		if tile.owner().leader == player.leader or tile.owner() is None:
-			# FIXME
-
-		}
-		} else if tile.owner().leader == player.leader and tile.hasAnyRoute():
-
-		# ...road segment in friendly territory?
-
-		let newTarget = HomelandTarget(targetType: .homeRoad)
-		newTarget.target = point
-		self.targetedHomelandRoads.append(newTarget)
-		}
-		}
-		}
-		}
+				elif tile.owner().leader == self.player.leader and tile.hasAnyRoute():
+					# ...road segment in friendly territory?
+					newTarget = HomelandTarget(HomelandTargetType.homeRoad)
+					newTarget.target = point
+					self.targetedHomelandRoads.append(newTarget)
 
 		# Post - processing on targets
 		# FIXME self.eliminateAdjacentSentryPoints();
 		# FIXME self.eliminateAdjacentHomelandRoads();
 		self.targetedCities.sort()
+
+	def assignHomelandMoves(self, simulation):
+		"""Choose which moves to run and assign units to it"""
+		# Proceed in priority order
+		for movePriorityItem in self.movePriorityList:
+			if movePriorityItem.moveType == HomelandMoveType.explore:  # AI_HOMELAND_MOVE_EXPLORE
+				self.plotExplorerMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.exploreSea:  # AI_HOMELAND_MOVE_EXPLORE_SEA
+				self.plotExplorerSeaMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.settle:  # AI_HOMELAND_MOVE_SETTLE:
+				self.plotFirstTurnSettlerMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.garrison:  # AI_HOMELAND_MOVE_GARRISON
+				self.plotGarrisonMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.heal:  # AI_HOMELAND_MOVE_HEAL
+				self.plotHealMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.toSafety:  # AI_HOMELAND_MOVE_TO_SAFETY
+				self.plotMovesToSafety(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.mobileReserve:  # AI_HOMELAND_MOVE_MOBILE_RESERVE
+				self.plotMobileReserveMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.sentry:  # AI_HOMELAND_MOVE_SENTRY
+				self.plotSentryMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.worker:  # AI_HOMELAND_MOVE_WORKER
+				self.plotWorkerMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.workerSea:  # AI_HOMELAND_MOVE_WORKER_SEA
+				self.plotWorkerSeaMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.patrol:  # AI_HOMELAND_MOVE_PATROL
+				self.plotPatrolMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.upgrade:  # AI_HOMELAND_MOVE_UPGRADE
+				self.plotUpgradeMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.ancientRuins:  # AI_HOMELAND_MOVE_ANCIENT_RUINS
+				self.plotAncientRuinMoves(simulation)
+			elif movePriorityItem.moveType == HomelandMoveType.aircraftToTheFront:  # AI_HOMELAND_MOVE_AIRCRAFT_TO_THE_FRONT
+				# FIXME self.plotAircraftMoves()
+				pass
+			elif movePriorityItem.moveType == HomelandMoveType.tradeUnit:  # AI_HOMELAND_MOVE_TRADE_UNIT
+				self.plotTradeUnitMoves(simulation)
+		#
+		# TODO
+		#             /*case .writer:
+		#                  # AI_HOMELAND_MOVE_WRITER:
+		#	self.plotWriterMoves()*/
+		#             /*case AI_HOMELAND_MOVE_ARTIST_GOLDEN_AGE:
+		#                 PlotArtistMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_MUSICIAN:
+		#                 PlotMusicianMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_SCIENTIST_FREE_TECH:
+		#                 PlotScientistMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_ENGINEER_HURRY:
+		#                 PlotEngineerMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_MERCHANT_TRADE:
+		#                 PlotMerchantMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_GENERAL_GARRISON:
+		#                 PlotGeneralMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_ADMIRAL_GARRISON:
+		#                 PlotAdmiralMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_PROPHET_RELIGION:
+		#                 PlotProphetMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_MISSIONARY:
+		#                 PlotMissionaryMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_INQUISITOR:
+		#                 PlotInquisitorMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_AIRCRAFT_TO_THE_FRONT:
+		#                 PlotAircraftMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_ADD_SPACESHIP_PART:
+		#                 PlotSSPartAdds();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_SPACESHIP_PART:
+		#                 PlotSSPartMoves();
+		#                 break;*/
+		#             /*case AI_HOMELAND_MOVE_ARCHAEOLOGIST:
+		#                 PlotArchaeologistMoves();
+		#                 break;
+		#             case AI_HOMELAND_MOVE_AIRLIFT:
+		#                 PlotAirliftMoves();
+		#                 break;*/
+		#
+		#             default:
+		#                 print(f"not implemented: HomelandAI - {movePriorityItem.type}")
+
+		self.reviewUnassignedUnits(simulation)
+		return
+
+	def plotExplorerMoves(self, simulation):
+		"""Get units with explore AI and plan their moves"""
+		self.clearCurrentMoveUnits()
+
+		# Loop through all recruited units
+		for currentTurnUnit in self.currentTurnUnits:
+			if currentTurnUnit.task() == UnitTaskType.explore or \
+				(currentTurnUnit.isAutomated() and currentTurnUnit.domain() == UnitDomainType.land and
+				 currentTurnUnit.automateType() == UnitAutomationType.explore):
+				homelandUnit = HomelandUnit(currentTurnUnit)
+				self.currentMoveUnits.append(homelandUnit)
+
+		if len(self.currentMoveUnits) > 0:
+			# Execute twice so explorers who can reach the end of their sight can move again
+			self.executeExplorerMoves(land=True, simulation=simulation)
+			self.executeExplorerMoves(land=True, simulation=simulation)
+
+		return
+
+	def plotTradeUnitMoves(self, simulation):
+		"""Send trade units on their way"""
+		self.clearCurrentMoveUnits()
+
+		# Loop through all remaining units
+		for currentTurnUnit in self.currentTurnUnits:
+			if currentTurnUnit.task() == UnitTaskType.trade:
+				unit = HomelandUnit(currentTurnUnit)
+				self.currentMoveUnits.append(unit)
+
+		if len(self.currentMoveUnits) > 0:
+			self.executeTradeUnitMoves(simulation)
+
+		return
+
+	def clearCurrentMoveUnits(self):
+		self.currentMoveUnits = []
+		self.currentBestMoveUnit = None
+		self.currentBestMoveUnitTurns = sys.maxsize
+
+	def plotExplorerSeaMoves(self, simulation):
+		"""Get units with explore AI and plan their moves"""
+		self.clearCurrentMoveUnits()
+
+		# Loop through all recruited units
+		for currentTurnUnit in self.currentTurnUnits:
+			if currentTurnUnit.task() == UnitTaskType.exploreSea or \
+				(currentTurnUnit.isAutomated() and currentTurnUnit.domain() == UnitDomainType.sea and
+				 currentTurnUnit.automateType() == UnitTaskType.explore):
+
+				self.currentMoveUnits.append(HomelandUnit(currentTurnUnit))
+
+		if len(self.currentMoveUnits) > 0:
+			# Execute twice so explorers who can reach the end of their sight can move again
+			self.executeExplorerMoves(land=False, simulation=simulation)
+			self.executeExplorerMoves(land=False, simulation=simulation)
+
+		return
+
+	def plotFirstTurnSettlerMoves(self, simulation):
+		"""Get our first city built"""
+		self.clearCurrentMoveUnits()
+
+		# Loop through all recruited units
+		for currentTurnUnit in self.currentTurnUnits:
+			goingToSettle = False
+
+			if not currentTurnUnit.player.isHuman():
+				if len(simulation.citiesOf(self.player)) == 0 and len(self.currentMoveUnits) == 0:
+					if currentTurnUnit.canFoundAt(currentTurnUnit.location, simulation):
+						homelandUnit = HomelandUnit(currentTurnUnit)
+						self.currentMoveUnits.append(homelandUnit)
+						goingToSettle = True
+
+			# If we find a settler that isn't in an operation, let's keep him in place
+			if not goingToSettle and currentTurnUnit.isFound() and currentTurnUnit.army() is None:
+				currentTurnUnit.pushMission(UnitMission(UnitMissionType.skip), simulation)
+				currentTurnUnit.finishMoves()
+
+		if len(self.currentMoveUnits) > 0:
+			self.executeFirstTurnSettlerMoves(simulation)
+
+		return
+
+	def executeFirstTurnSettlerMoves(self, simulation):
+		"""Creates cities for AI civs on first turn"""
+		for currentMoveUnit in self.currentMoveUnits:
+			if currentMoveUnit.unit is not None:
+				currentMoveUnit.unit.pushMission(UnitMission(UnitMissionType.found), simulation)
+				self.unitProcessed(currentMoveUnit.unit)
+
+				print(f"Founded city at {currentMoveUnit.unit.location}")
+
+		return
+
+	def unitProcessed(self, unit):
+		"""Remove a unit that we've allocated from list of units to move this turn"""
+		self.currentTurnUnits = list(filter(lambda loopUnit: loopUnit.location != unit.location, self.currentTurnUnits))
+		unit.setTurnProcessedTo(True)
+
+	def plotAncientRuinMoves(self, simulation):
+		"""Pop goody huts nearby"""
+		# Do we have any targets of this type?
+		if len(self.targetedAncientRuins) > 0:
+			# Prioritize them (LATER)
+
+			# See how many moves of this type we can execute
+			for (index, homelandTarget) in enumerate(self.targetedAncientRuins):
+				targetTile = simulation.tileAt(homelandTarget.target)
+
+				self.findUnitsForMove(HomelandMoveType.ancientRuins, firstTime=(index == 0), simulation=simulation)
+
+				if (len(self.currentMoveHighPriorityUnits) + len(self.currentMoveUnits)) > 0:
+
+					if self.bestUnitToReachTarget(targetTile, HomelandAI.defensiveMoveTurns, simulation):
+
+						self.executeMoveToTarget(targetTile, garrisonIfPossible=False, simulation=simulation)
+
+						if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
+							print("Moving to goody hut (non-explorer), \(targetTile.point)")
+							# LogHomelandMessage(strLogString);
+		return
+
+	def plotUpgradeMoves(self, simulation):
+		pass
+
+	def plotHealMoves(self, simulation):
+		"""Find out which units would like to heal"""
+		self.clearCurrentMoveUnits()
+
+		# Loop through all recruited units
+		for currentTurnUnit in self.currentTurnUnits:
+			tile = simulation.tileAt(currentTurnUnit.location)
+
+			if not currentTurnUnit.isHuman():
+
+				# Am I under 100 % health and not at sea or already in a city?
+				if currentTurnUnit.healthPoints() < currentTurnUnit.maxHealthPoints() and \
+					not currentTurnUnit.isEmbarked() and simulation.cityAt(currentTurnUnit.location) is None:
+
+					# If I'm a naval unit I need to be in friendly territory
+					if currentTurnUnit.domain() != UnitDomainType.sea or tile.isFriendlyTerritoryFor(self.player, simulation):
+
+						if not currentTurnUnit.isUnderEnemyRangedAttack():
+							self.currentMoveUnits.append(HomelandUnit(currentTurnUnit))
+
+							if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
+								print(f"{currentTurnUnit.unitType} healing at {currentTurnUnit.location}")
+								# LogHomelandMessage(strLogString);
+
+			if len(self.currentMoveUnits) > 0:
+				self.executeHeals(simulation)
+
+	def plotMovesToSafety(self, simulation):
+		"""Moved endangered units to safe hexes"""
+		self.clearCurrentMoveUnits()
+
+		# Loop through all recruited units
+		for currentTurnUnit in self.currentTurnUnits:
+			tile = simulation.tileAt(currentTurnUnit.location)
+			dangerLevel = self.player.dangerPlotsAI.dangerAt(currentTurnUnit.location)
+
+			# Danger value of plot must be greater than 0
+			if dangerLevel > 0:
+				addUnit = False
+
+				# If civilian( or embarked unit) always ready to flee
+				# slewis - 4.18.2013 - Problem here is that a combat unit that is a boat can get stuck in a city
+				# hiding from barbarians on the land
+				if not currentTurnUnit.canDefend():
+					if currentTurnUnit.isAutomated() and currentTurnUnit.baseCombatStrength(ignoreEmbarked=True) > 0:
+						# then this is our special case
+						pass
+					else:
+						addUnit = True
+				elif currentTurnUnit.healthPoints() < currentTurnUnit.maxHealthPoints():
+					# Also may be true if a damaged combat unit
+					if currentTurnUnit.isBarbarian():
+						# Barbarian combat units - only naval units flee (but they flee if have taken ANY damage)
+						if currentTurnUnit.domain() == UnitDomainType.sea:
+							addUnit = True
+					elif currentTurnUnit.isUnderEnemyRangedAttack() or \
+						currentTurnUnit.attackStrengthAgainst(unit=None, city=None, tile=tile, simulation=simulation) * 2 <= \
+						currentTurnUnit.baseCombatStrength(ignoreEmbarked=False):
+						# Everyone else flees at less than or equal to 50% combat strength
+						addUnit = True
+				elif not currentTurnUnit.isBarbarian():
+					# Also flee if danger is really high in current plot (but not if we're barbarian)
+					acceptableDanger = currentTurnUnit.attackStrengthAgainst(unit=None, city=None, tile=tile, simulation=simulation) * 100
+					if int(dangerLevel) > acceptableDanger:
+						addUnit = True
+
+				if addUnit:
+					# Just one unit involved in this move to execute
+					self.currentMoveUnits.append(HomelandUnit(currentTurnUnit))
+
+		if len(self.currentMoveUnits) > 0:
+			self.executeMovesToSafestPlot(simulation)
+
+		return
+
+	def plotWorkerMoves(self, simulation):
+		"""Find something for all workers to do"""
+		self.clearCurrentMoveUnits()
+
+		# Loop through all recruited units
+		for currentTurnUnit in self.currentTurnUnits:
+			if currentTurnUnit.task() == UnitTaskType.work or (currentTurnUnit.isAutomated() and currentTurnUnit.domain() == UnitDomainType.land and currentTurnUnit.automateType() == UnitAutomationType.build):
+				homelandUnit = HomelandUnit(currentTurnUnit)
+				self.currentMoveUnits.append(homelandUnit)
+
+		if len(self.currentMoveUnits) > 0:
+			self.executeWorkerMoves(simulation)
+
+		return
+
+	def plotWorkerSeaMoves(self, simulation):
+		"""Send out work boats to harvest resources"""
+		self.clearCurrentMoveUnits()
+
+		# Loop through all recruited units
+		for currentTurnUnit in self.currentTurnUnits:
+			if currentTurnUnit.task() == UnitTaskType.workerSea or \
+			(currentTurnUnit.isAutomated() and currentTurnUnit.domain() == UnitDomainType.sea and
+			 currentTurnUnit.automateType() == UnitAutomationType.build):
+
+				homelandUnit = HomelandUnit(currentTurnUnit)
+				self.currentMoveUnits.append(homelandUnit)
+
+		for currentMoveUnit in self.currentMoveUnits:
+			unit = currentMoveUnit.unit
+			targetIndex: Optional[HomelandTarget] = None
+			targetMoves: int = sys.maxsize
+
+			pathFinderDataSource = simulation.ignoreUnitsPathfinderDataSource(
+				unit.movementType(), unit.player, UnitMapType.combat,
+				canEmbark=unit.player.canEmbark(), canEnterOcean=unit.player.canEnterOcean())
+			pathFinder = AStarPathfinder(pathFinderDataSource)
+
+			# See how many moves of this type we can execute
+			for target in self.targetedNavalResources:
+				build = target.improvement.buildType()
+				targetLocation = target.target
+
+				if not currentMoveUnit.canBuild(build, targetLocation, testVisible=True, testGold=True, simulation=simulation):
+					continue
+
+				moves = pathFinder.turnsToReachTarget(unit, targetLocation, simulation)
+				if moves < targetMoves:
+					targetMoves = moves
+					targetIndex = target
+
+			if targetIndex is not None:
+				# Queue best one up to capture it
+				targetLocation = targetIndex.target
+
+				result = False
+				path = unit.pathTowards(targetLocation, options=None, simulation=simulation)
+				if path is not None:
+					unit.pushMission(UnitMission(UnitMissionType.moveTo, targetLocation), simulation)
+					if unit.location == targetLocation:
+						mission = UnitMission(
+							UnitMissionType.build,
+							buildType=targetIndex.improvement.buildType(),
+							target=targetLocation,
+							path=path,
+							options=None
+						)
+						unit.pushMission(mission, simulation)
+						result = True
+					else:
+						unit.finishMoves()
+
+					# Delete this unit from those we have to move
+					self.unitProcessed(unit)
+				else:
+					if unit.location == targetLocation:
+						mission = UnitMission(
+							UnitMissionType.build,
+							buildType=targetIndex.improvement.buildType(),
+							location=targetLocation,
+							path=None,
+							options=None
+						)
+						unit.pushMission(mission, simulation)
+						result = True
+
+				if result:
+					print(f"Harvesting naval resource at: {targetLocation}")
+				else:
+					print(f"Moving toward naval resource at: {targetLocation}")
+
+	def plotSentryMoves(self, simulation):
+		"""Send units to sentry points around borders"""
+		# Do we have any targets of this type?
+		if len(self.targetedSentryPoints) > 0:
+			# Prioritize them (LATER)
+
+			# See how many moves of this type we can execute
+			for (index, targetedSentryPoint) in enumerate(self.targetedSentryPoints):
+				# AI_PERF_FORMAT("Homeland-perf.csv", ("PlotSentryMoves, Turn %03d, %s", GC.getGame().getElapsedGameTurns(), m_pPlayer->getCivilizationShortDescription()) );
+
+				# CvPlot * pTarget = GC.getMap().plot(m_TargetedSentryPoints[iI].GetTargetX(), m_TargetedSentryPoints[iI].GetTargetY());
+				targetTile = simulation.tileAt(targetedSentryPoint.target)
+
+				self.findUnitsForMove(HomelandMoveType.sentry, firstTime=(index == 0), simulation=simulation)
+
+				if (len(self.currentMoveHighPriorityUnits) + len(self.currentMoveUnits)) > 0:
+					if self.bestUnitToReachTarget(targetTile, maxTurns=sys.maxsize, simulation=simulation):
+						self.executeMoveToTarget(targetTile, garrisonIfPossible=False, simulation=simulation)
+
+						if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
+							print("Moving to sentry point, \(targetedSentryPoint.target ?? HexPoint.invalid), " +
+								"Priority: \(targetedSentryPoint.threatValue)")
+							# LogHomelandMessage(strLogString);
+
+		return
+
+	def plotMobileReserveMoves(self, simulation):
+		pass  # fixme
+
+	def plotGarrisonMoves(self, simulation):
+		pass  # fixme
+
+	def plotPatrolMoves(self, simulation):
+		pass  # fixme
+
+	def reviewUnassignedUnits(self, simulation):
+		"""Log that we couldn't find assignments for some units"""
+		# Loop through all remaining units
+		for currentTurnUnit in self.currentTurnUnits:
+			currentTurnUnit.pushMission(UnitMission(UnitMissionType.skip), simulation)
+			currentTurnUnit.setTurnProcessedTo(True)
+
+			print(f"<< HomelandAI ### Unassigned {currentTurnUnit.name()} at {currentTurnUnit.location} ### >>")
+

@@ -527,7 +527,7 @@ class TestSimulation(unittest.TestCase):
 class TestUsecases(unittest.TestCase):
 	def test_first_city_build(self):
 		# GIVEN
-		mapModel = MapMock(20, 10, TerrainType.grass)
+		mapModel = MapMock(24, 20, TerrainType.grass)
 		simulation = Game(mapModel, handicap=HandicapType.chieftain)
 
 		# players

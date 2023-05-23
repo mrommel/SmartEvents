@@ -222,6 +222,14 @@ class CitySpecializationAI:
         pass
 
 
+class DangerPlotsAI:
+    def __init__(self, player):
+        self.player = player
+
+    def dangerAt(self, location: HexPoint) -> float:
+        return 0.0
+
+
 class Player:
     def __init__(self, leader: LeaderType, cityState: CityStateType = None, human: bool = False):
         self.leader = leader
@@ -237,6 +245,7 @@ class Player:
         self.homelandAI = HomelandAI(player=self)
         self.builderTaskingAI = BuilderTaskingAI(player=self)
         self.citySpecializationAI = CitySpecializationAI(player=self)
+        self.dangerPlotsAI = DangerPlotsAI(player=self)
 
         self.notifications = Notifications(self)
         self.diplomacyRequests = DiplomacyRequests(player=self)
@@ -958,3 +967,15 @@ class Player:
 
     def doTurnPost(self):
         pass
+
+    def canFoundAt(self, location: HexPoint, simulation) -> bool:
+        # FIXME check deals
+        # Has the AI agreed to not settle here?
+
+        # FIXME Settlers cannot found cities while empire is very unhappy
+
+        tile = simulation.tileAt(location)
+        if simulation.citySiteEvaluator().canCityBeFoundOn(tile, self):
+            return True
+
+        return False

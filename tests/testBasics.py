@@ -1,3 +1,4 @@
+from game.states.ui import Interface
 from map.map import Map
 from map.types import TerrainType
 
@@ -15,7 +16,7 @@ class MapMock(Map):
 			tile.discoverBy(player, simulation)
 
 
-class UserInterfaceMock:
+class UserInterfaceMock(Interface):
 	def updateCity(self, city):
 		pass
 
