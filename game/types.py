@@ -212,7 +212,7 @@ class TechType(ExtendedEnum):
 	def _data(self):
 		if self == TechType.none:
 			return TechTypeData(
-				name='TXT_KEY_TECH_NONE',
+				name=_('TXT_KEY_TECH_NONE'),
 				eureka_summary='',
 				eureka_description='',
 				quoteTexts=[],
@@ -226,10 +226,10 @@ class TechType(ExtendedEnum):
 		if self == TechType.mining:
 			# https://civilization.fandom.com/wiki/Mining_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_MINING_NAME',
-				eureka_summary='TXT_KEY_TECH_MINING_EUREKA',
-				eureka_description='TXT_KEY_TECH_MINING_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_MINING_QUOTE1', 'TXT_KEY_TECH_MINING_QUOTE2'],
+				name=_('TXT_KEY_TECH_MINING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_MINING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_MINING_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_MINING_QUOTE1'), _('TXT_KEY_TECH_MINING_QUOTE2')],
 				era=EraType.ancient,
 				cost=25,
 				required=[],
@@ -241,10 +241,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.pottery:
 			# https://civilization.fandom.com/wiki/Pottery_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_POTTERY_NAME',
-				eureka_summary='TXT_KEY_TECH_POTTERY_EUREKA',
-				eureka_description='TXT_KEY_TECH_POTTERY_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_POTTERY_QUOTE1', 'TXT_KEY_TECH_POTTERY_QUOTE2'],
+				name=_('TXT_KEY_TECH_POTTERY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_POTTERY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_POTTERY_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_POTTERY_QUOTE1'), _('TXT_KEY_TECH_POTTERY_QUOTE2')],
 				era=EraType.ancient,
 				cost=25,
 				required=[],
@@ -255,10 +255,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.animalHusbandry:
 			# https://civilization.fandom.com/wiki/Animal_Husbandry_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ANIMAL_HUSBANDRY_NAME',
-				eureka_summary='TXT_KEY_TECH_ANIMAL_HUSBANDRY_EUREKA',
-				eureka_description='TXT_KEY_TECH_ANIMAL_HUSBANDRY_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_ANIMAL_HUSBANDRY_QUOTE1', 'TXT_KEY_TECH_ANIMAL_HUSBANDRY_QUOTE2'],
+				name=_('TXT_KEY_TECH_ANIMAL_HUSBANDRY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ANIMAL_HUSBANDRY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_ANIMAL_HUSBANDRY_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_ANIMAL_HUSBANDRY_QUOTE1'), _('TXT_KEY_TECH_ANIMAL_HUSBANDRY_QUOTE2')],
 				era=EraType.ancient,
 				cost=25,
 				required=[],
@@ -270,10 +270,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.sailing:
 			# https://civilization.fandom.com/wiki/Sailing_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_SAILING_NAME',
-				eureka_summary='TXT_KEY_TECH_SAILING_EUREKA',
-				eureka_description='TXT_KEY_TECH_SAILING_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_SAILING_QUOTE1', 'TXT_KEY_TECH_SAILING_QUOTE2'],
+				name=_('TXT_KEY_TECH_SAILING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_SAILING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_SAILING_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_SAILING_QUOTE1'), _('TXT_KEY_TECH_SAILING_QUOTE2')],
 				era=EraType.ancient,
 				cost=50,
 				required=[],
@@ -287,10 +287,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.astrology:
 			# https://civilization.fandom.com/wiki/Astrology_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ASTROLOGY_NAME',
-				eureka_summary='TXT_KEY_TECH_ASTROLOGY_EUREKA',
-				eureka_description='TXT_KEY_TECH_ASTROLOGY_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_ASTROLOGY_QUOTE1', 'TXT_KEY_TECH_ASTROLOGY_QUOTE2'],
+				name=_('TXT_KEY_TECH_ASTROLOGY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ASTROLOGY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_ASTROLOGY_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_ASTROLOGY_QUOTE1'), _('TXT_KEY_TECH_ASTROLOGY_QUOTE2')],
 				era=EraType.ancient,
 				cost=50,
 				required=[],
@@ -303,10 +303,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.irrigation:
 			# https://civilization.fandom.com/wiki/Irrigation_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_IRRIGATION_NAME',
-				eureka_summary='TXT_KEY_TECH_IRRIGATION_EUREKA',
-				eureka_description='TXT_KEY_TECH_IRRIGATION_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_IRRIGATION_QUOTE1', 'TXT_KEY_TECH_IRRIGATION_QUOTE2'],
+				name=_('TXT_KEY_TECH_IRRIGATION_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_IRRIGATION_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_IRRIGATION_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_IRRIGATION_QUOTE1'), _('TXT_KEY_TECH_IRRIGATION_QUOTE2')],
 				era=EraType.ancient,
 				cost=50,
 				required=[TechType.pottery],
@@ -317,10 +317,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.writing:
 			# https://civilization.fandom.com/wiki/Writing_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_WRITING_NAME',
-				eureka_summary='TXT_KEY_TECH_WRITING_EUREKA',
-				eureka_description='TXT_KEY_TECH_WRITING_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_WRITING_QUOTE1', 'TXT_KEY_TECH_WRITING_QUOTE2'],
+				name=_('TXT_KEY_TECH_WRITING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_WRITING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_WRITING_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_WRITING_QUOTE1'), _('TXT_KEY_TECH_WRITING_QUOTE2')],
 				era=EraType.ancient,
 				cost=50,
 				required=[TechType.pottery],
@@ -333,10 +333,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.masonry:
 			# https://civilization.fandom.com/wiki/Masonry_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_MASONRY_NAME',
-				eureka_summary='TXT_KEY_TECH_MASONRY_EUREKA',
-				eureka_description='TXT_KEY_TECH_MASONRY_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_MASONRY_QUOTE1', 'TXT_KEY_TECH_MASONRY_QUOTE2'],
+				name=_('TXT_KEY_TECH_MASONRY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_MASONRY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_MASONRY_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_MASONRY_QUOTE1'), _('TXT_KEY_TECH_MASONRY_QUOTE2')],
 				era=EraType.ancient,
 				cost=80,
 				required=[TechType.mining],
@@ -350,10 +350,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.archery:
 			# https://civilization.fandom.com/wiki/Archery_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ARCHERY_NAME',
-				eureka_summary='TXT_KEY_TECH_ARCHERY_EUREKA',
-				eureka_description='TXT_KEY_TECH_ARCHERY_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_ARCHERY_QUOTE1', 'TXT_KEY_TECH_ARCHERY_QUOTE2'],
+				name=_('TXT_KEY_TECH_ARCHERY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ARCHERY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_ARCHERY_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_ARCHERY_QUOTE1'), _('TXT_KEY_TECH_ARCHERY_QUOTE2')],
 				era=EraType.ancient,
 				cost=50,
 				required=[TechType.animalHusbandry],
@@ -365,10 +365,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.bronzeWorking:
 			# https://civilization.fandom.com/wiki/Bronze_Working_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_BRONZE_WORKING_NAME',
-				eureka_summary='TXT_KEY_TECH_BRONZE_WORKING_EUREKA',
-				eureka_description='TXT_KEY_TECH_BRONZE_WORKING_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_BRONZE_WORKING_QUOTE1', 'TXT_KEY_TECH_BRONZE_WORKING_QUOTE2'],
+				name=_('TXT_KEY_TECH_BRONZE_WORKING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_BRONZE_WORKING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_BRONZE_WORKING_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_BRONZE_WORKING_QUOTE1'), _('TXT_KEY_TECH_BRONZE_WORKING_QUOTE2')],
 				era=EraType.ancient,
 				cost=80,
 				required=[TechType.mining],
@@ -381,10 +381,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.wheel:
 			# https://civilization.fandom.com/wiki/Wheel_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_WHEEL_NAME',
-				eureka_summary='TXT_KEY_TECH_WHEEL_EUREKA',
-				eureka_description='TXT_KEY_TECH_WHEEL_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_WHEEL_QUOTE1', 'TXT_KEY_TECH_WHEEL_QUOTE2'],
+				name=_('TXT_KEY_TECH_WHEEL_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_WHEEL_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_WHEEL_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_WHEEL_QUOTE1'), _('TXT_KEY_TECH_WHEEL_QUOTE2')],
 				era=EraType.ancient,
 				cost=80,
 				required=[TechType.mining],
@@ -401,10 +401,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.celestialNavigation:
 			# https://civilization.fandom.com/wiki/Celestial_Navigation_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_CELESTIAL_NAVIGATION_NAME',
-				eureka_summary='TXT_KEY_TECH_CELESTIAL_NAVIGATION_EUREKA',
-				eureka_description='TXT_KEY_TECH_CELESTIAL_NAVIGATION_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_CELESTIAL_NAVIGATION_QUOTE1', 'TXT_KEY_TECH_CELESTIAL_NAVIGATION_QUOTE2'],
+				name=_('TXT_KEY_TECH_CELESTIAL_NAVIGATION_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_CELESTIAL_NAVIGATION_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_CELESTIAL_NAVIGATION_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_CELESTIAL_NAVIGATION_QUOTE1'), _('TXT_KEY_TECH_CELESTIAL_NAVIGATION_QUOTE2')],
 				era=EraType.classical,
 				cost=120,
 				required=[TechType.sailing, TechType.astrology],
@@ -416,10 +416,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.horsebackRiding:
 			# https://civilization.fandom.com/wiki/Horseback_Riding_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_HORSEBACK_RIDING_NAME',
-				eureka_summary='TXT_KEY_TECH_HORSEBACK_RIDING_EUREKA',
-				eureka_description='TXT_KEY_TECH_HORSEBACK_RIDING_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_HORSEBACK_RIDING_QUOTE1', 'TXT_KEY_TECH_HORSEBACK_RIDING_QUOTE2'],
+				name=_('TXT_KEY_TECH_HORSEBACK_RIDING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_HORSEBACK_RIDING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_HORSEBACK_RIDING_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_HORSEBACK_RIDING_QUOTE1'), _('TXT_KEY_TECH_HORSEBACK_RIDING_QUOTE2')],
 				era=EraType.classical,
 				cost=120,
 				required=[TechType.animalHusbandry],
@@ -431,10 +431,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.currency:
 			# https://civilization.fandom.com/wiki/Currency_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_CURRENCY_NAME',
-				eureka_summary='TXT_KEY_TECH_CURRENCY_EUREKA',
-				eureka_description='TXT_KEY_TECH_CURRENCY_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_CURRENCY_QUOTE1', 'TXT_KEY_TECH_CURRENCY_QUOTE2'],
+				name=_('TXT_KEY_TECH_CURRENCY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_CURRENCY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_CURRENCY_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_CURRENCY_QUOTE1'), _('TXT_KEY_TECH_CURRENCY_QUOTE2')],
 				era=EraType.classical,
 				cost=120,
 				required=[TechType.writing],
@@ -446,10 +446,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.construction:
 			# https://civilization.fandom.com/wiki/Construction_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_CONSTRUCTION_NAME',
-				eureka_summary='TXT_KEY_TECH_CONSTRUCTION_EUREKA',
-				eureka_description='TXT_KEY_TECH_CONSTRUCTION_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_CONSTRUCTION_QUOTE1', 'TXT_KEY_TECH_CONSTRUCTION_QUOTE2'],
+				name=_('TXT_KEY_TECH_CONSTRUCTION_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_CONSTRUCTION_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_CONSTRUCTION_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_CONSTRUCTION_QUOTE1'), _('TXT_KEY_TECH_CONSTRUCTION_QUOTE2')],
 				era=EraType.classical,
 				cost=200,
 				required=[TechType.masonry, TechType.horsebackRiding],
@@ -462,10 +462,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.ironWorking:
 			# https://civilization.fandom.com/wiki/Iron_Working_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_IRON_WORKING_NAME',
-				eureka_summary='TXT_KEY_TECH_IRON_WORKING_EUREKA',
-				eureka_description='TXT_KEY_TECH_IRON_WORKING_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_IRON_WORKING_QUOTE1', 'TXT_KEY_TECH_IRON_WORKING_QUOTE2'],
+				name=_('TXT_KEY_TECH_IRON_WORKING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_IRON_WORKING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_IRON_WORKING_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_IRON_WORKING_QUOTE1'), _('TXT_KEY_TECH_IRON_WORKING_QUOTE2')],
 				era=EraType.classical,
 				cost=120,
 				required=[TechType.bronzeWorking],
@@ -478,10 +478,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.shipBuilding:
 			# https://civilization.fandom.com/wiki/Shipbuilding_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_SHIP_BUILDING_NAME',
-				eureka_summary='TXT_KEY_TECH_SHIP_BUILDING_EUREKA',
-				eureka_description='TXT_KEY_TECH_SHIP_BUILDING_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_SHIP_BUILDING_QUOTE1', 'TXT_KEY_TECH_SHIP_BUILDING_QUOTE2'],
+				name=_('TXT_KEY_TECH_SHIP_BUILDING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_SHIP_BUILDING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_SHIP_BUILDING_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_SHIP_BUILDING_QUOTE1'), _('TXT_KEY_TECH_SHIP_BUILDING_QUOTE2')],
 				era=EraType.classical,
 				cost=200,
 				required=[TechType.sailing],
@@ -494,10 +494,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.mathematics:
 			# https://civilization.fandom.com/wiki/Mathematics_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_MATHEMATICS_NAME',
-				eureka_summary='TXT_KEY_TECH_MATHEMATICS_EUREKA',
-				eureka_description='TXT_KEY_TECH_MATHEMATICS_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_MATHEMATICS_QUOTE1', 'TXT_KEY_TECH_MATHEMATICS_QUOTE2'],
+				name=_('TXT_KEY_TECH_MATHEMATICS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_MATHEMATICS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_MATHEMATICS_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_MATHEMATICS_QUOTE1'), _('TXT_KEY_TECH_MATHEMATICS_QUOTE2')],
 				era=EraType.classical,
 				cost=200,
 				required=[TechType.currency],
@@ -509,10 +509,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.engineering:
 			# https://civilization.fandom.com/wiki/Engineering_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ENGINEERING_NAME',
-				eureka_summary='TXT_KEY_TECH_ENGINEERING_EUREKA',
-				eureka_description='TXT_KEY_TECH_ENGINEERING_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_ENGINEERING_QUOTE1', 'TXT_KEY_TECH_ENGINEERING_QUOTE2'],
+				name=_('TXT_KEY_TECH_ENGINEERING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ENGINEERING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_ENGINEERING_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_ENGINEERING_QUOTE1'), _('TXT_KEY_TECH_ENGINEERING_QUOTE2')],
 				era=EraType.classical,
 				cost=200,
 				required=[TechType.wheel],
@@ -527,10 +527,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.militaryTactics:
 			# https://civilization.fandom.com/wiki/Military_Tactics_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_MILITARY_TACTICS_NAME',
-				eureka_summary='TXT_KEY_TECH_MILITARY_TACTICS_EUREKA',
-				eureka_description='TXT_KEY_TECH_MILITARY_TACTICS_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_MILITARY_TACTICS_QUOTE1', 'TXT_KEY_TECH_MILITARY_TACTICS_QUOTE2'],
+				name=_('TXT_KEY_TECH_MILITARY_TACTICS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_MILITARY_TACTICS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_MILITARY_TACTICS_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_MILITARY_TACTICS_QUOTE1'), _('TXT_KEY_TECH_MILITARY_TACTICS_QUOTE2')],
 				era=EraType.medieval,
 				cost=275,
 				required=[TechType.mathematics],
@@ -544,10 +544,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.buttress:
 			# https://civilization.fandom.com/wiki/Buttress_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_BUTTRESS_NAME',
-				eureka_summary='TXT_KEY_TECH_BUTTRESS_EUREKA',
-				eureka_description='TXT_KEY_TECH_BUTTRESS_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_BUTTRESS_QUOTE1', 'TXT_KEY_TECH_BUTTRESS_QUOTE2'],
+				name=_('TXT_KEY_TECH_BUTTRESS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_BUTTRESS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_BUTTRESS_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_BUTTRESS_QUOTE1'), _('TXT_KEY_TECH_BUTTRESS_QUOTE2')],
 				era=EraType.medieval,
 				cost=300,
 				required=[TechType.shipBuilding, TechType.mathematics],
@@ -558,10 +558,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.apprenticeship:
 			# https://civilization.fandom.com/wiki/Apprenticeship_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_APPRENTICESHIP_NAME',
-				eureka_summary='TXT_KEY_TECH_APPRENTICESHIP_EUREKA',
-				eureka_description='TXT_KEY_TECH_APPRENTICESHIP_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_APPRENTICESHIP_QUOTE1', 'TXT_KEY_TECH_APPRENTICESHIP_QUOTE2'],
+				name=_('TXT_KEY_TECH_APPRENTICESHIP_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_APPRENTICESHIP_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_APPRENTICESHIP_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_APPRENTICESHIP_QUOTE1'), _('TXT_KEY_TECH_APPRENTICESHIP_QUOTE2')],
 				era=EraType.medieval,
 				cost=275,
 				required=[TechType.currency, TechType.horsebackRiding],
@@ -573,10 +573,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.stirrups:
 			# https://civilization.fandom.com/wiki/Stirrups_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_STIRRUPS_NAME',
-				eureka_summary='TXT_KEY_TECH_STIRRUPS_EUREKA',
-				eureka_description='TXT_KEY_TECH_STIRRUPS_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_STIRRUPS_QUOTE1', 'TXT_KEY_TECH_STIRRUPS_QUOTE2'],
+				name=_('TXT_KEY_TECH_STIRRUPS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_STIRRUPS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_STIRRUPS_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_STIRRUPS_QUOTE1'), _('TXT_KEY_TECH_STIRRUPS_QUOTE2')],
 				era=EraType.medieval,
 				cost=360,
 				required=[TechType.horsebackRiding],
@@ -590,10 +590,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.machinery:
 			# https://civilization.fandom.com/wiki/Machinery_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_MACHINERY_NAME',
-				eureka_summary='TXT_KEY_TECH_MACHINERY_EUREKA',
-				eureka_description='TXT_KEY_TECH_MACHINERY_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_MACHINERY_QUOTE1', 'TXT_KEY_TECH_MACHINERY_QUOTE2'],
+				name=_('TXT_KEY_TECH_MACHINERY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_MACHINERY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_MACHINERY_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_MACHINERY_QUOTE1'), _('TXT_KEY_TECH_MACHINERY_QUOTE2')],
 				era=EraType.medieval,
 				cost=275,
 				required=[TechType.ironWorking, TechType.engineering],
@@ -605,10 +605,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.education:
 			# https://civilization.fandom.com/wiki/Education_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_EDUCATION_NAME',
-				eureka_summary='TXT_KEY_TECH_EDUCATION_EUREKA',
-				eureka_description='TXT_KEY_TECH_EDUCATION_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_EDUCATION_QUOTE1', 'TXT_KEY_TECH_EDUCATION_QUOTE2'],
+				name=_('TXT_KEY_TECH_EDUCATION_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_EDUCATION_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_EDUCATION_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_EDUCATION_QUOTE1'), _('TXT_KEY_TECH_EDUCATION_QUOTE2')],
 				era=EraType.medieval,
 				cost=335,
 				required=[TechType.apprenticeship, TechType.mathematics],
@@ -620,10 +620,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.militaryEngineering:
 			# https://civilization.fandom.com/wiki/Military_Engineering_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_MILITARY_ENGINEERING_NAME',
-				eureka_summary='TXT_KEY_TECH_MILITARY_ENGINEERING_EUREKA',
-				eureka_description='TXT_KEY_TECH_MILITARY_ENGINEERING_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_MILITARY_ENGINEERING_QUOTE1', 'TXT_KEY_TECH_MILITARY_ENGINEERING_QUOTE2'],
+				name=_('TXT_KEY_TECH_MILITARY_ENGINEERING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_MILITARY_ENGINEERING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_MILITARY_ENGINEERING_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_MILITARY_ENGINEERING_QUOTE1'), _('TXT_KEY_TECH_MILITARY_ENGINEERING_QUOTE2')],
 				era=EraType.medieval,
 				cost=335,
 				required=[TechType.construction],
@@ -635,10 +635,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.castles:
 			# https://civilization.fandom.com/wiki/Castles_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_CASTLES_NAME',
-				eureka_summary='TXT_KEY_TECH_CASTLES_EUREKA',
-				eureka_description='TXT_KEY_TECH_CASTLES_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_CASTLES_QUOTE1', 'TXT_KEY_TECH_CASTLES_QUOTE2'],
+				name=_('TXT_KEY_TECH_CASTLES_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_CASTLES_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_CASTLES_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_CASTLES_QUOTE1'), _('TXT_KEY_TECH_CASTLES_QUOTE2')],
 				era=EraType.medieval,
 				cost=390,
 				required=[TechType.construction],
@@ -651,10 +651,10 @@ class TechType(ExtendedEnum):
 		elif self == TechType.cartography:
 			# https://civilization.fandom.com/wiki/Cartography_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_CARTOGRAPHY_NAME',
-				eureka_summary='TXT_KEY_TECH_CARTOGRAPHY_EUREKA',
-				eureka_description='TXT_KEY_TECH_CARTOGRAPHY_EUREKA_TEXT',
-				quoteTexts=['TXT_KEY_TECH_CARTOGRAPHY_QUOTE1', 'TXT_KEY_TECH_CARTOGRAPHY_QUOTE2'],
+				name=_('TXT_KEY_TECH_CARTOGRAPHY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_CARTOGRAPHY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_CARTOGRAPHY_EUREKA_TEXT'),
+				quoteTexts=[_('TXT_KEY_TECH_CARTOGRAPHY_QUOTE1'), _('TXT_KEY_TECH_CARTOGRAPHY_QUOTE2')],
 				era=EraType.renaissance,
 				cost=490,
 				required=[TechType.shipBuilding],
@@ -665,12 +665,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.massProduction:
 			# https://civilization.fandom.com/wiki/Mass_Production_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_MASS_PRODUCTION_NAME',
-				eureka_summary='TXT_KEY_TECH_MASS_PRODUCTION_NAME',
-				eureka_description='TXT_KEY_TECH_MASS_PRODUCTION_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_MASS_PRODUCTION_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_MASS_PRODUCTION_NAME'),
+				eureka_description=_('TXT_KEY_TECH_MASS_PRODUCTION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_MASS_PRODUCTION_QUOTE1',
-					'TXT_KEY_TECH_MASS_PRODUCTION_QUOTE2'
+					_('TXT_KEY_TECH_MASS_PRODUCTION_QUOTE1'),
+					_('TXT_KEY_TECH_MASS_PRODUCTION_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=490,
@@ -682,12 +682,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.banking:
 			# https://civilization.fandom.com/wiki/Banking_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_BANKING_NAME',
-				eureka_summary='TXT_KEY_TECH_BANKING_NAME',
-				eureka_description='TXT_KEY_TECH_BANKING_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_BANKING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_BANKING_NAME'),
+				eureka_description=_('TXT_KEY_TECH_BANKING_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_BANKING_QUOTE1',
-					'TXT_KEY_TECH_BANKING_QUOTE2'
+					_('TXT_KEY_TECH_BANKING_QUOTE1'),
+					_('TXT_KEY_TECH_BANKING_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=490,
@@ -699,12 +699,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.gunpowder:
 			# https://civilization.fandom.com/wiki/Gunpowder_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_GUNPOWDER_NAME',
-				eureka_summary='TXT_KEY_TECH_GUNPOWDER_EUREKA',
-				eureka_description='TXT_KEY_TECH_GUNPOWDER_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_GUNPOWDER_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_GUNPOWDER_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_GUNPOWDER_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_GUNPOWDER_QUOTE1',
-					'TXT_KEY_TECH_GUNPOWDER_QUOTE2'
+					_('TXT_KEY_TECH_GUNPOWDER_QUOTE1'),
+					_('TXT_KEY_TECH_GUNPOWDER_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=490,
@@ -718,12 +718,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.printing:
 			# https://civilization.fandom.com/wiki/Printing_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_PRINTING_NAME',
-				eureka_summary='TXT_KEY_TECH_PRINTING_EUREKA',
-				eureka_description='TXT_KEY_TECH_PRINTING_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_PRINTING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_PRINTING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_PRINTING_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_PRINTING_QUOTE1',
-					'TXT_KEY_TECH_PRINTING_QUOTE2'
+					_('TXT_KEY_TECH_PRINTING_QUOTE1'),
+					_('TXT_KEY_TECH_PRINTING_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=490,
@@ -735,12 +735,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.squareRigging:
 			# https://civilization.fandom.com/wiki/Square_Rigging_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_SQUARE_RIGGING_NAME',
-				eureka_summary='TXT_KEY_TECH_SQUARE_RIGGING_EUREKA',
-				eureka_description='TXT_KEY_TECH_SQUARE_RIGGING_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_SQUARE_RIGGING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_SQUARE_RIGGING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_SQUARE_RIGGING_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_SQUARE_RIGGING_QUOTE1',
-					'TXT_KEY_TECH_SQUARE_RIGGING_QUOTE2'
+					_('TXT_KEY_TECH_SQUARE_RIGGING_QUOTE1'),
+					_('TXT_KEY_TECH_SQUARE_RIGGING_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=600,
@@ -754,12 +754,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.astronomy:
 			# https://civilization.fandom.com/wiki/Astronomy_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ASTRONOMY_NAME',
-				eureka_summary='TXT_KEY_TECH_ASTRONOMY_NAME',
-				eureka_description='TXT_KEY_TECH_ASTRONOMY_NAME',
+				name=_('TXT_KEY_TECH_ASTRONOMY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ASTRONOMY_NAME'),
+				eureka_description=_('TXT_KEY_TECH_ASTRONOMY_NAME'),
 				quoteTexts=[
-					'TXT_KEY_TECH_ASTRONOMY_QUOTE1',
-					'TXT_KEY_TECH_ASTRONOMY_QUOTE2'
+					_('TXT_KEY_TECH_ASTRONOMY_QUOTE1'),
+					_('TXT_KEY_TECH_ASTRONOMY_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=600,
@@ -771,12 +771,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.metalCasting:
 			# https://civilization.fandom.com/wiki/Metal_Casting_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_METAL_CASTING_NAME',
-				eureka_summary='TXT_KEY_TECH_METAL_CASTING_EUREKA',
-				eureka_description='TXT_KEY_TECH_METAL_CASTING_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_METAL_CASTING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_METAL_CASTING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_METAL_CASTING_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_METAL_CASTING_QUOTE1',
-					'TXT_KEY_TECH_METAL_CASTING_QUOTE2'
+					_('TXT_KEY_TECH_METAL_CASTING_QUOTE1'),
+					_('TXT_KEY_TECH_METAL_CASTING_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=660,
@@ -788,12 +788,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.siegeTactics:
 			# https://civilization.fandom.com/wiki/Siege_Tactics_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_SIEGE_TACTICS_NAME',
-				eureka_summary='TXT_KEY_TECH_SIEGE_TACTICS_EUREKA',
-				eureka_description='TXT_KEY_TECH_SIEGE_TACTICS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_SIEGE_TACTICS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_SIEGE_TACTICS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_SIEGE_TACTICS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_SIEGE_TACTICS_QUOTE1',
-					'TXT_KEY_TECH_SIEGE_TACTICS_QUOTE2'
+					_('TXT_KEY_TECH_SIEGE_TACTICS_QUOTE1'),
+					_('TXT_KEY_TECH_SIEGE_TACTICS_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=660,
@@ -808,12 +808,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.industrialization:
 			# https://civilization.fandom.com/wiki/Industrialization_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_INDUSTRIALIZATION_NAME',
-				eureka_summary='TXT_KEY_TECH_INDUSTRIALIZATION_EUREKA',
-				eureka_description='TXT_KEY_TECH_INDUSTRIALIZATION_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_INDUSTRIALIZATION_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_INDUSTRIALIZATION_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_INDUSTRIALIZATION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_INDUSTRIALIZATION_QUOTE1',
-					'TXT_KEY_TECH_INDUSTRIALIZATION_QUOTE2'
+					_('TXT_KEY_TECH_INDUSTRIALIZATION_QUOTE1'),
+					_('TXT_KEY_TECH_INDUSTRIALIZATION_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=700,
@@ -825,12 +825,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.scientificTheory:
 			# https://civilization.fandom.com/wiki/Scientific_Theory_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_SCIENTIFIC_THEORY_NAME',
-				eureka_summary='TXT_KEY_TECH_SCIENTIFIC_THEORY_EUREKA',
-				eureka_description='TXT_KEY_TECH_SCIENTIFIC_THEORY_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_SCIENTIFIC_THEORY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_SCIENTIFIC_THEORY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_SCIENTIFIC_THEORY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_SCIENTIFIC_THEORY_QUOTE1',
-					'TXT_KEY_TECH_SCIENTIFIC_THEORY_QUOTE2'
+					_('TXT_KEY_TECH_SCIENTIFIC_THEORY_QUOTE1'),
+					_('TXT_KEY_TECH_SCIENTIFIC_THEORY_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=700,
@@ -843,12 +843,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.ballistics:
 			# https://civilization.fandom.com/wiki/Ballistics_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_BALLISTICS_NAME',
-				eureka_summary='TXT_KEY_TECH_BALLISTICS_EUREKA',
-				eureka_description='TXT_KEY_TECH_BALLISTICS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_BALLISTICS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_BALLISTICS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_BALLISTICS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_BALLISTICS_QUOTE1',
-					'TXT_KEY_TECH_BALLISTICS_QUOTE2'
+					_('TXT_KEY_TECH_BALLISTICS_QUOTE1'),
+					_('TXT_KEY_TECH_BALLISTICS_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=840,
@@ -861,12 +861,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.militaryScience:
 			# https://civilization.fandom.com/wiki/Military_Science_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_MILITARY_SCIENCE_NAME',
-				eureka_summary='TXT_KEY_TECH_MILITARY_SCIENCE_EUREKA',
-				eureka_description='TXT_KEY_TECH_MILITARY_SCIENCE_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_MILITARY_SCIENCE_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_MILITARY_SCIENCE_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_MILITARY_SCIENCE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_MILITARY_SCIENCE_QUOTE1',
-					'TXT_KEY_TECH_MILITARY_SCIENCE_QUOTE2'
+					_('TXT_KEY_TECH_MILITARY_SCIENCE_QUOTE1'),
+					_('TXT_KEY_TECH_MILITARY_SCIENCE_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=845,
@@ -878,12 +878,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.steamPower:
 			# https://civilization.fandom.com/wiki/Steam_Power_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_STEAM_POWER_NAME',
-				eureka_summary='TXT_KEY_TECH_STEAM_POWER_EUREKA',
-				eureka_description='TXT_KEY_TECH_STEAM_POWER_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_STEAM_POWER_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_STEAM_POWER_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_STEAM_POWER_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_STEAM_POWER_QUOTE1',
-					'TXT_KEY_TECH_STEAM_POWER_QUOTE2'
+					_('TXT_KEY_TECH_STEAM_POWER_QUOTE1'),
+					_('TXT_KEY_TECH_STEAM_POWER_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=805,
@@ -897,12 +897,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.sanitation:
 			# https://civilization.fandom.com/wiki/Sanitation_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_SANITATION_NAME',
-				eureka_summary='TXT_KEY_TECH_SANITATION_EUREKA',
-				eureka_description='TXT_KEY_TECH_SANITATION_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_SANITATION_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_SANITATION_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_SANITATION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_SANITATION_QUOTE1',
-					'TXT_KEY_TECH_SANITATION_QUOTE2'
+					_('TXT_KEY_TECH_SANITATION_QUOTE1'),
+					_('TXT_KEY_TECH_SANITATION_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=805,
@@ -914,12 +914,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.economics:
 			# https://civilization.fandom.com/wiki/Economics_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ECONOMICS_NAME',
-				eureka_summary='TXT_KEY_TECH_ECONOMICS_EUREKA',
-				eureka_description='TXT_KEY_TECH_ECONOMICS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_ECONOMICS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ECONOMICS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_ECONOMICS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_ECONOMICS_QUOTE1',
-					'TXT_KEY_TECH_ECONOMICS_QUOTE2'
+					_('TXT_KEY_TECH_ECONOMICS_QUOTE1'),
+					_('TXT_KEY_TECH_ECONOMICS_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=805,
@@ -931,12 +931,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.rifling:
 			# https://civilization.fandom.com/wiki/Rifling_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_RIFLING_NAME',
-				eureka_summary='TXT_KEY_TECH_RIFLING_EUREKA',
-				eureka_description='TXT_KEY_TECH_RIFLING_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_RIFLING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_RIFLING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_RIFLING_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_RIFLING_QUOTE1',
-					'TXT_KEY_TECH_RIFLING_QUOTE2'
+					_('TXT_KEY_TECH_RIFLING_QUOTE1'),
+					_('TXT_KEY_TECH_RIFLING_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=970,
@@ -950,12 +950,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.flight:
 			# https://civilization.fandom.com/wiki/Flight_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_FLIGHT_NAME',
-				eureka_summary='TXT_KEY_TECH_FLIGHT_EUREKA',
-				eureka_description='TXT_KEY_TECH_FLIGHT_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_FLIGHT_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_FLIGHT_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_FLIGHT_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_FLIGHT_QUOTE1',
-					'TXT_KEY_TECH_FLIGHT_QUOTE2'
+					_('TXT_KEY_TECH_FLIGHT_QUOTE1'),
+					_('TXT_KEY_TECH_FLIGHT_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=900,
@@ -967,12 +967,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.replaceableParts:
 			# https://civilization.fandom.com/wiki/Replaceable_Parts_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_REPLACEABLE_PARTS_NAME',
-				eureka_summary='TXT_KEY_TECH_REPLACEABLE_PARTS_EUREKA',
-				eureka_description='TXT_KEY_TECH_REPLACEABLE_PARTS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_REPLACEABLE_PARTS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_REPLACEABLE_PARTS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_REPLACEABLE_PARTS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_REPLACEABLE_PARTS_QUOTE1',
-					'TXT_KEY_TECH_REPLACEABLE_PARTS_QUOTE2'
+					_('TXT_KEY_TECH_REPLACEABLE_PARTS_QUOTE1'),
+					_('TXT_KEY_TECH_REPLACEABLE_PARTS_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1250,
@@ -986,12 +986,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.steel:
 			# https://civilization.fandom.com/wiki/Steel_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_STEEL_NAME',
-				eureka_summary='TXT_KEY_TECH_STEEL_EUREKA',
-				eureka_description='TXT_KEY_TECH_STEEL_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_STEEL_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_STEEL_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_STEEL_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_STEEL_QUOTE1',
-					'TXT_KEY_TECH_STEEL_QUOTE2'
+					_('TXT_KEY_TECH_STEEL_QUOTE1'),
+					_('TXT_KEY_TECH_STEEL_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1140,
@@ -1004,11 +1004,11 @@ class TechType(ExtendedEnum):
 		elif self == TechType.refining:
 			# https://civilization.fandom.com/wiki/Refining_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_REFINING_NAME',
-				eureka_summary='TXT_KEY_TECH_REFINING_EUREKA',
-				eureka_description='TXT_KEY_TECH_REFINING_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_REFINING_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_REFINING_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_REFINING_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_REFINING_QUOTE1'
+					_('TXT_KEY_TECH_REFINING_QUOTE1')
 				],
 				era=EraType.modern,
 				cost=1250,
@@ -1021,12 +1021,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.electricity:
 			# https://civilization.fandom.com/wiki/Electricity_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ELECTRICITY_NAME',
-				eureka_summary='TXT_KEY_TECH_ELECTRICITY_EUREKA',
-				eureka_description='TXT_KEY_TECH_ELECTRICITY_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_ELECTRICITY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ELECTRICITY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_ELECTRICITY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_ELECTRICITY_QUOTE1',
-					'TXT_KEY_TECH_ELECTRICITY_QUOTE2'
+					_('TXT_KEY_TECH_ELECTRICITY_QUOTE1'),
+					_('TXT_KEY_TECH_ELECTRICITY_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=985,
@@ -1039,12 +1039,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.radio:
 			# https://civilization.fandom.com/wiki/Radio_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_RADIO_NAME',
-				eureka_summary='TXT_KEY_TECH_RADIO_EUREKA',
-				eureka_description='TXT_KEY_TECH_RADIO_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_RADIO_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_RADIO_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_RADIO_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_RADIO_QUOTE1',
-					'TXT_KEY_TECH_RADIO_QUOTE2'
+					_('TXT_KEY_TECH_RADIO_QUOTE1'),
+					_('TXT_KEY_TECH_RADIO_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=985,
@@ -1056,12 +1056,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.chemistry:
 			# https://civilization.fandom.com/wiki/Chemistry_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_CHEMISTRY_NAME',
-				eureka_summary='TXT_KEY_TECH_CHEMISTRY_EUREKA',
-				eureka_description='TXT_KEY_TECH_CHEMISTRY_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_CHEMISTRY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_CHEMISTRY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_CHEMISTRY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_CHEMISTRY_QUOTE1',
-					'TXT_KEY_TECH_CHEMISTRY_QUOTE2'
+					_('TXT_KEY_TECH_CHEMISTRY_QUOTE1'),
+					_('TXT_KEY_TECH_CHEMISTRY_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=985,
@@ -1074,12 +1074,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.combustion:
 			# https://civilization.fandom.com/wiki/Combustion_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_COMBUSTION_NAME',
-				eureka_summary='TXT_KEY_TECH_COMBUSTION_EUREKA',
-				eureka_description='TXT_KEY_TECH_COMBUSTION_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_COMBUSTION_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_COMBUSTION_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_COMBUSTION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_COMBUSTION_QUOTE1',
-					'TXT_KEY_TECH_COMBUSTION_QUOTE2'
+					_('TXT_KEY_TECH_COMBUSTION_QUOTE1'),
+					_('TXT_KEY_TECH_COMBUSTION_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1250,
@@ -1094,12 +1094,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.advancedFlight:
 			# https://civilization.fandom.com/wiki/Advanced_Flight_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ADVANCED_FLIGHT_NAME',
-				eureka_summary='TXT_KEY_TECH_ADVANCED_FLIGHT_EUREKA',
-				eureka_description='TXT_KEY_TECH_ADVANCED_FLIGHT_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_ADVANCED_FLIGHT_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ADVANCED_FLIGHT_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_ADVANCED_FLIGHT_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_ADVANCED_FLIGHT_QUOTE1',
-					'TXT_KEY_TECH_ADVANCED_FLIGHT_QUOTE2'
+					_('TXT_KEY_TECH_ADVANCED_FLIGHT_QUOTE1'),
+					_('TXT_KEY_TECH_ADVANCED_FLIGHT_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=1065,
@@ -1111,12 +1111,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.rocketry:
 			# https://civilization.fandom.com/wiki/Rocketry_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ROCKETRY_NAME',
-				eureka_summary='TXT_KEY_TECH_ROCKETRY_EUREKA',
-				eureka_description='TXT_KEY_TECH_ROCKETRY_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_ROCKETRY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ROCKETRY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_ROCKETRY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_ROCKETRY_QUOTE1',
-					'TXT_KEY_TECH_ROCKETRY_QUOTE2'
+					_('TXT_KEY_TECH_ROCKETRY_QUOTE1'),
+					_('TXT_KEY_TECH_ROCKETRY_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=1065,
@@ -1128,12 +1128,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.advancedBallistics:
 			# https://civilization.fandom.com/wiki/Advanced_Ballistics_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ADVANCED_BALLISTICS_NAME',
-				eureka_summary='TXT_KEY_TECH_ADVANCED_BALLISTICS_EUREKA',
-				eureka_description='TXT_KEY_TECH_ADVANCED_BALLISTICS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_ADVANCED_BALLISTICS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ADVANCED_BALLISTICS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_ADVANCED_BALLISTICS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_ADVANCED_BALLISTICS_QUOTE1',
-					'TXT_KEY_TECH_ADVANCED_BALLISTICS_QUOTE2'
+					_('TXT_KEY_TECH_ADVANCED_BALLISTICS_QUOTE1'),
+					_('TXT_KEY_TECH_ADVANCED_BALLISTICS_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=1410,
@@ -1146,12 +1146,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.combinedArms:
 			# https://civilization.fandom.com/wiki/Combined_Arms_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_COMBINED_ARMS_NAME',
-				eureka_summary='TXT_KEY_TECH_COMBINED_ARMS_EUREKA',
-				eureka_description='TXT_KEY_TECH_COMBINED_ARMS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_COMBINED_ARMS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_COMBINED_ARMS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_COMBINED_ARMS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_COMBINED_ARMS_QUOTE1',
-					'TXT_KEY_TECH_COMBINED_ARMS_QUOTE2'
+					_('TXT_KEY_TECH_COMBINED_ARMS_QUOTE1'),
+					_('TXT_KEY_TECH_COMBINED_ARMS_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=1480,
@@ -1163,12 +1163,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.plastics:
 			# https://civilization.fandom.com/wiki/Plastics_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_PLASTICS_NAME',
-				eureka_summary='TXT_KEY_TECH_PLASTICS_EUREKA',
-				eureka_description='TXT_KEY_TECH_PLASTICS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_PLASTICS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_PLASTICS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_PLASTICS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_PLASTICS_QUOTE1',
-					'TXT_KEY_TECH_PLASTICS_QUOTE2'
+					_('TXT_KEY_TECH_PLASTICS_QUOTE1'),
+					_('TXT_KEY_TECH_PLASTICS_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=1065,
@@ -1181,12 +1181,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.computers:
 			# https://civilization.fandom.com/wiki/Computers_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_COMPUTERS_NAME',
-				eureka_summary='TXT_KEY_TECH_COMPUTERS_EUREKA',
-				eureka_description='TXT_KEY_TECH_COMPUTERS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_COMPUTERS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_COMPUTERS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_COMPUTERS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_COMPUTERS_QUOTE1',
-					'TXT_KEY_TECH_COMPUTERS_QUOTE2'
+					_('TXT_KEY_TECH_COMPUTERS_QUOTE1'),
+					_('TXT_KEY_TECH_COMPUTERS_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=1195,
@@ -1200,12 +1200,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.nuclearFission:
 			# https://civilization.fandom.com/wiki/Nuclear_Fission_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_NUCLEAR_FISSION_NAME',
-				eureka_summary='TXT_KEY_TECH_NUCLEAR_FISSION_EUREKA',
-				eureka_description='TXT_KEY_TECH_NUCLEAR_FISSION_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_NUCLEAR_FISSION_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_NUCLEAR_FISSION_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_NUCLEAR_FISSION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_NUCLEAR_FISSION_QUOTE1',
-					'TXT_KEY_TECH_NUCLEAR_FISSION_QUOTE2'
+					_('TXT_KEY_TECH_NUCLEAR_FISSION_QUOTE1'),
+					_('TXT_KEY_TECH_NUCLEAR_FISSION_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=1195,
@@ -1217,12 +1217,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.syntheticMaterials:
 			# https://civilization.fandom.com/wiki/Synthetic_Materials_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_SYNTHETIC_MATERIALS_NAME',
-				eureka_summary='TXT_KEY_TECH_SYNTHETIC_MATERIALS_EUREKA',
-				eureka_description='TXT_KEY_TECH_SYNTHETIC_MATERIALS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_SYNTHETIC_MATERIALS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_SYNTHETIC_MATERIALS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_SYNTHETIC_MATERIALS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_SYNTHETIC_MATERIALS_QUOTE1',
-					'TXT_KEY_TECH_SYNTHETIC_MATERIALS_QUOTE2'
+					_('TXT_KEY_TECH_SYNTHETIC_MATERIALS_QUOTE1'),
+					_('TXT_KEY_TECH_SYNTHETIC_MATERIALS_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=1195,
@@ -1237,12 +1237,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.telecommunications:
 			# https://civilization.fandom.com/wiki/Telecommunications_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_TELECOMMUNICATIONS_NAME',
-				eureka_summary='TXT_KEY_TECH_TELECOMMUNICATIONS_EUREKA',
-				eureka_description='TXT_KEY_TECH_TELECOMMUNICATIONS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_TELECOMMUNICATIONS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_TELECOMMUNICATIONS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_TELECOMMUNICATIONS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_TELECOMMUNICATIONS_QUOTE1',
-					'TXT_KEY_TECH_TELECOMMUNICATIONS_QUOTE2'
+					_('TXT_KEY_TECH_TELECOMMUNICATIONS_QUOTE1'),
+					_('TXT_KEY_TECH_TELECOMMUNICATIONS_QUOTE2')
 				],
 				era=EraType.information,
 				cost=1340,
@@ -1254,12 +1254,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.satellites:
 			# https://civilization.fandom.com/wiki/Satellites_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_SATELLITES_NAME',
-				eureka_summary='TXT_KEY_TECH_SATELLITES_EUREKA',
-				eureka_description='TXT_KEY_TECH_SATELLITES_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_SATELLITES_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_SATELLITES_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_SATELLITES_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_SATELLITES_QUOTE1',
-					'TXT_KEY_TECH_SATELLITES_QUOTE2'
+					_('TXT_KEY_TECH_SATELLITES_QUOTE1'),
+					_('TXT_KEY_TECH_SATELLITES_QUOTE2')
 				],
 				era=EraType.information,
 				cost=1340,
@@ -1272,12 +1272,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.guidanceSystems:
 			# https://civilization.fandom.com/wiki/Guidance_Systems_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_GUIDANCE_SYSTEMS_NAME',
-				eureka_summary='TXT_KEY_TECH_GUIDANCE_SYSTEMS_EUREKA',
-				eureka_description='TXT_KEY_TECH_GUIDANCE_SYSTEMS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_GUIDANCE_SYSTEMS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_GUIDANCE_SYSTEMS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_GUIDANCE_SYSTEMS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_GUIDANCE_SYSTEMS_QUOTE1',
-					'TXT_KEY_TECH_GUIDANCE_SYSTEMS_QUOTE2'
+					_('TXT_KEY_TECH_GUIDANCE_SYSTEMS_QUOTE1'),
+					_('TXT_KEY_TECH_GUIDANCE_SYSTEMS_QUOTE2')
 				],
 				era=EraType.information,
 				cost=1580,
@@ -1289,12 +1289,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.lasers:
 			# https://civilization.fandom.com/wiki/Lasers_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_LASERS_NAME',
-				eureka_summary='TXT_KEY_TECH_LASERS_EUREKA',
-				eureka_description='TXT_KEY_TECH_LASERS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_LASERS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_LASERS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_LASERS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_LASERS_QUOTE1',
-					'TXT_KEY_TECH_LASERS_QUOTE2'
+					_('TXT_KEY_TECH_LASERS_QUOTE1'),
+					_('TXT_KEY_TECH_LASERS_QUOTE2')
 				],
 				era=EraType.information,
 				cost=1340,
@@ -1306,12 +1306,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.composites:
 			# https://civilization.fandom.com/wiki/Composites_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_COMPOSITES_NAME',
-				eureka_summary='TXT_KEY_TECH_COMPOSITES_EUREKA',
-				eureka_description='TXT_KEY_TECH_COMPOSITES_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_COMPOSITES_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_COMPOSITES_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_COMPOSITES_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_COMPOSITES_QUOTE1',
-					'TXT_KEY_TECH_COMPOSITES_QUOTE2'
+					_('TXT_KEY_TECH_COMPOSITES_QUOTE1'),
+					_('TXT_KEY_TECH_COMPOSITES_QUOTE2')
 				],
 				era=EraType.information,
 				cost=1340,
@@ -1323,12 +1323,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.stealthTechnology:
 			# https://civilization.fandom.com/wiki/Stealth_Technology_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_STEALTH_TECHNOLOGY_NAME',
-				eureka_summary='TXT_KEY_TECH_STEALTH_TECHNOLOGY_EUREKA',
-				eureka_description='TXT_KEY_TECH_STEALTH_TECHNOLOGY_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_STEALTH_TECHNOLOGY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_STEALTH_TECHNOLOGY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_STEALTH_TECHNOLOGY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_STEALTH_TECHNOLOGY_QUOTE1',
-					'TXT_KEY_TECH_STEALTH_TECHNOLOGY_QUOTE2'
+					_('TXT_KEY_TECH_STEALTH_TECHNOLOGY_QUOTE1'),
+					_('TXT_KEY_TECH_STEALTH_TECHNOLOGY_QUOTE2')
 				],
 				era=EraType.information,
 				cost=1340,
@@ -1340,12 +1340,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.robotics:
 			# https://civilization.fandom.com/wiki/Robotics_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_ROBOTICS_NAME',
-				eureka_summary='TXT_KEY_TECH_ROBOTICS_EUREKA',
-				eureka_description='TXT_KEY_TECH_ROBOTICS_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_ROBOTICS_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_ROBOTICS_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_ROBOTICS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_ROBOTICS_QUOTE1',
-					'TXT_KEY_TECH_ROBOTICS_QUOTE2'
+					_('TXT_KEY_TECH_ROBOTICS_QUOTE1'),
+					_('TXT_KEY_TECH_ROBOTICS_QUOTE2')
 				],
 				era=EraType.information,
 				cost=1560,
@@ -1358,12 +1358,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.nuclearFusion:
 			# https://civilization.fandom.com/wiki/Nuclear_Fusion_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_NUCLEAR_FUSION_NAME',
-				eureka_summary='TXT_KEY_TECH_NUCLEAR_FUSION_EUREKA',
-				eureka_description='TXT_KEY_TECH_NUCLEAR_FUSION_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_NUCLEAR_FUSION_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_NUCLEAR_FUSION_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_NUCLEAR_FUSION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_NUCLEAR_FUSION_QUOTE1',
-					'TXT_KEY_TECH_NUCLEAR_FUSION_QUOTE2'
+					_('TXT_KEY_TECH_NUCLEAR_FUSION_QUOTE1'),
+					_('TXT_KEY_TECH_NUCLEAR_FUSION_QUOTE2')
 				],
 				era=EraType.information,
 				cost=1560,
@@ -1375,12 +1375,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.nanotechnology:
 			# https://civilization.fandom.com/wiki/Nanotechnology_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_NANOTECHNOLOGY_NAME',
-				eureka_summary='TXT_KEY_TECH_NANOTECHNOLOGY_EUREKA',
-				eureka_description='TXT_KEY_TECH_NANOTECHNOLOGY_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_NANOTECHNOLOGY_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_NANOTECHNOLOGY_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_NANOTECHNOLOGY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_NANOTECHNOLOGY_QUOTE1',
-					'TXT_KEY_TECH_NANOTECHNOLOGY_QUOTE2'
+					_('TXT_KEY_TECH_NANOTECHNOLOGY_QUOTE1'),
+					_('TXT_KEY_TECH_NANOTECHNOLOGY_QUOTE2')
 				],
 				era=EraType.information,
 				cost=1560,
@@ -1393,12 +1393,12 @@ class TechType(ExtendedEnum):
 		elif self == TechType.futureTech:
 			# https://civilization.fandom.com/wiki/Future_Tech_(Civ6)
 			return TechTypeData(
-				name='TXT_KEY_TECH_FUTURE_TECH_NAME',
-				eureka_summary='TXT_KEY_TECH_FUTURE_TECH_EUREKA',
-				eureka_description='TXT_KEY_TECH_FUTURE_TECH_EUREKA_TEXT',
+				name=_('TXT_KEY_TECH_FUTURE_TECH_NAME'),
+				eureka_summary=_('TXT_KEY_TECH_FUTURE_TECH_EUREKA'),
+				eureka_description=_('TXT_KEY_TECH_FUTURE_TECH_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_TECH_FUTURE_TECH_QUOTE1',
-					'TXT_KEY_TECH_FUTURE_TECH_QUOTE2'
+					_('TXT_KEY_TECH_FUTURE_TECH_QUOTE1'),
+					_('TXT_KEY_TECH_FUTURE_TECH_QUOTE2')
 				],
 				era=EraType.future,
 				cost=1780,
@@ -1536,7 +1536,7 @@ class CivicType(ExtendedEnum):
 		# default
 		if self == CivicType.none:
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_NONE',
+				name=_('TXT_KEY_CIVIC_NONE'),
 				inspiration_summary='',
 				inspiration_description='',
 				quoteTexts=[],
@@ -1552,12 +1552,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.stateWorkforce:
 			# https://civilization.fandom.com/wiki/State_Workforce_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_STATE_WORKFORCE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_STATE_WORKFORCE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_STATE_WORKFORCE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_STATE_WORKFORCE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_STATE_WORKFORCE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_STATE_WORKFORCE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_STATE_WORKFORCE_QUOTE1',
-					'TXT_KEY_CIVIC_STATE_WORKFORCE_QUOTE2'
+					_('TXT_KEY_CIVIC_STATE_WORKFORCE_QUOTE1'),
+					_('TXT_KEY_CIVIC_STATE_WORKFORCE_QUOTE2')
 				],
 				era=EraType.ancient,
 				cost=70,
@@ -1569,9 +1569,9 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.craftsmanship:
 			# https://civilization.fandom.com/wiki/Craftsmanship_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_CRAFTSMANSHIP_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_CRAFTSMANSHIP_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_CRAFTSMANSHIP_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_CRAFTSMANSHIP_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_CRAFTSMANSHIP_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_CRAFTSMANSHIP_EUREKA_TEXT'),
 				quoteTexts=[
 					"TXT_KEY_CIVIC_CRAFTSMANSHIP_QUOTE1",
 					"TXT_KEY_CIVIC_CRAFTSMANSHIP_QUOTE2"
@@ -1586,12 +1586,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.codeOfLaws:  # no eureka
 			# https://civilization.fandom.com/wiki/Code_of_Laws_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_CODE_OF_LAWS_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_CODE_OF_LAWS_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_CODE_OF_LAWS_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_CODE_OF_LAWS_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_CODE_OF_LAWS_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_CODE_OF_LAWS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_CODE_OF_LAWS_QUOTE1',
-					'TXT_KEY_CIVIC_CODE_OF_LAWS_QUOTE2'
+					_('TXT_KEY_CIVIC_CODE_OF_LAWS_QUOTE1'),
+					_('TXT_KEY_CIVIC_CODE_OF_LAWS_QUOTE2')
 				],
 				era=EraType.ancient,
 				cost=20,
@@ -1603,12 +1603,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.earlyEmpire:
 			# https://civilization.fandom.com/wiki/Early_Empire_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_EARLY_EMPIRE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_EARLY_EMPIRE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_EARLY_EMPIRE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_EARLY_EMPIRE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_EARLY_EMPIRE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_EARLY_EMPIRE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_EARLY_EMPIRE_QUOTE1',
-					'TXT_KEY_CIVIC_EARLY_EMPIRE_QUOTE2'
+					_('TXT_KEY_CIVIC_EARLY_EMPIRE_QUOTE1'),
+					_('TXT_KEY_CIVIC_EARLY_EMPIRE_QUOTE2')
 				],
 				era=EraType.ancient,
 				cost=70,
@@ -1620,12 +1620,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.foreignTrade:
 			# https://civilization.fandom.com/wiki/Foreign_Trade_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_FOREIGN_TRADE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_FOREIGN_TRADE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_FOREIGN_TRADE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_FOREIGN_TRADE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_FOREIGN_TRADE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_FOREIGN_TRADE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_FOREIGN_TRADE_QUOTE1',
-					'TXT_KEY_CIVIC_FOREIGN_TRADE_QUOTE2'
+					_('TXT_KEY_CIVIC_FOREIGN_TRADE_QUOTE1'),
+					_('TXT_KEY_CIVIC_FOREIGN_TRADE_QUOTE2')
 				],
 				era=EraType.ancient,
 				cost=40,
@@ -1637,12 +1637,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.mysticism:
 			# https://civilization.fandom.com/wiki/Mysticism_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_MYSTICISM_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_MYSTICISM_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_MYSTICISM_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_MYSTICISM_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_MYSTICISM_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_MYSTICISM_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_MYSTICISM_QUOTE1',
-					'TXT_KEY_CIVIC_MYSTICISM_QUOTE2'
+					_('TXT_KEY_CIVIC_MYSTICISM_QUOTE1'),
+					_('TXT_KEY_CIVIC_MYSTICISM_QUOTE2')
 				],
 				era=EraType.ancient,
 				cost=50,
@@ -1654,12 +1654,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.militaryTradition:
 			# https://civilization.fandom.com/wiki/Military_Training_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_MILITARY_TRADITION_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_MILITARY_TRADITION_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_MILITARY_TRADITION_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_MILITARY_TRADITION_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_MILITARY_TRADITION_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_MILITARY_TRADITION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_MILITARY_TRADITION_QUOTE1',
-					'TXT_KEY_CIVIC_MILITARY_TRADITION_QUOTE2'
+					_('TXT_KEY_CIVIC_MILITARY_TRADITION_QUOTE1'),
+					_('TXT_KEY_CIVIC_MILITARY_TRADITION_QUOTE2')
 				],
 				era=EraType.ancient,
 				cost=50,
@@ -1673,12 +1673,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.defensiveTactics:
 			# https://civilization.fandom.com/wiki/Defensive_Tactics_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_DEFENSIVE_TACTICS_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_DEFENSIVE_TACTICS_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_DEFENSIVE_TACTICS_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_DEFENSIVE_TACTICS_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_DEFENSIVE_TACTICS_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_DEFENSIVE_TACTICS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_DEFENSIVE_TACTICS_QUOTE1',
-					'TXT_KEY_CIVIC_DEFENSIVE_TACTICS_QUOTE2'
+					_('TXT_KEY_CIVIC_DEFENSIVE_TACTICS_QUOTE1'),
+					_('TXT_KEY_CIVIC_DEFENSIVE_TACTICS_QUOTE2')
 				],
 				era=EraType.classical,
 				cost=175,
@@ -1690,12 +1690,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.gamesAndRecreation:
 			# https://civilization.fandom.com/wiki/Games_and_Recreation_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_GAMES_AND_RECREATION_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_GAMES_AND_RECREATION_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_GAMES_AND_RECREATION_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_GAMES_AND_RECREATION_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_GAMES_AND_RECREATION_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_GAMES_AND_RECREATION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_GAMES_AND_RECREATION_QUOTE1',
-					'TXT_KEY_CIVIC_GAMES_AND_RECREATION_QUOTE2'
+					_('TXT_KEY_CIVIC_GAMES_AND_RECREATION_QUOTE1'),
+					_('TXT_KEY_CIVIC_GAMES_AND_RECREATION_QUOTE2')
 				],
 				era=EraType.classical,
 				cost=110,
@@ -1707,12 +1707,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.politicalPhilosophy:
 			# https://civilization.fandom.com/wiki/Political_Philosophy_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_POLITICAL_PHILOSOPHY_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_POLITICAL_PHILOSOPHY_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_POLITICAL_PHILOSOPHY_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_POLITICAL_PHILOSOPHY_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_POLITICAL_PHILOSOPHY_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_POLITICAL_PHILOSOPHY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_POLITICAL_PHILOSOPHY_QUOTE1',
-					'TXT_KEY_CIVIC_POLITICAL_PHILOSOPHY_QUOTE2'
+					_('TXT_KEY_CIVIC_POLITICAL_PHILOSOPHY_QUOTE1'),
+					_('TXT_KEY_CIVIC_POLITICAL_PHILOSOPHY_QUOTE2')
 				],
 				era=EraType.classical,
 				cost=110,
@@ -1724,12 +1724,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.recordedHistory:
 			# https://civilization.fandom.com/wiki/Recorded_History_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_RECORDED_HISTORY_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_RECORDED_HISTORY_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_RECORDED_HISTORY_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_RECORDED_HISTORY_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_RECORDED_HISTORY_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_RECORDED_HISTORY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_RECORDED_HISTORY_QUOTE1',
-					'TXT_KEY_CIVIC_RECORDED_HISTORY_QUOTE2'
+					_('TXT_KEY_CIVIC_RECORDED_HISTORY_QUOTE1'),
+					_('TXT_KEY_CIVIC_RECORDED_HISTORY_QUOTE2')
 				],
 				era=EraType.classical,
 				cost=175,
@@ -1741,12 +1741,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.dramaAndPoetry:
 			# https://civilization.fandom.com/wiki/Drama_and_Poetry_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_DRAMA_AND_POETRY_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_DRAMA_AND_POETRY_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_DRAMA_AND_POETRY_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_DRAMA_AND_POETRY_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_DRAMA_AND_POETRY_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_DRAMA_AND_POETRY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_DRAMA_AND_POETRY_QUOTE1',
-					'TXT_KEY_CIVIC_DRAMA_AND_POETRY_QUOTE2'
+					_('TXT_KEY_CIVIC_DRAMA_AND_POETRY_QUOTE1'),
+					_('TXT_KEY_CIVIC_DRAMA_AND_POETRY_QUOTE2')
 				],
 				era=EraType.classical,
 				cost=110,
@@ -1758,12 +1758,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.theology:
 			# https://civilization.fandom.com/wiki/Theology_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_THEOLOGY_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_THEOLOGY_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_THEOLOGY_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_THEOLOGY_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_THEOLOGY_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_THEOLOGY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_THEOLOGY_QUOTE1',
-					'TXT_KEY_CIVIC_THEOLOGY_QUOTE2'
+					_('TXT_KEY_CIVIC_THEOLOGY_QUOTE1'),
+					_('TXT_KEY_CIVIC_THEOLOGY_QUOTE2')
 				],
 				era=EraType.classical,
 				cost=120,
@@ -1775,12 +1775,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.militaryTraining:
 			# https://civilization.fandom.com/wiki/Military_Training_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_MILITARY_TRAINING_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_MILITARY_TRAINING_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_MILITARY_TRAINING_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_MILITARY_TRAINING_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_MILITARY_TRAINING_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_MILITARY_TRAINING_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_MILITARY_TRAINING_QUOTE1',
-					'TXT_KEY_CIVIC_MILITARY_TRAINING_QUOTE2'
+					_('TXT_KEY_CIVIC_MILITARY_TRAINING_QUOTE1'),
+					_('TXT_KEY_CIVIC_MILITARY_TRAINING_QUOTE2')
 				],
 				era=EraType.classical,
 				cost=120,
@@ -1794,12 +1794,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.navalTradition:
 			# https://civilization.fandom.com/wiki/Naval_Tradition_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_NAVAL_TRADITION_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_NAVAL_TRADITION_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_NAVAL_TRADITION_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_NAVAL_TRADITION_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_NAVAL_TRADITION_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_NAVAL_TRADITION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_NAVAL_TRADITION_QUOTE1',
-					'TXT_KEY_CIVIC_NAVAL_TRADITION_QUOTE2'
+					_('TXT_KEY_CIVIC_NAVAL_TRADITION_QUOTE1'),
+					_('TXT_KEY_CIVIC_NAVAL_TRADITION_QUOTE2')
 				],
 				era=EraType.medieval,
 				cost=200,
@@ -1811,12 +1811,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.feudalism:
 			# https://civilization.fandom.com/wiki/Feudalism_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_FEUDALISM_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_FEUDALISM_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_FEUDALISM_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_FEUDALISM_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_FEUDALISM_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_FEUDALISM_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_FEUDALISM_QUOTE1',
-					'TXT_KEY_CIVIC_FEUDALISM_QUOTE2'
+					_('TXT_KEY_CIVIC_FEUDALISM_QUOTE1'),
+					_('TXT_KEY_CIVIC_FEUDALISM_QUOTE2')
 				],
 				era=EraType.medieval,
 				cost=275,
@@ -1828,12 +1828,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.medievalFaires:
 			# https://civilization.fandom.com/wiki/Medieval_Faires_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_MEDIEVAL_FAIRES_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_MEDIEVAL_FAIRES_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_MEDIEVAL_FAIRES_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_MEDIEVAL_FAIRES_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_MEDIEVAL_FAIRES_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_MEDIEVAL_FAIRES_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_MEDIEVAL_FAIRES_QUOTE1',
-					'TXT_KEY_CIVIC_MEDIEVAL_FAIRES_QUOTE2'
+					_('TXT_KEY_CIVIC_MEDIEVAL_FAIRES_QUOTE1'),
+					_('TXT_KEY_CIVIC_MEDIEVAL_FAIRES_QUOTE2')
 				],
 				era=EraType.medieval,
 				cost=385,
@@ -1845,12 +1845,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.civilService:
 			# https://civilization.fandom.com/wiki/Civil_Service_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_CIVIL_SERVICE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_CIVIL_SERVICE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_CIVIL_SERVICE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_CIVIL_SERVICE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_CIVIL_SERVICE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_CIVIL_SERVICE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_CIVIL_SERVICE_QUOTE1',
-					'TXT_KEY_CIVIC_CIVIL_SERVICE_QUOTE2'
+					_('TXT_KEY_CIVIC_CIVIL_SERVICE_QUOTE1'),
+					_('TXT_KEY_CIVIC_CIVIL_SERVICE_QUOTE2')
 				],
 				era=EraType.medieval,
 				cost=275,
@@ -1862,12 +1862,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.guilds:
 			# https://civilization.fandom.com/wiki/Guilds_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_GUILDS_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_GUILDS_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_GUILDS_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_GUILDS_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_GUILDS_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_GUILDS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_GUILDS_QUOTE1',
-					'TXT_KEY_CIVIC_GUILDS_QUOTE2'
+					_('TXT_KEY_CIVIC_GUILDS_QUOTE1'),
+					_('TXT_KEY_CIVIC_GUILDS_QUOTE2')
 				],
 				era=EraType.medieval,
 				cost=385,
@@ -1879,12 +1879,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.mercenaries:
 			# https://civilization.fandom.com/wiki/Mercenaries_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_MERCENARIES_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_MERCENARIES_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_MERCENARIES_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_MERCENARIES_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_MERCENARIES_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_MERCENARIES_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_MERCENARIES_QUOTE1',
-					'TXT_KEY_CIVIC_MERCENARIES_QUOTE2'
+					_('TXT_KEY_CIVIC_MERCENARIES_QUOTE1'),
+					_('TXT_KEY_CIVIC_MERCENARIES_QUOTE2')
 				],
 				era=EraType.medieval,
 				cost=290,
@@ -1896,12 +1896,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.divineRight:
 			# https://civilization.fandom.com/wiki/Divine_Right_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_DIVINE_RIGHT_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_DIVINE_RIGHT_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_DIVINE_RIGHT_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_DIVINE_RIGHT_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_DIVINE_RIGHT_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_DIVINE_RIGHT_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_DIVINE_RIGHT_QUOTE1',
-					'TXT_KEY_CIVIC_DIVINE_RIGHT_QUOTE2'
+					_('TXT_KEY_CIVIC_DIVINE_RIGHT_QUOTE1'),
+					_('TXT_KEY_CIVIC_DIVINE_RIGHT_QUOTE2')
 				],
 				era=EraType.medieval,
 				cost=290,
@@ -1915,12 +1915,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.enlightenment:
 			# https://civilization.fandom.com/wiki/The_Enlightenment_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_ENLIGHTENMENT_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_ENLIGHTENMENT_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_ENLIGHTENMENT_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_ENLIGHTENMENT_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_ENLIGHTENMENT_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_ENLIGHTENMENT_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_ENLIGHTENMENT_QUOTE1',
-					'TXT_KEY_CIVIC_ENLIGHTENMENT_QUOTE2'
+					_('TXT_KEY_CIVIC_ENLIGHTENMENT_QUOTE1'),
+					_('TXT_KEY_CIVIC_ENLIGHTENMENT_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=655,
@@ -1932,12 +1932,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.humanism:
 			# https://civilization.fandom.com/wiki/Humanism_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_HUMANISM_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_HUMANISM_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_HUMANISM_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_HUMANISM_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_HUMANISM_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_HUMANISM_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_HUMANISM_QUOTE1',
-					'TXT_KEY_CIVIC_HUMANISM_QUOTE2'
+					_('TXT_KEY_CIVIC_HUMANISM_QUOTE1'),
+					_('TXT_KEY_CIVIC_HUMANISM_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=540,
@@ -1949,12 +1949,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.mercantilism:
 			# https://civilization.fandom.com/wiki/Mercantilism_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_MERCANTILISM_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_MERCANTILISM_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_MERCANTILISM_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_MERCANTILISM_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_MERCANTILISM_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_MERCANTILISM_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_MERCANTILISM_QUOTE1',
-					'TXT_KEY_CIVIC_MERCANTILISM_QUOTE2'
+					_('TXT_KEY_CIVIC_MERCANTILISM_QUOTE1'),
+					_('TXT_KEY_CIVIC_MERCANTILISM_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=655,
@@ -1966,12 +1966,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.diplomaticService:
 			# https://civilization.fandom.com/wiki/Diplomatic_Service_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_DIPLOMATIC_SERVICE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_DIPLOMATIC_SERVICE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_DIPLOMATIC_SERVICE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_DIPLOMATIC_SERVICE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_DIPLOMATIC_SERVICE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_DIPLOMATIC_SERVICE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_DIPLOMATIC_SERVICE_QUOTE1',
-					'TXT_KEY_CIVIC_DIPLOMATIC_SERVICE_QUOTE2'
+					_('TXT_KEY_CIVIC_DIPLOMATIC_SERVICE_QUOTE1'),
+					_('TXT_KEY_CIVIC_DIPLOMATIC_SERVICE_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=540,
@@ -1983,12 +1983,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.exploration:
 			# https://civilization.fandom.com/wiki/Exploration_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_EXPLORATION_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_EXPLORATION_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_EXPLORATION_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_EXPLORATION_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_EXPLORATION_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_EXPLORATION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_EXPLORATION_QUOTE1',
-					'TXT_KEY_CIVIC_EXPLORATION_QUOTE2'
+					_('TXT_KEY_CIVIC_EXPLORATION_QUOTE1'),
+					_('TXT_KEY_CIVIC_EXPLORATION_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=400,
@@ -2000,12 +2000,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.reformedChurch:
 			# https://civilization.fandom.com/wiki/Reformed_Church_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_REFORMED_CHURCH_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_REFORMED_CHURCH_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_REFORMED_CHURCH_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_REFORMED_CHURCH_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_REFORMED_CHURCH_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_REFORMED_CHURCH_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_REFORMED_CHURCH_QUOTE1',
-					'TXT_KEY_CIVIC_REFORMED_CHURCH_QUOTE2'
+					_('TXT_KEY_CIVIC_REFORMED_CHURCH_QUOTE1'),
+					_('TXT_KEY_CIVIC_REFORMED_CHURCH_QUOTE2')
 				],
 				era=EraType.renaissance,
 				cost=400,
@@ -2019,12 +2019,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.civilEngineering:
 			# https://civilization.fandom.com/wiki/Civil_Engineering_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_CIVIL_ENGINEERING_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_CIVIL_ENGINEERING_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_CIVIL_ENGINEERING_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_CIVIL_ENGINEERING_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_CIVIL_ENGINEERING_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_CIVIL_ENGINEERING_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_CIVIL_ENGINEERING_QUOTE1',
-					'TXT_KEY_CIVIC_CIVIL_ENGINEERING_QUOTE2'
+					_('TXT_KEY_CIVIC_CIVIL_ENGINEERING_QUOTE1'),
+					_('TXT_KEY_CIVIC_CIVIL_ENGINEERING_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=920,
@@ -2036,12 +2036,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.colonialism:
 			# https://civilization.fandom.com/wiki/Colonialism_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_COLONIALISM_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_COLONIALISM_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_COLONIALISM_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_COLONIALISM_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_COLONIALISM_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_COLONIALISM_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_COLONIALISM_QUOTE1',
-					'TXT_KEY_CIVIC_COLONIALISM_QUOTE2'
+					_('TXT_KEY_CIVIC_COLONIALISM_QUOTE1'),
+					_('TXT_KEY_CIVIC_COLONIALISM_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=725,
@@ -2053,12 +2053,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.nationalism:
 			# https://civilization.fandom.com/wiki/Nationalism_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_NATIONALISM_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_NATIONALISM_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_NATIONALISM_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_NATIONALISM_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_NATIONALISM_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_NATIONALISM_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_NATIONALISM_QUOTE1',
-					'TXT_KEY_CIVIC_NATIONALISM_QUOTE2'
+					_('TXT_KEY_CIVIC_NATIONALISM_QUOTE1'),
+					_('TXT_KEY_CIVIC_NATIONALISM_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=920,
@@ -2070,12 +2070,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.operaAndBallet:
 			# https://civilization.fandom.com/wiki/Opera_and_Ballet_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_OPERA_AND_BALLET_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_OPERA_AND_BALLET_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_OPERA_AND_BALLET_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_OPERA_AND_BALLET_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_OPERA_AND_BALLET_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_OPERA_AND_BALLET_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_OPERA_AND_BALLET_QUOTE1',
-					'TXT_KEY_CIVIC_OPERA_AND_BALLET_QUOTE2'
+					_('TXT_KEY_CIVIC_OPERA_AND_BALLET_QUOTE1'),
+					_('TXT_KEY_CIVIC_OPERA_AND_BALLET_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=725,
@@ -2087,12 +2087,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.naturalHistory:
 			# https://civilization.fandom.com/wiki/Natural_History_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_NATURAL_HISTORY_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_NATURAL_HISTORY_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_NATURAL_HISTORY_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_NATURAL_HISTORY_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_NATURAL_HISTORY_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_NATURAL_HISTORY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_NATURAL_HISTORY_QUOTE1',
-					'TXT_KEY_CIVIC_NATURAL_HISTORY_QUOTE2'
+					_('TXT_KEY_CIVIC_NATURAL_HISTORY_QUOTE1'),
+					_('TXT_KEY_CIVIC_NATURAL_HISTORY_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=870,
@@ -2104,12 +2104,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.urbanization:
 			# https://civilization.fandom.com/wiki/Urbanization_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_URBANIZATION_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_URBANIZATION_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_URBANIZATION_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_URBANIZATION_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_URBANIZATION_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_URBANIZATION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_URBANIZATION_QUOTE1',
-					'TXT_KEY_CIVIC_URBANIZATION_QUOTE2'
+					_('TXT_KEY_CIVIC_URBANIZATION_QUOTE1'),
+					_('TXT_KEY_CIVIC_URBANIZATION_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=1060,
@@ -2121,12 +2121,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.scorchedEarth:
 			# https://civilization.fandom.com/wiki/Scorched_Earth_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_SCORCHED_EARTH_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_SCORCHED_EARTH_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_SCORCHED_EARTH_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_SCORCHED_EARTH_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_SCORCHED_EARTH_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_SCORCHED_EARTH_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_SCORCHED_EARTH_QUOTE1',
-					'TXT_KEY_CIVIC_SCORCHED_EARTH_QUOTE2'
+					_('TXT_KEY_CIVIC_SCORCHED_EARTH_QUOTE1'),
+					_('TXT_KEY_CIVIC_SCORCHED_EARTH_QUOTE2')
 				],
 				era=EraType.industrial,
 				cost=1060,
@@ -2140,12 +2140,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.conservation:
 			# https://civilization.fandom.com/wiki/Conservation_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_CONSERVATION_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_CONSERVATION_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_CONSERVATION_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_CONSERVATION_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_CONSERVATION_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_CONSERVATION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_CONSERVATION_QUOTE1',
-					'TXT_KEY_CIVIC_CONSERVATION_QUOTE2'
+					_('TXT_KEY_CIVIC_CONSERVATION_QUOTE1'),
+					_('TXT_KEY_CIVIC_CONSERVATION_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1255,
@@ -2157,12 +2157,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.massMedia:
 			# https://civilization.fandom.com/wiki/Mass_Media_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_MASS_MEDIA_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_MASS_MEDIA_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_MASS_MEDIA_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_MASS_MEDIA_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_MASS_MEDIA_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_MASS_MEDIA_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_MASS_MEDIA_QUOTE1',
-					'TXT_KEY_CIVIC_MASS_MEDIA_QUOTE2'
+					_('TXT_KEY_CIVIC_MASS_MEDIA_QUOTE1'),
+					_('TXT_KEY_CIVIC_MASS_MEDIA_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1410,
@@ -2174,12 +2174,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.mobilization:
 			# https://civilization.fandom.com/wiki/Mobilization_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_MOBILIZATION_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_MOBILIZATION_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_MOBILIZATION_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_MOBILIZATION_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_MOBILIZATION_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_MOBILIZATION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_MOBILIZATION_QUOTE1',
-					'TXT_KEY_CIVIC_MOBILIZATION_QUOTE2'
+					_('TXT_KEY_CIVIC_MOBILIZATION_QUOTE1'),
+					_('TXT_KEY_CIVIC_MOBILIZATION_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1410,
@@ -2191,12 +2191,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.capitalism:
 			# https://civilization.fandom.com/wiki/Capitalism_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_CAPITALISM_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_CAPITALISM_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_CAPITALISM_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_CAPITALISM_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_CAPITALISM_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_CAPITALISM_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_CAPITALISM_QUOTE1',
-					'TXT_KEY_CIVIC_CAPITALISM_QUOTE2'
+					_('TXT_KEY_CIVIC_CAPITALISM_QUOTE1'),
+					_('TXT_KEY_CIVIC_CAPITALISM_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1560,
@@ -2208,12 +2208,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.ideology:
 			# https://civilization.fandom.com/wiki/Ideology_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_IDEOLOGY_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_IDEOLOGY_EUREKA',  # no inspiration
-				inspiration_description='TXT_KEY_CIVIC_IDEOLOGY_EUREKA_TEXT',  # no inspiration
+				name=_('TXT_KEY_CIVIC_IDEOLOGY_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_IDEOLOGY_EUREKA'),  # no inspiration
+				inspiration_description=_('TXT_KEY_CIVIC_IDEOLOGY_EUREKA_TEXT'),  # no inspiration
 				quoteTexts=[
-					'TXT_KEY_CIVIC_IDEOLOGY_QUOTE1',
-					'TXT_KEY_CIVIC_IDEOLOGY_QUOTE2'
+					_('TXT_KEY_CIVIC_IDEOLOGY_QUOTE1'),
+					_('TXT_KEY_CIVIC_IDEOLOGY_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=660,
@@ -2225,12 +2225,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.nuclearProgram:
 			# https://civilization.fandom.com/wiki/Nuclear_Program_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_NUCLEAR_PROGRAM_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_NUCLEAR_PROGRAM_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_NUCLEAR_PROGRAM_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_NUCLEAR_PROGRAM_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_NUCLEAR_PROGRAM_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_NUCLEAR_PROGRAM_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_NUCLEAR_PROGRAM_QUOTE1',
-					'TXT_KEY_CIVIC_NUCLEAR_PROGRAM_QUOTE2'
+					_('TXT_KEY_CIVIC_NUCLEAR_PROGRAM_QUOTE1'),
+					_('TXT_KEY_CIVIC_NUCLEAR_PROGRAM_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1715,
@@ -2242,12 +2242,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.suffrage:
 			# https://civilization.fandom.com/wiki/Suffrage_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_SUFFRAGE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_SUFFRAGE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_SUFFRAGE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_SUFFRAGE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_SUFFRAGE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_SUFFRAGE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_SUFFRAGE_QUOTE1',
-					'TXT_KEY_CIVIC_SUFFRAGE_QUOTE2'
+					_('TXT_KEY_CIVIC_SUFFRAGE_QUOTE1'),
+					_('TXT_KEY_CIVIC_SUFFRAGE_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1715,
@@ -2259,12 +2259,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.totalitarianism:
 			# https://civilization.fandom.com/wiki/Totalitarianism_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_TOTALITARIANISM_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_TOTALITARIANISM_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_TOTALITARIANISM_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_TOTALITARIANISM_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_TOTALITARIANISM_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_TOTALITARIANISM_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_TOTALITARIANISM_QUOTE1',
-					'TXT_KEY_CIVIC_TOTALITARIANISM_QUOTE2'
+					_('TXT_KEY_CIVIC_TOTALITARIANISM_QUOTE1'),
+					_('TXT_KEY_CIVIC_TOTALITARIANISM_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1715,
@@ -2276,12 +2276,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.classStruggle:
 			# https://civilization.fandom.com/wiki/Class_Struggle_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_CLASS_STRUGGLE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_CLASS_STRUGGLE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_CLASS_STRUGGLE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_CLASS_STRUGGLE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_CLASS_STRUGGLE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_CLASS_STRUGGLE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_CLASS_STRUGGLE_QUOTE1',
-					'TXT_KEY_CIVIC_CLASS_STRUGGLE_QUOTE2'
+					_('TXT_KEY_CIVIC_CLASS_STRUGGLE_QUOTE1'),
+					_('TXT_KEY_CIVIC_CLASS_STRUGGLE_QUOTE2')
 				],
 				era=EraType.modern,
 				cost=1715,
@@ -2295,12 +2295,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.culturalHeritage:
 			# https://civilization.fandom.com/wiki/Cultural_Heritage_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_CULTURAL_HERITAGE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_CULTURAL_HERITAGE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_CULTURAL_HERITAGE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_CULTURAL_HERITAGE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_CULTURAL_HERITAGE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_CULTURAL_HERITAGE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_CULTURAL_HERITAGE_QUOTE1',
-					'TXT_KEY_CIVIC_CULTURAL_HERITAGE_QUOTE2'
+					_('TXT_KEY_CIVIC_CULTURAL_HERITAGE_QUOTE1'),
+					_('TXT_KEY_CIVIC_CULTURAL_HERITAGE_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=1955,
@@ -2312,12 +2312,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.coldWar:
 			# https://civilization.fandom.com/wiki/Cold_War_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_COLD_WAR_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_COLD_WAR_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_COLD_WAR_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_COLD_WAR_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_COLD_WAR_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_COLD_WAR_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_COLD_WAR_QUOTE1',
-					'TXT_KEY_CIVIC_COLD_WAR_QUOTE2'
+					_('TXT_KEY_CIVIC_COLD_WAR_QUOTE1'),
+					_('TXT_KEY_CIVIC_COLD_WAR_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=2185,
@@ -2329,12 +2329,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.professionalSports:
 			# https://civilization.fandom.com/wiki/Professional_Sports_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_PROFESSIONAL_SPORTS_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_PROFESSIONAL_SPORTS_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_PROFESSIONAL_SPORTS_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_PROFESSIONAL_SPORTS_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_PROFESSIONAL_SPORTS_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_PROFESSIONAL_SPORTS_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_PROFESSIONAL_SPORTS_QUOTE1',
-					'TXT_KEY_CIVIC_PROFESSIONAL_SPORTS_QUOTE2'
+					_('TXT_KEY_CIVIC_PROFESSIONAL_SPORTS_QUOTE1'),
+					_('TXT_KEY_CIVIC_PROFESSIONAL_SPORTS_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=2185,
@@ -2346,12 +2346,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.rapidDeployment:
 			# https://civilization.fandom.com/wiki/Rapid_Deployment_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_RAPID_DEPLOYMENT_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_RAPID_DEPLOYMENT_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_RAPID_DEPLOYMENT_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_RAPID_DEPLOYMENT_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_RAPID_DEPLOYMENT_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_RAPID_DEPLOYMENT_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_RAPID_DEPLOYMENT_QUOTE1',
-					'TXT_KEY_CIVIC_RAPID_DEPLOYMENT_QUOTE2'
+					_('TXT_KEY_CIVIC_RAPID_DEPLOYMENT_QUOTE1'),
+					_('TXT_KEY_CIVIC_RAPID_DEPLOYMENT_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=2415,
@@ -2363,12 +2363,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.spaceRace:
 			# https://civilization.fandom.com/wiki/Space_Race_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_SPACE_RACE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_SPACE_RACE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_SPACE_RACE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_SPACE_RACE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_SPACE_RACE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_SPACE_RACE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_SPACE_RACE_QUOTE1',
-					'TXT_KEY_CIVIC_SPACE_RACE_QUOTE2'
+					_('TXT_KEY_CIVIC_SPACE_RACE_QUOTE1'),
+					_('TXT_KEY_CIVIC_SPACE_RACE_QUOTE2')
 				],
 				era=EraType.atomic,
 				cost=2415,
@@ -2382,11 +2382,11 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.environmentalism:
 			# https://civilization.fandom.com/wiki/Environmentalism_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_ENVIRONMENTALISM_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_ENVIRONMENTALISM_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_ENVIRONMENTALISM_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_ENVIRONMENTALISM_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_ENVIRONMENTALISM_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_ENVIRONMENTALISM_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_ENVIRONMENTALISM_QUOTE1'
+					_('TXT_KEY_CIVIC_ENVIRONMENTALISM_QUOTE1')
 				],
 				era=EraType.information,
 				cost=2880,
@@ -2398,12 +2398,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.globalization:
 			# https://civilization.fandom.com/wiki/Globalization_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_GLOBALIZATION_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_GLOBALIZATION_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_GLOBALIZATION_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_GLOBALIZATION_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_GLOBALIZATION_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_GLOBALIZATION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_GLOBALIZATION_QUOTE1',
-					'TXT_KEY_CIVIC_GLOBALIZATION_QUOTE2'
+					_('TXT_KEY_CIVIC_GLOBALIZATION_QUOTE1'),
+					_('TXT_KEY_CIVIC_GLOBALIZATION_QUOTE2')
 				],
 				era=EraType.information,
 				cost=2880,
@@ -2415,12 +2415,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.socialMedia:
 			# https://civilization.fandom.com/wiki/Social_Media_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_SOCIAL_MEDIA_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_SOCIAL_MEDIA_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_SOCIAL_MEDIA_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_SOCIAL_MEDIA_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_SOCIAL_MEDIA_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_SOCIAL_MEDIA_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_SOCIAL_MEDIA_QUOTE1',
-					'TXT_KEY_CIVIC_SOCIAL_MEDIA_QUOTE2'
+					_('TXT_KEY_CIVIC_SOCIAL_MEDIA_QUOTE1'),
+					_('TXT_KEY_CIVIC_SOCIAL_MEDIA_QUOTE2')
 				],
 				era=EraType.information,
 				cost=2880,
@@ -2434,11 +2434,11 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.nearFutureGovernance:
 			# https://civilization.fandom.com/wiki/Near_Future_Governance_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_NEAR_FUTURE_GOVERNANCE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_NEAR_FUTURE_GOVERNANCE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_NEAR_FUTURE_GOVERNANCE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_NEAR_FUTURE_GOVERNANCE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_NEAR_FUTURE_GOVERNANCE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_NEAR_FUTURE_GOVERNANCE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_NEAR_FUTURE_GOVERNANCE_QUOTE1'
+					_('TXT_KEY_CIVIC_NEAR_FUTURE_GOVERNANCE_QUOTE1')
 				],
 				era=EraType.future,
 				cost=3100,
@@ -2456,12 +2456,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.informationWarfare:
 			# https://civilization.fandom.com/wiki/Information_Warfare_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_INFORMATION_WARFARE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_INFORMATION_WARFARE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_INFORMATION_WARFARE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_INFORMATION_WARFARE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_INFORMATION_WARFARE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_INFORMATION_WARFARE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_INFORMATION_WARFARE_QUOTE1',
-					'TXT_KEY_CIVIC_INFORMATION_WARFARE_QUOTE2'
+					_('TXT_KEY_CIVIC_INFORMATION_WARFARE_QUOTE1'),
+					_('TXT_KEY_CIVIC_INFORMATION_WARFARE_QUOTE2')
 				],
 				era=EraType.future,
 				cost=3200,
@@ -2473,12 +2473,12 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.globalWarmingMitigation:
 			# https://civilization.fandom.com/wiki/Global_Warming_Mitigation_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_GLOBAL_WARMING_MITIGATION_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_GLOBAL_WARMING_MITIGATION_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_GLOBAL_WARMING_MITIGATION_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_GLOBAL_WARMING_MITIGATION_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_GLOBAL_WARMING_MITIGATION_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_GLOBAL_WARMING_MITIGATION_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_GLOBAL_WARMING_MITIGATION_QUOTE1',
-					'TXT_KEY_CIVIC_GLOBAL_WARMING_MITIGATION_QUOTE2'
+					_('TXT_KEY_CIVIC_GLOBAL_WARMING_MITIGATION_QUOTE1'),
+					_('TXT_KEY_CIVIC_GLOBAL_WARMING_MITIGATION_QUOTE2')
 				],
 				era=EraType.future,
 				cost=3200,
@@ -2490,11 +2490,11 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.culturalHegemony:
 			# https://civilization.fandom.com/wiki/Cultural_Hegemony_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_CULTURAL_HEGEMONY_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_CULTURAL_HEGEMONY_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_CULTURAL_HEGEMONY_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_CULTURAL_HEGEMONY_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_CULTURAL_HEGEMONY_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_CULTURAL_HEGEMONY_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_CULTURAL_HEGEMONY_QUOTE1'
+					_('TXT_KEY_CIVIC_CULTURAL_HEGEMONY_QUOTE1')
 				],
 				era=EraType.future,
 				cost=3200,
@@ -2506,11 +2506,11 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.exodusImperative:
 			# https://civilization.fandom.com/wiki/Exodus_Imperative_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_EXODUS_IMPERATIVE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_EXODUS_IMPERATIVE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_EXODUS_IMPERATIVE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_EXODUS_IMPERATIVE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_EXODUS_IMPERATIVE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_EXODUS_IMPERATIVE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_EXODUS_IMPERATIVE_QUOTE1'
+					_('TXT_KEY_CIVIC_EXODUS_IMPERATIVE_QUOTE1')
 				],
 				era=EraType.future,
 				cost=3200,
@@ -2522,11 +2522,11 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.smartPowerDoctrine:
 			# https://civilization.fandom.com/wiki/Smart_Power_Doctrine_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_SMART_POWER_DOCTRINE_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_SMART_POWER_DOCTRINE_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_SMART_POWER_DOCTRINE_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_SMART_POWER_DOCTRINE_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_SMART_POWER_DOCTRINE_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_SMART_POWER_DOCTRINE_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_SMART_POWER_DOCTRINE_QUOTE1'
+					_('TXT_KEY_CIVIC_SMART_POWER_DOCTRINE_QUOTE1')
 				],
 				era=EraType.future,
 				cost=3200,
@@ -2538,11 +2538,11 @@ class CivicType(ExtendedEnum):
 		elif self == CivicType.futureCivic:
 			# https://civilization.fandom.com/wiki/Future_Civic_(Civ6)
 			return CivicTypeData(
-				name='TXT_KEY_CIVIC_FUTURE_CIVIC_TITLE',
-				inspiration_summary='TXT_KEY_CIVIC_FUTURE_CIVIC_EUREKA',
-				inspiration_description='TXT_KEY_CIVIC_FUTURE_CIVIC_EUREKA_TEXT',
+				name=_('TXT_KEY_CIVIC_FUTURE_CIVIC_TITLE'),
+				inspiration_summary=_('TXT_KEY_CIVIC_FUTURE_CIVIC_EUREKA'),
+				inspiration_description=_('TXT_KEY_CIVIC_FUTURE_CIVIC_EUREKA_TEXT'),
 				quoteTexts=[
-					'TXT_KEY_CIVIC_FUTURE_CIVIC_QUOTE1'
+					_('TXT_KEY_CIVIC_FUTURE_CIVIC_QUOTE1')
 				],
 				era=EraType.future,
 				cost=3200,

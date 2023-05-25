@@ -26,7 +26,7 @@ run: venv
 
 l18n_prepare: $(PY_FILES)
 	which xgettext || (echo "You have to install gettext (brew install gettext)" ; exit 1)
-	xgettext -k_ -kN_ --from-code=UTF-8 -o locales/base.pot $^
+	find . -iname "*.py" | xargs xgettext -L Python -o locales/base.pot
 
 l18n_extract:
 	mkdir -p 'locales/en/LC_MESSAGES'

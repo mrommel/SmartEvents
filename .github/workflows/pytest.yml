@@ -32,7 +32,7 @@ jobs:
           sudo apt-get install -y gettext
           
           which xgettext || (echo "You have to install gettext (brew install gettext)" ; exit 1)
-          xgettext -k_ -kN_ --from-code=UTF-8 -o locales/base.pot $^
+          find . -iname "*.py" | xargs xgettext -L Python -o locales/base.pot 
 
           mkdir -p 'locales/en/LC_MESSAGES'
           [ -e 'locales/en/LC_MESSAGES/base.po' ] || msginit --no-translator -l en -i 'locales/base.pot' -o 'locales/en/LC_MESSAGES/base.po'
