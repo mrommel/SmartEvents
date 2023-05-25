@@ -27,6 +27,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-cov
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Prepare localization
+          which xgettext || (echo "You have to install gettext (brew install gettext)" ; exit 1)
+          xgettext -k_ -kN_ --from-code=UTF-8 -o locales/base.pot $^
+
+          mkdir -p 'locales/en/LC_MESSAGES'
+          [ -e 'locales/en/LC_MESSAGES/base.po' ] || msginit --no-translator -l en -i 'locales/base.pot' -o 'locales/en/LC_MESSAGES/base.po'
+          msgmerge -N -U 'locales/en/LC_MESSAGES/base.po' 'locales/base.pot'
+
+          msgfmt 'locales/en/LC_MESSAGES/base.po' -o 'locales/en/LC_MESSAGES/base.mo'
       - name: Test with pytest
         run: |
           pytest -q tests/test_basics.py -q tests/test_game.py -q tests/test_map.py --cov
