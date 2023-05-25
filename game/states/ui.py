@@ -20,6 +20,9 @@ class Interface:
 	def refreshUnit(self, unit):
 		pass
 
+	def hideUnit(self, unit, location):
+		pass
+
 
 class ScreenType(ExtendedEnum):
 	diplomatic = 'diplomatic'

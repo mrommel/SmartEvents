@@ -7,8 +7,8 @@ from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.states.dedications import DedicationType
-from game.types import EraType
-from game.unitTypes import UnitTaskType, UnitType, PromotionType, MoveOptions, UnitMissionType
+from game.types import EraType, TechType
+from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOptions, UnitMissionType
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
 from map.types import UnitDomainType, YieldType
@@ -288,19 +288,19 @@ class Unit:
 		# } * /
 
 		# commando - +1 Movement.
-		if self.hasPromotion(PromotionType.commando):
+		if self.hasPromotion(UnitPromotionType.commando):
 			moveVal += 1
 
 		# pursuit - +1 Movement.
-		if self.hasPromotion(PromotionType.pursuit):
+		if self.hasPromotion(UnitPromotionType.pursuit):
 			moveVal += 1
 
 		# redeploy - +1 Movement.
-		if self.hasPromotion(PromotionType.redeploy):
+		if self.hasPromotion(UnitPromotionType.redeploy):
 			moveVal += 1
 
 		# helmsman - +1 Movement.
-		if self.hasPromotion(PromotionType.helmsman):
+		if self.hasPromotion(UnitPromotionType.helmsman):
 			moveVal += 1
 
 		# militaryOrganization - +2 Great General points for every Armory and +4 Great General points for every Military Academy.
@@ -348,7 +348,7 @@ class Unit:
 	def movesLeft(self) -> int:
 		return max(0, self.moves())
 
-	def hasPromotion(self, promotion: PromotionType) -> bool:
+	def hasPromotion(self, promotion: UnitPromotionType) -> bool:
 		return False
 
 	def canMoveInto(self, point, options, simulation):
@@ -655,9 +655,26 @@ class Unit:
 
 		return True
 
-	def doKillDelayed(self, param, param1, simulation):
-		# fixme
-		pass
+	def doKillDelayed(self, delayed: bool, otherPlayer, simulation):
+		if self.player.isBarbarian():
+			# Bronze Working eureka: Kill 3 Barbarians
+			otherPlayer.techs.changeEurekaValueFor(TechType.bronzeWorking, change=1)
+
+			if otherPlayer.tech.changeEurekaValueFor(TechType.bronzeWorking) >= 3:
+				otherPlayer.tech.triggerEurekaFor(TechType.bronzeWorking, simulation)
+
+		if delayed:
+			self.startDelayedDeath()
+			return
+
+		if otherPlayer is not None:
+			# FIXME - add die visualization
+			pass
+
+		simulation.concealAt(self.location, sight=self.sight(), unit=self, player=self.player)
+
+		simulation.userInterface.hideUnit(self, self.location)
+		simulation.removeUnit(self)
 
 	def canHoldAt(self, location, simulation):
 		# fixme
@@ -672,4 +689,17 @@ class Unit:
 				self._activityTypeValue = UnitActivityType.none
 
 		return
+
+	def sight(self):
+		sightValue = self.unitType.sight()
+
+		# spyglass - +1 sight range.
+		if self.hasPromotion(UnitPromotionType.spyglass):
+			sightValue += 1
+
+		# rutter - +1 sight range.
+		if self.hasPromotion(UnitPromotionType.rutter):
+			sightValue += 1
+
+		return sightValue
 

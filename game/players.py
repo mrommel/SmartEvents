@@ -462,7 +462,7 @@ class Player:
 		#                                 pathTile.set(route: self.bestRoute())
 
 		# send gossip
-		# gameModel.sendGossip(type: .cityFounded(cityName: cityName), of: self)
+		simulation.sendGossip(GossipType.cityFounded, cityName=cityName, player=self)
 
 		self.citiesFoundValue += 1
 

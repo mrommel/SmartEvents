@@ -14,7 +14,7 @@ from game.states.builds import BuildType
 from game.states.ui import ScreenType
 from game.states.victories import VictoryType
 from game.types import TechType
-from game.unitTypes import UnitMapType, UnitAbilityType, PromotionType
+from game.unitTypes import UnitMapType, UnitAbilityType, UnitPromotionType
 from game.units import Unit
 from map.base import HexPoint
 from map.improvements import ImprovementType
@@ -137,6 +137,9 @@ class Game:
 	def addUnit(self, unit):
 		self._map.addUnit(unit)
 
+	def removeUnit(self, unit):
+		self._map.removeUnit(unit)
+
 	def citiesOf(self, player) -> [City]:
 		return self._map.citiesOf(player)
 
@@ -153,7 +156,7 @@ class Game:
 
 		tile.setFeature(FeatureType.none)
 
-		self._map.addCity(city, self)
+		self._map.addCity(city, simulation=self)
 		# self.userInterface?.show(city: city)
 
 		# update area around the city
@@ -169,7 +172,7 @@ class Game:
 			if self._map.isCoastalAt(city.location):
 				city.player.techs.triggerEurekaFor(TechType.sailing, self)
 
-		self._map.addCity(city, simulation=self)
+		return
 
 	def tileAt(self, location) -> Tile:
 		return self._map.tileAt(location)
@@ -486,12 +489,12 @@ class Game:
 	def updateTacticalAnalysisMap(self, player):
 		pass
 
-	def sightAt(self, location: HexPoint, sight: int, unit = None, player = None):
+	def sightAt(self, location: HexPoint, sight: int, unit=None, player=None):
 		if player is None:
 			raise Exception("cant get player")
 
 		currentTile = self.tileAt(location)
-		hasSentry: bool = unit.hasPromotion(PromotionType.sentry) if unit is not None else False
+		hasSentry: bool = unit.hasPromotion(UnitPromotionType.sentry) if unit is not None else False
 
 		for areaPoint in location.areaWithRadius(sight):
 			tile = self.tileAt(areaPoint)
@@ -544,6 +547,22 @@ class Game:
 			if continent is not None:
 				self.checkDiscoveredContinent(continent, areaPoint, player)
 			self.userInterface.refreshTile(tile)
+
+		return
+
+	def concealAt(self, location: HexPoint, sight: int, unit=None, player=None):
+		currentTile = self.tileAt(location)
+
+		hasSentry: bool = unit.hasPromotion(UnitPromotionType.sentry) if unit is not None else False
+
+		for loopPoint in location.areaWithRadius(sight):
+			loopTile = self.tileAt(loopPoint)
+
+			if not loopTile.canSeeTile(currentTile, player, sight, hasSentry=hasSentry, simulation=self):
+				continue
+
+			loopTile.concealTo(player)
+			self.userInterface.refreshTile(loopTile)
 
 		return
 

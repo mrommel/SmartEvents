@@ -11,12 +11,14 @@ from utils.base import InvalidEnumError
 # from utils.translation import gettext_lazy as _
 
 
-class PromotionType(ExtendedEnum):
+class UnitPromotionType(ExtendedEnum):
+	spyglass = 'spyglass'
 	commando = 'commando'
 	helmsman = 'helmsman'
 	redeploy = 'redeploy'
 	pursuit = 'pursuit'
 	sentry = 'sentry'
+	rutter = 'rutter'
 
 
 class UnitMapType(ExtendedEnum):
@@ -263,6 +265,9 @@ class UnitType(ExtendedEnum):
 
 	def abilities(self) -> [UnitAbilityType]:
 		return self._data().abilities
+
+	def sight(self) -> int:
+		return self._data().sight
 
 	def _data(self) -> UnitTypeData:
 		# default ------------------------------
