@@ -28,6 +28,7 @@ jobs:
           pip install pytest pytest-cov
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Prepare localization
+        run: |
           which xgettext || (echo "You have to install gettext (brew install gettext)" ; exit 1)
           xgettext -k_ -kN_ --from-code=UTF-8 -o locales/base.pot $^
 
