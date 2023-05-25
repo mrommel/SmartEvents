@@ -12,6 +12,16 @@ from map.types import FeatureType, TerrainType, UnitMovementType, MapSize, MapTy
 from tests.testBasics import UserInterfaceMock, MapMock
 
 
+class TestMapAssets(unittest.TestCase):
+	def test_mapSize_data(self):
+		for mapSize in list(MapSize):
+			_ = mapSize.name()
+
+	def test_mapType_data(self):
+		for mapType in list(MapType):
+			_ = mapType.name()
+
+
 class TestArray2D(unittest.TestCase):
 	def test_constructor(self):
 		"""Test the Array2D constructor"""
@@ -411,7 +421,7 @@ class TestMapGenerator(unittest.TestCase):
 			print(f'Progress: {state.value} - {state.message} ', flush=True)
 			self.last_state_value = state.value
 
-		options = MapOptions(mapSize=MapSize.DUEL, mapType=MapType.CONTINENTS, leader=LeaderType.trajan)
+		options = MapOptions(mapSize=MapSize.duel, mapType=MapType.continents, leader=LeaderType.trajan)
 		generator = MapGenerator(options)
 
 		grid = generator.generate(_callback)

@@ -115,13 +115,13 @@ class MapOptions:
 
     def waterPercentage(self):
         """ abc """
-        if self.mapType == MapType.CONTINENTS:
+        if self.mapType == MapType.continents:
             return 0.52  # low
-        elif self.mapType == MapType.EARTH:
+        elif self.mapType == MapType.earth:
             return 0.65
-        elif self.mapType == MapType.PANGAEA:
+        elif self.mapType == MapType.pangaea:
             return 0.65
-        elif self.mapType == MapType.ARCHIPELAGO:
+        elif self.mapType == MapType.archipelago:
             return 0.65
         #
         #         case .custom:
@@ -728,11 +728,11 @@ class MapGenerator:
         return grid
 
     def _generateHeightMap(self):
-        if self.options.mapType == MapType.CONTINENTS:
+        if self.options.mapType == MapType.continents:
             return HeightMap(self.width, self.height, 4)
-        elif self.options.mapType == MapType.PANGAEA:
+        elif self.options.mapType == MapType.pangaea:
             return HeightMap(self.width, self.height, 2)
-        elif self.options.mapType == MapType.ARCHIPELAGO:
+        elif self.options.mapType == MapType.archipelago:
             return HeightMap(self.width, self.height, 8)
         else:
             return HeightMap(self.width, self.height, 4)  # fallback
@@ -1183,7 +1183,7 @@ class MapGenerator:
         # https://github.com/Gedemon/Civ5-YnAEMP/blob/db7cd1bc6a0684411aba700838184bcc6272b166/Override/WorldBuilderRandomItems.lua
         # get info about current resource in map
         info = self.numberOfResources(grid, resource)
-        mapFactor = grid.width * grid.height * 100 / (MapSize.STANDARD.size().width * MapSize.STANDARD.size().height)
+        mapFactor = grid.width * grid.height * 100 / (MapSize.standard.size().width * MapSize.standard.size().height)
         absolute_amount = max(1, resource.baseAmount() * mapFactor / 100)
 
         # skip random altering for tests

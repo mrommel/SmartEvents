@@ -22,62 +22,101 @@ class MapAge(Enum):
 
 
 class MapSizeData:
-	def __init__(self, name: str, size: Size, numPlayers: int):
+	def __init__(self, name: str, size: Size, numPlayers: int, numberOfCityStates: int):
 		self.name = name
 		self.size = size
 		self.numPlayers = numPlayers
+		self.numberOfCityStates = numberOfCityStates
 
 
 class MapSize(Enum):
-	DUEL = 'duel'  # _('TXT_KEY_MAP_SIZE_DUEL_NAME')
-	TINY = 'tiny'  # _('TXT_KEY_MAP_SIZE_TINY_NAME')
-	SMALL = 'small'  # _('TXT_KEY_MAP_SIZE_SMALL_NAME')
-	STANDARD = 'standard'  # _('TXT_KEY_MAP_SIZE_STANDARD_NAME')
+	duel = 'duel'
+	tiny = 'tiny'
+	small = 'small'
+	standard = 'standard'
+
+	def name(self) -> str:
+		return self._data().name
 
 	def size(self) -> Size:
 		return self._data().size
 
-	def _data(self):
-		if self == MapSize.DUEL:
-			return MapSizeData(
-				name=_('TXT_KEY_MAP_SIZE_DUEL_NAME'),
-				size=Size(32, 22),
-				numPlayers=2
-			)
-		elif self == MapSize.TINY:
-			return MapSizeData(
-				name=_('TXT_KEY_MAP_SIZE_TINY_NAME'),
-				size=Size(42, 32),
-				numPlayers=3
-			)
-		elif self == MapSize.SMALL:
-			return MapSizeData(
-				name=_('TXT_KEY_MAP_SIZE_SMALL_NAME'),
-				size=Size(52, 42),
-				numPlayers=4
-			)
-		elif self == MapSize.STANDARD:
-			return MapSizeData(
-				name=_('TXT_KEY_MAP_SIZE_STANDARD_NAME'),
-				size=Size(62, 52),
-				numPlayers=6
-			)
-
-		raise ValueError(f'Not handled enum: {self}')
 
 	def numberOfPlayers(self):
 		return self._data().numPlayers
 
 	def numberOfCityStates(self):
-		return 2
+		return self._data().numberOfCityStates
+
+	def _data(self):
+		if self == MapSize.duel:
+			return MapSizeData(
+				name=_('TXT_KEY_MAP_SIZE_DUEL_NAME'),
+				size=Size(32, 22),
+				numPlayers=2,
+				numberOfCityStates=3
+			)
+		elif self == MapSize.tiny:
+			return MapSizeData(
+				name=_('TXT_KEY_MAP_SIZE_TINY_NAME'),
+				size=Size(42, 32),
+				numPlayers=3,
+				numberOfCityStates=6
+			)
+		elif self == MapSize.small:
+			return MapSizeData(
+				name=_('TXT_KEY_MAP_SIZE_SMALL_NAME'),
+				size=Size(52, 42),
+				numPlayers=4,
+				numberOfCityStates=9
+			)
+		elif self == MapSize.standard:
+			return MapSizeData(
+				name=_('TXT_KEY_MAP_SIZE_STANDARD_NAME'),
+				size=Size(62, 52),
+				numPlayers=6,
+				numberOfCityStates=12
+			)
+
+		raise ValueError(f'Not handled enum: {self}')
+
+
+class MapTypeData:
+	def __init__(self, name: str):
+		self.name = name
 
 
 class MapType(Enum):
-	EMPTY = 'empty'  # _('TXT_KEY_MAP_TYPE_EMPTY_NAME')
-	EARTH = 'earth'  # _('TXT_KEY_MAP_TYPE_EARTH_NAME')
-	PANGAEA = 'pangaea'  # _('TXT_KEY_MAP_TYPE_PANGAEA_NAME')
-	CONTINENTS = 'continents'  # _('TXT_KEY_MAP_TYPE_CONTINENTS_NAME')
-	ARCHIPELAGO = 'archipelago'  # _('TXT_KEY_MAP_TYPE_ARCHIPELAGO_NAME')
+	empty = 'empty'
+	earth = 'earth'
+	pangaea = 'pangaea'
+	continents = 'continents'
+	archipelago = 'archipelago'
+
+	def name(self) -> str:
+		return self._data().name
+
+	def _data(self) -> MapTypeData:
+		if self == MapType.empty:
+			return MapTypeData(
+				name=_('TXT_KEY_MAP_TYPE_EMPTY_NAME')
+			)
+		elif self == MapType.earth:
+			return MapTypeData(
+				name=_('TXT_KEY_MAP_TYPE_EARTH_NAME')
+			)
+		elif self == MapType.pangaea:
+			return MapTypeData(
+				name=_('TXT_KEY_MAP_TYPE_PANGAEA_NAME')
+			)
+		elif self == MapType.continents:
+			return MapTypeData(
+				name=_('TXT_KEY_MAP_TYPE_CONTINENTS_NAME')
+			)
+		elif self == MapType.archipelago:
+			return MapTypeData(
+				name=_('TXT_KEY_MAP_TYPE_ARCHIPELAGO_NAME')
+			)
 
 
 class Yields:

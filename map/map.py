@@ -1052,7 +1052,7 @@ class Map:
 
 	def bestMatchingSize(self) -> MapSize:
 		bestDelta = 100000
-		bestMapSize = MapSize.TINY
+		bestMapSize = MapSize.tiny
 
 		for mapSize in list(MapSize):
 			delta = abs((mapSize.size().width * mapSize.size().height) - (self.width * self.height))
