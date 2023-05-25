@@ -1258,3 +1258,13 @@ class UnitMissionType(Enum):
 			return UnitMissionTypeData('Found', False)
 
 		raise InvalidEnumError(self)
+
+
+class UnitActivityType(ExtendedEnum):
+	none = 'none'
+
+	heal = 'heal'
+	sleep = 'sleep'
+	awake = 'awake'
+	mission = 'mission'
+	hold = 'hold'

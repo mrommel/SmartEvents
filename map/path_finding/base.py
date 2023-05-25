@@ -123,3 +123,7 @@ class AStar(ABC, Generic[T]):
 					heappush(open_set, neighbor)
 
 		return None
+
+
+class HexPath:
+	pass
