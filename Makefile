@@ -8,7 +8,7 @@ all: venv
 
 $(VENV)/bin/activate: requirements.txt
 	python3 -m venv $(VENV)
-	./$(VENV)/bin/pip install -r requirements.txt
+	./$(VENV)/bin/pip3 install -r requirements.txt
 
 # venv is a shortcut target
 venv: $(VENV)/bin/activate
@@ -18,8 +18,8 @@ venv: $(VENV)/bin/activate
 #	./$(VENV)/bin/pylint
 
 pytests: venv
-	./$(VENV)/bin/pytest -v ./tests/test_game.py
-	./$(VENV)/bin/pytest -v ./tests/test_map.py
+	mkdir -p coverage
+	./$(VENV)/bin/pytest tests/
 
 run: venv
 	./$(VENV)/bin/python3 main.py

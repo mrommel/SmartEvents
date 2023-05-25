@@ -6,4 +6,5 @@
 ## Links
 
 * https://phrase.com/blog/posts/translate-python-gnu-gettext/
+* https://stackoverflow.com/questions/11451105/recursive-scan-for-files-with-xgettext
 * https://github.com/LoneGazebo/Community-Patch-DLL

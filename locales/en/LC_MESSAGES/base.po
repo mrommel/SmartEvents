@@ -151,7 +151,7 @@ msgstr "TXT_KEY_TECH_ASTROLOGY_EUREKA_TEXT"
 
 #: game/types.py:293
 msgid "TXT_KEY_TECH_ASTROLOGY_QUOTE1"
-msgstr ""
+msgstr "Astrology"
 
 #: game/types.py:293
 msgid "TXT_KEY_TECH_ASTROLOGY_QUOTE2"
@@ -159,7 +159,7 @@ msgstr ""
 
 #: game/types.py:306
 msgid "TXT_KEY_TECH_IRRIGATION_NAME"
-msgstr "TXT_KEY_TECH_IRRIGATION_NAME"
+msgstr "Irrigation"
 
 #: game/types.py:307
 msgid "TXT_KEY_TECH_IRRIGATION_EUREKA"
@@ -179,7 +179,7 @@ msgstr ""
 
 #: game/types.py:320
 msgid "TXT_KEY_TECH_WRITING_NAME"
-msgstr "TXT_KEY_TECH_WRITING_NAME"
+msgstr "Writing"
 
 #: game/types.py:321
 msgid "TXT_KEY_TECH_WRITING_EUREKA"
@@ -199,7 +199,7 @@ msgstr ""
 
 #: game/types.py:336
 msgid "TXT_KEY_TECH_MASONRY_NAME"
-msgstr "TXT_KEY_TECH_MASONRY_NAME"
+msgstr "Masonry"
 
 #: game/types.py:337
 msgid "TXT_KEY_TECH_MASONRY_EUREKA"
@@ -219,7 +219,7 @@ msgstr ""
 
 #: game/types.py:353
 msgid "TXT_KEY_TECH_ARCHERY_NAME"
-msgstr "TXT_KEY_TECH_ARCHERY_NAME"
+msgstr "Archery"
 
 #: game/types.py:354
 msgid "TXT_KEY_TECH_ARCHERY_EUREKA"
@@ -239,7 +239,7 @@ msgstr ""
 
 #: game/types.py:368
 msgid "TXT_KEY_TECH_BRONZE_WORKING_NAME"
-msgstr "TXT_KEY_TECH_BRONZE_WORKING_NAME"
+msgstr "Bronze Working"
 
 #: game/types.py:369
 msgid "TXT_KEY_TECH_BRONZE_WORKING_EUREKA"
@@ -259,7 +259,7 @@ msgstr ""
 
 #: game/types.py:384
 msgid "TXT_KEY_TECH_WHEEL_NAME"
-msgstr "TXT_KEY_TECH_WHEEL_NAME"
+msgstr "Wheel"
 
 #: game/types.py:385
 msgid "TXT_KEY_TECH_WHEEL_EUREKA"
@@ -279,7 +279,7 @@ msgstr ""
 
 #: game/types.py:404
 msgid "TXT_KEY_TECH_CELESTIAL_NAVIGATION_NAME"
-msgstr "TXT_KEY_TECH_CELESTIAL_NAVIGATION_NAME"
+msgstr "Celestial Navigation"
 
 #: game/types.py:405
 msgid "TXT_KEY_TECH_CELESTIAL_NAVIGATION_EUREKA"
@@ -299,7 +299,7 @@ msgstr ""
 
 #: game/types.py:419
 msgid "TXT_KEY_TECH_HORSEBACK_RIDING_NAME"
-msgstr "TXT_KEY_TECH_HORSEBACK_RIDING_NAME"
+msgstr "Horseback Riding"
 
 #: game/types.py:420
 msgid "TXT_KEY_TECH_HORSEBACK_RIDING_EUREKA"
@@ -319,7 +319,7 @@ msgstr ""
 
 #: game/types.py:434
 msgid "TXT_KEY_TECH_CURRENCY_NAME"
-msgstr "TXT_KEY_TECH_CURRENCY_NAME"
+msgstr "Currency"
 
 #: game/types.py:435
 msgid "TXT_KEY_TECH_CURRENCY_EUREKA"
