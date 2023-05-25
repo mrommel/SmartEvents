@@ -1,5 +1,4 @@
 import sys
-from typing import Union
 
 from map.base import HexPoint, HexArea
 from map.map import Map

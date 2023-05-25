@@ -12,3 +12,4 @@ class PantheonType(ExtendedEnum):
 	fertilityRites = 'fertilityRites'
 	godOfTheOpenSky = 'godOfTheOpenSky'
 	goddessOfFestivals = 'goddessOfFestivals'
+	initiationRites = 'initiationRites'

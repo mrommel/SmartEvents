@@ -14,14 +14,21 @@ class Trait:
 
 class CivilizationAbility(ExtendedEnum):
 	none = 'none'
+
 	motherRussia = 'motherRussia'
 	allRoadsLeadToRome = 'allRoadsLeadToRome'
+	workshopOfTheWorld = 'workshopOfTheWorld'
+	platosRepublic = 'platosRepublic'
+
+	def name(self) -> str:
+		return 'ability'
 
 
 class CivilizationData:
-	def __init__(self, name: str, ability: CivilizationAbility):
+	def __init__(self, name: str, ability: CivilizationAbility, cityNames: [str]):
 		self.name = name
 		self.ability = ability
+		self.cityNames = cityNames
 
 
 class CivilizationType(ExtendedEnum):
@@ -55,41 +62,143 @@ class CivilizationType(ExtendedEnum):
 		if self == CivilizationType.none:
 			return CivilizationData(
 				name='None',
-				ability=CivilizationAbility.none
+				ability=CivilizationAbility.none,
+				cityNames=[]
 			)
 		elif self == CivilizationType.barbarian:
 			return CivilizationData(
 				name='Barbarian',
-				ability=CivilizationAbility.none
+				ability=CivilizationAbility.none,
+				cityNames=[]
 			)
 		elif self == CivilizationType.free:
 			return CivilizationData(
 				name='Free',
-				ability=CivilizationAbility.none
+				ability=CivilizationAbility.none,
+				cityNames=[]
 			)
 		elif self == CivilizationType.cityState:
 			return CivilizationData(
 				name='CityState',
-				ability=CivilizationAbility.none
+				ability=CivilizationAbility.none,
+				cityNames=[]
 			)
 
 		elif self == CivilizationType.greek:
+			# https://civilization.fandom.com/wiki/Greek_(Civ6)
+			# cities taken from here: https://civilization.fandom.com/wiki/Greek_cities_(Civ6)
 			return CivilizationData(
-				name='Greek',
-				ability=CivilizationAbility.none
+				name='TXT_KEY_CIVILIZATION_GREEK',
+				ability=CivilizationAbility.platosRepublic,
+				cityNames=[
+					"TXT_KEY_CITY_NAME_ATHENS",
+					"TXT_KEY_CITY_NAME_SPARTA",
+					"TXT_KEY_CITY_NAME_CORINTH",
+					"TXT_KEY_CITY_NAME_EPHESUS",
+					"TXT_KEY_CITY_NAME_ARGOS",
+					"TXT_KEY_CITY_NAME_KNOSSOS",
+					"TXT_KEY_CITY_NAME_MYCENAE",
+					"TXT_KEY_CITY_NAME_PHARSALOS",
+					"TXT_KEY_CITY_NAME_RHODES",
+					"TXT_KEY_CITY_NAME_OLYMPIA",
+					"TXT_KEY_CITY_NAME_ERETRIA",
+					"TXT_KEY_CITY_NAME_PERGAMON",
+					"TXT_KEY_CITY_NAME_MILETOS",
+					"TXT_KEY_CITY_NAME_MEGARA",
+					"TXT_KEY_CITY_NAME_PHOCAEA",
+					"TXT_KEY_CITY_NAME_DELPHI",
+					"TXT_KEY_CITY_NAME_MARATHON",
+					"TXT_KEY_CITY_NAME_PATRAS"
+				]
 			)
 		elif self == CivilizationType.roman:
+			# https://civilization.fandom.com/wiki/Roman_(Civ6)
+			# cities taken from here: https://civilization.fandom.com/wiki/Roman_cities_(Civ6)
 			return CivilizationData(
-				name='Roman',
-				ability=CivilizationAbility.allRoadsLeadToRome
+				name="TXT_KEY_CIVILIZATION_ROMAN",
+				ability=CivilizationAbility.allRoadsLeadToRome,
+				cityNames=[
+					"TXT_KEY_CITY_NAME_ROME",
+					"TXT_KEY_CITY_NAME_OSTIA",
+					"TXT_KEY_CITY_NAME_ANTIUM",
+					"TXT_KEY_CITY_NAME_CUMAE",
+					"TXT_KEY_CITY_NAME_AQUILEIA",
+					"TXT_KEY_CITY_NAME_RAVENNA",
+					"TXT_KEY_CITY_NAME_PUTEOLI",
+					"TXT_KEY_CITY_NAME_ARRETIUM",
+					"TXT_KEY_CITY_NAME_MEDIOLANUM",
+					"TXT_KEY_CITY_NAME_LUGDUNUM",
+					"TXT_KEY_CITY_NAME_ARPINUM",
+					"TXT_KEY_CITY_NAME_SETIA",
+					"TXT_KEY_CITY_NAME_VELITRAE",
+					"TXT_KEY_CITY_NAME_DUROCORTORUM",
+					"TXT_KEY_CITY_NAME_BRUNDISIUM",
+					"TXT_KEY_CITY_NAME_CAESARAUGUSTA",
+					"TXT_KEY_CITY_NAME_PALMYRA",
+					"TXT_KEY_CITY_NAME_HISPALIS",
+					"TXT_KEY_CITY_NAME_CAESAREA",
+					"TXT_KEY_CITY_NAME_ARTAXATA",
+					"TXT_KEY_CITY_NAME_PAPHOS",
+					"TXT_KEY_CITY_NAME_SALONAE",
+					"TXT_KEY_CITY_NAME_EBURACUM",
+					"TXT_KEY_CITY_NAME_LAURIACUM",
+					"TXT_KEY_CITY_NAME_VERONA",
+					"TXT_KEY_CITY_NAME_COLONIA_AGRIPPINA",
+					"TXT_KEY_CITY_NAME_NARBO",
+					"TXT_KEY_CITY_NAME_TINGI",
+					"TXT_KEY_CITY_NAME_SARMIZEGETUSA",
+					"TXT_KEY_CITY_NAME_SIRMIUM"
+				]
 			)
 		elif self == CivilizationType.english:
+			#
+			# cities taken from here: https://civilization.fandom.com/wiki/English_cities_(Civ6)
 			return CivilizationData(
-				name='English',
-				ability=CivilizationAbility.none
+				name='TXT_KEY_CIVILIZATION_ENGLISH',
+				ability=CivilizationAbility.workshopOfTheWorld,
+				cityNames=[
+					"TXT_KEY_CITY_NAME_LONDON",
+					"TXT_KEY_CITY_NAME_LIVERPOOL",
+					"TXT_KEY_CITY_NAME_MANCHESTER",
+					"TXT_KEY_CITY_NAME_BIRMINGHAM",
+					"TXT_KEY_CITY_NAME_LEEDS",
+					"TXT_KEY_CITY_NAME_SHEFFIELD",
+					"TXT_KEY_CITY_NAME_BRISTOL",
+					"TXT_KEY_CITY_NAME_PLYMOUTH",
+					"TXT_KEY_CITY_NAME_NEWCASTLE_UPON_TYNE",
+					"TXT_KEY_CITY_NAME_BRADFORD",
+					"TXT_KEY_CITY_NAME_STOKE_UPON_TRENT",
+					"TXT_KEY_CITY_NAME_HULL",
+					"TXT_KEY_CITY_NAME_PORTSMOUTH",
+					"TXT_KEY_CITY_NAME_PRESTON",
+					"TXT_KEY_CITY_NAME_SUNDERLAND",
+					"TXT_KEY_CITY_NAME_BRIGHTON",
+					"TXT_KEY_CITY_NAME_NORWICH",
+					"TXT_KEY_CITY_NAME_YORK",
+					"TXT_KEY_CITY_NAME_NOTTINGHAM",
+					"TXT_KEY_CITY_NAME_LEICESTER",
+					"TXT_KEY_CITY_NAME_BLACKBURN",
+					"TXT_KEY_CITY_NAME_WOLVERHAMPTON",
+					"TXT_KEY_CITY_NAME_BATH",
+					"TXT_KEY_CITY_NAME_CONVENTRY",
+					"TXT_KEY_CITY_NAME_EXETER",
+					"TXT_KEY_CITY_NAME_LINCOLN",
+					"TXT_KEY_CITY_NAME_CANTERBURY",
+					"TXT_KEY_CITY_NAME_IPSWICH",
+					"TXT_KEY_CITY_NAME_DOVER",
+					"TXT_KEY_CITY_NAME_HASTINGS",
+					"TXT_KEY_CITY_NAME_OXFORD",
+					"TXT_KEY_CITY_NAME_SHREWSBURY",
+					"TXT_KEY_CITY_NAME_CAMBRIDGE",
+					"TXT_KEY_CITY_NAME_NEWCASTLE",
+					"TXT_KEY_CITY_NAME_WARWICK"
+				]
 			)
 
 		raise InvalidEnumError(self)
+
+	def cityNames(self):
+		return self._data().cityNames
 
 
 class WeightedCivilizationList(WeightedBaseList):

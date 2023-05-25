@@ -4,10 +4,12 @@ from typing import Optional
 
 from game.ai.baseTypes import PlayerStateAllWars, WarGoalType
 from game.ai.militaries import MilitaryThreatType
+from game.cities import GossipType
 from game.civilizations import CivilizationType, LeaderType
 from game.flavors import FlavorType
 from game.moments import Moment, MomentType
 from game.notifications import NotificationType
+from game.states.accessLevels import AccessLevel
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.states.diplomaticMessages import DiplomaticRequestState, DiplomaticRequestMessage, LeaderEmotionType
@@ -139,7 +141,7 @@ class PlayerTechs:
 		# 	    cityStatePlayer.obsoleteQuest(by: player.leader, in: gameModel)
 
 		# send gossip
-		# simulation.sendGossip(type:.technologyResearched(tech: tech), of: self.player)
+		simulation.sendGossip(GossipType.technologyResearched, tech=tech, player=self.player)
 
 		# check for printing
 		# Researching the Printing technology. This will increase your visibility with all civilizations by one level.
@@ -515,31 +517,6 @@ class ApproachType(ExtendedEnum):
 			return ApproachType.denounced
 		else:
 			return ApproachType.war
-
-
-class AccessLevel:
-	pass
-
-
-class AccessLevel(ExtendedEnum):
-	none = 'none'
-
-	limited = 'limited'
-	open = 'open'
-	secret = 'secret'
-	topSecret = 'topSecret'
-
-	def increased(self):
-		if self == AccessLevel.none:
-			return AccessLevel.limited
-		elif self == AccessLevel.limited:
-			return AccessLevel.open
-		elif self == AccessLevel.open:
-			return AccessLevel.secret
-		elif self == AccessLevel.secret:
-			return AccessLevel.topSecret
-		elif self == AccessLevel.topSecret:
-			return AccessLevel.topSecret
 
 
 class PlayerOpinionType(ExtendedEnum):
@@ -1358,8 +1335,10 @@ class PlayerMoments:
 		self._momentsArray.append(moment)
 		self._currentEraScore += moment.type.eraScore()
 
-	def addMomentOf(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None):
-		self._momentsArray.append(Moment(momentType, turn, civilization))
+	def addMomentOf(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None,
+	                cityName: Optional[str] = None, continentName: Optional[str] = None):
+		self._momentsArray.append(Moment(momentType, turn, civilization=civilization, cityName=cityName,
+		                                 continentName=continentName))
 
 		self._currentEraScore += momentType.eraScore()
 

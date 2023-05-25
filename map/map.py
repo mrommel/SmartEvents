@@ -15,7 +15,7 @@ from map.base import HexPoint, HexDirection, Size, Array2D
 from map.improvements import ImprovementType
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
 	Tutorials, Yields, AppealLevel
-from utils.base import WeightedBaseList
+from utils.base import WeightedBaseList, ExtendedEnum
 
 
 class Tile:
@@ -298,7 +298,7 @@ class Tile:
 			self.discovered[str(player.leader)] = True
 
 			# tutorial
-			if simulation.tutorial() == Tutorials.MOVEMENT_AND_EXPLORATION and player.isHuman():
+			if simulation.tutorial() == Tutorials.movementAndExploration and player.isHuman():
 				numberOfDiscoveredPlots = player.numberOfDiscoveredPlots(simulation)
 				if numberOfDiscoveredPlots >= Tutorials.tilesToDiscover():
 					print(f'tutorial finished: MOVEMENT_AND_EXPLORATION')
@@ -723,7 +723,7 @@ class Continent:
 		self.name = name
 		self.grid = grid
 		self.points = []
-		self.continentType = ContinentType.NONE
+		self.continentType = ContinentType.none
 
 	def add(self, point):
 		self.points.append(point)
@@ -732,10 +732,10 @@ class Continent:
 		return f'Content: {self.identifier} {self.name}'
 
 
-class ContinentType(Enum):
-	NONE = 0
+class ContinentType(ExtendedEnum):
+	none = 'none'
 
-	AFRICA = 1
+	africa = 'africa'
 	AMASIA = 2
 	AMERICA = 3
 	ANTARCTICA = 4

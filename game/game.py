@@ -4,7 +4,7 @@ from typing import Optional
 from game.ai.barbarians import BarbarianAI
 from game.ai.religions import Religions
 from game.baseTypes import HandicapType, GameState
-from game.cities import City
+from game.cities import City, GossipType
 from game.civilizations import LeaderType
 from game.evaluators import CitySiteEvaluator
 from game.moments import MomentType
@@ -19,7 +19,7 @@ from game.units import Unit
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.map import Map, Tile, ContinentType, Continent
-from map.types import FeatureType
+from map.types import FeatureType, Tutorials
 
 
 class Game:
@@ -183,8 +183,8 @@ class Game:
 	def isCoastalAt(self, location) -> bool:
 		return self._map.isCoastalAt(location)
 
-	def tutorial(self):
-		return None
+	def tutorial(self) -> Tutorials:
+		return Tutorials.none
 
 	def showTutorialInfos(self) -> bool:
 		return False
@@ -561,3 +561,20 @@ class Game:
 
 	def citySiteEvaluator(self) -> CitySiteEvaluator:
 		return CitySiteEvaluator(self._map)
+
+	def isLargestPlayer(self, player) -> bool:
+		"""
+			check if moment worldsLargestCivilization should trigger
+
+			- Parameter civilization: civilization to check
+			- Returns:  has the civilization at least 3 more cities than the next biggest civilization
+		"""
+		numPlayerCities = len(self.citiesOf(player))
+		numAllOtherCities = map(lambda p: len(self.citiesOf(p)), self.players)
+		numNextBestPlayersCities = max(numAllOtherCities)
+
+		return numPlayerCities >= (numNextBestPlayersCities + 3)
+
+	def sendGossip(self, gossipType: GossipType, cityName: Optional[str] = None, tech: Optional[TechType] = None,
+	               player = None):
+		pass

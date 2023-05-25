@@ -9,8 +9,10 @@ from utils.translation import gettext_lazy as _
 
 class UnitDomainType(ExtendedEnum):
 	none = 'none'
+
 	sea = 'sea'
 	land = 'land'
+	immobile = 'immobile'
 
 
 class MapAge(Enum):
@@ -1206,10 +1208,9 @@ class RouteType(ExtendedEnum):
 
 
 class Tutorials(Enum):
-	NONE = 0
-
-	MOVEMENT_AND_EXPLORATION = 1
-	FOUND_FIRST_CITY = 2
+	none = 'none'
+	foundFirstCity = 'foundFirstCity'
+	movementAndExploration = 'movementAndExploration'
 
 	@classmethod
 	def tilesToDiscover(cls):

@@ -1215,15 +1215,28 @@ class UnitMissionTypeData:
 
 
 class UnitMissionType(Enum):
-	heal = 'heal'
-	fortify = 'fortify'
-	sleep = 'sleep'
-	moveTo = 'moveTo'
-	rangedAttack = 'rangedAttack'
-	skip = 'skip'
 	found = 'found'
+	moveTo = 'moveTo'
+	routeTo = 'routeTo'
+	followPath = 'followPath'
+	garrison = 'garrison'
+	pillage = 'pillage'
+	plunderTradeRoute = 'plunderTradeRoute'
 	build = 'build'
+	skip = 'skip'
+	rangedAttack = 'rangedAttack'
+
+	sleep = 'sleep'
+	fortify = 'fortify'
 	alert = 'alert'
+	airPatrol = 'airPatrol'
+	heal = 'heal'
+
+	embark = 'embark'
+	disembark = 'disembark'
+	rebase = 'rebase'
+	swapUnits = 'swapUnits'
+	moveToUnit = 'moveToUnit'
 
 	def name(self) -> str:
 		return self._data().name

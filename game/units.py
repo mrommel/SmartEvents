@@ -1,14 +1,17 @@
 import sys
 from typing import Optional
 
+from game.buildings import BuildingType
 from game.policyCards import PolicyCardType
+from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.states.dedications import DedicationType
 from game.types import EraType
 from game.unitTypes import UnitTaskType, UnitType, PromotionType, MoveOptions, UnitMissionType
 from map.base import HexPoint, HexArea
-from map.types import UnitDomainType
+from map.improvements import ImprovementType
+from map.types import UnitDomainType, YieldType
 from utils.base import ExtendedEnum
 
 
@@ -125,9 +128,60 @@ class UnitMission:
 
 		return
 
+	def calculateMissionTimerFor(self, unit, steps: int = 0) -> int:
+		"""
+			---------------------------------------------------------------------------
+			Update the mission timer to a new value based on the mission (or lack thereof) in the queue
+			KWG: The mission timer controls when the next time the unit's mission will be checked, not
+				in absolute time, but in passes through the Game Core update loop.  Previously,
+				this was used to delay processing so that the user could see the visualization of
+				units.  The Game Core no longer deals with visualization timing, but this system is
+				still used to keep the units sequencing their missions with each other.
+				i.e. each unit will get a chance to complete a mission segment, rather than a unit
+				exhausting its mission queue all in one go.
+		"""
+		peekMission = unit.peekMission()
+
+		if not unit.player.isHuman():
+			time = 0
+		elif peekMission is not None:
+			time = 1
+
+			if peekMission.missionType == UnitMissionType.moveTo:  # or peekMission.type ==.routeTo or peekMission.type ==.moveToUnit
+
+				targetPlot: Optional[HexPoint] = None
+				# / * if peekMission.type ==.moveToUnit
+				# {
+				# 	pTargetUnit = GET_PLAYER((PlayerTypes)
+				# kMissionData.iData1).getUnit(kMissionData.iData2);
+				# if (pTargetUnit) {
+				# pTargetPlot = pTargetUnit->plot();
+				# } else {
+				# pTargetPlot = NULL;
+				# }
+				# } else {* /
+				targetPlot = peekMission.target
+
+				if targetPlot is not None and unit.location == targetPlot:
+					time += steps
+				else:
+					time = min(time, 2)
+
+			if unit.player.isHuman() and unit.isAutomated():
+				time = min(time, 1)
+		else:
+			time = 0
+
+		return time
+
 
 class Army:
 	pass
+
+
+class UnitAnimationType:
+	fortify = 'fortify'
+	unfortify = 'unfortify'
 
 
 class Unit:
@@ -146,6 +200,8 @@ class Unit:
 		self._automationType = UnitAutomationType.none
 		self._processedInTurnValue = False
 		self._missions = []
+		self._fortifyTurnsValue = 0
+		self._fortifiedThisTurnValue = False
 
 	def name(self) -> str:
 		return self._name
@@ -451,6 +507,9 @@ class Unit:
 	def maxHealthPoints(self) -> int:
 		return int(Unit.maxHealth)
 
+	def setHealthPoints(self, newValue):
+		self._healthPointsValue = newValue
+
 	def isHurt(self) -> bool:
 		return self.damage() > 0
 
@@ -488,3 +547,129 @@ class Unit:
 
 	def isHuman(self) -> bool:
 		return self.player.isHuman()
+
+	def isFortified(self) -> bool:
+		return self._fortifyTurnsValue > 0
+
+	def isFortifiedThisTurn(self) -> bool:
+		return self._fortifiedThisTurnValue
+
+	def fortifyTurns(self) -> int:
+		return self._fortifyTurnsValue
+
+	def setFortifyTurns(self, newValue: int, simulation):
+		# range(iNewValue, 0, GC.getMAX_FORTIFY_TURNS());
+
+		if newValue != self._fortifyTurnsValue:
+			# Unit subtly slipped into Fortification state by remaining stationary for a turn
+			if self.fortifyTurns() == 0 and newValue > 0:
+				simulation.userInterface.animateUnit(self, UnitAnimationType.fortify)
+
+			self._fortifyTurnsValue = newValue
+			# setInfoBarDirty(true);
+
+			# Fortification turned off, send an event noting this
+			if newValue == 0:
+				self.setFortifiedThisTurn(False, simulation)
+
+		return
+
+	def setFortifiedThisTurn(self, fortifiedThisTurn: bool, simulation):
+		if not self.isEverFortifyable() and fortifiedThisTurn:
+			return
+
+		if self.isFortifiedThisTurn() != fortifiedThisTurn:
+			self._fortifiedThisTurnValue = fortifiedThisTurn
+
+			if fortifiedThisTurn:
+				turnsToFortify = 1
+				if not self.isFortifyable(canWaitForNextTurn=False, simulation=simulation):
+					turnsToFortify = 0
+
+				# Manually set us to being fortified for the first turn (so we get the Fort bonus immediately)
+				self.setFortifyTurns(turnsToFortify, simulation)
+
+				if turnsToFortify > 0:
+					# auto_ptr < ICvUnit1 > pDllUnit(new CvDllUnit(this));
+					# gDLL->GameplayUnitFortify(pDllUnit.get(), true);
+					simulation.userInterface.animateUnit(self, UnitAnimationType.fortify)
+			else:
+				simulation.userInterface.animateUnit(self, UnitAnimationType.unfortify)
+
+		return
+
+	def isEverFortifyable(self):
+		"""Can this Unit EVER fortify? (maybe redundant with some other stuff)"""
+		# /*|| noDefensiveBonus()*/
+		if not self.isCombatUnit() or (self.domain() != UnitDomainType.land and self.domain() != UnitDomainType.immobile):
+			return False
+
+		return True
+
+	def isFortifyable(self, canWaitForNextTurn: bool, simulation):
+		# Can't fortify if you've already used any moves this turn
+		if not canWaitForNextTurn:
+			if self.hasMoved(simulation):
+				return False
+
+		if not self.isEverFortifyable():
+			return False
+
+		return True
+
+	def isCombatUnit(self) -> bool:
+		"""Combat eligibility routines"""
+		return self.unitType.meleeStrength() > 0
+
+	def doFoundWith(self, name: str, simulation):
+		if not self.canFoundAt(self.location, simulation):
+			return False
+
+		for neighbor in self.location.neighbors():
+			newPlot = simulation.tileAt(neighbor)
+
+			if newPlot.hasImprovement(ImprovementType.barbarianCamp):
+				self.player.doClearBarbarianCampAt(newPlot, simulation)
+
+				# initiationRites - +50 Faith for each Barbarian Outpost cleared.The unit that cleared the Barbarian Outpost heals +100 HP.
+				if self.player.religion.pantheon() == PantheonType.initiationRites:
+					self.setHealthPoints(self.maxHealthPoints())
+
+			elif newPlot.hasImprovement(ImprovementType.goodyHut):
+				self.player.doGoodyHutAt(newPlot, self, simulation)
+
+		self.player.foundAt(self.location, name=name, simulation=simulation)
+
+		# ancestralHall - New cities receive a free Builder
+		if self.player.hasBuilding(BuildingType.ancestralHall, simulation):
+			newCity = simulation.cityAt(self.location)
+
+			# hack - add fake money - it will be removed once the builder is purchased
+			purchaseCost = newCity.goldPurchaseCostOf(UnitType.builder, simulation)
+			self.player.treasury.changeGoldBy(purchaseCost)
+
+			# now purchase the builder
+			newCity.purchaseUnit(UnitType.builder, YieldType.gold, simulation)
+
+		self.doKillDelayed(False, None, simulation)
+
+		return True
+
+	def doKillDelayed(self, param, param1, simulation):
+		# fixme
+		pass
+
+	def canHoldAt(self, location, simulation):
+		# fixme
+		return False
+
+	def popMission(self):
+		if len(self._missions) > 0:
+			self._missions.pop()
+
+		if len(self._missions) == 0:
+			if self._activityTypeValue == UnitActivityType.mission:
+				self._activityTypeValue = UnitActivityType.none
+
+		return
+

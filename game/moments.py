@@ -30,9 +30,9 @@ class MomentType(ExtendedEnum):
 	# allGovernorsAppointed  # 2
 	# canalCompleted  # 3 #
 	# cityNearFloodableRiver(cityName: String)  # 4 #
-	# cityNearVolcano(cityName: String)  # 5
-	# cityOfAwe(cityName: String)  # 6
-	# cityOnNewContinent(cityName: String, continentName: String)  # 7
+	cityNearVolcano = 'cityNearVolcano'  # (cityName: String)  # 5
+	cityOfAwe = 'cityOfAwe'  # (cityName: String)  # 6
+	cityOnNewContinent = 'cityOnNewContinent'  # (cityName: String, continentName: String)  # 7
 	# cityStatesFirstSuzerain(cityState: CityStateType)  # 8
 	# cityStateArmyLeviedNearEnemy 9
 	# climateChangePhase 10
@@ -148,7 +148,7 @@ class MomentType(ExtendedEnum):
 	# worldsFirstStrategicResourcePotentialUnleashed  # 120 #
 	# worldsFirstTechnologyOfNewEra(eraType: EraType)  # 121
 	# worldsFirstToMeetAllCivilizations  # 122 #
-	# worldsLargestCivilization  # 123
+	worldsLargestCivilization = 'worldsLargestCivilization'  # 123
 	# worldCircumnavigated  # 124
 	# 
 	# minor
@@ -159,7 +159,7 @@ class MomentType(ExtendedEnum):
 	# cityReturnsToOriginalOwner(cityName: String, originalCivilization: CivilizationType)  # 204 #
 	# cityStateArmyLevied  # 205 #
 	# coastalFloodMitigated  # 206 #
-	# desertCity(cityName: String)  # 207
+	desertCity = 'desertCity'  # (cityName: String)  # 207
 	# diplomaticVictoryResolutionWon  # 208 #
 	# firstArmada 209
 	# firstArmy  # 210 #
@@ -181,11 +181,11 @@ class MomentType(ExtendedEnum):
 	# pantheonFounded(pantheon: PantheonType)  # 226
 	# riverFloodMitigated  # 227 #
 	# satelliteLaunchedIntoOrbit  # 228 #
-	# snowCity(cityName: String)  # 229
+	snowCity = 'snowCity'  # (cityName: String)  # 229
 	# strategicResourcePotentialUnleashed  # 230 #
 	# tradingPostEstablishedInNewCivilization(civilization: CivilizationType)  # 231
 	# tribalVillageContacted  # 232
-	# tundraCity(cityName: String)  # 233
+	tundraCity = 'tundraCity'  # (cityName: String)  # 233
 	# unitPromotedWithDistinction  # 234
 	# wonderCompleted(wonder: WonderType)  # 235
 	# 
@@ -208,7 +208,35 @@ class MomentType(ExtendedEnum):
 
 	def _data(self) -> MomentTypeData:
 		# ...
-		if self == MomentType.discoveryOfANaturalWonder:  # (naturalWonder: FeatureType)
+		if self == MomentType.cityNearVolcano: # (cityName: String)
+			# 5
+			return MomentTypeData(
+				name="TXT_KEY_MOMENT_CITY_NEAR_VOLCANO_TITLE",
+				summary="TXT_KEY_MOMENT_CITY_NEAR_VOLCANO_SUMMARY",
+				instanceText=None,
+				category=MomentCategory.major,
+				eraScore=1
+			)
+		elif self == MomentType.cityOfAwe:  # (cityName: String)
+			# 6
+			return MomentTypeData(
+				name="TXT_KEY_MOMENT_CITY_OF_AWE_TITLE",
+				summary="TXT_KEY_MOMENT_CITY_OF_AWE_SUMMARY",
+				instanceText=None,
+				category=MomentCategory.major,
+				eraScore=3
+			)
+		elif self == MomentType.cityOnNewContinent:  # (cityName: String, continentName: String)
+			# 7
+			return MomentTypeData(
+				name="TXT_KEY_MOMENT_CITY_ON_NEW_CONTINENT_TITLE",
+				summary="TXT_KEY_MOMENT_CITY_OF_NEW_CONTINENT_SUMMARY",
+				instanceText=None,
+				category=MomentCategory.major,
+				eraScore=2
+			)
+		# ...
+		elif self == MomentType.discoveryOfANaturalWonder:  # (naturalWonder: FeatureType)
 			# 12
 			return MomentTypeData(
 				name="TXT_KEY_MOMENT_DISCOVERY_OF_A_NATURAL_WONDER_TITLE",
@@ -238,6 +266,27 @@ class MomentType(ExtendedEnum):
 				eraScore=3
 			)
 		# ...
+		elif self == MomentType.worldsLargestCivilization:
+			# 123
+			return MomentTypeData(
+				name="World's Largest Civilization",
+				summary="Your civilization has become the largest in the world, with at least 3 more cities than its "
+				        "next biggest rival.",
+				instanceText=None,
+				category=MomentCategory.major,
+				eraScore=3
+			)
+		# ...
+		elif self == MomentType.desertCity:  # (cityName: String)
+			# 207
+			return MomentTypeData(
+				name="TXT_KEY_MOMENT_DESERT_CITY_TITLE",
+				summary="TXT_KEY_MOMENT_DESERT_CITY_SUMMARY",
+				instanceText="TXT_KEY_MOMENT_DESERT_CITY_INSTANCE",
+				category=MomentCategory.minor,
+				eraScore=1
+			)
+		# ...
 		elif self == MomentType.metNewCivilization:
 			# 222
 			return MomentTypeData(
@@ -247,7 +296,39 @@ class MomentType(ExtendedEnum):
 				category=MomentCategory.minor,
 				eraScore=1
 			)
-		# ...
+		# oldGreatPersonRecruited  # 223
+		# oldWorldWonderCompleted  # 224
+		# operationIvyCompleted 225
+		# pantheonFounded(pantheon: PantheonType)  # 226
+		# riverFloodMitigated  # 227 #
+		# satelliteLaunchedIntoOrbit  # 228 #
+		elif self == MomentType.snowCity:  # (cityName: String)
+			# 229
+			return MomentTypeData(
+				name="TXT_KEY_MOMENT_SNOW_CITY_TITLE",
+				summary="TXT_KEY_MOMENT_SNOW_CITY_SUMMARY",
+				instanceText="TXT_KEY_MOMENT_SNOW_CITY_INSTANCE",
+				category=MomentCategory.minor,
+				eraScore=1
+			)
+		# strategicResourcePotentialUnleashed  # 230 #
+		# tradingPostEstablishedInNewCivilization(civilization: CivilizationType)  # 231
+		# tribalVillageContacted  # 232
+		elif self == MomentType.tundraCity:  # (cityName: String)
+			# 233
+			return MomentTypeData(
+				name="TXT_KEY_MOMENT_TUNDRA_CITY_TITLE",
+				summary="TXT_KEY_MOMENT_TUNDRA_CITY_SUMMARY",
+				instanceText="TXT_KEY_MOMENT_TUNDRA_CITY_INSTANCE",
+				category=MomentCategory.minor,
+				eraScore=1
+			)
+		# unitPromotedWithDistinction  # 234
+		# wonderCompleted(wonder: WonderType)  # 235
+
+		# hidden
+		# shipSunk  # 300 for artifacts
+		# battleFought  # 301
 		elif self == MomentType.dedicationTriggered:
 			# 302
 			return MomentTypeData(
@@ -262,9 +343,12 @@ class MomentType(ExtendedEnum):
 
 
 class Moment:
-	def __init__(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None):
+	def __init__(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None,
+	                cityName: Optional[str] = None, continentName: Optional[str] = None):
 		self.type = momentType
 		self.turn = turn
 
 		# meta
 		self.civilization = civilization
+		self.cityName = cityName
+		self.continentName = continentName

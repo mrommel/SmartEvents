@@ -6,7 +6,7 @@ from game.ai.economicStrategies import EconomicStrategyType
 from game.baseTypes import HandicapType
 from game.buildings import BuildingType
 from game.cities import City
-from game.civilizations import LeaderType, CivilizationType
+from game.civilizations import LeaderType, CivilizationType, CivilizationAbility
 from game.districts import DistrictType
 from game.game import Game
 from game.governments import GovernmentType
@@ -138,6 +138,9 @@ class TestGameAssets(unittest.TestCase):
 	def test_civilization_data(self):
 		for civilization in list(CivilizationType):
 			_ = civilization.name()
+
+		for civilizationAbility in list(CivilizationAbility):
+			_ = civilizationAbility.name()
 
 	def test_leader_data(self):
 		for leader in list(LeaderType):
