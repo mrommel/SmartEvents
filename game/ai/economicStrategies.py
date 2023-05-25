@@ -84,7 +84,7 @@ class EarlyExpansionStrategy(EconomicStrategy):
         maxCultureCities = 6  # AI_GS_CULTURE_MAX_CITIES
 
         desiredCities = (3 * flavorExpansion) / max(flavorGrowth, 1)
-        difficulty = max(0, simulation.handicap.value - 3)
+        difficulty = max(0, simulation.handicap.value() - 3)
         desiredCities += difficulty
 
         if player.grandStrategyAI.activeStrategy == GrandStrategyAIType.culture:

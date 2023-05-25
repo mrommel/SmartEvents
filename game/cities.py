@@ -5,8 +5,8 @@ from game.ai.cities import CityStrategyAI, CitySpecializationType
 from game.ai.economicStrategies import EconomicStrategyType
 from game.ai.grandStrategies import GrandStrategyAIType
 from game.amenities import AmenitiesState
-from game.baseTypes import CityStateCategory
 from game.buildings import BuildingType, BuildingCategoryType
+from game.cityStates import CityStateType, CityStateCategory
 from game.civilizations import LeaderWeightList, CivilizationAbility, LeaderAbility, LeaderType, \
 	WeightedCivilizationList, CivilizationType
 from game.districts import DistrictType
@@ -30,7 +30,7 @@ from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType
-from utils.base import ExtendedEnum
+from utils.base import ExtendedEnum, InvalidEnumError
 
 
 class CityDistricts:
@@ -278,7 +278,8 @@ class CityCitizens:
 		self.doReallocateCitizens(simulation)
 
 		sum = self.numberOfCitizensWorkingPlots() + self.totalSpecialistCount() + self.numberOfUnassignedCitizens()
-		assert (sum <= self.city.population(), "Gameplay: More workers than population in the city.")
+		if not sum <= self.city.population():
+			raise Exception("Gameplay: More workers than population in the city.")
 		# print("working: \(self.numCitizensWorkingPlots()) + spec: \(self.totalSpecialistCount()) + unassigned: \(self.numUnassignedCitizens()) for \(city.population())")
 
 	def workingTileLocations(self) -> [HexPoint]:
@@ -668,233 +669,6 @@ class RouteType(ExtendedEnum):
 	ancientRoad = 'ancientRoad'
 
 
-class GossipTypeData:
-	def __init__(self, name: str, accessLevel: AccessLevel):
-		self.name = name
-		self.accessLevel = accessLevel
-
-
-class GossipType(ExtendedEnum):
-	# AccessLevel: none
-	cityConquests = 'cityConquests'  # (cityName: String)
-	pantheonCreated = 'pantheonCreated'  # (pantheonName: String)
-	religionsFounded = 'religionsFounded'  # (religionName: String)
-	declarationsOfWar = 'declarationsOfWar'  # (leader: LeaderType)
-	weaponsOfMassDestructionStrikes = 'weaponsOfMassDestructionStrikes'  # fixme
-	spaceRaceProjectsCompleted = 'spaceRaceProjectsCompleted'  # fixme
-
-	# AccessLevel: limited
-	alliance = 'alliance'  # (leader: LeaderType) fixme
-	friendship = 'alliance'  # (leader: LeaderType)
-	governmentChange = 'governmentChange'  # (government: GovernmentType)
-	denunciation = 'denunciation'  # (leader: LeaderType)
-	cityFounded = 'cityFounded'  # (cityName: String)
-	cityLiberated = 'cityLiberated'  # (cityName: String, originalOwner: LeaderType)
-	cityRazed = 'cityRazed'  # (cityName: String, originalOwner: LeaderType)
-	cityBesieged = 'cityBesieged'  # (cityName: String) fixme
-	tradeDealEnacted = 'tradeDealEnacted'  # fixme
-	tradeDealReneged = 'tradeDealReneged'  # fixme
-	barbarianCampCleared = 'barbarianCampCleared'  # (unit: UnitType)
-
-	# AccessLevel: open
-	buildingConstructed = 'buildingConstructed'  # (building: BuildingType)
-	districtConstructed = 'districtConstructed'  # (district: DistrictType)
-	greatPeopleRecruited = 'greatPeopleRecruited'  # (greatPeople: GreatPerson)
-	wonderStarted = 'wonderStarted'  # (wonder: WonderType, cityName: String)
-	artifactsExtracted = 'artifactsExtracted'  # fixme
-	inquisitionLaunched = 'inquisitionLaunched'  # fixme
-
-	# AccessLevel: secret
-	cityStatesInfluenced = 'cityStatesInfluenced'  # fixme
-	civicCompleted = 'civicCompleted'  # (civic: CivicType)
-	technologyResearched = 'technologyResearched'  # (tech: TechType)
-	settlerTrained = 'settlerTrained'  # (cityName: String)
-
-	# AccessLevel: top secret
-	weaponOfMassDestructionBuilt = 'weaponOfMassDestructionBuilt'  # fixme
-	attacksLaunched = 'attacksLaunched'  # fixme
-	projectsStarted = 'projectsStarted'  # fixme
-	victoryStrategyChanged = 'victoryStrategyChanged'  # fixme
-	warPreparations = 'warPreparations'  # fixme
-
-	def name(self) -> str:
-		return self._data().name
-
-	def accessLevel(self) -> AccessLevel:
-		return self._data().accessLevel
-
-	def _data(self) -> GossipTypeData:
-		# AccessLevel: none
-		if self == GossipType.cityConquests:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_CITY_CONQUEST",
-				accessLevel=AccessLevel.none
-			)
-		elif self == GossipType.pantheonCreated:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_PANTHEON_CREATED",
-				accessLevel=AccessLevel.none
-			)
-		elif self == GossipType.religionsFounded:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_RELIGIONS_FOUNDED",
-				accessLevel=AccessLevel.none
-			)
-		elif self == GossipType.declarationsOfWar:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_DECLARATIONS_OF_WAR",
-				accessLevel=AccessLevel.none
-			)
-		elif self == GossipType.weaponsOfMassDestructionStrikes:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_WEAPONS_OF_MASS_DESTRUCTION_STRIKES",
-				accessLevel=AccessLevel.none
-			)
-		elif self == GossipType.spaceRaceProjectsCompleted:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_SPACE_RACE_PROJECTS_COMPLETED",
-				accessLevel=AccessLevel.none
-			)
-
-		# AccessLevel: limited
-		elif self == GossipType.alliance:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_ALLIANCES",
-				accessLevel=AccessLevel.limited
-			)
-		elif self == GossipType.friendship:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_FRIENDSHIPS",
-				accessLevel=AccessLevel.limited
-			)
-		elif self == GossipType.governmentChange:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_GOVERNMENT_CHANGES",
-				accessLevel=AccessLevel.limited
-			)
-		elif self == GossipType.denunciation:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_DENUNCIATION",
-				accessLevel=AccessLevel.limited
-			)
-		elif self == GossipType.cityFounded:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_CITIES_FOUNDED",
-				accessLevel=AccessLevel.limited
-			)
-		elif self == GossipType.cityLiberated:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_CITIES_LIBERATED",
-				accessLevel=AccessLevel.limited
-			)
-		elif self == GossipType.cityRazed:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_CITIES_RAZED",
-				accessLevel=AccessLevel.limited
-			)
-		elif self == GossipType.cityBesieged:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_CITIES_BESIEGED",
-				accessLevel=AccessLevel.limited
-			)
-		elif self == GossipType.tradeDealEnacted:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_TRADE_DEALS_ENACTED",
-				accessLevel=AccessLevel.limited
-			)
-		elif self == GossipType.tradeDealReneged:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_TRADE_DEALS_RENEGED",
-				accessLevel=AccessLevel.limited
-			)
-		elif self == GossipType.barbarianCampCleared:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_BARBARIAN_CAMP_CLEARED",
-				accessLevel=AccessLevel.limited
-			)
-
-		# AccessLevel: open
-		elif self == GossipType.buildingConstructed:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_BUILDINGS_CONSTRUCTED",
-				accessLevel=AccessLevel.open
-			)
-		elif self == GossipType.districtConstructed:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_DISTRICTS_CONSTRUCTED",
-				accessLevel=AccessLevel.open
-			)
-		elif self == GossipType.greatPeopleRecruited:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_GREAT_PEOPLE_RECRUITED",
-				accessLevel=AccessLevel.open
-			)
-		elif self == GossipType.wonderStarted:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_WONDERS_STARTED",
-				accessLevel=AccessLevel.open
-			)
-		elif self == GossipType.artifactsExtracted:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_ARTIFACTS_EXTRACTED",
-				accessLevel=AccessLevel.open
-			)
-		elif self == GossipType.inquisitionLaunched:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_INQUISITION_LAUNCHED",
-				accessLevel=AccessLevel.open
-			)
-
-		# AccessLevel: secret
-		elif self == GossipType.cityStatesInfluenced:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_CITY_STATE_INFLUENCED",
-				accessLevel=AccessLevel.secret
-			)
-		elif self == GossipType.civicCompleted:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_CIVICS_COMPLETED",
-				accessLevel=AccessLevel.secret
-			)
-		elif self == GossipType.technologyResearched:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_TECHNOLOGIES_RESEARCHED",
-				accessLevel=AccessLevel.secret
-			)
-		elif self == GossipType.settlerTrained:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_SETTLERS_TRAINED",
-				accessLevel=AccessLevel.secret
-			)
-
-		# AccessLevel: top secret
-		elif self == GossipType.weaponOfMassDestructionBuilt:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_WEAPON_OF_MASS_DESTRUCTION_BUILT",
-				accessLevel=AccessLevel.topSecret
-			)
-		elif self == GossipType.attacksLaunched:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_ATTACKS_LAUNCHED",
-				accessLevel=AccessLevel.topSecret
-			)
-		elif self == GossipType.projectsStarted:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_PROJECTS_STARTED",
-				accessLevel=AccessLevel.topSecret
-			)
-		elif self == GossipType.victoryStrategyChanged:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_VICTORY_STRATEGY_CHANGED",
-				accessLevel=AccessLevel.topSecret
-			)
-		elif self == GossipType.warPreparations:
-			return GossipTypeData(
-				name="TXT_KEY_DIPLOMACY_GOSSIP_NAME_WAR_PREPARATIONS",
-				accessLevel=AccessLevel.topSecret
-			)
-
-
 class YieldValues:
 	pass
 
@@ -914,12 +688,6 @@ class YieldValues:
 			return YieldValues(self.value + other.value, self.percentage + other.percentage)
 		else:
 			raise Exception(f'invalid parameter: {other}')
-
-
-class CityState(ExtendedEnum):
-	singapore = 'singapore'
-	johannesburg = 'johannesburg'
-	auckland = 'auckland'
 
 
 class City:
@@ -1299,7 +1067,7 @@ class City:
 				# auckland suzerain bonus
 				# Shallow water tiles worked by Citizens provide +1 Production.
 				# Additional +1 when you reach the Industrial Era
-				if self.player.isSuzerainOf(CityState.auckland, simulation):
+				if self.player.isSuzerainOf(CityStateType.auckland, simulation):
 					if workedTile.terrain() == TerrainType.shore:
 						productionValue += 1.0
 
@@ -1309,7 +1077,7 @@ class City:
 				# johannesburg suzerain bonus
 				# Cities receive + 1 Production for every improved resource type.
 				# After researching Industrialization it becomes +2[Production] Production.
-				if self.player.isSuzerainOf(CityState.johannesburg, simulation):
+				if self.player.isSuzerainOf(CityStateType.johannesburg, simulation):
 					if workedTile.hasAnyImprovement() and workedTile.resourceFor(self.player) != ResourceType.none:
 						productionValue += 1.0
 
@@ -1418,7 +1186,7 @@ class City:
 
 		# Singapore suzerain bonus
 		# Your cities receive +2 Production for each foreign civilization they have a Trade Route to.
-		if self.player.isSuzerainOf(CityState.singapore, simulation):
+		if self.player.isSuzerainOf(CityStateType.singapore, simulation):
 			productionFromTradeRoutes += 2.0 * float(numberOfForeignCivilizations)
 
 		return productionFromTradeRoutes

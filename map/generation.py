@@ -5,7 +5,7 @@ from typing import Optional
 
 from bitarray import bitarray
 
-from game.baseTypes import CityStateType
+from game.cityStates import CityStateType
 from game.civilizations import LeaderType
 from map.base import HexPoint, HexDirection, Array2D, HexArea
 from map.map import Map, Tile, Continent, ContinentType

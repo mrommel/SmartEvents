@@ -1,6 +1,6 @@
 from typing import Optional
 
-from game.cities import CityState
+from game.cities import CityStateType
 from game.moments import MomentType
 from map.base import HexPoint
 from utils.base import ExtendedEnum
@@ -19,7 +19,7 @@ class NotificationType(ExtendedEnum):
 
 class Notification:
 	def __init__(self, notificationType: NotificationType, city=None, player=None,
-	             momentType: Optional[MomentType] = None, cityState: Optional[CityState] = None,
+	             momentType: Optional[MomentType] = None, cityState: Optional[CityStateType] = None,
 	             first: Optional[bool] = None, location: Optional[HexPoint] = None):
 		self.notificationType = notificationType
 		self.city = city
@@ -42,7 +42,7 @@ class Notifications:
 		pass
 
 	def addNotification(self, notificationType: NotificationType, momentType: Optional[MomentType] = None,
-	                    cityState: Optional[CityState] = None, first: Optional[bool] = None):
+	                    cityState: Optional[CityStateType] = None, first: Optional[bool] = None):
 		notification = Notification(
 			notificationType=notificationType,
 			momentType=momentType,

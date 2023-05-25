@@ -1,163 +1,126 @@
 from enum import Enum
 
+from game.types import TechType
 from game.units import UnitType
 from utils.base import InvalidEnumError
-from utils.theming import Color
 from utils.translation import gettext_lazy as _
 
 
-class CityStateCategoryData:
-    def __init__(self, name: str, color: Color, firstEnvoyBonus: str, thirdEnvoyBonus: str, sixthEnvoyBonus: str):
+class HandicapTypeData:
+    def __init__(self, name: str, value: int, barbarianCampGold: int, barbarianSpawnMod: int, freeHumanTechs: [TechType],
+                 freeHumanStartingUnitTypes: [UnitType]):
         self.name = name
-        self.color = color
-        self.firstEnvoyBonus = firstEnvoyBonus
-        self.thirdEnvoyBonus = thirdEnvoyBonus
-        self.sixthEnvoyBonus = sixthEnvoyBonus
+        self.value = value
+        self.barbarianCampGold = barbarianCampGold
+        self.barbarianSpawnMod = barbarianSpawnMod
+        self.freeHumanTechs = freeHumanTechs
+        self.freeHumanStartingUnitTypes = freeHumanStartingUnitTypes
 
 
-class CityStateCategory(Enum):
-    cultural = 'cultural'
-    industrial = 'industrial'
-    militaristic = 'militaristic'
-    religious = 'religious'
-    scientific = 'scientific'
-    trade = 'trade'
+class HandicapType(Enum):
+    # https://civ6.gamepedia.com/Game_difficulty
 
-    def _data(self):
-        if self == CityStateCategory.cultural:
-            return CityStateCategoryData(
-                name=_("TXT_KEY_CITY_STATE_CATEGORY_CULTURAL_NAME"),
-                color=Color.MAGENTA,
-                firstEnvoyBonus=_("TXT_KEY_CITY_STATE_CATEGORY_CULTURAL_FIRST_ENVOY_BONUS"),
-                thirdEnvoyBonus=_("TXT_KEY_CITY_STATE_CATEGORY_CULTURAL_THIRD_ENVOY_BONUS"),
-                sixthEnvoyBonus=_("TXT_KEY_CITY_STATE_CATEGORY_CULTURAL_SIXTH_ENVOY_BONUS")
-            )
-        elif self == CityStateCategory.industrial:
-            return CityStateCategoryData()
-        elif self == CityStateCategory.militaristic:
-            return CityStateCategoryData()
-        elif self == CityStateCategory.religious:
-            return CityStateCategoryData()
-        elif self == CityStateCategory.scientific:
-            return CityStateCategoryData()
-        elif self == CityStateCategory.trade:
-            return CityStateCategoryData()
-        else:
-            raise InvalidEnumError(self)
-
-
-class CityStateData:
-    def __init__(self, name: str, category: CityStateCategory, suzerainBonus: str):
-        self.name = name
-        self.category = category
-        self.suzerainBonus = suzerainBonus
-
-
-class CityStateType(Enum):
-    AKKAD = 0
-    AMSTERDAM = 1
-    ANSHAN = 2
-    ANTANANARIVO = 3
-    ANTIOCH = 4
-    ARMAGH = 5
-    AUCKLAND = 6
-    AYUTTHAYA = 7
-    BABYLON = 8
-    BANDARBRUNEI = 9
-    BOLOGNA = 10
-    BRUSSELS = 11
-    BUENOSAIRES = 12
-    CAGUANA = 13
-    CAHOKIA = 14
-    CARDIFF = 15
-    CARTHAGE = 16
-    CHINGUETTI = 17
-    FEZ = 18
-    GENEVA = 19
-    GRANADA = 20
-    HATTUSA = 21
-    HONGKONG = 22
-    HUNZA = 23
-    JAKARTA = 24
-    JERUSALEM = 25
-    JOHANNESBURG = 26
-    KABUL = 27
-    KANDY = 28
-    KUMASI = 29
-    LAVENTA = 30
-
-    # // Lahore
-    #     // Lisbon
-    #     // Mexico City
-    #     // Mitla
-    #     // Mogadishu
-    #     // Mohenjo-Daro
-    #     // Muscat
-    #     // Nalanda
-    #     // Nan Madol
-    #     // Nazca
-    #     // Ngazargamu
-    #     // Palenque
-    #     // Preslav
-    #     // Rapa Nui
-    #     case samarkand
-    #     case seoul
-    #     case singapore
-    #     case stockholm
-    #     case taruga
-    #     case toronto
-    #     case valletta
-    #     case vaticanCity
-    #     case venice
-    #     case vilnius
-    #     case wolin
-    #     case yerevan
-    #     case zanzibar
+    settler = 'settler'
+    chieftain = 'chieftain'
+    warlord = 'warlord'
+    prince = 'prince'
+    king = 'king'
+    emperor = 'emperor'
+    immortal = 'immortal'
+    deity = 'deity'
 
     def name(self) -> str:
         return self._data().name
 
-    def category(self) -> CityStateCategory:
-        return self._data().category
-
-    def _data(self) -> CityStateData:
-        if self == CityStateType.AKKAD:
-            return CityStateData(
-                name=_("TXT_KEY_CITY_STATE_AKKAD_NAME"),
-                category=CityStateCategory.militaristic,
-                suzerainBonus=_("TXT_KEY_CITY_STATE_AKKAD_SUZERAIN")
-            )
-        else:
-            raise InvalidEnumError(self)
-
-
-class HandicapType(Enum):
-    settler = 0
-    chieftain = 1
-    warlord = 2
-    prince = 3
-    king = 4
-    emperor = 5
-    immortal = 6
-    deity = 7
+    def value(self) -> int:
+        return self._data().value
 
     def freeHumanStartingUnitTypes(self) -> [UnitType]:
+        return self._data().freeHumanStartingUnitTypes
+
+    def _data(self) -> HandicapTypeData:
         if self == HandicapType.settler:
-            return [UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.builder]
+            #
+            return HandicapTypeData(
+                name=_("TXT_KEY_HANDICAP_SETTLER"),
+                value=0,
+                barbarianCampGold=50,
+                barbarianSpawnMod=8,
+                freeHumanTechs=[TechType.pottery, TechType.animalHusbandry, TechType.mining],
+                freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.builder]
+            )
         elif self == HandicapType.chieftain:
-            return [UnitType.settler, UnitType.warrior, UnitType.builder]
+            #
+            return HandicapTypeData(
+                name=_("TXT_KEY_HANDICAP_CHIEFTAIN"),
+                value=1,
+                barbarianCampGold=40,
+                barbarianSpawnMod=5,
+                freeHumanTechs=[TechType.pottery, TechType.animalHusbandry],
+                freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior, UnitType.builder]
+            )
         elif self == HandicapType.warlord:
-            return [UnitType.settler, UnitType.warrior, UnitType.builder]
+            #
+            return HandicapTypeData(
+                name=_("TXT_KEY_HANDICAP_WARLORD"),
+                value=2,
+                barbarianCampGold=30,
+                barbarianSpawnMod=3,
+                freeHumanTechs=[TechType.pottery],
+                freeHumanStartingUnitTypes=[
+                    UnitType.settler, UnitType.warrior, UnitType.builder
+                ]
+            )
         elif self == HandicapType.prince:
-            return [UnitType.settler, UnitType.warrior]
+            #
+            return HandicapTypeData(
+                name=_("TXT_KEY_HANDICAP_PRINCE"),
+                value=3,
+                barbarianCampGold=25,
+                barbarianSpawnMod=0,
+                freeHumanTechs=[],
+                freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior]
+            )
         elif self == HandicapType.king:
-            return [UnitType.settler, UnitType.warrior]
+            #
+            return HandicapTypeData(
+                name=_("TXT_KEY_HANDICAP_KING"),
+                value=4,
+                barbarianCampGold=25,
+                barbarianSpawnMod=0,
+                freeHumanTechs=[],
+                freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior]
+            )
         elif self == HandicapType.emperor:
-            return [UnitType.settler, UnitType.warrior]
+            #
+            return HandicapTypeData(
+                name=_("TXT_KEY_HANDICAP_EMPEROR"),
+                value=5,
+                barbarianCampGold=25,
+                barbarianSpawnMod=0,
+                freeHumanTechs=[],
+                freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior]
+            )
         elif self == HandicapType.immortal:
-            return [UnitType.settler, UnitType.warrior]
+            #
+            return HandicapTypeData(
+                name=_("TXT_KEY_HANDICAP_IMMORTAL"),
+                value=6,
+                barbarianCampGold=25,
+                barbarianSpawnMod=0,
+                freeHumanTechs=[],
+                freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior]
+            )
         elif self == HandicapType.deity:
-            return [UnitType.settler, UnitType.warrior]
+            #
+            return HandicapTypeData(
+                name=_("TXT_KEY_HANDICAP_DEITY"),
+                value=7,
+                barbarianCampGold=25,
+                barbarianSpawnMod=0,
+                freeHumanTechs=[],
+                freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior]
+            )
 
     def freeAIStartingUnitTypes(self) -> [UnitType]:
         if self == HandicapType.settler:

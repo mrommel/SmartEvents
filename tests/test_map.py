@@ -4,7 +4,7 @@ import unittest
 from game.civilizations import LeaderType
 from game.game import Game
 from game.players import Player
-from map.base import Array2D, HexPoint, HexCube, HexDirection, Size
+from map.base import Array2D, HexPoint, HexCube, HexDirection, Size, BoundingBox, HexArea
 from map.generation import MapOptions, MapGenerator, HeightMap
 from map.map import Tile, Map
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, AStarPathfinder, MoveTypeIgnoreUnitsPathfinderDataSource
@@ -288,6 +288,19 @@ class TestTile(unittest.TestCase):
 		self.assertEqual(grass_tile.movementCost(UnitMovementType.walk, tundra_tile), 1)
 		self.assertEqual(mountains_tile.movementCost(UnitMovementType.walk, tundra_tile), 3)
 		self.assertEqual(ocean_tile.movementCost(UnitMovementType.walk, tundra_tile), UnitMovementType.max.value)
+
+
+class TestBoundingBox(unittest.TestCase):
+	def test_constructor(self):
+		boundingBox = BoundingBox([HexPoint(1, 1), HexPoint(2, 2), HexPoint(3, 3)])
+		self.assertEqual(boundingBox.width(), 2)
+		self.assertEqual(boundingBox.height(), 2)
+
+
+class TestHexArea(unittest.TestCase):
+	def test_constructor(self):
+		area = HexArea([HexPoint(1, 1), HexPoint(2, 2), HexPoint(3, 3)])
+		self.assertEqual(area.center(), HexPoint(2, 2))
 
 
 class TestMap(unittest.TestCase):

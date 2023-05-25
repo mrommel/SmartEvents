@@ -17,9 +17,9 @@ venv: $(VENV)/bin/activate
 	# --disable=C0303,R0903,R0915,C0103,E1101,E0102,R0913,W0123,R0912,R0801 simulation map population
 #	./$(VENV)/bin/pylint
 
-pytests: venv
+pytest: venv
 	mkdir -p coverage
-	./$(VENV)/bin/pytest tests/
+	./$(VENV)/bin/pytest tests/ --cov
 
 run: venv
 	./$(VENV)/bin/python3 main.py

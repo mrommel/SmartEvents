@@ -2,12 +2,12 @@ import math
 from typing import Optional
 
 from game.ai.homeland import HomelandAI
-from game.baseTypes import CityStateType, GameState
+from game.baseTypes import GameState
 from game.ai.economics import EconomicAI
 from game.ai.grandStrategies import GrandStrategyAI
 from game.ai.militaries import MilitaryAI
 from game.buildings import BuildingType
-from game.cities import City, CityState, YieldValues, GossipType
+from game.cities import City, CityStateType, YieldValues
 from game.cityConnections import CityConnections
 from game.civilizations import LeaderType, CivilizationType, CivilizationAbility
 from game.flavors import Flavors, FlavorType
@@ -21,6 +21,7 @@ from game.policyCards import PolicyCardType
 from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
+from game.states.gossips import GossipType
 from game.states.ui import ScreenType
 from game.tradeRoutes import TradeRoutes
 from game.types import EraType, TechType, CivicType
@@ -236,7 +237,7 @@ class DangerPlotsAI:
 
 
 class Player:
-	def __init__(self, leader: LeaderType, cityState: CityStateType = None, human: bool = False):
+	def __init__(self, leader: LeaderType, cityState: Optional[CityStateType]=None, human: bool=False):
 		self.leader = leader
 		self.cityState = cityState
 		self.human = human
@@ -719,7 +720,7 @@ class Player:
 	def hasWonder(self, wonder: WonderType, simulation) -> bool:
 		return False
 
-	def isSuzerainOf(self, cityState: CityState, simulation) -> bool:
+	def isSuzerainOf(self, cityState: CityStateType, simulation) -> bool:
 		return False
 
 	def isMajorAI(self) -> bool:
@@ -738,7 +739,8 @@ class Player:
 				return
 
 		if self.isEndTurn() != value:
-			assert(self.isTurnActive(), "isTurnActive is expected to be true")
+			if not self.isTurnActive():
+				raise Exception("isTurnActive is expected to be true")
 
 			self.endTurnValue = value
 

@@ -4,7 +4,6 @@ from typing import Optional
 
 from game.ai.baseTypes import PlayerStateAllWars, WarGoalType
 from game.ai.militaries import MilitaryThreatType
-from game.cities import GossipType
 from game.civilizations import CivilizationType, LeaderType
 from game.flavors import FlavorType
 from game.moments import Moment, MomentType
@@ -13,6 +12,7 @@ from game.states.accessLevels import AccessLevel
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.states.diplomaticMessages import DiplomaticRequestState, DiplomaticRequestMessage, LeaderEmotionType
+from game.states.gossips import GossipType
 from game.types import TechType, CivicType, EraType
 from utils.base import WeightedBaseList, ExtendedEnum, InvalidEnumError
 

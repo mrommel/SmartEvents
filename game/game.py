@@ -4,13 +4,14 @@ from typing import Optional
 from game.ai.barbarians import BarbarianAI
 from game.ai.religions import Religions
 from game.baseTypes import HandicapType, GameState
-from game.cities import City, GossipType
+from game.cities import City
 from game.civilizations import LeaderType
 from game.evaluators import CitySiteEvaluator
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.players import Player
 from game.states.builds import BuildType
+from game.states.gossips import GossipType
 from game.states.ui import ScreenType
 from game.states.victories import VictoryType
 from game.types import TechType

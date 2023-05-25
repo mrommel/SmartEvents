@@ -192,12 +192,17 @@ class ImprovementType(ExtendedEnum):
 
 		raise InvalidEnumError(self)
 
-	def yieldsFor(self, player, visibleResource):
+	def yieldsFor(self, player):
 		if self == ImprovementType.none:
 			return Yields(food=0, production=0, gold=0, science=0)
+		elif self == ImprovementType.barbarianCamp:
+			return Yields(food=0, production=0, gold=0, science=0)
+		elif self == ImprovementType.goodyHut:
+			return Yields(food=0, production=0, gold=0, science=0)
+
 		elif self == ImprovementType.mine:
 			# https://civilization.fandom.com/wiki/Mine_(Civ6)
-			yieldValue =  Yields(food=0, production=1, gold=0, science=0, appeal=-1.0)
+			yieldValue = Yields(food=0, production=1, gold=0, science=0, appeal=-1.0)
 
 			# +1 additional Production (requires Apprenticeship)
 			if player.techs.hasTech(TechType.apprenticeship):
@@ -310,5 +315,16 @@ class ImprovementType(ExtendedEnum):
 				yieldValue.production += 1
 
 			return yieldValue
+		elif self == ImprovementType.oilWell:
+			# https://civilization.fandom.com/wiki/Oil_Well_(Civ6)
+			yieldValue = Yields(food=0, production=2, gold=0, appeal=-1)
+
+			# +1 Production(requires Predictive Systems)
+			# if player.techs.hasTech(TechType.predictiveSystems):
+			#	yieldValue.production += 1
+
+			return yieldValue
+		elif self == ImprovementType.fort:
+			return Yields(food=0, production=0, gold=0, science=0)
 
 		raise InvalidEnumError(self)

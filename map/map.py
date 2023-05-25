@@ -440,7 +440,7 @@ class Tile:
 
 		if self._improvement is not None and self._improvement != ImprovementType.none and \
 			not self.isImprovementPillaged():
-			returnYields += self._improvement.yieldsFor(player, visibleResource)
+			returnYields += self._improvement.yieldsFor(player)
 
 		return returnYields
 

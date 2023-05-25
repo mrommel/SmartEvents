@@ -5,16 +5,20 @@ from game.ai.baseTypes import MilitaryStrategyType
 from game.ai.economicStrategies import EconomicStrategyType
 from game.baseTypes import HandicapType
 from game.buildings import BuildingType
-from game.cities import City
+from game.cities import City, CityStateType
+from game.cityStates import CityStateCategory
 from game.civilizations import LeaderType, CivilizationType, CivilizationAbility
 from game.districts import DistrictType
 from game.game import Game
 from game.governments import GovernmentType
+from game.loyalties import LoyaltyState
 from game.moments import MomentType
 from game.players import Player
 from game.policyCards import PolicyCardType
+from game.states.accessLevels import AccessLevel
 from game.states.ages import AgeType
 from game.states.builds import BuildType
+from game.states.gossips import GossipType
 from game.types import CivicType, TechType, EraType
 from game.unitTypes import UnitType
 from game.units import Unit, UnitActivityType
@@ -27,6 +31,18 @@ from tests.testBasics import UserInterfaceMock, MapMock
 
 
 class TestGameAssets(unittest.TestCase):
+
+	def test_handicap_data(self):
+		for handicap in list(HandicapType):
+			_ = handicap.name()
+
+	def test_gossip_data(self):
+		for gossip in list(GossipType):
+			_ = gossip.name()
+
+	def test_accessLevel_data(self):
+		for accessLevel in list(AccessLevel):
+			_ = accessLevel.name()
 
 	def test_era_data(self):
 		for era in list(EraType):
@@ -57,8 +73,12 @@ class TestGameAssets(unittest.TestCase):
 			_ = building.name()
 
 	def test_improvements_data(self):
+		player = Player(LeaderType.trajan)
+		player.initialize()
+
 		for improvement in list(ImprovementType):
 			_ = improvement.name()
+			_ = improvement.yieldsFor(player)
 
 	def test_builds_data(self):
 		for build in list(BuildType):
@@ -71,6 +91,13 @@ class TestGameAssets(unittest.TestCase):
 	def test_moment_data(self):
 		for moment in list(MomentType):
 			_ = moment.name()
+
+	def test_cityState_data(self):
+		for cityStateCategory in list(CityStateCategory):
+			_ = cityStateCategory.name()
+
+		for cityState in list(CityStateType):
+			_ = cityState.name()
 
 	def test_civics_envoys(self):
 		# https://civilization.fandom.com/wiki/Envoy_(Civ6)
@@ -149,6 +176,11 @@ class TestGameAssets(unittest.TestCase):
 	def test_unit_data(self):
 		for unit in list(UnitType):
 			_ = unit.name()
+
+	def test_loyalties_data(self):
+		for loyalty in list(LoyaltyState):
+			_ = loyalty.name()
+			_ = loyalty.yieldPercentage()
 
 
 class TestCity(unittest.TestCase):
