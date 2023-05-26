@@ -8,7 +8,7 @@ from game.types import EraType, TechType, CivicType
 from map.types import UnitMovementType, ResourceType, UnitDomainType
 from utils.base import ExtendedEnum
 from utils.base import InvalidEnumError
-# from utils.translation import gettext_lazy as _
+from utils.translation import gettext_lazy as _
 
 
 class UnitPromotionType(ExtendedEnum):
@@ -307,7 +307,7 @@ class UnitType(ExtendedEnum):
 		# civilians ------------------------------
 		elif self == UnitType.settler:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_SETTLER_NAME",
+				name=_("TXT_KEY_UNIT_SETTLER_NAME"),
 				baseType=UnitType.settler,
 				domain=UnitDomainType.land,
 				effects=[
@@ -344,7 +344,7 @@ class UnitType(ExtendedEnum):
 			)
 		elif self == UnitType.builder:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_BUILDER_NAME",
+				name=_("TXT_KEY_UNIT_BUILDER_NAME"),
 				baseType=UnitType.builder,
 				domain=UnitDomainType.land,
 				effects=[
@@ -389,7 +389,7 @@ class UnitType(ExtendedEnum):
 			)
 		elif self == UnitType.trader:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_TRADER_NAME",
+				name=_("TXT_KEY_UNIT_TRADER_NAME"),
 				baseType=UnitType.trader,
 				domain=UnitDomainType.land,
 				effects=[
@@ -431,7 +431,7 @@ class UnitType(ExtendedEnum):
 		# recon ------------------------------
 		elif self == UnitType.scout:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_SCOUT_NAME",
+				name=_("TXT_KEY_UNIT_SCOUT_NAME"),
 				baseType=UnitType.scout,
 				domain=UnitDomainType.land,
 				effects=[
@@ -468,7 +468,7 @@ class UnitType(ExtendedEnum):
 			)
 		elif self == UnitType.skirmisher:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_SKIRMISHER_NAME",
+				name=_("TXT_KEY_UNIT_SKIRMISHER_NAME"),
 				baseType=UnitType.skirmisher,
 				domain=UnitDomainType.land,
 				effects=[
@@ -509,7 +509,7 @@ class UnitType(ExtendedEnum):
 		# melee ------------------------------
 		elif self == UnitType.warrior:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_WARRIOR_NAME",
+				name=_("TXT_KEY_UNIT_WARRIOR_NAME"),
 				baseType=UnitType.warrior,
 				domain=UnitDomainType.land,
 				effects=[
@@ -547,7 +547,7 @@ class UnitType(ExtendedEnum):
 			)
 		elif self == UnitType.swordman:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_SWORDMAN_NAME",
+				name=_("TXT_KEY_UNIT_SWORDMAN_NAME"),
 				baseType=UnitType.swordman,
 				domain=UnitDomainType.land,
 				effects=[
@@ -581,7 +581,7 @@ class UnitType(ExtendedEnum):
 			)
 		elif self == UnitType.manAtArms:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_MAN_AT_ARMS_NAME",
+				name=_("TXT_KEY_UNIT_MAN_AT_ARMS_NAME"),
 				baseType=UnitType.manAtArms,
 				domain=UnitDomainType.land,
 				effects=[
@@ -621,7 +621,7 @@ class UnitType(ExtendedEnum):
 		# ranged ------------------------------
 		elif self == UnitType.slinger:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_SLINGER_NAME",
+				name=_("TXT_KEY_UNIT_SLINGER_NAME"),
 				baseType=UnitType.slinger,
 				domain=UnitDomainType.land,
 				effects=[
@@ -660,7 +660,7 @@ class UnitType(ExtendedEnum):
 			)
 		elif self == UnitType.archer:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_ARCHER_NAME",
+				name=_("TXT_KEY_UNIT_ARCHER_NAME"),
 				baseType=UnitType.archer,
 				domain=UnitDomainType.land,
 				effects=[
@@ -699,7 +699,7 @@ class UnitType(ExtendedEnum):
 			)
 		elif self == UnitType.crossbowman:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_CROSSBOWMAN_NAME",
+				name=_("TXT_KEY_UNIT_CROSSBOWMAN_NAME"),
 				baseType=UnitType.crossbowman,
 				domain=UnitDomainType.land,
 				effects=[
@@ -740,7 +740,7 @@ class UnitType(ExtendedEnum):
 		# anti-cavalry ------------------------------
 		elif self == UnitType.spearman:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_SPEARMAN_NAME",
+				name=_("TXT_KEY_UNIT_SPEARMAN_NAME"),
 				baseType=UnitType.spearman,
 				domain=UnitDomainType.land,
 				effects=[
@@ -778,7 +778,7 @@ class UnitType(ExtendedEnum):
 			)
 		elif self == UnitType.pikeman:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_PIKEMAN_NAME",
+				name=_("TXT_KEY_UNIT_PIKEMAN_NAME"),
 				baseType=UnitType.pikeman,
 				domain=UnitDomainType.land,
 				effects=[
@@ -819,7 +819,7 @@ class UnitType(ExtendedEnum):
 		# light cavalry ------------------------------
 		elif self == UnitType.horseman:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_HORSEMAN_NAME",
+				name=_("TXT_KEY_UNIT_HORSEMAN_NAME"),
 				baseType=UnitType.horseman,
 				domain=UnitDomainType.land,
 				effects=[
@@ -892,7 +892,7 @@ class UnitType(ExtendedEnum):
 		# heavy cavalry ------------------------------
 		elif self == UnitType.heavyChariot:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_HEAVY_CHARIOT_NAME",
+				name=_("TXT_KEY_UNIT_HEAVY_CHARIOT_NAME"),
 				baseType=UnitType.heavyChariot,
 				domain=UnitDomainType.land,
 				effects=[
@@ -933,7 +933,7 @@ class UnitType(ExtendedEnum):
 			)
 		elif self == UnitType.knight:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_KNIGHT_NAME",
+				name=_("TXT_KEY_UNIT_KNIGHT_NAME"),
 				baseType=UnitType.knight,
 				domain=UnitDomainType.land,
 				effects=[
@@ -973,7 +973,7 @@ class UnitType(ExtendedEnum):
 		# siege ------------------------------
 		elif self == UnitType.catapult:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_CATAPULT_NAME",
+				name=_("TXT_KEY_UNIT_CATAPULT_NAME"),
 				baseType=UnitType.catapult,
 				domain=UnitDomainType.land,
 				effects=[
@@ -1012,7 +1012,7 @@ class UnitType(ExtendedEnum):
 			)
 		elif self == UnitType.trebuchet:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_TREBUCHET_NAME",
+				name=_("TXT_KEY_UNIT_TREBUCHET_NAME"),
 				baseType=UnitType.trebuchet,
 				domain=UnitDomainType.land,
 				effects=[
@@ -1054,7 +1054,7 @@ class UnitType(ExtendedEnum):
 		# naval melee ------------------------------
 		elif self == UnitType.galley:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_GALLEY_NAME",
+				name=_("TXT_KEY_UNIT_GALLEY_NAME"),
 				baseType=UnitType.galley,
 				domain=UnitDomainType.sea,
 				effects=[
@@ -1101,7 +1101,7 @@ class UnitType(ExtendedEnum):
 		# naval ranged ------------------------------
 		elif self == UnitType.quadrireme:
 			return UnitTypeData(
-				name="TXT_KEY_UNIT_QUADRIREME_NAME",
+				name=_("TXT_KEY_UNIT_QUADRIREME_NAME"),
 				baseType=UnitType.quadrireme,
 				domain=UnitDomainType.sea,
 				effects=[
@@ -1210,6 +1210,7 @@ class UnitType(ExtendedEnum):
 
 
 class MoveOptions(Enum):
+	attack = 'attack'
 	none = 'none'
 
 
@@ -1250,12 +1251,48 @@ class UnitMissionType(Enum):
 		return self._data().needsTarget
 
 	def _data(self) -> UnitMissionTypeData:
-		if self == UnitMissionType.rangedAttack:
-			return UnitMissionTypeData('RangedAttack', True)
+		if self == UnitMissionType.found:
+			return UnitMissionTypeData(name='TXT_KEY_MISSION_FOUND_NAME', needsTarget=False)
+		elif self == UnitMissionType.moveTo:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_MOVE_TO_NAME"), needsTarget=True)
+		elif self == UnitMissionType.routeTo:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_ROUTE_TO_NAME"), needsTarget=True)
+		elif self == UnitMissionType.followPath:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_FOLLOW_PATH_NAME"), needsTarget=True)
+		elif self == UnitMissionType.garrison:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_GARRISON_NAME"), needsTarget=False)
+		elif self == UnitMissionType.pillage:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_PILLAGE_NAME"), needsTarget=False)
+		elif self == UnitMissionType.plunderTradeRoute:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_PLUNDER_TRADE_ROUTE_NAME"), needsTarget=True)
+		elif self == UnitMissionType.build:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_BUILD_NAME"), needsTarget=False)
 		elif self == UnitMissionType.skip:
-			return UnitMissionTypeData('Skip', False)
-		elif self == UnitMissionType.found:
-			return UnitMissionTypeData('Found', False)
+			return UnitMissionTypeData(name='TXT_KEY_MISSION_SKIP_NAME', needsTarget=False)
+		elif self == UnitMissionType.rangedAttack:
+			return UnitMissionTypeData(name='TXT_KEY_MISSION_RANGED_ATTACK_NAME', needsTarget=True)
+
+		elif self == UnitMissionType.sleep:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_SLEEP_NAME"), needsTarget=False)
+		elif self == UnitMissionType.fortify:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_FORTIFY_NAME"), needsTarget=False)
+		elif self == UnitMissionType.alert:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_ALERT_NAME"), needsTarget=False)
+		elif self == UnitMissionType.airPatrol:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_AIR_PATROL_NAME"), needsTarget=False)
+		elif self == UnitMissionType.heal:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_HEAL_NAME"), needsTarget=False)
+
+		elif self == UnitMissionType.embark:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_EMBARK_NAME"), needsTarget=True)
+		elif self == UnitMissionType.disembark:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_DISEMBARK_NAME"), needsTarget=True)
+		elif self == UnitMissionType.rebase:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_REBASE_NAME"), needsTarget=True)
+		elif self == UnitMissionType.swapUnits:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_SWAP_UNITS_NAME"), needsTarget=True)
+		elif self == UnitMissionType.moveToUnit:
+			return UnitMissionTypeData(name=_("TXT_KEY_MISSION_MOVE_TO_UNIT_NAME"), needsTarget=True)
 
 		raise InvalidEnumError(self)
 

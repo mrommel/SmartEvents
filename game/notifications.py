@@ -1,6 +1,6 @@
 from typing import Optional
 
-from game.cities import CityStateType
+from game.cityStates import CityStateType
 from game.moments import MomentType
 from map.base import HexPoint
 from utils.base import ExtendedEnum

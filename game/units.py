@@ -2,13 +2,17 @@ import sys
 from typing import Optional
 
 from game.buildings import BuildingType
+from game.combat import Combat
+from game.moments import MomentType
+from game.notifications import NotificationType
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.types import EraType, TechType
 from game.unitMissions import UnitMission
-from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOptions, UnitMissionType, UnitActivityType
+from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOptions, UnitMissionType, UnitActivityType, \
+	UnitMapType
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
 from map.types import UnitDomainType, YieldType
@@ -47,6 +51,7 @@ class Unit:
 		self._automationType = UnitAutomationType.none
 		self._processedInTurnValue = False
 		self._missions = []
+		self._missionTimerValue = 0
 		self._fortifyTurnsValue = 0
 		self._fortifiedThisTurnValue = False
 
@@ -220,7 +225,11 @@ class Unit:
 		return self._processedInTurnValue
 
 	def updateMission(self, simulation):
-		pass
+		if self.activityTypeValue == UnitActivityType.mission:
+			if len(self._missions) > 0:
+				self._missions[-1].continueMission(steps=0, simulation=simulation)
+
+		return
 
 	def pushMission(self, mission, simulation):
 		self._missions.append(mission)
@@ -269,7 +278,14 @@ class Unit:
 		pass
 
 	def peekMission(self) -> Optional[UnitMission]:
-		return None
+		if len(self._missions) > 0:
+			return self._missions[-1]  # return last element
+
+	def setMissionTimerTo(self, timer: int):
+		self._missionTimerValue = timer
+
+	def missionTimer(self) -> int:
+		return self._missionTimerValue
 
 	def canStartMission(self, mission: UnitMission, simulation):
 		"""Eligible to start a new mission?"""
@@ -550,3 +566,159 @@ class Unit:
 
 		return sightValue
 
+	def doAttackInto(self, destination: HexPoint, steps: int, simulation) -> bool:
+		"""Returns true if attack was made...
+			UnitAttack in civ5"""
+		destPlot = simulation.tileAt(destination)
+
+		attack = False
+		# wrapX: Int = gameModel.wrappedX() ? gameModel.mapSize().width(): -1
+		adjacent = self.location.isNeighborOf(destination)
+
+		if adjacent:
+			if self.isOutOfAttacks(simulation):
+				return False
+
+			# Air mission
+			if self.domain() == UnitDomainType.air and self.baseCombatStrength() == 0:
+				if self.canRangeStrikeAt(destination, needWar=False, noncombatAllowed=True, simulation=simulation):
+					attack = True
+					Combat.doAirAttack(self, destPlot, simulation=simulation)
+
+			elif destPlot.isCity():  # City combat
+				city = simulation.cityAt(destination)
+				if city is not None:
+					if self.player.diplomacyAI.isAtWarWith(city.player):
+						if self.domain() == UnitDomainType.land:
+							# Ranged units that are embarked can't do a move-attack
+							if self.isRanged() and self.isEmbarked():
+								return False
+
+							attack = True
+							Combat.doMeleeAttack(self, city, simulation)
+
+			else: # Normal unit combat
+				# if there are no defenders, do not attack
+				defenderUnit = simulation.unitAt(destination, UnitMapType.combat)
+				if defenderUnit is None:
+					return False
+
+				# Ranged units that are embarked can't do a move-attack
+				if self.isRanged() and self.isEmbarked():
+					return False
+
+				if not self.player.diplomacyAI.isAtWarWith(defenderUnit.player) or not defenderUnit.isBarbarian():
+					return False
+
+				attack = True
+				Combat.doMeleeAttack(self, defenderUnit, simulation)
+
+				self.player.addMoment(MomentType.battleFought, simulation)
+
+			# Barb camp here that was attacked?
+			if destPlot.improvement() == ImprovementType.barbarianCamp:
+				simulation.doCampAttackedAt(destPlot.point)
+
+		return attack
+
+	def isTrading(self) -> bool:
+		return False
+
+	def doMoveOnPathTowards(self, target: HexPoint, previousETA: int, buildingRoute: bool, simulation):
+		"""
+		// UnitPathTo
+		// Returns the number of turns it will take to reach the target.
+		// If no move was made it will return 0.
+		// If it can reach the target in one turn or less than one turn (i.e. not use up all its movement points) it will return 1
+		"""
+		if self.location == target:
+			print("Already at location")
+			return 0
+
+		pathPlot = None
+
+		targetPlot = simulation.tileAt(target)
+		if targetPlot is None:
+			print("Destination is not a valid plot location")
+			return 0
+
+		path = self.pathTowards(target, options=None, simulation=simulation)
+		if path is None:
+			print("Unable to generate path with BuildRouteFinder")
+			if self.unitType == UnitType.trader:
+				self.finishMoves()  # skip one turn
+			else:
+				self.doCancelOrder(simulation)
+
+			return 0
+
+		if self.domain() == UnitDomainType.air:
+
+			if not self.canMoveInto(target, options=None, simulation=simulation):
+				return 0
+
+			pathPlot = targetPlot
+		else:
+			if len(path) > 1:
+				pathPlot = simulation.tileAt(path[1])
+
+			if buildingRoute:
+				if pathPlot is None or not self.canMoveInto(target, options=None, simulation=simulation):
+					# add route interrupted
+					simulation.humanPlayer().notifications().addNotification(NotificationType.generic)
+					return 0
+
+		rejectMove = False
+
+		# handle empty path
+		if len(path.points()) > 0:
+			firstCost = path.costs()[0]
+
+			if previousETA >= 0 and int(firstCost) > previousETA + 2:
+				# LOG_UNIT_MOVES_MESSAGE_OSTR(std::string("Rejecting move iPrevETA=") << iPrevETA << std::string(", m_iData2=") << kNode.m_iData2);
+				rejectMove = True
+
+			# if we should end our turn there this turn, but can't move into that tile
+			if int(firstCost) == 1 and not self.canMoveInto(target, options=None, simulation=simulation):
+				if self.peekMission() is not None:
+					if self.peekMission().startedInTurn != simulation.currentTurn:
+						# LOG_UNIT_MOVES_MESSAGE_OSTR(std::
+						#	string("Rejecting move pkMissionData->iPushTurn=") << pkMissionData->iPushTurn << std::string(
+						#	", GC.getGame().getGameTurn()=") << GC.getGame().getGameTurn());
+						rejectMove = True
+
+			if rejectMove:
+				# m_kLastPath.clear();
+				# slewis - perform its queued moves?
+				self.publishQueuedVisualizationMoves(simulation)
+				return 0
+
+		usedPathCost = 0.0
+
+		# this is wrong - unsure where it gets broken
+		path.cropPointsUntil(self.location)
+
+		print(f"unit {self.location} => doMoveOnPath({path})")
+		for (index, point) in enumerate(path):
+			# skip if already at point
+			if point == self.location:
+				continue
+
+			if self.doMoveOnto(point, simulation):
+				if self.isTrading():
+					tile = simulation.tileAt(point)
+					if tile is not None:
+						tile.setRoute(self.player.bestRouteAt(tile))
+						simulation.userInterface.refreshTile(tile)
+
+				usedPathCost += path[index].cost
+
+		self.publishQueuedVisualizationMoves(simulation)
+
+		if len(path.points()) > 0:
+			tmp = (path.cost() - usedPathCost) / float(self.maxMoves(simulation))
+			if 0.0 < tmp < 1.0:
+				return 1
+			return int(tmp)
+
+		return 1

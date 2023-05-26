@@ -26,3 +26,8 @@ class Interface:
 
 class ScreenType(ExtendedEnum):
 	diplomatic = 'diplomatic'
+
+
+class PopupType(ExtendedEnum):
+	tutorialBadUnitAttack = 'tutorialBadUnitAttack'
+	tutorialCityAttack = 'tutorialCityAttack'

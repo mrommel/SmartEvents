@@ -30,10 +30,10 @@ l18n_prepare: $(PY_FILES)
 
 l18n_extract:
 	mkdir -p 'locales/en/LC_MESSAGES'
-	[ -e 'locales/en/LC_MESSAGES/base.po' ] || msginit --no-translator -l en -i 'locales/base.pot' -o 'locales/en/LC_MESSAGES/base.po'
-	msgmerge -N -U 'locales/en/LC_MESSAGES/base.po' 'locales/base.pot'
+	[ -e 'locales/en/LC_MESSAGES/base.po' ] || /opt/homebrew/bin/msginit --no-translator -l en -i 'locales/base.pot' -o 'locales/en/LC_MESSAGES/base.po'
+	/opt/homebrew/bin/msgmerge -N -U 'locales/en/LC_MESSAGES/base.po' 'locales/base.pot'
 
 l18n_compile:
-	msgfmt 'locales/en/LC_MESSAGES/base.po' -o 'locales/en/LC_MESSAGES/base.mo'
+	/opt/homebrew/bin/msgfmt 'locales/en/LC_MESSAGES/base.po' -o 'locales/en/LC_MESSAGES/base.mo'
 
 .PHONY: l18n_prepare l18n_extract l18n_compile

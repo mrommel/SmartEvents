@@ -12,6 +12,7 @@ class UnitDomainType(ExtendedEnum):
 
 	sea = 'sea'
 	land = 'land'
+	air = 'air'
 	immobile = 'immobile'
 
 
