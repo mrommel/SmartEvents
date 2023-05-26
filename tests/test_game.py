@@ -3,6 +3,7 @@ import unittest
 from game.achievements import CivicAchievements, TechAchievements
 from game.ai.baseTypes import MilitaryStrategyType
 from game.ai.economicStrategies import EconomicStrategyType
+from game.ai.homeland import HomelandMoveType
 from game.baseTypes import HandicapType
 from game.buildings import BuildingType
 from game.cities import City, CityStateType
@@ -181,6 +182,10 @@ class TestGameAssets(unittest.TestCase):
 		for loyalty in list(LoyaltyState):
 			_ = loyalty.name()
 			_ = loyalty.yieldPercentage()
+
+	def test_homelandMoves_data(self):
+		for homelandMove in list(HomelandMoveType):
+			_ = homelandMove.name()
 
 
 class TestCity(unittest.TestCase):

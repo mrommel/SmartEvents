@@ -51,7 +51,10 @@ class HexPoint:
 
 
 class BoundingBox:
-	def __init__(self, points: [HexPoint]):
+	def __init__(self, points=None):
+		if points is None:
+			points = []
+
 		self.min_x = -1
 		self.min_y = -1
 		self.max_x = -1
@@ -75,7 +78,17 @@ class BoundingBox:
 	def height(self) -> int:
 		return self.max_y - self.min_y
 
+	def __eq__(self, other):
+		if isinstance(other, BoundingBox):
+			return self.min_x == other.min_x and self.min_y == other.min_y and \
+				self.max_x == other.max_x and self.max_y == other.max_y
+
+		return False
+
 	def __str__(self):
+		return f'BoundingBox( ({self.min_x}, {self.min_y}) -> ({self.max_x}, {self.max_y}) )'
+
+	def __repr__(self):
 		return f'BoundingBox( ({self.min_x}, {self.min_y}) -> ({self.max_x}, {self.max_y}) )'
 
 

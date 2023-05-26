@@ -80,6 +80,5 @@ class WeightedBaseList(dict):
 		return output
 
 
-
 class WeightedStringList(WeightedBaseList):
 	pass

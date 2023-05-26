@@ -185,6 +185,9 @@ class TerrainType(ExtendedEnum):
 	land = 'land'
 	sea = 'sea'
 
+	def name(self) -> str:
+		return self._data().name
+
 	def isWater(self):
 		return self == TerrainType.sea or self == TerrainType.ocean or self == TerrainType.shore
 
@@ -363,10 +366,13 @@ class FeatureType(ExtendedEnum):
 	cliffsOfDover = 'cliffsOfDover'
 	uluru = 'uluru'
 
+	def name(self) -> str:
+		return self._data().name
+
 	def _data(self):
 		if self == FeatureType.none:
 			return FeatureData('None', Yields(food=0, production=0, gold=0), False)
-		if self == FeatureType.forest:
+		if self == FeatureType.forest or self == FeatureType.pine:
 			return FeatureData('Forest', Yields(0, 1, gold=0), False)
 		elif self == FeatureType.rainforest:
 			return FeatureData('Rainforest', Yields(1, 0, gold=0), False)
@@ -390,6 +396,32 @@ class FeatureType(ExtendedEnum):
 			return FeatureData("Lake", Yields(0, 0, gold=0), False)
 		elif self == FeatureType.fallout:
 			return FeatureData("Fallout", Yields(-3, -3, gold=-3), False)
+
+		# wonders
+		elif self == FeatureType.mountEverest:
+			return FeatureData(
+				name="Mount Everest",
+				yields=Yields(food=2, production=0, gold=0, science=0, faith=1),
+				is_wonder=True
+			)
+		elif self == FeatureType.greatBarrierReef:
+			return FeatureData(
+				name="Great Barrier Reef",
+				yields=Yields(food=3, production=0, gold=0, science=2),
+				is_wonder=True
+			)
+		elif self == FeatureType.cliffsOfDover:
+			return FeatureData(
+				name="Cliffs of Dover",
+				yields=Yields(food=0, production=0, gold=0, science=0, culture=0, faith=0),  #
+				is_wonder=True
+			)
+		elif self == FeatureType.uluru:
+			return FeatureData(
+				name="Uluru",
+				yields=Yields(food=0, production=0, gold=0, science=0, culture=2, faith=2),
+				is_wonder=True
+			)
 
 		raise AttributeError(f'FeatureType.data: {self} not handled!')
 

@@ -1,8 +1,6 @@
-from enum import Enum
 from typing import Optional
 
 from game.cities import City
-from game.civilizations import LeaderType
 from game.districts import DistrictType
 from game.governors import GovernorType, GovernorTitle
 from game.players import Player
@@ -50,10 +48,11 @@ class Tile:
 		self._featureValue = FeatureType.none
 		self._resourceValue = ResourceType.none  # property is hidden
 		self._resourceQuantity = 0
-		self.river_value = 0
-		self.climate_zone = ClimateZone.temperate
+		self._riverValue = 0
+		self._climateZone = ClimateZone.temperate
 		self._route = RouteType.none
-		self._improvement = ImprovementType.none
+		self._improvementValue = ImprovementType.none
+		self._improvementPillagedValue: bool = False
 		self.continentIdentifier = None
 		self.discovered = dict()
 		self.visible = dict()
@@ -223,19 +222,19 @@ class Tile:
 		"""river in north can flow from east or west direction"""
 		# 0x01 => east
 		# 0x02 => west
-		return self.river_value & 0x01 > 0 or self.river_value & 0x02 > 0
+		return self._riverValue & 0x01 > 0 or self._riverValue & 0x02 > 0
 
 	def isRiverInNorthEast(self):
 		"""river in north-east can flow to northwest or southeast direction"""
 		# 0x04 => northWest
 		# 0x08 => southEast
-		return self.river_value & 0x04 > 0 or self.river_value & 0x08 > 0
+		return self._riverValue & 0x04 > 0 or self._riverValue & 0x08 > 0
 
 	def isRiverInSouthEast(self):
 		"""river in south-east can flow to northeast or southwest direction"""
 		# 0x16 => northWest
 		# 0x32 => southEast
-		return self.river_value & 0x10 > 0 or self.river_value & 0x20 > 0
+		return self._riverValue & 0x10 > 0 or self._riverValue & 0x20 > 0
 
 	def hasAnyRoute(self):
 		return self._route != RouteType.none
@@ -261,11 +260,11 @@ class Tile:
 			if not resource.canBePlacedOnFeature(self._featureValue):
 				return False
 
-			if not resource.canBePlacedOnFeatureTerrain(self.terrain):
+			if not resource.canBePlacedOnFeatureTerrain(self._terrainValue):
 				return False
 		else:
 			# only checked if no feature
-			if not resource.canBePlacedOnTerrain(self.terrain):
+			if not resource.canBePlacedOnTerrain(self._terrainValue):
 				return False
 
 		if self._isHills:
@@ -391,10 +390,10 @@ class Tile:
 		self._isHills = hills
 
 	def hasAnyImprovement(self) -> bool:
-		return self._improvement != ImprovementType.none
+		return self._improvementValue != ImprovementType.none
 
 	def hasImprovement(self, improvement: ImprovementType) -> bool:
-		return self._improvement == improvement
+		return self._improvementValue == improvement
 
 	def route(self) -> RouteType:
 		return self._route
@@ -403,10 +402,10 @@ class Tile:
 		self._route = route
 
 	def improvement(self):
-		return self._improvement
+		return self._improvementValue
 
 	def setImprovement(self, improvement: ImprovementType):
-		self._improvement = improvement
+		self._improvementValue = improvement
 
 	def hasAnyWonder(self) -> bool:
 		return self._wonderValue != WonderType.none
@@ -438,14 +437,17 @@ class Tile:
 		visibleResource = self.resourceFor(player)
 		returnYields += visibleResource.yields()
 
-		if self._improvement is not None and self._improvement != ImprovementType.none and \
+		if self._improvementValue is not None and self._improvementValue != ImprovementType.none and \
 			not self.isImprovementPillaged():
-			returnYields += self._improvement.yieldsFor(player)
+			returnYields += self._improvementValue.yieldsFor(player)
 
 		return returnYields
 
-	def isImprovementPillaged(self):
-		return False
+	def isImprovementPillaged(self) -> bool:
+		return self._improvementPillagedValue
+
+	def setImprovementPillaged(self, value: bool):
+		self._improvementPillagedValue = value
 
 	def changeBuildProgressOf(self, build: BuildType, change: int, player: Player, simulation) -> bool:
 		"""Returns true if build finished ..."""
@@ -921,10 +923,10 @@ class Map:
 		"""@return True, if this tile has a river - False otherwise"""
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
-			return self.tiles.values[hex_point.y][hex_point.x].river_value > 0
+			return self.tiles.values[hex_point.y][hex_point.x]._riverValue > 0
 		elif isinstance(x_or_hex, int) and isinstance(y, int):
 			x = x_or_hex
-			return self.tiles.values[y][x].river_value > 0
+			return self.tiles.values[y][x]._riverValue > 0
 		else:
 			raise AttributeError(f'Map.riverAt with wrong attributes: {x_or_hex} / {y}')
 

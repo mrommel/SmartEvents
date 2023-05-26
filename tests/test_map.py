@@ -6,9 +6,10 @@ from game.game import Game
 from game.players import Player
 from map.base import Array2D, HexPoint, HexCube, HexDirection, Size, BoundingBox, HexArea
 from map.generation import MapOptions, MapGenerator, HeightMap
+from map.improvements import ImprovementType
 from map.map import Tile, Map
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, AStarPathfinder, MoveTypeIgnoreUnitsPathfinderDataSource
-from map.types import FeatureType, TerrainType, UnitMovementType, MapSize, MapType, AppealLevel
+from map.types import FeatureType, TerrainType, UnitMovementType, MapSize, MapType, AppealLevel, ResourceType
 from tests.testBasics import UserInterfaceMock, MapMock
 
 
@@ -20,6 +21,21 @@ class TestMapAssets(unittest.TestCase):
 	def test_mapType_data(self):
 		for mapType in list(MapType):
 			_ = mapType.name()
+
+	def test_terrain_data(self):
+		for terrain in list(TerrainType):
+			_ = terrain.name()
+			_ = terrain.textures()
+
+	def test_feature_data(self):
+		for feature in list(FeatureType):
+			_ = feature.name()
+			_ = feature.textures()
+
+	def test_resource_data(self):
+		for resource in list(ResourceType):
+			_ = resource.name()
+			_ = resource.texture()
 
 
 class TestArray2D(unittest.TestCase):
@@ -263,7 +279,7 @@ class TestTile(unittest.TestCase):
 
 	def test_river_n(self):
 		tile = Tile(HexPoint(3, 2), TerrainType.tundra)
-		tile.river_value = 1
+		tile._riverValue = 1
 
 		self.assertEqual(tile.isRiverInNorth(), True)
 		self.assertEqual(tile.isRiverInNorthEast(), False)
@@ -271,7 +287,7 @@ class TestTile(unittest.TestCase):
 
 	def test_river_ne(self):
 		tile = Tile(HexPoint(3, 2), TerrainType.tundra)
-		tile.river_value = 4
+		tile._riverValue = 4
 
 		self.assertEqual(tile.isRiverInNorth(), False)
 		self.assertEqual(tile.isRiverInNorthEast(), True)
@@ -299,6 +315,28 @@ class TestTile(unittest.TestCase):
 		self.assertEqual(mountains_tile.movementCost(UnitMovementType.walk, tundra_tile), 3)
 		self.assertEqual(ocean_tile.movementCost(UnitMovementType.walk, tundra_tile), UnitMovementType.max.value)
 
+	def test_improvement_getset(self):
+		tile = Tile(HexPoint(3, 2), TerrainType.grass)
+
+		self.assertEqual(tile.improvement(), ImprovementType.none)  # initial
+
+		tile.setImprovement(ImprovementType.farm)
+		self.assertEqual(tile.improvement(), ImprovementType.farm)
+
+		tile.setImprovement(ImprovementType.none)
+		self.assertEqual(tile.improvement(), ImprovementType.none)
+
+	def test_improvement_pillage(self):
+		tile = Tile(HexPoint(3, 2), TerrainType.tundra)
+
+		self.assertEqual(tile.isImprovementPillaged(), False)  # initial
+
+		tile.setImprovementPillaged(True)
+		self.assertEqual(tile.isImprovementPillaged(), True)
+
+		tile.setImprovementPillaged(False)
+		self.assertEqual(tile.isImprovementPillaged(), False)
+
 
 class TestBoundingBox(unittest.TestCase):
 	def test_constructor(self):
@@ -309,8 +347,25 @@ class TestBoundingBox(unittest.TestCase):
 
 class TestHexArea(unittest.TestCase):
 	def test_constructor(self):
+		area0 = HexArea([HexPoint(1, 1), HexPoint(2, 2), HexPoint(3, 3)])
+		self.assertEqual(area0.points, [HexPoint(1, 1), HexPoint(2, 2), HexPoint(3, 3)])
+
+		area1 = HexArea(HexPoint(1, 1))
+		self.assertEqual(area1.points, [HexPoint(1, 1)])
+
+	def test_center(self):
 		area = HexArea([HexPoint(1, 1), HexPoint(2, 2), HexPoint(3, 3)])
 		self.assertEqual(area.center(), HexPoint(2, 2))
+
+	def test_boundingBox(self):
+		area0 = HexArea([HexPoint(1, 1), HexPoint(1, 2)])
+		boundingBox0 = area0.boundingBox()
+		expectedBoundingBox = BoundingBox()
+		expectedBoundingBox.min_x = 1
+		expectedBoundingBox.min_y = 1
+		expectedBoundingBox.max_x = 1
+		expectedBoundingBox.max_y = 2
+		self.assertEqual(boundingBox0, expectedBoundingBox)
 
 
 class TestMap(unittest.TestCase):
