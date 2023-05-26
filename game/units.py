@@ -660,8 +660,8 @@ class Unit:
 
 			pathPlot = targetPlot
 		else:
-			if len(path) > 1:
-				pathPlot = simulation.tileAt(path[1])
+			if len(path.points()) > 1:
+				pathPlot = simulation.tileAt(path.points()[1])
 
 			if buildingRoute:
 				if pathPlot is None or not self.canMoveInto(target, options=None, simulation=simulation):
@@ -696,11 +696,11 @@ class Unit:
 
 		usedPathCost = 0.0
 
-		# this is wrong - unsure where it gets broken
-		path.cropPointsUntil(self.location)
+		# fixme this is wrong - unsure where it gets broken
+		# path.cropPointsUntil(self.location)
 
 		print(f"unit {self.location} => doMoveOnPath({path})")
-		for (index, point) in enumerate(path):
+		for (index, point) in enumerate(path.points()):
 			# skip if already at point
 			if point == self.location:
 				continue
@@ -712,7 +712,7 @@ class Unit:
 						tile.setRoute(self.player.bestRouteAt(tile))
 						simulation.userInterface.refreshTile(tile)
 
-				usedPathCost += path[index].cost
+				usedPathCost += path.costs()[index]
 
 		self.publishQueuedVisualizationMoves(simulation)
 
@@ -725,7 +725,78 @@ class Unit:
 		return 1
 
 	def pathTowards(self, target: HexPoint, options, simulation) -> Optional[HexPath]:
-		return None
+		return simulation.pathTowards(target, options, self)
 
 	def doCancelOrder(self, simulation):
 		pass
+
+	def movementType(self):
+		return self.unitType.movementType()
+
+	def doMoveOnto(self, target: HexPoint, simulation) -> bool:
+		targetPlot = simulation.tileAt(target)
+		oldPlot = simulation.tileAt(self.location)
+
+		costDataSource = simulation.unitAwarePathfinderDataSource(self)
+
+		if not self.canMove():
+			return False
+
+		shouldDeductCost: bool = True
+		moveCost = costDataSource.costToMove(self.location, target)
+
+		# we need to get our dis / embarking on
+		if self.canEverEmbark() and targetPlot.terrain().isWater() != oldPlot.terrain().isWater():
+			if oldPlot.terrain().isWater():
+				if self.isEmbarked():
+					# moving from water to the land
+					#/ * if self.moveLocations.count > 0 {
+					# If we have some queued moves, execute them now, so that the disembark is done at the proper location visually
+					#self.publishQueuedVisualizationMoves( in: gameModel)
+					#} * /
+
+					self.doDisembark(simulation)
+
+			else:
+				if not self.isEmbarked() and self.canEmbarkInto(target, simulation):
+					# moving from land to the water
+					# if self.moveLocations.count > 0
+					# If we have some queued moves, execute them now, so that the disembark is done at the proper location visually
+					# self.publishQueuedVisualizationMoves( in: gameModel)
+
+					self.doEmbark(simulation)
+					self.finishMoves()
+					shouldDeductCost = False
+
+		if shouldDeductCost:
+			self._movesValue -= int(moveCost)
+
+			if self._movesValue < 0:
+				self._movesValue = 0
+
+		self.setLocation(target, simulation=simulation)
+
+		return True
+
+	def canEverEmbark(self) -> bool:
+		# https://civilization.fandom.com/wiki/Movement_(Civ6)?so=search#Embarking
+		# only land units can embark
+		if self.domain() != UnitDomainType.land:
+			return False
+
+		if self.unitType == UnitType.builder and self.player.hasTech(TechType.sailing):
+			return True
+
+		if self.player.canEmbark():
+			return True
+
+		return False
+
+	def isBusy(self) -> bool:
+		if self.missionTimer() > 0:
+			return True
+
+		# if self.isInCombat():
+		# 	return True
+
+		return False

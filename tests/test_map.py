@@ -508,9 +508,9 @@ class TestPathfinding(unittest.TestCase):
 
 		# print(path)
 		target_path = [HexPoint(0, 0), HexPoint(1, 1), HexPoint(2, 1), HexPoint(2, 2), HexPoint(2, 3), ]
-		self.assertEqual(len(path), 5)
+		self.assertEqual(len(path.points()), 5)
 		for i, n in enumerate(target_path):
-			self.assertEqual(n, path[i])
+			self.assertEqual(n, path.points()[i])
 
 
 if __name__ == '__main__':

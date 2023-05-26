@@ -1126,3 +1126,9 @@ class Player:
 				return True
 
 		return False
+
+	def canEmbark(self) -> bool:
+		return self.hasTech(TechType.shipBuilding)
+
+	def hasTech(self, techType: TechType) -> bool:
+		return self.techs.hasTech(techType)

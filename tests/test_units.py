@@ -54,9 +54,9 @@ class TestUnitMissions(unittest.TestCase):
 		simulation.addUnit(playerTrajanScout)
 
 		# WHEN
-		# path = HexPath([HexPoint(4, 5), HexPoint(4, 4), HexPoint(4, 3), HexPoint(4, 2), HexPoint(4, 1)])
 		playerTrajanScout.pushMission(UnitMission(missionType=UnitMissionType.moveTo, target=HexPoint(4, 1)), simulation)
 		playerTrajanScout.updateMission(simulation)
 
 		# THEN
-		self.assertEqual(playerTrajanScout.peekMission(), None)
+		self.assertEqual(playerTrajanScout.peekMission().missionType, UnitMissionType.moveTo)
+		self.assertEqual(playerTrajanScout.location, HexPoint(3, 2))

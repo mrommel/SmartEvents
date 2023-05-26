@@ -269,6 +269,9 @@ class UnitType(ExtendedEnum):
 	def sight(self) -> int:
 		return self._data().sight
 
+	def movementType(self) -> UnitMovementType:
+		return self._data().movementType
+
 	def _data(self) -> UnitTypeData:
 		# default ------------------------------
 		if self == UnitType.none:

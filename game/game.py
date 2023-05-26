@@ -15,11 +15,13 @@ from game.states.gossips import GossipType
 from game.states.ui import ScreenType
 from game.states.victories import VictoryType
 from game.types import TechType
-from game.unitTypes import UnitMapType, UnitAbilityType, UnitPromotionType
+from game.unitTypes import UnitMapType, UnitAbilityType, UnitPromotionType, MoveOptions
 from game.units import Unit
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.map import Map, Tile, ContinentType, Continent
+from map.path_finding.finder import AStarPathfinder, MoveTypeIgnoreUnitsOptions, MoveTypeIgnoreUnitsPathfinderDataSource
+from map.path_finding.path import HexPath
 from map.types import FeatureType, Tutorials
 
 
@@ -609,3 +611,34 @@ class Game:
 				return enemyUnit
 
 		return None
+
+	def unitAwarePathfinderDataSource(self, unit) -> MoveTypeIgnoreUnitsPathfinderDataSource:
+		datasourceOptions = MoveTypeIgnoreUnitsOptions(
+			ignore_sight=True,
+			can_embark=unit.player.canEmbark(),
+			can_enter_ocean=unit.player.canEnterOcean()
+		)
+		return MoveTypeIgnoreUnitsPathfinderDataSource(self._map, unit.movementType(), unit.player, datasourceOptions)
+
+	def pathTowards(self, target: HexPoint, options: MoveOptions, unit) -> HexPath:
+		datasource = self.unitAwarePathfinderDataSource(unit)
+		pathFinder = AStarPathfinder(datasource)
+
+		path = pathFinder.shortestPath(unit.location, target)
+
+		# add costs
+		path.addCost(0.0)  # first location
+
+		lastPoint = None
+		for index, point in enumerate(path.points()):
+			if index == 0:
+				lastPoint = point
+				continue
+
+			cost = datasource.costToMove(lastPoint, point)
+			path.addCost(cost)
+			lastPoint = point
+
+		return path
+
+

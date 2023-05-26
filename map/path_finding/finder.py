@@ -1,6 +1,9 @@
+from typing import Optional
+
 from map.base import HexPoint
 from map.map import Map
 from map.path_finding.base import AStar
+from map.path_finding.path import HexPath
 from map.types import UnitMovementType, TerrainType
 
 
@@ -95,13 +98,13 @@ class AStarPathfinder(AStar):
 	def is_goal_reached(self, current, goal):
 		return current == goal
 
-	def shortestPath(self, from_point, to_point):
+	def shortestPath(self, from_point, to_point) -> Optional[HexPath]:
 		if self.data_source is None:
 			print('no datasource')
 
 		pts_or_none = self.astar(from_point, to_point, False)
 
 		if pts_or_none is not None:
-			return list(pts_or_none)
+			return HexPath(list(pts_or_none))
 
 		return None
