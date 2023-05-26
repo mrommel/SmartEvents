@@ -21,7 +21,8 @@ from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.states.gossips import GossipType
 from game.types import CivicType, TechType, EraType
-from game.unitTypes import UnitType
+from game.unitMissions import UnitMission
+from game.unitTypes import UnitType, UnitMissionType
 from game.units import Unit, UnitActivityType
 from game.wonders import WonderType
 from map.base import HexPoint
@@ -562,6 +563,37 @@ class TestSimulation(unittest.TestCase):
 
 		# THEN
 		self.assertLess(iteration, 25, 'maximum iterations reached')
+
+
+class TestUnitMission(unittest.TestCase):
+	def test_moveTo_mission(self):
+		# GIVEN
+		mapModel = MapMock(24, 20, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+
+		# players
+		playerTrajan = Player(LeaderType.trajan, human=True)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# initial unit
+		playerAugustusWarrior = Unit(HexPoint(15, 16), UnitType.warrior, playerTrajan)
+		simulation.addUnit(playerAugustusWarrior)
+
+		# this is cheating
+		mapModel.discover(playerTrajan, simulation)
+
+		# WHEN
+		playerAugustusWarrior.pushMission(UnitMission(missionType=UnitMissionType.moveTo, target=HexPoint(12, 3)), simulation=simulation)
+
+		# THEN
+		self.assertIsNotNone(playerAugustusWarrior.peekMission())
+		self.assertEqual(playerAugustusWarrior.peekMission().missionType, UnitMissionType.moveTo)
+		self.assertEqual(playerAugustusWarrior.peekMission().target, HexPoint(12, 3))
+		self.assertNotEqual(playerAugustusWarrior.location, HexPoint(15, 16))
 
 
 class TestUsecases(unittest.TestCase):

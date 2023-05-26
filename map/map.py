@@ -56,7 +56,7 @@ class Tile:
 		self.continentIdentifier = None
 		self.discovered = dict()
 		self.visible = dict()
-		self.cityValue = None
+		self._cityValue = None
 		self._districtValue = None
 		self._wonderValue = WonderType.none
 		self._owner = None
@@ -347,8 +347,11 @@ class Tile:
 	def concealTo(self, player):
 		self.visible[str(player.leader)] = False
 
+	def isCity(self) -> bool:
+		return self._cityValue is not None
+
 	def setCity(self, city):
-		self.cityValue = city
+		self._cityValue = city
 
 	def productionFromFeatureRemoval(self, buildType: BuildType) -> int:
 		if not self.hasAnyFeature():

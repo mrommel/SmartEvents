@@ -5,9 +5,12 @@ from game.ai.economics import EconomicStrategyAdoptions
 from game.ai.homeland import HomelandUnit
 from game.civilizations import LeaderType
 from game.players import Player
+from game.states.builds import BuildType
 from game.unitTypes import UnitType
 from game.units import Unit
 from map.base import HexPoint
+from map.types import TerrainType
+from tests.testBasics import MapMock
 
 
 class TestHomeland(unittest.TestCase):
@@ -86,3 +89,12 @@ class TestEconomics(unittest.TestCase):
 
 		# THEN
 		self.assertFalse(adoptions.adopted(EconomicStrategyType.losingMoney))
+
+
+class TestBuilds(unittest.TestCase):
+	def test_buildOn(self):
+		mapModel = MapMock(10, 10, TerrainType.grass)
+		tile = mapModel.tileAt(HexPoint(1, 1))
+		buildTime = BuildType.farm.buildTimeOn(tile)
+
+		self.assertEqual(buildTime, 600)

@@ -598,3 +598,14 @@ class Game:
 	def sendGossip(self, gossipType: GossipType, cityName: Optional[str] = None, tech: Optional[TechType] = None,
 	               player = None):
 		pass
+
+	def visibleEnemyAt(self, location: HexPoint, player, unitMapType: UnitMapType = UnitMapType.combat) -> Optional[Unit]:
+		tile = self.tileAt(location)
+
+		if tile.isVisibleTo(player):
+			enemyUnit = self.unitAt(location, unitMapType)
+
+			if player.diplomacyAI.isAtWar(enemyUnit.player):
+				return enemyUnit
+
+		return None
