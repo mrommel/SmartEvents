@@ -38,23 +38,27 @@ class FeatureBuild:
 		self.isRemove = isRemove
 
 
-class BuildType(ExtendedEnum):
-	none = 0
+class BuildType:
+	pass
 
-	removeRainforest = 1
-	removeMarsh = 2
-	removeForest = 3
-	repair = 4
-	mine = 5
-	ancientRoad = 6
-	classicalRoad = 7
-	removeRoad = 8
-	fishingBoats = 9
-	camp = 10
-	farm = 11
-	quarry = 12
-	plantation = 13
-	pasture = 14
+
+class BuildType(ExtendedEnum):
+	none = 'none'
+
+	removeRainforest = 'removeRainforest'
+	removeMarsh = 'removeMarsh'
+	removeForest = 'removeForest'
+	repair = 'repair'
+	mine = 'mine'
+	ancientRoad = 'ancientRoad'
+	classicalRoad = 'classicalRoad'
+	removeRoad = 'removeRoad'
+	fishingBoats = 'fishingBoats'
+	camp = 'camp'
+	farm = 'farm'
+	quarry = 'quarry'
+	plantation = 'plantation'
+	pasture = 'pasture'
 
 	def name(self) -> str:
 		return self._data().name
@@ -306,3 +310,11 @@ class BuildType(ExtendedEnum):
 
 	def willRemoveRoute(self) -> bool:
 		return self._data().removeRoad
+
+	@classmethod
+	def fromImprovement(cls, improvement) -> Optional[BuildType]:
+		for build in list(BuildType):
+			if build.improvement() == improvement:
+				return build
+
+		return None

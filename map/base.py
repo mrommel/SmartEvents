@@ -1,6 +1,6 @@
 import math
 import uuid
-from typing import Optional
+from typing import Optional, Union
 
 from utils.base import ExtendedEnum
 
@@ -102,7 +102,7 @@ class HexArea:
 		if isinstance(center_or_list, list):
 			tmp = center_or_list
 		elif isinstance(center_or_list, HexPoint):
-			tmp = set([center_or_list])
+			tmp = {center_or_list}
 		else:
 			raise RuntimeError(f'wrong type {center_or_list} - list or HexPoint expected')
 
@@ -296,16 +296,18 @@ class HexDirection(ExtendedEnum):
 
 
 class HexPoint(Point):
-	def __init__(self, x_or_hex_cube, y=None):
-		# super().__init__(x_or_hex_cube, y) - this does not work !!!
+	def __init__(self, x_or_hex_cube: Union[int, HexCube], y: Optional[int] = None):
 		if isinstance(x_or_hex_cube, int) and isinstance(y, int):
 			x = x_or_hex_cube
+			super().__init__(x, y)
 			self.x = x
 			self.y = y
 		elif isinstance(x_or_hex_cube, HexCube) and y is None:
 			hex_cube = x_or_hex_cube
+			x_value = int(hex_cube.q + (hex_cube.s + (hex_cube.s & 1)) / 2)
 			# even-q
-			self.x = int(hex_cube.q + (hex_cube.s + (hex_cube.s & 1)) / 2)
+			super().__init__(x_value, hex_cube.s)
+			self.x = x_value
 			self.y = hex_cube.s
 		else:
 			raise AttributeError(f'HexPoint with wrong attributes: {x_or_hex_cube} / {y}')
@@ -334,10 +336,10 @@ class HexPoint(Point):
 
 	def directionTowards(self, target: HexPoint) -> HexDirection:
 		"""
-            returns the direction of the neighbor
-            @param target:
-            @return:
-        """
+			returns the direction of the neighbor
+			@param target:
+			@return:
+		"""
 		for direction in list(HexDirection):
 			if self.neighbor(direction, 1) == target:
 				return direction
@@ -350,7 +352,7 @@ class HexPoint(Point):
 		return hex_cube.toScreen()
 
 	@staticmethod
-	def screenAngle(from_point, towards_point) -> int:
+	def screenAngle(from_point: HexPoint, towards_point: HexPoint) -> int:
 		fromScreenPoint = from_point.toScreen()
 		towardsScreenPoint = towards_point.toScreen()
 
@@ -397,11 +399,11 @@ class HexPoint(Point):
 
 	def __str__(self):
 		"""returns a string representation of the HexPoint"""
-		return f'[HexPoint x: {self.x}, y: {self.y}]'
+		return f'HexPoint({self.x}, {self.y})'
 
 	def __repr__(self):
 		"""returns a string representation of the HexPoint"""
-		return f'[HexPoint x: {self.x}, y: {self.y}]'
+		return f'HexPoint({self.x}, {self.y})'
 
 
 class Array2D:

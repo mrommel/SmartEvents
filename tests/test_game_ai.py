@@ -1,5 +1,7 @@
 import unittest
 
+from game.ai.economicStrategies import EconomicStrategyType
+from game.ai.economics import EconomicStrategyAdoptions
 from game.ai.homeland import HomelandUnit
 from game.civilizations import LeaderType
 from game.players import Player
@@ -8,7 +10,7 @@ from game.units import Unit
 from map.base import HexPoint
 
 
-class TestGameAI(unittest.TestCase):
+class TestHomeland(unittest.TestCase):
 	def test_homelandUnit_eq(self):
 		# GIVEN
 		player = Player(LeaderType.alexander)
@@ -58,3 +60,29 @@ class TestGameAI(unittest.TestCase):
 		self.assertTrue(homelandUnit0 < homelandUnit2)
 		self.assertTrue(homelandUnit1 < homelandUnit2)
 		self.assertFalse(homelandUnit1 < homelandUnit1)
+
+
+class TestEconomics(unittest.TestCase):
+	def test_adoption(self):
+		# GIVEN
+		adoptions = EconomicStrategyAdoptions()
+
+		# WHEN
+		adoptions.adopt(EconomicStrategyType.losingMoney, turnOfAdoption=2)
+
+		# THEN
+		self.assertTrue(adoptions.adopted(EconomicStrategyType.losingMoney))
+		self.assertEqual(adoptions.turnOfAdoption(EconomicStrategyType.losingMoney), 2)
+		self.assertFalse(adoptions.adopted(EconomicStrategyType.foundCity))
+		self.assertEqual(adoptions.turnOfAdoption(EconomicStrategyType.foundCity), -1)
+
+	def test_abandon(self):
+		# GIVEN
+		adoptions = EconomicStrategyAdoptions()
+		adoptions.adopt(EconomicStrategyType.losingMoney, turnOfAdoption=2)
+
+		# WHEN
+		adoptions.abandon(EconomicStrategyType.losingMoney)
+
+		# THEN
+		self.assertFalse(adoptions.adopted(EconomicStrategyType.losingMoney))

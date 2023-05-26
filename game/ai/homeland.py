@@ -3,6 +3,7 @@ from typing import Optional
 
 from game.cities import City
 from game.flavors import FlavorType
+from game.states.builds import BuildType
 from game.unitTypes import UnitTaskType, UnitMapType, UnitMissionType
 from game.units import Unit, UnitAutomationType, UnitMission
 from map.base import HexPoint
@@ -766,7 +767,7 @@ class HomelandAI:
 					if unit.location == targetLocation:
 						mission = UnitMission(
 							UnitMissionType.build,
-							buildType=targetIndex.improvement.buildType(),
+							buildType=BuildType.fromImprovement(targetIndex.improvement),
 							location=targetLocation,
 							path=None,
 							options=None
@@ -822,4 +823,7 @@ class HomelandAI:
 			currentTurnUnit.setTurnProcessedTo(True)
 
 			print(f"<< HomelandAI ### Unassigned {currentTurnUnit.name()} at {currentTurnUnit.location} ### >>")
+
+	def findAutomatedUnits(self, simulation):
+		pass
 

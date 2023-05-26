@@ -353,6 +353,9 @@ class TestHexArea(unittest.TestCase):
 		area1 = HexArea(HexPoint(1, 1))
 		self.assertEqual(area1.points, [HexPoint(1, 1)])
 
+		area2 = HexArea(HexPoint(1, 1), radius=1)
+		self.assertEqual(area2.points, [HexPoint(0, 0), HexPoint(0, 1), HexPoint(0, 2), HexPoint(2, 1), HexPoint(1, 0), HexPoint(1, 1), HexPoint(1, 2)])
+
 	def test_center(self):
 		area = HexArea([HexPoint(1, 1), HexPoint(2, 2), HexPoint(3, 3)])
 		self.assertEqual(area.center(), HexPoint(2, 2))
