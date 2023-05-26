@@ -15,6 +15,7 @@ from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOption
 	UnitMapType
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
+from map.path_finding.path import HexPath
 from map.types import UnitDomainType, YieldType
 from utils.base import ExtendedEnum
 
@@ -225,7 +226,7 @@ class Unit:
 		return self._processedInTurnValue
 
 	def updateMission(self, simulation):
-		if self.activityTypeValue == UnitActivityType.mission:
+		if self._activityTypeValue == UnitActivityType.mission:
 			if len(self._missions) > 0:
 				self._missions[-1].continueMission(steps=0, simulation=simulation)
 
@@ -397,7 +398,7 @@ class Unit:
 		oldActivity = self._activityTypeValue
 
 		if oldActivity != activityType:
-			self.activityTypeValue = activityType
+			self._activityTypeValue = activityType
 
 			# If we're waking up a Unit then remove it's fortification bonus
 			if activityType == UnitActivityType.awake:
@@ -722,3 +723,9 @@ class Unit:
 			return int(tmp)
 
 		return 1
+
+	def pathTowards(self, target: HexPoint, options, simulation) -> Optional[HexPath]:
+		return None
+
+	def doCancelOrder(self, simulation):
+		pass
