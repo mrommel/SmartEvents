@@ -1,3 +1,5 @@
+from typing import Optional
+
 from map.base import HexPoint
 
 
@@ -19,12 +21,17 @@ class HexPath:
 		return sum(self._costs)
 
 	def cropPointsUntil(self, location):
-		cropIndex = -1
+		cropIndex = self.firstIndexOf(location)
+
+		if cropIndex is not None:
+			self._points = self._points[0:cropIndex]
+			self._costs = self._costs[0:cropIndex]
+
+	def firstIndexOf(self, location) -> Optional[int]:
+		cropIndex = None
 
 		for (index, point) in enumerate(self._points):
 			if point == location:
 				cropIndex = index
 
-		if cropIndex != -1:
-			self._points = self._points[0:cropIndex]
-			self._costs = self._costs[0:cropIndex]
+		return cropIndex

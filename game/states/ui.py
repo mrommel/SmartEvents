@@ -23,6 +23,9 @@ class Interface:
 	def hideUnit(self, unit, location):
 		pass
 
+	def animateUnit(self, unit, animation):
+		pass
+
 
 class ScreenType(ExtendedEnum):
 	diplomatic = 'diplomatic'

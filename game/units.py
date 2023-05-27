@@ -55,6 +55,7 @@ class Unit:
 		self._missionTimerValue = 0
 		self._fortifyTurnsValue = 0
 		self._fortifiedThisTurnValue = False
+		self._fortifyValue = 0
 
 	def name(self) -> str:
 		return self._name
@@ -800,3 +801,84 @@ class Unit:
 		# 	return True
 
 		return False
+
+	def canFortifyAt(self, point, simulation):
+		if self.player.isHuman() and self._fortifyValue == 0:
+			# num friendly units
+			pass
+
+		# a unit can either fortify or garrison. Never both.
+		if self.canGarrisonAt(point, simulation):
+			return False
+
+		if not self.isFortifyable(canWaitForNextTurn=True, simulation=simulation):
+			return False
+
+		if self.isWaiting():
+			return False
+
+		return True
+
+	def setFortifiedThisTurnTo(self, fortifiedThisTurn: bool, simulation):
+		if not self.isEverFortifyable() and fortifiedThisTurn:
+			return
+
+		if self.isFortifiedThisTurn() != fortifiedThisTurn:
+			self._fortifiedThisTurnValue = fortifiedThisTurn
+
+			if fortifiedThisTurn:
+				turnsToFortify = 1
+				if not self.isFortifyableCanWaitForNextTurn(False, simulation):
+					turnsToFortify = 0
+
+				# Manually set us to being fortified for the first turn (so we get the Fort bonus immediately)
+				self.setFortifyTurns(turnsToFortify, simulation)
+
+				if turnsToFortify > 0:
+					# auto_ptr < ICvUnit1 > pDllUnit(new CvDllUnit(this));
+					# gDLL->GameplayUnitFortify(pDllUnit.get(), true);
+					simulation.userInterface.animateUnit(self, UnitAnimationType.fortify)
+
+			else:
+				simulation.userInterface.animateUnit(self, UnitAnimationType.unfortify)
+
+		return
+
+	def canGarrisonAt(self, point, simulation) -> bool:
+		# garrison only in cities
+		if simulation.cityAt(point) is None:
+			return False
+
+		# only one unit per tile, or we are the units?
+		if simulation.unitAt(point, self.unitMapType()) is not None and self.location == point:
+			return False
+
+		return True
+
+	def unitMapType(self) -> UnitMapType:
+		if self.unitType.unitClass() == UnitMapType.civilian:
+			return UnitMapType.civilian
+		else:
+			return UnitMapType.combat
+
+	def isWaiting(self):
+		return self._activityTypeValue == UnitActivityType.hold or self._activityTypeValue == UnitActivityType.sleep or \
+			self._activityTypeValue == UnitActivityType.heal or self._activityTypeValue == UnitActivityType.sentry or \
+			self._activityTypeValue == UnitActivityType.intercept
+
+	def isFortifyableCanWaitForNextTurn(self, canWaitForNextTurn: bool, simulation):
+		# Can't fortify if you've already used any moves this turn
+		if not canWaitForNextTurn:
+			if self.hasMoved(simulation):
+				return False
+
+		if not self.isEverFortifyable():
+			return False
+
+		return True
+
+	def isBarbarian(self) -> bool:
+		return self.player.isBarbarian()
+
+	def isHuman(self) -> bool:
+		return self.player.isHuman()

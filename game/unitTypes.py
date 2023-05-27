@@ -186,6 +186,9 @@ class UnitType(ExtendedEnum):
 	def name(self):
 		return self._data().name
 
+	def unitClass(self):
+		return self._data().targetType
+
 	def civilization(self):
 		return self._data().civilization
 
@@ -1308,3 +1311,5 @@ class UnitActivityType(ExtendedEnum):
 	awake = 'awake'
 	mission = 'mission'
 	hold = 'hold'
+	sentry = 'sentry'
+	intercept = 'intercept'

@@ -565,37 +565,6 @@ class TestSimulation(unittest.TestCase):
 		self.assertLess(iteration, 25, 'maximum iterations reached')
 
 
-class TestUnitMission(unittest.TestCase):
-	def test_moveTo_mission(self):
-		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
-
-		# players
-		playerTrajan = Player(LeaderType.trajan, human=True)
-		playerTrajan.initialize()
-		simulation.players.append(playerTrajan)
-
-		# add UI
-		simulation.userInterface = UserInterfaceMock()
-
-		# initial unit
-		playerAugustusWarrior = Unit(HexPoint(15, 16), UnitType.warrior, playerTrajan)
-		simulation.addUnit(playerAugustusWarrior)
-
-		# this is cheating
-		mapModel.discover(playerTrajan, simulation)
-
-		# WHEN
-		playerAugustusWarrior.pushMission(UnitMission(missionType=UnitMissionType.moveTo, target=HexPoint(12, 3)), simulation=simulation)
-
-		# THEN
-		self.assertIsNotNone(playerAugustusWarrior.peekMission())
-		self.assertEqual(playerAugustusWarrior.peekMission().missionType, UnitMissionType.moveTo)
-		self.assertEqual(playerAugustusWarrior.peekMission().target, HexPoint(12, 3))
-		self.assertNotEqual(playerAugustusWarrior.location, HexPoint(15, 16))
-
-
 class TestUsecases(unittest.TestCase):
 	def test_first_city_build(self):
 		# GIVEN

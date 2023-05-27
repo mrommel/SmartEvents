@@ -977,7 +977,7 @@ class Map:
 		return list(filter(lambda unit: unit.location == location, self._units))
 
 	def unitAt(self, location, unitMapType: UnitMapType) -> Optional[Unit]:
-		return next(filter(lambda unit: unit.location == location and unit.unitType == unitMapType, self._units), None)
+		return next(filter(lambda unit: unit.location == location and unit.unitMapType() == unitMapType, self._units), None)
 
 	def addUnit(self, unit):
 		self._units.append(unit)

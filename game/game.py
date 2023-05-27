@@ -131,10 +131,10 @@ class Game:
 	def unitsOf(self, player: Player) -> [Unit]:
 		return self._map.unitsOf(player)
 
-	def unitsAt(self, location) -> [Unit]:
+	def unitsAt(self, location: HexPoint) -> [Unit]:
 		return self._map.unitsAt(location)
 
-	def unitAt(self, location, unitMapType: UnitMapType) -> Optional[Unit]:
+	def unitAt(self, location: HexPoint, unitMapType: UnitMapType) -> Optional[Unit]:
 		return self._map.unitAt(location, unitMapType)
 
 	def addUnit(self, unit):
@@ -142,6 +142,9 @@ class Game:
 
 	def removeUnit(self, unit):
 		self._map.removeUnit(unit)
+
+	def cityAt(self, location: HexPoint) -> Optional[City]:
+		return self._map.cityAt(location)
 
 	def citiesOf(self, player) -> [City]:
 		return self._map.citiesOf(player)
