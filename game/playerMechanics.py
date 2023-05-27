@@ -96,12 +96,12 @@ class PlayerTechs:
 
 	def discover(self, tech: TechType, simulation):
 		# check if this tech is the first of a new era
-		# techsInEra = sum(1 for t in self._techs if t.era() == tech.era())
-		# if techsInEra == 0 and tech.era() != EraType.ancient:
-		# 	if simulation.anyHasMoment(of: .worldsFirstTechnologyOfNewEra(eraType: tech.era())) {
-		# 		self.player?.addMoment(of:.firstTechnologyOfNewEra(eraType: tech.era()), in: gameModel)
-		# 	else:
-		# 		self.player?.addMoment(of:.worldsFirstTechnologyOfNewEra(eraType: tech.era()), in: gameModel)
+		techsInEra = sum(1 for t in self._techs if t.era() == tech.era())
+		if techsInEra == 0 and tech.era() != EraType.ancient:
+			if simulation.anyHasMoment(MomentType.worldsFirstTechnologyOfNewEra, eraType=tech.era()):
+				self.player.addMoment(MomentType.firstTechnologyOfNewEra, eraType=tech.era(), simulation=simulation)
+			else:
+				self.player.addMoment(MomentType.worldsFirstTechnologyOfNewEra, eraType=tech.era(), simulation=simulation)
 
 		self.updateEurekas(simulation)
 
@@ -1336,9 +1336,10 @@ class PlayerMoments:
 		self._currentEraScore += moment.type.eraScore()
 
 	def addMomentOf(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None,
-	                cityName: Optional[str] = None, continentName: Optional[str] = None):
+	                cityName: Optional[str] = None, continentName: Optional[str] = None,
+	                eraType: Optional[EraType] = None):
 		self._momentsArray.append(Moment(momentType, turn, civilization=civilization, cityName=cityName,
-		                                 continentName=continentName))
+		                                 continentName=continentName, eraType=eraType))
 
 		self._currentEraScore += momentType.eraScore()
 
@@ -1350,3 +1351,20 @@ class PlayerMoments:
 
 	def resetEraScore(self):
 		self._currentEraScore = 0
+
+	def hasMoment(self, momentType: MomentType, civilization: Optional[CivilizationType] = None,
+		          eraType: Optional[EraType] = None, cityName: Optional[str] = None):
+		for moment in self._momentsArray:
+			# 5 - cityNearVolcano
+			if moment.type == MomentType.cityNearVolcano and momentType == MomentType.cityNearVolcano:
+				return moment.cityName == cityName and cityName is not None
+
+			# 6 - cityOfAwe
+			elif moment.type == MomentType.cityOfAwe and momentType == MomentType.cityOfAwe:
+				return moment.cityName == cityName and cityName is not None
+
+			# 222 - metNewCivilization
+			elif moment.type == MomentType.metNewCivilization and momentType == MomentType.metNewCivilization:
+				return moment.civilization == civilization
+
+		return False

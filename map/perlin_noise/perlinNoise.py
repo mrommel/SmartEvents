@@ -62,14 +62,14 @@ class PerlinNoise:
 			map(lambda coordinate: coordinate * self.octaves, coordinates),
 		)
 
-		coor_bounding_box = [
+		coordinates_bounding_box = [
 			(math.floor(coordinate), math.floor(coordinate + 1))
 			for coordinate in coordinates
 		]
 		return sum([
 			self.get_from_cache_of_create_new(coors).
 			get_weighted_val(coordinates)
-			for coors in each_with_each(coor_bounding_box)
+			for coors in each_with_each(coordinates_bounding_box)
 		])
 
 	def get_from_cache_of_create_new(self, coors):

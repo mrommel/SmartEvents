@@ -883,7 +883,8 @@ class Player:
 		return
 
 	def addMoment(self, momentType: MomentType, civilization: Optional[CivilizationType] = None,
-				  cityName: Optional[str] = None, continentName: Optional[str] = None, simulation = None):
+				  cityName: Optional[str] = None, continentName: Optional[str] = None,
+				  eraType: Optional[EraType] = None, simulation = None):
 		if simulation is None:
 			raise Exception('simulation not provided')
 
@@ -891,20 +892,17 @@ class Player:
 			return
 
 		self.moments.addMomentOf(momentType, simulation.currentTurn, civilization=civilization,
-								 cityName=cityName, continentName=continentName)
+								 cityName=cityName, continentName=continentName, eraType=eraType)
 
 		# also show a notification, when the moment brings era score
 		if momentType.eraScore() > 0:
 			if self.isHuman():
 				self.notifications.addNotification(NotificationType.momentAdded, momentType=momentType)
 
-	def hasMomentType(self, momentType: MomentType, civilization: Optional[CivilizationType] = None) -> bool:
-		# @fixme move to PlayerMoments
-		for moment in self.moments.moments():
-			if moment.type == MomentType.metNewCivilization and momentType == MomentType.metNewCivilization:
-				return moment.civilization == civilization
-
-		return False
+	def hasMoment(self, momentType: MomentType, civilization: Optional[CivilizationType] = None,
+	              eraType: Optional[EraType] = None, cityName: Optional[str] = None) -> bool:
+		return self.moments.hasMoment(momentType=momentType, civilization=civilization, eraType=eraType,
+		                              cityName=cityName)
 
 	def militaryMight(self, simulation) -> int:
 		might = 0.0

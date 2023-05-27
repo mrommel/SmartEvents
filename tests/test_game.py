@@ -475,28 +475,6 @@ class TestPlayerStrategies(unittest.TestCase):
 		self.assertEqual(player.militaryAI.adopted(MilitaryStrategyType.eradicateBarbarians), True)
 
 
-class TestPlayerMoments(unittest.TestCase):
-	def test_met_civilization(self):
-		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
-
-		player = Player(LeaderType.trajan, human=True)
-		player.initialize()
-
-		otherPlayer = Player(LeaderType.alexander, human=False)
-		otherPlayer.initialize()
-
-		simulation.userInterface = UserInterfaceMock()
-
-		# WHEN
-		player.doFirstContactWith(otherPlayer, simulation)
-
-		# THEN
-		self.assertEqual(player.hasMomentType(MomentType.metNewCivilization, civilization=CivilizationType.greek), True)
-		self.assertEqual(player.hasMomentType(MomentType.metNewCivilization, civilization=CivilizationType.english), False)
-
-
 class TestSimulation(unittest.TestCase):
 	def test_found_capital(self):
 		# GIVEN

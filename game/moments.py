@@ -80,7 +80,7 @@ class MomentType(ExtendedEnum):
 	# firstRockBandConcertInWorld 52
 	# firstSeasideResort 53
 	# firstShipwreckExcavated  # 54 #
-	# firstTechnologyOfNewEra(eraType: EraType)  # 55
+	firstTechnologyOfNewEra = 'firstTechnologyOfNewEra'  # (eraType: EraType)  # 55
 	# firstTier1Government(governmentType: GovernmentType)  # 56 #
 	# firstTier1GovernmentInWorld(governmentType: GovernmentType)  # 57 #
 	# firstTier2Government(governmentType: GovernmentType)  # 58 #
@@ -146,7 +146,7 @@ class MomentType(ExtendedEnum):
 	# worldsFirstSeasideResort  # 118 #
 	# worldsFirstShipwreckExcavated  # 119 #
 	# worldsFirstStrategicResourcePotentialUnleashed  # 120 #
-	# worldsFirstTechnologyOfNewEra(eraType: EraType)  # 121
+	worldsFirstTechnologyOfNewEra = 'worldsFirstTechnologyOfNewEra'  # (eraType: EraType)  # 121
 	# worldsFirstToMeetAllCivilizations  # 122 #
 	worldsLargestCivilization = 'worldsLargestCivilization'  # 123
 	# worldCircumnavigated  # 124
@@ -256,6 +256,16 @@ class MomentType(ExtendedEnum):
 				eraScore=2
 			)
 		# ...
+		elif self == MomentType.firstTechnologyOfNewEra:
+			# 55
+			return MomentTypeData(
+				name="First Technology of New Era",
+				summary="You have completed your civilization's first technology from a new era of discovery.",
+				instanceText = None,
+				category=MomentCategory.major,
+				eraScore=1
+			)
+		# ...
 		elif self == MomentType.worldsFirstNeighborhood:
 			# 112
 			return MomentTypeData(
@@ -264,6 +274,16 @@ class MomentType(ExtendedEnum):
 				instanceText=None,
 				category=MomentCategory.major,
 				eraScore=3
+			)
+		# ...
+		elif self == MomentType.worldsFirstTechnologyOfNewEra:
+			# 121
+			return MomentTypeData(
+				name="World's First Technology of New Era",
+				summary="You have completed the world's first technology from a new era of discovery.",
+				instanceText=None,
+				category=MomentCategory.major,
+				eraScore=2
 			)
 		# ...
 		elif self == MomentType.worldsLargestCivilization:
@@ -344,7 +364,8 @@ class MomentType(ExtendedEnum):
 
 class Moment:
 	def __init__(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None,
-	                cityName: Optional[str] = None, continentName: Optional[str] = None):
+	             cityName: Optional[str] = None, continentName: Optional[str] = None,
+	             eraType: Optional[EraType] = None):
 		self.type = momentType
 		self.turn = turn
 
@@ -352,3 +373,4 @@ class Moment:
 		self.civilization = civilization
 		self.cityName = cityName
 		self.continentName = continentName
+		self.eraType = eraType

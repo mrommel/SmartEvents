@@ -4,6 +4,7 @@ import unittest
 from game.civilizations import LeaderType
 from game.game import Game
 from game.players import Player
+from game.types import TechType
 from map.base import Array2D, HexPoint, HexCube, HexDirection, Size, BoundingBox, HexArea
 from map.generation import MapOptions, MapGenerator, HeightMap
 from map.improvements import ImprovementType
@@ -127,6 +128,83 @@ class TestHexPoint(unittest.TestCase):
 
 		self.assertEqual(len(area1.points), 7)  # 1 + 6
 		self.assertEqual(len(area2.points), 19)  # 1 + 6 + 12
+
+
+class TestImprovementType(unittest.TestCase):
+	def test_farm_yields(self):
+		player = Player(LeaderType.trajan, human=False)
+		player.initialize()
+
+		farmYields = ImprovementType.farm.yieldsFor(player)
+		self.assertEqual(farmYields.food, 1)
+		self.assertEqual(farmYields.production, 0)
+		self.assertEqual(farmYields.gold, 0)
+
+	def test_mine_yields(self):
+		player = Player(LeaderType.trajan, human=False)
+		player.initialize()
+
+		mineYields = ImprovementType.mine.yieldsFor(player)
+		self.assertEqual(mineYields.food, 0)
+		self.assertEqual(mineYields.production, 1)
+		self.assertEqual(mineYields.gold, 0)
+
+	def test_pasture_yields(self):
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+		simulation = Game(mapModel)
+
+		player = Player(LeaderType.trajan, human=False)
+		player.initialize()
+
+		pastureYields = ImprovementType.pasture.yieldsFor(player)
+		self.assertEqual(pastureYields.food, 0)
+		self.assertEqual(pastureYields.production, 1)
+		self.assertEqual(pastureYields.gold, 0)
+
+		player.techs.discover(TechType.stirrups, simulation)
+		pastureYields = ImprovementType.pasture.yieldsFor(player)
+		self.assertEqual(pastureYields.food, 1)
+		self.assertEqual(pastureYields.production, 1)
+		self.assertEqual(pastureYields.gold, 0)
+
+		player.techs.discover(TechType.robotics, simulation)
+		pastureYields = ImprovementType.pasture.yieldsFor(player)
+		self.assertEqual(pastureYields.food, 2)
+		self.assertEqual(pastureYields.production, 2)
+		self.assertEqual(pastureYields.gold, 0)
+
+		player.techs.discover(TechType.replaceableParts, simulation)
+		pastureYields = ImprovementType.pasture.yieldsFor(player)
+		self.assertEqual(pastureYields.food, 2)
+		self.assertEqual(pastureYields.production, 3)
+		self.assertEqual(pastureYields.gold, 0)
+
+	def test_plantation_yields(self):
+		player = Player(LeaderType.trajan, human=False)
+		player.initialize()
+
+		plantationYields = ImprovementType.plantation.yieldsFor(player)
+		self.assertEqual(plantationYields.food, 0)
+		self.assertEqual(plantationYields.production, 0)
+		self.assertEqual(plantationYields.gold, 2)
+
+	def test_fishingBoats_yields(self):
+		player = Player(LeaderType.trajan, human=False)
+		player.initialize()
+
+		fishingBoatsYields = ImprovementType.fishingBoats.yieldsFor(player)
+		self.assertEqual(fishingBoatsYields.food, 1)
+		self.assertEqual(fishingBoatsYields.production, 0)
+		self.assertEqual(fishingBoatsYields.gold, 0)
+
+	def test_camp_yields(self):
+		player = Player(LeaderType.trajan, human=False)
+		player.initialize()
+
+		campYields = ImprovementType.camp.yieldsFor(player)
+		self.assertEqual(campYields.food, 0)
+		self.assertEqual(campYields.production, 0)
+		self.assertEqual(campYields.gold, 1)
 
 
 class TestFeatureType(unittest.TestCase):

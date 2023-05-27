@@ -5,7 +5,7 @@ from game.ai.barbarians import BarbarianAI
 from game.ai.religions import Religions
 from game.baseTypes import HandicapType, GameState
 from game.cities import City
-from game.civilizations import LeaderType
+from game.civilizations import LeaderType, CivilizationType
 from game.evaluators import CitySiteEvaluator
 from game.moments import MomentType
 from game.notifications import NotificationType
@@ -14,7 +14,7 @@ from game.states.builds import BuildType
 from game.states.gossips import GossipType
 from game.states.ui import ScreenType
 from game.states.victories import VictoryType
-from game.types import TechType
+from game.types import TechType, EraType
 from game.unitTypes import UnitMapType, UnitAbilityType, UnitPromotionType, MoveOptions
 from game.units import Unit
 from map.base import HexPoint
@@ -644,4 +644,10 @@ class Game:
 
 		return path
 
+	def anyHasMoment(self, momentType: MomentType, civilization: Optional[CivilizationType] = None,
+	                 eraType: Optional[EraType] = None) -> bool:
+		for player in self.players:
+			if player.hasMoment(momentType, civilization=civilization, eraType=eraType):
+				return True
 
+		return False
