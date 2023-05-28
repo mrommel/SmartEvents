@@ -1,7 +1,9 @@
 from typing import Optional
 
 from game.civilizations import CivilizationType
+from game.states.dedications import DedicationType
 from game.types import EraType
+from map.types import FeatureType
 from utils.base import ExtendedEnum, InvalidEnumError
 
 
@@ -40,22 +42,22 @@ class MomentType(ExtendedEnum):
 	discoveryOfANaturalWonder = 'discoveryOfANaturalWonder'  # (naturalWonder: FeatureType)  # 12
 	# emergencyCompletedSuccessfully 13
 	# emergencySuccessfullyDefended 14
-	# enemyCityAdoptsOurReligion  # 15 #
+	# enemyCityAdoptsOurReligion  # 15
 	# enemyCityStatePacified 16
-	# enemyFormationDefeated  # 17 #
-	# enemyVeteranDefeated  # 18 #
-	# exoplanetExpeditionLaunched  # 19 #
-	# finalForeignCityTaken  # 20 #
-	# firstAerodromeFullyDeveloped  # 21 #
+	# enemyFormationDefeated  # 17
+	# enemyVeteranDefeated  # 18
+	# exoplanetExpeditionLaunched  # 19
+	# finalForeignCityTaken  # 20
+	# firstAerodromeFullyDeveloped  # 21
 	# firstBustlingCity(cityName: String)  # 22
 	# firstCivicOfNewEra(eraType: EraType)  # 23
 	# firstCorporationCreated 24
 	# firstCorporationInTheWorld 25
-	# firstDiscoveryOfANaturalWonder  # 26 #
+	# firstDiscoveryOfANaturalWonder  # 26
 	# firstDiscoveryOfANewContinent  # 27
-	# firstEncampmentFullyDeveloped  # 28 #
+	# firstEncampmentFullyDeveloped  # 28
 	# firstEnormousCity(cityName: String)  # 29
-	# firstEntertainmentComplexFullyDeveloped  # 30 #
+	# firstEntertainmentComplexFullyDeveloped  # 30
 	# firstGiganticCity(cityName: String)  # 31
 	# firstGreenImprovement 32
 	# firstGreenImprovementInWorld 33
@@ -79,44 +81,44 @@ class MomentType(ExtendedEnum):
 	# firstRockBandConcert 51
 	# firstRockBandConcertInWorld 52
 	# firstSeasideResort 53
-	# firstShipwreckExcavated  # 54 #
+	# firstShipwreckExcavated  # 54
 	firstTechnologyOfNewEra = 'firstTechnologyOfNewEra'  # (eraType: EraType)  # 55
-	# firstTier1Government(governmentType: GovernmentType)  # 56 #
-	# firstTier1GovernmentInWorld(governmentType: GovernmentType)  # 57 #
-	# firstTier2Government(governmentType: GovernmentType)  # 58 #
-	# firstTier2GovernmentInWorld(governmentType: GovernmentType)  # 59 #
-	# firstTier3Government(governmentType: GovernmentType)  # 60 #
-	# firstTier3GovernmentInWorld(governmentType: GovernmentType)  # 61 #
-	# firstTier4Government(governmentType: GovernmentType)  # 62 #
-	# firstTier4GovernmentInWorld(governmentType: GovernmentType)  # 63 #
-	# firstTradingPostsInAllCivilizations  # 64 #
-	# firstUnitPromotedWithDistinction  # 65 #
+	# firstTier1Government(governmentType: GovernmentType)  # 56
+	# firstTier1GovernmentInWorld(governmentType: GovernmentType)  # 57
+	# firstTier2Government(governmentType: GovernmentType)  # 58
+	# firstTier2GovernmentInWorld(governmentType: GovernmentType)  # 59
+	# firstTier3Government(governmentType: GovernmentType)  # 60
+	# firstTier3GovernmentInWorld(governmentType: GovernmentType)  # 61
+	# firstTier4Government(governmentType: GovernmentType)  # 62
+	# firstTier4GovernmentInWorld(governmentType: GovernmentType)  # 63
+	# firstTradingPostsInAllCivilizations  # 64
+	# firstUnitPromotedWithDistinction  # 65
 	# firstWaterParkFullyDeveloped 66
 	# freeCityJoins 67
-	# generalDefeatsEnemy  # 68 #
+	# generalDefeatsEnemy  # 68
 	# goldenAgeBegins  # 69 #
 	# governorFullyPromoted  # 70
 	# greatPersonLuredByFaith 71
 	# greatPersonLuredByGold 72
-	# heroicAgeBegins  # 73 #
+	# heroicAgeBegins  # 73
 	# inquisitionBegins 74
 	# leviedArmyStandsDown 75
-	# metAllCivilizations  # 76 #
-	# nationalParkFounded  # 77 #
+	# metAllCivilizations  # 76
+	# nationalParkFounded  # 77
 	# normalAgeBegins  # 78 #
 	# onTheWaves  # 79 #
-	# religionAdoptsAllBeliefs  # 80 #
+	# religionAdoptsAllBeliefs  # 80
 	# religionFounded(religion: ReligionType)  # 81
 	# rivalHolyCityConverted  # 82 #
 	# splendidCampusCompleted  # 83 #
-	# splendidCommercialHubCompleted  # 84 #
-	# splendidHarborCompleted  # 85 #
-	# splendidHolySiteCompleted  # 86 #
-	# splendidIndustrialZoneCompleted  # 87 #
-	# splendidTheaterSquareCompleted  # 88 #
-	# takingFlight  # 89 #
-	# threateningCampDestroyed  # 90 #
-	# tradingPostsInAllCivilizations  # 91 #
+	# splendidCommercialHubCompleted  # 84
+	# splendidHarborCompleted  # 85
+	# splendidHolySiteCompleted  # 86
+	# splendidIndustrialZoneCompleted  # 87
+	# splendidTheaterSquareCompleted  # 88
+	# takingFlight  # 89
+	# threateningCampDestroyed  # 90
+	# tradingPostsInAllCivilizations  # 91
 	# uniqueBuildingConstructed 92
 	# uniqueDistrictCompleted 93
 	# uniqueTileImprovementBuilt 94
@@ -128,67 +130,67 @@ class MomentType(ExtendedEnum):
 	# worldsFirstCivicOfNewEra(eraType: EraType)  # 100
 	# worldsFirstCorps 101
 	# worldsFirstEnormousCity(cityName: String)  # 102
-	# worldsFirstExoplanetExpeditionLaunched  # 103 #
-	# worldsFirstFleet  # 104 #
-	# worldsFirstFlight  # 105 #
+	# worldsFirstExoplanetExpeditionLaunched  # 103
+	# worldsFirstFleet  # 104
+	# worldsFirstFlight  # 105
 	# worldsFirstGiganticCity(cityName: String)  # 106
 	# worldsFirstInquisition 107
-	# worldsFirstLandingOnTheMoon  # 108 #
+	# worldsFirstLandingOnTheMoon  # 108
 	# worldsFirstLargeCity(cityName: String)  # 109
-	# worldsFirstMartianColonyEstablished  # 110 #
-	# worldsFirstNationalPark  # 111 #
+	# worldsFirstMartianColonyEstablished  # 110
+	# worldsFirstNationalPark  # 111
 	worldsFirstNeighborhood = 'worldsFirstNeighborhood'  # 112
 	# worldsFirstPantheon  # 113
 	# worldsFirstReligion  # 114
-	# worldsFirstReligionToAdoptAllBeliefs  # 115 #
-	# worldsFirstSatelliteInOrbit  # 116 #
-	# worldsFirstSeafaring  # 117 #
-	# worldsFirstSeasideResort  # 118 #
-	# worldsFirstShipwreckExcavated  # 119 #
-	# worldsFirstStrategicResourcePotentialUnleashed  # 120 #
+	# worldsFirstReligionToAdoptAllBeliefs  # 115
+	# worldsFirstSatelliteInOrbit  # 116
+	# worldsFirstSeafaring  # 117
+	# worldsFirstSeasideResort  # 118
+	# worldsFirstShipwreckExcavated  # 119
+	# worldsFirstStrategicResourcePotentialUnleashed  # 120
 	worldsFirstTechnologyOfNewEra = 'worldsFirstTechnologyOfNewEra'  # (eraType: EraType)  # 121
-	# worldsFirstToMeetAllCivilizations  # 122 #
+	# worldsFirstToMeetAllCivilizations  # 122
 	worldsLargestCivilization = 'worldsLargestCivilization'  # 123
-	# worldCircumnavigated  # 124
-	# 
+	worldCircumnavigated = 'worldCircumnavigated'  # 124
+
 	# minor
-	# aggressiveCityPlacement  # 200 #
-	# artifactExtracted  # 201 #
+	# aggressiveCityPlacement  # 200
+	# artifactExtracted  # 201
 	# barbarianCampDestroyed  # 202
-	# causeForWar(warType: CasusBelliType, civilizationType: CivilizationType)  # 203 #
-	# cityReturnsToOriginalOwner(cityName: String, originalCivilization: CivilizationType)  # 204 #
-	# cityStateArmyLevied  # 205 #
-	# coastalFloodMitigated  # 206 #
+	# causeForWar(warType: CasusBelliType, civilizationType: CivilizationType)  # 203
+	# cityReturnsToOriginalOwner(cityName: String, originalCivilization: CivilizationType)  # 204
+	# cityStateArmyLevied  # 205
+	# coastalFloodMitigated  # 206
 	desertCity = 'desertCity'  # (cityName: String)  # 207
-	# diplomaticVictoryResolutionWon  # 208 #
+	# diplomaticVictoryResolutionWon  # 208
 	# firstArmada 209
-	# firstArmy  # 210 #
-	# firstCorps  # 211 #
-	# firstFleet  # 212 #
-	# foreignCapitalTaken  # 213 #
+	# firstArmy  # 210
+	# firstCorps  # 211
+	# firstFleet  # 212
+	# foreignCapitalTaken  # 213
 	# greatPersonRecruited  # 214
-	# heroClaimed  # 215 #
-	# heroDeparted  # 216 #
-	# heroRecalled  # 217 #
-	# landedOnTheMoon  # 218 #
-	# manhattanProjectCompleted  # 219 #
-	# martianColonyEstablished  # 220 #
-	# masterSpyEarned  # 221 #
+	# heroClaimed  # 215
+	# heroDeparted  # 216
+	# heroRecalled  # 217
+	# landedOnTheMoon  # 218
+	# manhattanProjectCompleted  # 219
+	# martianColonyEstablished  # 220
+	# masterSpyEarned  # 221
 	metNewCivilization = 'metNewCivilization'  # 222
 	# oldGreatPersonRecruited  # 223
 	# oldWorldWonderCompleted  # 224
 	# operationIvyCompleted 225
 	# pantheonFounded(pantheon: PantheonType)  # 226
 	# riverFloodMitigated  # 227 #
-	# satelliteLaunchedIntoOrbit  # 228 #
+	# satelliteLaunchedIntoOrbit  # 228
 	snowCity = 'snowCity'  # (cityName: String)  # 229
-	# strategicResourcePotentialUnleashed  # 230 #
+	# strategicResourcePotentialUnleashed  # 230
 	# tradingPostEstablishedInNewCivilization(civilization: CivilizationType)  # 231
 	# tribalVillageContacted  # 232
 	tundraCity = 'tundraCity'  # (cityName: String)  # 233
 	# unitPromotedWithDistinction  # 234
 	# wonderCompleted(wonder: WonderType)  # 235
-	# 
+
 	# hidden
 	# shipSunk  # 300 for artifacts
 	# battleFought  # 301
@@ -296,7 +298,26 @@ class MomentType(ExtendedEnum):
 				category=MomentCategory.major,
 				eraScore=3
 			)
-		# ...
+		elif self == MomentType.worldCircumnavigated:
+			# 124
+			return MomentTypeData(
+				name="World Circumnavigated",
+				summary="Your civilization has revealed a tile in every vertical line of the map." +
+				         "This forms a path around the world, even if the path does not end where it began.",
+				instanceText = None,
+				category=MomentCategory.major,
+				eraScore=3
+			)
+
+		# minor
+		# aggressiveCityPlacement  # 200
+		# artifactExtracted  # 201
+		# barbarianCampDestroyed  # 202
+		# causeForWar(warType: CasusBelliType, civilizationType: CivilizationType)  # 203
+		# cityReturnsToOriginalOwner(cityName: String, originalCivilization: CivilizationType)  # 204
+		# cityStateArmyLevied  # 205
+		# coastalFloodMitigated  # 206
+
 		elif self == MomentType.desertCity:  # (cityName: String)
 			# 207
 			return MomentTypeData(
@@ -365,7 +386,8 @@ class MomentType(ExtendedEnum):
 class Moment:
 	def __init__(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None,
 	             cityName: Optional[str] = None, continentName: Optional[str] = None,
-	             eraType: Optional[EraType] = None):
+	             eraType: Optional[EraType] = None, naturalWonder: [FeatureType] = None,
+	             dedication: [DedicationType] = None):
 		self.type = momentType
 		self.turn = turn
 
@@ -374,3 +396,5 @@ class Moment:
 		self.cityName = cityName
 		self.continentName = continentName
 		self.eraType = eraType
+		self.naturalWonder = naturalWonder
+		self.dedication = dedication
