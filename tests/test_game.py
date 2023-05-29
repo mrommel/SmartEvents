@@ -14,6 +14,7 @@ from game.game import Game
 from game.governments import GovernmentType
 from game.loyalties import LoyaltyState
 from game.moments import MomentType
+from game.notifications import NotificationType
 from game.players import Player
 from game.policyCards import PolicyCardType
 from game.states.accessLevels import AccessLevel
@@ -187,6 +188,10 @@ class TestGameAssets(unittest.TestCase):
 	def test_homelandMoves_data(self):
 		for homelandMove in list(HomelandMoveType):
 			_ = homelandMove.name()
+
+	def test_notification_data(self):
+		for notificationType in list(NotificationType):
+			_ = notificationType.name()
 
 
 class TestCity(unittest.TestCase):

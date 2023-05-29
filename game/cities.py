@@ -1,7 +1,7 @@
 import random
 from typing import Optional
 
-from game.ai.cities import CityStrategyAI, CitySpecializationType
+from game.ai.cities import CityStrategyAI, CitySpecializationType, BuildableItem, BuildableType
 from game.ai.economicStrategies import EconomicStrategyType
 from game.ai.grandStrategies import GrandStrategyAIType
 from game.amenities import AmenitiesState
@@ -19,35 +19,64 @@ from game.moments import MomentType
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType
 from game.specialists import SpecialistType
-from game.states.accessLevels import AccessLevel
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
+from game.states.gossips import GossipType
 from game.types import EraType, TechType
-from game.unitTypes import UnitType
+from game.unitTypes import UnitType, UnitClassType
 from game.units import Unit
 from game.wonders import WonderType
 from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType
-from utils.base import ExtendedEnum, InvalidEnumError
+from utils.base import ExtendedEnum
+
+
+class CityDistrictItem:
+	def __init__(self, district: DistrictType, location: HexPoint):
+		self.district = district
+		self.location = location
 
 
 class CityDistricts:
 	def __init__(self, city):
 		self.city = city
+		self._items: [CityDistrictItem] = []
+		self._housingVal = 0.0
 
 	def build(self, district: DistrictType, location: HexPoint):
-		pass
+		newItem = CityDistrictItem(district=district, location=location)
+
+		if len(list(filter(lambda item: item.district == district and item.location == location, self._items))) > 0:
+			raise Exception(f'District {district} already built at {district}')
+
+		self._items.append(newItem)
 
 	def hasAny(self) -> bool:
-		return False
+		# cityCenter does not count
+		return len(list(filter(lambda item: item.district != DistrictType.cityCenter, self._items))) > 0
+
+	def hasAnySpecialtyDistrict(self) -> bool:
+		return len(list(filter(lambda item: item.districtisSpecialty(), self._items))) > 0
 
 	def hasDistrict(self, district: DistrictType) -> bool:
-		return False
+		return len(list(filter(lambda item: item.district == district, self._items))) > 0
+
+	def housing(self) -> float:
+		return self._housingVal
 
 	def updateHousing(self):
-		pass
+		housingVal = 0.0
+		for district in list(DistrictType):
+			if self.hasDistrict(district):
+				housingVal += district.yields().housing
+
+		self._housingVal = housingVal
+		return
+
+	def numberOfSpecialtyDistricts(self) -> int:
+		return sum(map(lambda item: 1 if item.district.isSpecialty() else 0, self._items))
 
 
 class CityBuildings:
@@ -690,8 +719,34 @@ class YieldValues:
 			raise Exception(f'invalid parameter: {other}')
 
 
+class BuildQueue:
+	def __init__(self):
+		self._items: [BuildableItem] = []
+
+	def peek(self) -> Optional[BuildableItem]:
+		if len(self._items) == 0:
+			return None
+
+		return self._items[0]
+
+	def buildingOf(self, buildingType: BuildingType) -> Optional[BuildableItem]:
+		item = next(filter(lambda itemIterator: itemIterator.buildableType == BuildableType.building and itemIterator.buildingType == buildingType, self._items), None)
+		if item is not None:
+			return item
+
+		return None
+
+	def unitOf(self, unitType: UnitType) -> Optional[BuildableItem]:
+		item = next(filter(lambda itemIterator: itemIterator.buildableType == BuildableType.unit and itemIterator.unitType == unitType, self._items), None)
+		if item is not None:
+			return item
+
+		return None
+
+
 class City:
 	workRadius = 3
+
 	def __init__(self, name: str, location: HexPoint, isCapital: bool, player):
 		self.name = name
 		self.location = location
@@ -720,7 +775,8 @@ class City:
 		self.extraSpecialistYield = YieldList()
 		self.numPlotsAcquiredList = LeaderWeightList()
 
-		self.featureProductionValue = 0.0
+		self._featureProductionValue = 0.0
+		self._buildQueue = BuildQueue()
 
 		# ai
 		self.cityStrategyAI = CityStrategyAI(self)
@@ -839,13 +895,13 @@ class City:
 		self.setPopulation(newPopulation=1, reassignCitizen=True, simulation=simulation)
 
 	def featureProduction(self) -> float:
-		return self.featureProductionValue
+		return self._featureProductionValue
 
 	def changeFeatureProduction(self, change: float):
-		self.featureProductionValue += change
+		self._featureProductionValue += change
 
 	def setFeatureProduction(self, value: float):
-		self.featureProductionValue = value
+		self._featureProductionValue = value
 
 	def buildDistrict(self, district: DistrictType, location: HexPoint, simulation):
 		tile = simulation.tileAt(location)
@@ -864,7 +920,7 @@ class City:
 			# 	if case .constructDistrict(type: let district) = quest.type {
 			# 		if district == districtType && player.leader == quest.leader {
 			# 			let cityStatePlayer = gameModel.cityStatePlayer(for: quest.cityState)
-			# 			cityStatePlayer?.fulfillQuest(by: player.leader, in: gameModel)
+			# 			cityStatePlayer?.fulfillQuest(by: player.leader,simulation)
 
 			if district == DistrictType.preserve:
 				# Initiate a Culture Bomb on adjacent unowned tiles
@@ -1568,9 +1624,9 @@ class City:
 				#
 				#         # check if someone else already had a bustling city
 				# 		if gameModel.anyHasMoment(of: .worldsFirstBustlingCity(cityName: self.name)):
-				# 			player.addMoment(of:.firstBustlingCity(cityName: self.name), in: gameModel)
+				# 			player.addMoment(of:.firstBustlingCity(cityName: self.name),simulation)
 				# 		else:
-				# 			player.addMoment(of:.worldsFirstBustlingCity(cityName: self.name), in: gameModel)
+				# 			player.addMoment(of:.worldsFirstBustlingCity(cityName: self.name),simulation)
 
 				# if self._populationValue > 15:
 				# 	if not player.hasMoment(of: .firstLargeCity(cityName: self.name)) and
@@ -1578,9 +1634,9 @@ class City:
 				#
 				#         #  check if someone else already had a bustling city
 				# 		if gameModel.anyHasMoment(of: .worldsFirstLargeCity(cityName: self.name)):
-				# 			player.addMoment(of:.firstLargeCity(cityName: self.name), in: gameModel)
+				# 			player.addMoment(of:.firstLargeCity(cityName: self.name),simulation)
 				# 		else:
-				# 			player.addMoment(of:.worldsFirstLargeCity(cityName: self.name), in: gameModel)
+				# 			player.addMoment(of:.worldsFirstLargeCity(cityName: self.name),simulation)
 
 				# if self.populationValue > 20:
 				# 	if not self.player.hasMoment(of: .firstEnormousCity(cityName: self.name)) and
@@ -1588,9 +1644,9 @@ class City:
 				#
 				#         # check if someone else already had a bustling city
 				# 		if simulation.anyHasMoment(of: .worldsFirstEnormousCity(cityName: self.name)) {
-				# 			player.addMoment(of:.firstEnormousCity(cityName: self.name), in: gameModel)
+				# 			player.addMoment(of:.firstEnormousCity(cityName: self.name),simulation)
 				# 		else:
-				# 			player.addMoment(of:.worldsFirstEnormousCity(cityName: self.name), in: gameModel)
+				# 			player.addMoment(of:.worldsFirstEnormousCity(cityName: self.name),simulation)
 
 				# if self._populationValue > 25:
 				# 	if not self.player.hasMoment(of: .firstGiganticCity(cityName: self.name)) and
@@ -1598,9 +1654,9 @@ class City:
 				#
 				#         # check if someone else already had a bustling city
 				# 		if gameModel.anyHasMoment(of: .worldsFirstGiganticCity(cityName: self.name)):
-				# 			player.addMoment(of:.firstGiganticCity(cityName: self.name), in: gameModel)
+				# 			player.addMoment(of:.firstGiganticCity(cityName: self.name),simulation)
 				# 		else:
-				# 			player.addMoment(of:.worldsFirstGiganticCity(cityName: self.name), in: gameModel)
+				# 			player.addMoment(of:.worldsFirstGiganticCity(cityName: self.name),simulation)
 
 		elif self.foodBasket() < 0:
 			self.setFoodBasket(0)
@@ -1609,7 +1665,290 @@ class City:
 				self.setPopulation(self.population() - 1, simulation=simulation)
 
 	def doProduction(self, allowNoProduction, simulation):
-		pass
+		if not self.player.isHuman() or self.isProductionAutomated():
+			if not self.isProduction():  # or self.isProductionProcess() or AI_isChooseProductionDirty()
+				self.AI_chooseProduction(interruptWonders=False, simulation=simulation)
+
+		if not allowNoProduction and not self.isProduction():
+			return
+
+		# processes are wealth or science
+		# if self.isProductionProcess()
+		# return
+
+		if self.isProduction():
+			production: float = self.productionPerTurn(simulation)
+			modifierPercentage = 0.0
+
+			effects = self.player.envoyEffects(simulation)
+
+			for effect in effects:
+				# Industrial: +2 Production in the Capital when producing wonders, buildings, and districts.
+				if effect.isEqualCategory(CityStateCategory.industrial, EnvoyEffectLevel.first) and self.capitalValue:
+
+					if self._buildQueue.isCurrentlyBuildingBuilding() or \
+						self._buildQueue.isCurrentlyBuildingDistrict() or \
+						self._buildQueue.isCurrentlyBuildingWonder():
+						production += 2.0
+
+				# Industrial: +2 Production in every city with a Workshop building when producing wonders, buildings, and districts.
+				if effect.isEqualCategory(CityStateCategory.industrial, EnvoyEffectLevel.third) and self.hasBuilding(BuildingType.workshop):
+					if self._buildQueue.isCurrentlyBuildingBuilding() or \
+					   self._buildQueue.isCurrentlyBuildingDistrict() or \
+					   self._buildQueue.isCurrentlyBuildingWonder():
+						production += 2.0
+
+				# Industrial: +2 Production in every city with a Factory building when producing wonders, buildings, and districts.
+				if effect.isEqualCategory(CityStateCategory.industrial, EnvoyEffectLevel.sixth) and self.hasBuilding(BuildingType.factory):
+					if self._buildQueue.isCurrentlyBuildingBuilding() or \
+					   self._buildQueue.isCurrentlyBuildingDistrict() or \
+					   self._buildQueue.isCurrentlyBuildingWonder():
+						production += 2.0
+
+				# Militaristic: +2 Production in the Capital when producing units.
+				if effect.isEqualCategory(CityStateCategory.militaristic, EnvoyEffectLevel.first) and self.capitalValue:
+					if self._buildQueue.isCurrentlyTrainingUnit():
+						production += 2.0
+
+				# Militaristic: +2 Production in every city with a Barracks or Stable building when producing units.
+				if effect.isEqualCategory(CityStateCategory.militaristic, EnvoyEffectLevel.third) and \
+					(self.hasBuilding(BuildingType.barracks) or self.hasBuilding(BuildingType.stable)):
+					if self._buildQueue.isCurrentlyTrainingUnit():
+						production += 2.0
+
+				# Militaristic: +2 Production in every city with an Armory building when producing units.
+				if effect.isEqualCategory(CityStateCategory.militaristic, EnvoyEffectLevel.sixth) and self.hasBuilding(BuildingType.armory):
+					if self._buildQueue.isCurrentlyTrainingUnit():
+						production += 2.0
+
+				# brussels suzerain bonus
+				# Your cities get +15% Production towards wonders.
+				if effect.cityState == CityStateType.brussels and effect.level == EnvoyEffectLevel.suzerain:
+					if self.productionWonderType() is not None:
+						modifierPercentage += 0.15
+
+			# +1 Production in all cities.
+			if self.player.government.hasCard(PolicyCardType.urbanPlanning):
+				production += 1.0
+
+			# city state production bonus is 50%
+			if self.player.isCityState():
+				modifierPercentage += 0.5
+
+			# https://civilization.fandom.com/wiki/Autocracy_(Civ6)
+			# +10% Production toward Wonders.
+			if self.player.government.currentGovernment() == GovernmentType.autocracy:
+				if self.productionWonderType() is not None:
+					modifierPercentage += 0.1
+
+			# +15% Production toward Districts.
+			if self.player.government.currentGovernment() == GovernmentType.merchantRepublic:
+				if self._buildQueue.isCurrentlyBuildingDistrict():
+					modifierPercentage += 0.15
+
+			# +50% Production toward Units.
+			if self.player.government.currentGovernment() == GovernmentType.fascism:
+				if self._buildQueue.isCurrentlyTrainingUnit():
+					modifierPercentage += 0.50
+
+			# +15 % Production.
+			if self.player.government.currentGovernment() == GovernmentType.communism:
+				modifierPercentage += 0.15
+
+			# +1 Production ... per District.
+			if self.player.government.currentGovernment() == GovernmentType.democracy:
+				production += float(self.districts.numberOfBuiltDistricts())
+
+			# +20 % Production towards Medieval, Renaissance, and Industrial Wonders.
+			if self.player.leader.civilization().ability() == CivilizationAbility.grandTour:
+				if self.productionWonderType() is not None:
+					if self.productionWonderType().era() == EraType.ancient or \
+						self.productionWonderType().era() == EraType.classical:
+						modifierPercentage += 0.20
+
+			# +15 % Production towards Districts and wonders built next to a river.
+			if self.player.leader.civilization().ability() == CivilizationAbility.iteru:
+				if simulation.riverAt(self.location):
+					if self.productionWonderType() is not None or self.productionDistrictType() is not None:
+						modifierPercentage += 0.15
+
+			# corvee - +15 % Production toward Ancient and Classical wonders.
+			if self.player.government.hasCard(PolicyCardType.corvee):
+				if self.productionWonderType() is not None:
+					if self.productionWonderType().era() == EraType.ancient or \
+						self.productionWonderType().era() == EraType.classical:
+						modifierPercentage += 0.15
+
+			# ilkum - +30 % Production toward Builders.
+			if self.player.government.hasCard(PolicyCardType.ilkum):
+				if self._buildQueue.isCurrentlyTrainingUnit(UnitType.builder):
+					modifierPercentage += 0.30
+
+			# colonization - +50 % Production toward Settlers.
+			if self.player.government.hasCard(PolicyCardType.colonization):
+				if self._buildQueue.isCurrentlyTrainingUnit(UnitType.settler):
+					modifierPercentage += 0.50
+
+			# maneuver - +50 % Production toward Ancient and Classical era heavy and light cavalry units.
+			if self.player.government.hasCard(PolicyCardType.maneuver):
+				if self._buildQueue.isCurrentlyTrainingUnit(UnitClassType.heavyCavalry) or \
+					self._buildQueue.isCurrentlyTrainingUnit(UnitClassType.lightCavalry):
+					modifierPercentage += 0.50
+
+			# maritimeIndustries - +100 % Production toward Ancient and Classical era naval units.
+			if self.player.government.hasCard(PolicyCardType.maritimeIndustries):
+				unitType = self.productionUnitType()
+				if unitType is not None:
+					if unitType.unitClass() == UnitClassType.navalMelee and \
+						(unitType.era() == EraType.ancient or unitType.era() == EraType.classical):
+						modifierPercentage += 1.0
+
+			# limes - +100% Production toward defensive buildings.
+			if self.player.government.hasCard(PolicyCardType.limes):
+				buildingType = self.productionBuildingType()
+				if buildingType is not None:
+					if buildingType.defense() > 0:
+						modifierPercentage += 1.0
+
+			# agoge - +50 % Production toward Ancient and Classical era melee, ranged units and anti - cavalry units.
+			if self.player.government.hasCard(PolicyCardType.agoge):
+				unitType = self.productionUnitType()
+				if unitType is not None:
+					if (unitType.unitClass() == UnitClassType.melee or unitType.unitClass() == UnitClassType.ranged or \
+						unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or \
+						unitType.era() == EraType.classical):
+						modifierPercentage += 0.50
+
+			# veterancy - +30 % Production toward Encampment and Harbor districts and buildings for those districts.
+			if self.player.government.hasCard(PolicyCardType.veterancy):
+				districtType = self.productionDistrictType()
+				if districtType is not None:
+					if districtType == DistrictType.encampment or districtType == DistrictType.harbor:
+						modifierPercentage += 0.30
+
+				buildingType = self.productionBuildingType()
+				if buildingType is not None:
+					if buildingType.district() == DistrictType.encampment or buildingType.district() == DistrictType.harbor:
+						modifierPercentage += 0.30
+
+			# feudalContract - +50 % Production toward Ancient, Classical, Medieval and Renaissance era melee, ranged and anti - cavalry units.
+			if self.player.government.hasCard(PolicyCardType.feudalContract):
+				unitType = self.productionUnitType()
+				if unitType is not None:
+					if (unitType.unitClass() == UnitClassType.melee or unitType.unitClass() == UnitClassType.ranged or
+						unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or
+						unitType.era() == EraType.classical or unitType.era() == EraType.medieval or
+						unitType.era() == EraType.renaissance):
+						modifierPercentage += 0.50
+
+			# chivalry - +50%  Production toward Industrial era and earlier heavy and light cavalry units.
+			if self.player.government.hasCard(PolicyCardType.chivalry):
+				unitType = self.productionUnitType()
+				if unitType is not None:
+					if (unitType.unitClass() == UnitClassType.lightCavalry or unitType.unitClass() == UnitClassType.heavyCavalry) and \
+					   (unitType.era() == EraType.ancient or unitType.era() == EraType.classical or
+						unitType.era() == EraType.medieval or unitType.era() == EraType.renaissance or
+						unitType.era() == EraType.industrial):
+						modifierPercentage += 0.50
+
+			# gothicArchitecture - +15%  Production toward Ancient, Classical, Medieval and Renaissance wonders.
+			if self.player.government.hasCard(PolicyCardType.gothicArchitecture):
+				wonderType = self.productionWonderType()
+				if wonderType is not None:
+					if wonderType.era() == EraType.ancient or wonderType.era() == EraType.classical or \
+					   wonderType.era() == EraType.medieval or wonderType.era() == EraType.renaissance:
+						modifierPercentage += 0.15
+
+			# militaryFirst - +50% Production toward all melee, anti - cavalry and ranged units.
+			if self.player.government.hasCard(PolicyCardType.militaryFirst):
+				unitType = self.productionUnitType()
+				if unitType is not None:
+					if unitType.unitClass() == UnitClassType.melee or \
+					   unitType.unitClass() == UnitClassType.antiCavalry or \
+					   unitType.unitClass() == UnitClassType.ranged:
+						modifierPercentage += 0.50
+
+			# lightningWarfare - +50% Production for all heavy and light cavalry units.
+			if self.player.government.hasCard(PolicyCardType.lightningWarfare):
+				unitType = self.productionUnitType()
+				if unitType is not None:
+					if unitType.unitClass() == UnitClassType.heavyCavalry or \
+					   unitType.unitClass() == UnitClassType.lightCavalry:
+						modifierPercentage += 0.5
+
+			# internationalWaters - +100% Production towards all naval units, excluding Carriers.
+			if self.player.government.hasCard(PolicyCardType.internationalWaters):
+				unitType = self.productionUnitType()
+				if unitType is not None:
+					if unitType.unitClass() == UnitClassType.navalMelee or \
+					   unitType.unitClass() == UnitClassType.navalRaider or \
+					   unitType.unitClass() == UnitClassType.navalRanged:
+						modifierPercentage += 1.0
+
+			# - Automated Workforce +20% Production towards city projects.
+			# BUT: -1 Amenities and -5 Loyalty in all cities.
+			if self.player.government.hasCard(PolicyCardType.automatedWorkforce):
+				projectType = self.productionProjectType()
+				if projectType is not None:
+					if projectType.unique():
+						modifierPercentage += 0.20
+
+			# cityPatronGoddess - +25% Production toward districts in cities without a specialty district.
+			if self.player.religion.pantheon() == PantheonType.cityPatronGoddess:
+				if not self.districts.hasAnySpecialtyDistrict():
+					if self._buildQueue.isCurrentlyBuildingDistrict():
+						modifierPercentage += 0.25
+
+			# godOfTheForge - +25% Production toward Ancient and Classical military units.
+			if self.player.religion.pantheon() == PantheonType.godOfTheForge:
+				unitType = self.productionUnitType()
+				if unitType is not None:
+					if (unitType.unitClass() == UnitClassType.melee or unitType.unitClass() == UnitClassType.ranged) and \
+					(unitType.era() == EraType.ancient or unitType.era() == EraType.classical):
+						modifierPercentage += 0.25
+
+			# monumentToTheGods - +15%  Production to Ancient and Classical era Wonders.
+			if self.player.religion.pantheon() == PantheonType.monumentToTheGods:
+				wonderType = self.productionWonderType()
+				if wonderType is not None:
+					if wonderType.era() == EraType.ancient or wonderType.era() == EraType.classical:
+						modifierPercentage += 0.15
+
+			# governor effects
+			if self.governor() is not None:
+				# Liang - zoningCommissioner - +20 %Production towards constructing Districts in the city.
+				if self.hasGovernorTitle(GovernorTitle.zoningCommissioner):
+					if self._buildQueue.isCurrentlyBuildingDistrict():
+						modifierPercentage += 0.20
+
+			# Themistocles - +20 % Production towards Naval Ranged promotion class .
+			if self.player.hasRetired(GreatPersonType.themistocles):
+				unitType = self.productionUnitType()
+				if unitType is not None:
+					if unitType.unitClass() == UnitClassType.navalRanged:
+						modifierPercentage += 0.20
+
+			# statueOfZeus - +50 % Production towards anti - cavalry units.
+			if self.hasWonder(WonderType.statueOfZeus):
+				unitType = self.productionUnitType()
+				if unitType is not None:
+					if unitType.unitClass() == UnitClassType.antiCavalry:
+						modifierPercentage += 0.50
+
+			# ancestralHall - 50 % increased Production toward Settlers in this city
+			if self.hasBuilding(BuildingType.ancestralHall):
+				unitType = self.productionUnitType()
+				if unitType is not None and unitType == UnitType.settler:
+					modifierPercentage += 0.5
+
+			production *= (1.0 + modifierPercentage)
+
+			self.updateProduction(production, simulation)
+			self.setFeatureProductionTo(0.0)
+		else:
+			self.setFeatureProductionTo(0.0)
+
+		return
 
 	def culturePerTurn(self, simulation) -> float:
 		culturePerTurn: YieldValues = YieldValues(value=0.0, percentage=1.0)
@@ -2334,7 +2673,7 @@ class City:
 		#             // taruga suzerain effect
 		#             // Your cities receive +5% [Science] Science for each different Strategic Resource they have.
 		#             if effect.cityState == .taruga && effect.level == .suzerain {
-		#                 let differentResources = Double(self.numberOfDifferentStrategicResources(in: gameModel))
+		#                 let differentResources = float(self.numberOfDifferentStrategicResources(in: gameModel))
 		#                 scienceFromEnvoys += YieldValues(value: 5.0 * differentResources)
 		#             }
 		# 
@@ -2631,4 +2970,228 @@ class City:
 
 		return costs
 
+	def currentBuildableItem(self) -> Optional[BuildableItem]:
+		return self._buildQueue.peek()
 
+	def isProduction(self):
+		if self._buildQueue.peek() is not None:
+			return True
+
+		return False
+
+	def AI_chooseProduction(self, interruptWonders: bool, simulation):
+		buildWonder = False
+
+		# See if this is the one AI city that is supposed to be building wonders
+		wonderBuildCity = self.player.citySpecializationAI.wonderBuildCity()
+		if wonderBuildCity is not None and wonderBuildCity.location == self.location:
+			# Is it still working on that wonder, and we don't want to interrupt it?
+			if not interruptWonders:
+				if self.productionWonderType() is not None:
+					# Stay the course
+					return
+
+			# So we're the wonder building city but it is not underway yet...
+
+			# Has the designated wonder been poached by another civ?
+			(nextWonderType, nextWonderLocation) = self.player.citySpecializationAI.nextWonderDesired()
+			if not self.canBuildWonder(nextWonderType, nextWonderLocation, simulation):
+				# Reset city specialization
+				# citySpecializationAI.->SetSpecializationsDirty(SPECIALIZATION_UPDATE_WONDER_BUILT_BY_RIVAL);
+				raise Exception("need to trigger the selection of new wonder")
+			else:
+				buildWonder = True
+
+		if buildWonder:
+			(nextWonderType, nextWonderLocation) = self.player.citySpecializationAI.nextWonderDesired()
+			self.startBuildingWonder(nextWonderType, nextWonderLocation, simulation)
+
+			if simulation.getLogging() and simulation.getAILogging():
+				print('bla bla bla')
+				# CvString playerName;
+				# FILogFile * pLog;
+				# CvString strBaseString;
+				# CvString strOutBuf;
+				# m_pCityStrategyAI->LogCityProduction(buildable, false);
+				# playerName = kOwner.getCivilizationShortDescription();
+				# pLog = LOGFILEMGR.GetLog(kOwner.GetCitySpecializationAI()->GetLogFileName(playerName), FILogFile::kDontTimeStamp);
+				# strBaseString.Format("%03d, ", GC.getGame().getElapsedGameTurns());
+				# strBaseString += playerName + ", ";
+				# strOutBuf.Format("%s, WONDER - Started %s, Turns: %d", getName().GetCString(),
+				# GC.getBuildingInfo((BuildingTypes)buildable.m_iIndex)->GetDescription(), buildable.m_iTurnsToConstruct);
+				# strBaseString += strOutBuf;
+				# pLog->Msg(strBaseString);
+		else:
+			self.cityStrategy.chooseProduction(simulation)
+			simulation.userInterface.updateCity(self)
+
+		return
+
+	def setFeatureProductionTo(self, value: float):
+		self._featureProductionValue = value
+
+	def isProductionAutomated(self) -> bool:
+		return False
+
+	def canBuildDistrict(self, districtType: DistrictType, location: Optional[HexPoint] = None, simulation = None):
+		if simulation is None:
+			raise Exception('simulation cannot be None')
+
+		if location is not None:
+			tile = simulation.tileAt(location)
+
+			# can't build districts in cities, wonders or other districts
+			if tile.isCity() or tile.district() != DistrictType.none or tile.wonder() != WonderType.none:
+				return False
+
+			if tile.workingCity() is not None and tile.workingCity().location != self.location:
+				return False
+
+		requiredTech = districtType.requiredTech()
+		if requiredTech is not None:
+			if not self.player.hasTech(requiredTech):
+				return False
+
+		requiredCivic = districtType.requiredCivic()
+		if requiredTech is not None:
+			if not self.player.hasCivic(requiredCivic):
+				return False
+
+		if districtType.isSpecialty():
+			# specialty districts are limited by population
+			if self.districts.numberOfSpecialtyDistricts() >= self.numberOfBuildableSpecialtyDistricts():
+				return False
+
+			# they can only be built once per city
+			if self.districts.hasDistrict(districtType):
+				return False
+
+		if districtType.oncePerCivilization():
+			for city in simulation.citiesOf(self.player):
+				if city.districts.hasDistrict(districtType):
+					return False
+
+		if location is not None and not districtType.canBuildOn(location, simulation):
+			return False
+
+		return True
+
+	def bestLocationForDistrict(self, districtType: DistrictType, simulation) -> Optional[HexPoint]:
+		for loopLocation in self.cityCitizens.workingTileLocations():
+			loopTile = simulation.tileAt(loopLocation)
+			if loopTile.workingCity() is not None:
+				if loopTile.workingCity().location != self.location:
+					continue
+
+			if districtType.canBuildOn(loopLocation, simulation):
+				return loopLocation
+
+		return None
+
+	def numberOfBuildableSpecialtyDistricts(self) -> int:
+		"""For example a city of 6 pop can only build 2 districts but 7 can build 3."""
+		return int((int(self._populationValue) + 2) / 3)
+
+	def canBuildBuilding(self, buildingType: BuildingType, simulation) -> bool:
+		# at least one required building is needed( if there is one)
+		hasOneRequiredBuilding = False
+		for requiredBuilding in buildingType.requiredBuildings():
+			if self.buildings.hasBuilding(requiredBuilding):
+				hasOneRequiredBuilding = True
+
+		if not len(buildingType.requiredBuildings()) == 0 and not hasOneRequiredBuilding:
+			return False
+
+		# if an obsolete building exists - this cant be built
+		for obsoleteBuilding in buildingType.obsoleteBuildings():
+			if self.buildings.hasBuilding(obsoleteBuilding):
+				return False
+
+		if not buildingType.canBuildIn(self, simulation):
+			return False
+
+		if self.buildings.hasBuilding(buildingType):
+			return False
+
+		requiredTech = buildingType.requiredTech()
+		if requiredTech is not None:
+			if not self.player.hasTech(requiredTech):
+				return False
+
+		requiredCivic = buildingType.requiredCivic()
+		if requiredCivic is not None:
+			if not self.player.hasCivic(requiredCivic):
+				return False
+
+		if not self.hasDistrict(buildingType.district()):
+			return False
+
+		# special handling of the palace
+		# can only be built once
+		if buildingType == BuildingType.palace and simulation.capitalOf(self.player) is not None:
+			return False
+
+		return True
+
+	def buildingProductionTurnsLeftFor(self, buildingType: BuildingType) -> int:
+		buildingTypeItem = self._buildQueue.buildingOf(buildingType)
+		if buildingTypeItem is not None:
+			return int(buildingTypeItem.productionLeftFor(self.player) / self.productionLastTurnValue)
+
+		return 100
+
+	def canTrainUnit(self, unitType: UnitType, simulation) -> bool:
+		# city states cant build settlers or prophets
+		if self.player.isCityState() and (unitType == UnitType.settler or unitType == UnitType.prophet):
+			return False
+
+		# filter great people
+		if unitType.productionCost() < 0:
+			return False
+
+		requiredTech = unitType.requiredTech()
+		if requiredTech is not None:
+			if not self.player.hasTech(requiredTech):
+				return False
+
+		if unitType == UnitType.settler:
+			if self.population() <= 1:
+				return False
+
+			# isolationism - Domestic routes provide +2 Food, +2 Production.
+			# BUT: Can't train or buy Settlers nor settle new cities.
+			if self.player.government.hasCard(PolicyCardType.isolationism):
+				return False
+
+		if unitType == UnitType.trader:
+			if self.player.isCityState() or self.player.isBarbarian() or self.player.isFreeCity():
+				return False
+
+			if (self.player.numberOfTradeRoutes() + self.player.numberOfUnassignedTraders(simulation)) >= self.player.tradingCapacity():
+				return False
+
+		requiredCivilization = unitType.civilization()
+		if requiredCivilization is not None:
+			if self.player.leader.civilization() != requiredCivilization:
+				return False
+
+		# only coastal cities( or cities with harbors) can build ships
+		if unitType.unitClass() == UnitClassType.navalMelee or unitType.unitClass() == UnitClassType.navalRanged or \
+			unitType.unitClass() == UnitClassType.navalRaider or unitType.unitClass() == UnitClassType.navalCarrier:
+			if not self.isCoastal(simulation) and not self.districts.hasDistrict(DistrictType.harbor):
+				return False
+
+		# check that enough resources are there
+		resource = unitType.requiredResource()
+		if resource is not None:
+			if self.player.numberOfItemsInStockpile(resource) < 1:
+				return False
+
+		return True
+
+	def unitProductionTurnsLeftFor(self, unitType: UnitType) -> int:
+		unitTypeItem = self._buildQueue.unitOf(unitType)
+		if unitTypeItem is not None:
+			return int(unitTypeItem.productionLeftFor(self.player) / self.productionLastTurnValue)
+
+		return 100

@@ -148,13 +148,15 @@ class Yields:
 			raise Exception(f'type is not accepted {type(other)}')
 
 
-class YieldType(Enum):
-	food = 0
-	production = 1
-	gold = 2
-	science = 3
-	culture = 4
-	faith = 5
+class YieldType(ExtendedEnum):
+	none = 'none'
+
+	food = 'food'
+	production = 'production'
+	gold = 'gold'
+	science = 'science'
+	culture = 'culture'
+	faith = 'faith'
 
 
 class YieldList(WeightedBaseList):

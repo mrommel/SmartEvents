@@ -12,6 +12,31 @@ from tests.testBasics import MapMock, UserInterfaceMock
 
 
 class TestMoments(unittest.TestCase):
+	# major
+	# admiralDefeatsEnemy  # 1 #
+	# allGovernorsAppointed  # 2
+	# canalCompleted  # 3 #
+
+	def test_moment_cityNearFloodableRiver(self):  # 4
+		# GIVEN
+		mapModel = MapMock(24, 20, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+
+		# WHEN
+		beforeMoment = playerTrajan.hasMoment(MomentType.cityNearFloodableRiver, cityName='Berlin')
+		playerTrajan.addMoment(MomentType.cityNearFloodableRiver, cityName='Berlin', simulation=simulation)
+
+		# THEN
+		self.assertFalse(beforeMoment)
+		self.assertTrue(playerTrajan.hasMoment(MomentType.cityNearFloodableRiver, cityName='Berlin'))
+		self.assertFalse(playerTrajan.hasMoment(MomentType.cityNearFloodableRiver, cityName='Potsdam'))
+
 	def test_moment_cityNearVolcano(self):  # 5
 		# GIVEN
 		mapModel = MapMock(24, 20, TerrainType.grass)

@@ -2,7 +2,12 @@ from typing import Optional
 
 from game.flavors import Flavor, FlavorType
 from game.types import CivicType, EraType
-from utils.base import ExtendedEnum
+from utils.base import ExtendedEnum, InvalidEnumError
+
+
+class PolicyCardSlotData:
+	def __init__(self, name: str):
+		self.name = name
 
 
 class PolicyCardSlot(ExtendedEnum):
@@ -10,6 +15,24 @@ class PolicyCardSlot(ExtendedEnum):
 	wildcard = 'wildcard'
 	economic = 'economic'
 	military = 'military'
+	darkAge = 'darkAge'
+
+	def name(self) -> str:
+		return self._data().name
+
+	def _data(self) -> PolicyCardSlotData:
+		if self == PolicyCardSlot.diplomatic:
+			return PolicyCardSlotData(name='TXT_KEY_POLICY_CARD_TYPE_DIPLOMATIC_TITLE')
+		elif self == PolicyCardSlot.wildcard:
+			return PolicyCardSlotData(name='TXT_KEY_POLICY_CARD_TYPE_WILDCARD_TITLE')
+		elif self == PolicyCardSlot.economic:
+			return PolicyCardSlotData(name='TXT_KEY_POLICY_CARD_TYPE_ECONOMIC_TITLE')
+		elif self == PolicyCardSlot.military:
+			return PolicyCardSlotData(name='TXT_KEY_POLICY_CARD_TYPE_MILITARY_TITLE')
+		elif self == PolicyCardSlot.darkAge:
+			return PolicyCardSlotData(name='TXT_KEY_POLICY_CARD_TYPE_DARK_AGE_TITLE')
+
+		raise InvalidEnumError(self)
 
 
 class PolicyCardType:
@@ -21,6 +44,18 @@ class PolicyCardTypeData:
 	             obsoleteCivic: Optional[CivicType] = None, startEra: Optional[EraType] = [],
 	             endEra: Optional[EraType] = [], replace: [PolicyCardType] = [], flavors: [Flavor] = [],
 	             requiresDarkAge: bool = False):
+		"""
+		@param name: name of this policy card
+		@param bonus: description of the bonus of this policy card
+		@param slot: slot / type of this policy card
+		@param requiredCivic: civic that unlocks this policy card
+		@param obsoleteCivic: civic that makes this policy card obsolete
+		@param startEra: era when this policy card is unlocked
+		@param endEra: era when this policy card is obsolete
+		@param replace: policy cards that gets removed when this card is active
+		@param flavors: flavors for this policy cards
+		@param requiresDarkAge: true if this policy cards requires a dark age
+		"""
 		self.name = name
 		self.bonus = bonus
 		self.slot = slot
@@ -185,7 +220,7 @@ class PolicyCardType(ExtendedEnum):
 	# decentralization
 	despoticPaternalism = 'despoticPaternalism'
 	# disinformationCampaign
-	# eliteForces
+	eliteForces = 'eliteForces'
 	# flowerPower
 	# inquisition
 	isolationism = 'isolationism'
@@ -1044,7 +1079,20 @@ class PolicyCardType(ExtendedEnum):
 				requiresDarkAge=True
 			)
 		# disinformationCampaign
-		# eliteForces
+		elif self == PolicyCardType.eliteForces:
+			# https://civilization.fandom.com/wiki/Elite_Forces_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_ELITE_FORCES_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_ELITE_FORCES_BONUS",
+				slot=PolicyCardSlot.wildcard,
+				requiredCivic=None,
+				obsoleteCivic=None,
+				startEra=EraType.industrial,
+				endEra=EraType.information,
+				replace=[],
+				flavors=[],
+				requiresDarkAge=True
+			)
 		# flowerPower
 		# inquisition
 		elif self == PolicyCardType.isolationism:
@@ -1131,4 +1179,3 @@ class PolicyCardType(ExtendedEnum):
 			)
 
 		raise AttributeError(f'cant get data for policy card {self}')
-

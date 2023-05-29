@@ -74,6 +74,8 @@ class UnitClassType(ExtendedEnum):
 	siege = 'siege'
 	navalMelee = 'navalMelee'
 	navalRanged = 'navalRanged'
+	navalRaider = 'navalRaider'
+	navalCarrier = 'navalCarrier'
 
 
 class BitArray:
@@ -216,6 +218,12 @@ class UnitType(ExtendedEnum):
 	def range(self) -> int:
 		return self._data().range
 
+	def productionCost(self) -> int:
+		return self._data().productionCost
+
+	def requiredResource(self) -> Optional[ResourceType]:
+		return self._data().requiredResource
+
 	def meleeStrength(self) -> int:
 		return self._data().meleeAttack
 
@@ -274,6 +282,9 @@ class UnitType(ExtendedEnum):
 
 	def movementType(self) -> UnitMovementType:
 		return self._data().movementType
+
+	def flavors(self) -> [Flavor]:
+		return self._data().flavors
 
 	def _data(self) -> UnitTypeData:
 		# default ------------------------------

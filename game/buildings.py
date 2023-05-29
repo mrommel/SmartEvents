@@ -140,8 +140,17 @@ class BuildingType(ExtendedEnum):
 	def categoryType(self) -> BuildingCategoryType:
 		return self._data().category
 
+	def district(self) -> DistrictType:
+		return self._data().district
+
 	def requiredCivic(self) -> CivicType:
 		return self._data().requiredCivic
+
+	def requiredBuildings(self) -> [BuildingType]:
+		return self._data().requiredBuildingsOr
+
+	def obsoleteBuildings(self) -> [BuildingType]:
+		return self._data().obsoleteBuildingsOr
 
 	def requiredTech(self) -> TechType:
 		return self._data().requiredTech
@@ -151,6 +160,17 @@ class BuildingType(ExtendedEnum):
 
 	def maintenanceCost(self) -> float:
 		return self._data().maintenanceCost
+
+	def _flavors(self) -> [Flavor]:
+		return self._data().flavors
+
+	def flavor(self, flavorType: FlavorType) -> int:
+		item = next((flavor for flavor in self._flavors() if flavor.flavorType == flavorType), None)
+
+		if item is not None:
+			return item.value
+
+		return 0
 
 	def _data(self) -> BuildingTypeData:
 		# default
@@ -1225,3 +1245,10 @@ class BuildingType(ExtendedEnum):
 			return 1
 
 		return 0
+
+	def canBuildIn(self, city, simulation) -> bool:
+		if self == BuildingType.waterMill:
+			# It can be built in the City Center, if the city is next to a River.
+			return simulation.riverAt(city.location)
+
+		return True

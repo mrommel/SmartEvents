@@ -419,8 +419,14 @@ class Tile:
 	def buildDistrict(self, district: DistrictType):
 		self._districtValue = district
 
+	def district(self) -> DistrictType:
+		return self._districtValue
+
 	def setOwner(self, player):
 		self._owner = player
+
+	def	workingCity(self):
+		return self._workingCity
 
 	def setWorkingCity(self, city):
 		self._workingCity = city

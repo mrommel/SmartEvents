@@ -4,7 +4,7 @@ from typing import Optional
 from game.ai.homeland import HomelandAI
 from game.baseTypes import GameState
 from game.ai.economics import EconomicAI
-from game.ai.grandStrategies import GrandStrategyAI
+from game.ai.grandStrategies import GrandStrategyAI, GrandStrategyAIType
 from game.ai.militaries import MilitaryAI
 from game.buildings import BuildingType
 from game.cities import City, CityStateType, YieldValues
@@ -227,6 +227,9 @@ class CitySpecializationAI:
 	def setSpecializationsDirty(self):
 		pass
 
+	def wonderBuildCity(self) -> Optional[City]:
+		return None
+
 
 class DangerPlotsAI:
 	def __init__(self, player):
@@ -429,7 +432,7 @@ class Player:
 					self.notifications.add(Notification(NotificationType.civicNeeded))
 
 				if isCapital:
-					self.notifications.add(Notification(NotificationType.policyNeeded))
+					self.notifications.add(Notification(NotificationType.policiesNeeded))
 			else:
 				city.doFoundMessage()
 
@@ -885,7 +888,7 @@ class Player:
 	def addMoment(self, momentType: MomentType, civilization: Optional[CivilizationType] = None,
 				  cityName: Optional[str] = None, continentName: Optional[str] = None,
 				  eraType: Optional[EraType] = None, naturalWonder: Optional[FeatureType] = None,
-	              dedication: Optional[DedicationType] = None,
+				  dedication: Optional[DedicationType] = None,
 				  simulation = None):
 		if simulation is None:
 			raise Exception('simulation not provided')
@@ -903,12 +906,12 @@ class Player:
 				self.notifications.addNotification(NotificationType.momentAdded, momentType=momentType)
 
 	def hasMoment(self, momentType: MomentType, civilization: Optional[CivilizationType] = None,
-	              eraType: Optional[EraType] = None, cityName: Optional[str] = None,
-	              continentName: Optional[str] = None, naturalWonder: Optional[FeatureType] = None,
-	              dedication: Optional[DedicationType] = None) -> bool:
+				  eraType: Optional[EraType] = None, cityName: Optional[str] = None,
+				  continentName: Optional[str] = None, naturalWonder: Optional[FeatureType] = None,
+				  dedication: Optional[DedicationType] = None) -> bool:
 		return self.moments.hasMoment(momentType=momentType, civilization=civilization, eraType=eraType,
-		                              cityName=cityName, continentName=continentName, naturalWonder=naturalWonder,
-		                              dedication=dedication)
+									  cityName=cityName, continentName=continentName, naturalWonder=naturalWonder,
+									  dedication=dedication)
 
 	def militaryMight(self, simulation) -> int:
 		might = 0.0
@@ -1136,3 +1139,29 @@ class Player:
 
 	def hasTech(self, techType: TechType) -> bool:
 		return self.techs.hasTech(techType)
+
+	def hasCivic(self, civicType: CivicType) -> bool:
+		return self.civics.hasCivic(civicType)
+
+	def personalAndGrandStrategyFlavor(self, flavorType: FlavorType) -> int:
+		if self.grandStrategyAI.activeStrategy == GrandStrategyAIType.none:
+			return self.personalityFlavors.value(flavorType)
+
+		value = self.personalityFlavors.value(flavorType) + self.grandStrategyAI.activeStrategy.flavorModifier(flavorType)
+
+		if value < 0:
+			return 0
+
+		return value
+
+	def numberOfTradeRoutes(self) -> int:
+		# fixme
+		return 0
+
+	def numberOfUnassignedTraders(self, simulation) -> int:
+		# fixme
+		return 0
+
+	def tradingCapacity(self) -> int:
+		# fixme
+		return 0

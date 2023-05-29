@@ -7,15 +7,19 @@ from utils.base import InvalidEnumError, ExtendedEnum
 
 
 class GrandStrategyAIType(ExtendedEnum):
-	conquest = 1
-	culture = 2
-	council = 3
+	none = 'none'
+
+	conquest = 'conquest'
+	culture = 'culture'
+	council = 'council'
 
 	def flavor(self, flavorType: FlavorType) -> int:
-		return self._flavorBase() + self._flavorModifier(flavorType)
+		return self._flavorBase() + self.flavorModifier(flavorType)
 
 	def _flavorBase(self) -> int:
-		if self == GrandStrategyAIType.conquest:
+		if self == GrandStrategyAIType.none:
+			return 0
+		elif self == GrandStrategyAIType.conquest:
 			return 11
 		elif self == GrandStrategyAIType.culture:
 			return 11
@@ -24,7 +28,7 @@ class GrandStrategyAIType(ExtendedEnum):
 
 		raise InvalidEnumError(self)
 
-	def _flavorModifier(self, flavorType: FlavorType) -> int:
+	def flavorModifier(self, flavorType: FlavorType) -> int:
 		item = next((flavorModifier for flavorModifier in self._flavorModifiers() if
 					 flavorModifier.flavorType == flavorType), None)
 
@@ -34,7 +38,9 @@ class GrandStrategyAIType(ExtendedEnum):
 		return 0
 
 	def _flavorModifiers(self) -> [Flavor]:
-		if self == GrandStrategyAIType.conquest:
+		if self == GrandStrategyAIType.none:
+			return []
+		elif self == GrandStrategyAIType.conquest:
 			return [
 				Flavor(FlavorType.militaryTraining, 2),
 				Flavor(FlavorType.growth, -1),
@@ -88,7 +94,7 @@ class GrandStrategyAIDict:
 class GrandStrategyAI:
 	def __init__(self, player):
 		self.player = player
-		self.activeStrategy = None
+		self.activeStrategy = GrandStrategyAIType.none
 		self.turnActiveStrategySet = 0
 
 	def doTurn(self, simulation):

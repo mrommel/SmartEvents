@@ -2,8 +2,9 @@ from typing import Optional
 
 from game.flavors import Flavor, FlavorType
 from game.types import CivicType, TechType
-from map.types import Yields
-from utils.base import ExtendedEnum
+from map.base import HexPoint
+from map.types import Yields, TerrainType, FeatureType
+from utils.base import ExtendedEnum, InvalidEnumError
 
 
 class DistrictTypeData:
@@ -55,6 +56,20 @@ class DistrictType(ExtendedEnum):
 
 	def maintenanceCost(self) -> float:
 		return self._data().maintenanceCost
+
+	def _flavors(self) -> [Flavor]:
+		return self._data().flavors
+
+	def flavor(self, flavorType: FlavorType) -> int:
+		item = next((flavor for flavor in self._flavors() if flavor.flavorType == flavorType), None)
+
+		if item is not None:
+			return item.value
+
+		return 0
+
+	def yields(self) -> Yields:
+		return Yields(food=0, production=0, gold=0)
 
 	def _data(self) -> DistrictTypeData:
 		if self == DistrictType.none:
@@ -416,3 +431,88 @@ class DistrictType(ExtendedEnum):
 
 	def isSpecialty(self):
 		return self._data().specialty
+
+	def oncePerCivilization(self):
+		return self._data().oncePerCivilization
+
+	def canBuildOn(self, point, simulation) -> bool:
+		tile = simulation.tileAt(point)
+
+		# Districts and wonders(except for Machu Picchu) cannot be placed on Mountains tiles.
+		if tile.hasFeature(FeatureType.mountains):
+			return False
+
+		# natural wonders can't be used for districts
+		if tile.feature().isNaturalWonder():
+			return False
+
+		if self == DistrictType.none:
+			return False
+		elif self == DistrictType.cityCenter:
+			return True
+		elif self == DistrictType.campus:
+			return tile.isLand()
+		elif self == DistrictType.theaterSquare:
+			return tile.isLand()
+		elif self == DistrictType.holySite:
+			return tile.isLand()
+		elif self == DistrictType.encampment:
+			return tile.isLand()
+		elif self == DistrictType.commercialHub:
+			return tile.isLand()
+		elif self == DistrictType.harbor:
+			return tile.terrain() == TerrainType.shore  # must be built on water adjacent to land
+		elif self == DistrictType.entertainmentComplex:
+			return tile.isLand()
+		elif self == DistrictType.industrialZone:
+			return tile.isLand()
+		elif self == DistrictType.waterPark:
+			return tile.terrain() == TerrainType.shore or tile.hasFeature(FeatureType.lake)  # must be built on a Coast or Lake tile adjacent to land.
+		elif self == DistrictType.aqueduct:
+			return DistrictType.canBuildAqueductOn(tile.point, simulation)
+		elif self == DistrictType.neighborhood:
+			return tile.isLand()
+		# canal
+		# dam
+		# areodrome
+		elif self == DistrictType.preserve:
+			return DistrictType.canBuildPreserveOn(tile.point, simulation)  # Cannot be adjacent to the City Center
+		elif self == DistrictType.spaceport:
+			return tile.isLand() and not tile.hasHills()
+		elif self == DistrictType.governmentPlaza:
+			return tile.isLand()
+
+		raise InvalidEnumError(self)
+
+	@staticmethod
+	def canBuildAqueductOn(point, simulation):
+		tile = simulation.tileAt(point)
+
+		# Must be built adjacent to both the City Center and one of the following: River, Lake, Oasis, or Mountain.
+		nextToCityCenter: bool = False
+		nextToWaterSource: bool = False
+
+		for neighbor in point.neighbors():
+			neighborTile = simulation.tileAt(neighbor)
+
+			if neighborTile.isRiver() or neighborTile.hasFeature(FeatureType.lake) or \
+				neighborTile.hasFeature(FeatureType.oasis) or \
+				neighborTile.hasFeature(FeatureType.mountains):
+				nextToWaterSource = True
+
+
+			if tile.workingCity().location == neighbor:
+				nextToCityCenter = True
+
+		return nextToCityCenter and nextToWaterSource
+
+	@staticmethod
+	def canBuildPreserveOn(point: HexPoint, simulation) -> bool:
+		"""Cannot be adjacent to the City Center"""
+		tile = simulation.tileAt(point)
+
+		for neighbor in point.neighbors():
+			if simulation.cityAt(neighbor) is not None:
+				return False
+
+		return tile.isLand()

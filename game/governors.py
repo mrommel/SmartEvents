@@ -16,6 +16,7 @@ class GovernorTitle(ExtendedEnum):
 	librarian = 'librarian'
 	connoisseur = 'connoisseur'
 	redoubt = 'redoubt'
+	zoningCommissioner = 'zoningCommissioner'
 
 
 class Governor:

@@ -31,7 +31,7 @@ class MomentType(ExtendedEnum):
 	# admiralDefeatsEnemy  # 1 #
 	# allGovernorsAppointed  # 2
 	# canalCompleted  # 3 #
-	# cityNearFloodableRiver(cityName: String)  # 4 #
+	cityNearFloodableRiver = 'cityNearFloodableRiver'  # (cityName: String)  # 4
 	cityNearVolcano = 'cityNearVolcano'  # (cityName: String)  # 5
 	cityOfAwe = 'cityOfAwe'  # (cityName: String)  # 6
 	cityOnNewContinent = 'cityOnNewContinent'  # (cityName: String, continentName: String)  # 7
@@ -209,8 +209,20 @@ class MomentType(ExtendedEnum):
 		return self._data().maxEra
 
 	def _data(self) -> MomentTypeData:
-		# ...
-		if self == MomentType.cityNearVolcano: # (cityName: String)
+		# major
+		# admiralDefeatsEnemy  # 1 #
+		# allGovernorsAppointed  # 2
+		# canalCompleted  # 3 #
+		if self == MomentType.cityNearFloodableRiver:  # (cityName: String)
+			# 4
+			return MomentTypeData(
+				name="TXT_KEY_MOMENT_CITY_NEAR_FLOODABLE_RIVER_TITLE",
+				summary="TXT_KEY_MOMENT_CITY_NEAR_FLOODABLE_RIVER_SUMMARY",
+				instanceText = None,
+				category=MomentCategory.major,
+				eraScore=1
+			)
+		elif self == MomentType.cityNearVolcano:  # (cityName: String)
 			# 5
 			return MomentTypeData(
 				name="TXT_KEY_MOMENT_CITY_NEAR_VOLCANO_TITLE",
@@ -406,7 +418,10 @@ class Moment:
 		# 1 - admiralDefeatsEnemy
 		# 2 - allGovernorsAppointed
 		# 3 - canalCompleted
+
 		# 4 - cityNearFloodableRiver(cityName: String)
+		if self.momentType == MomentType.cityNearFloodableRiver and other.momentType == MomentType.cityNearFloodableRiver:
+			return self.cityName == other.cityName and other.cityName is not None
 
 		# 5 - cityNearVolcano
 		if self.momentType == MomentType.cityNearVolcano and other.momentType == MomentType.cityNearVolcano:
@@ -481,81 +496,81 @@ class Moment:
 		elif self.momentType == MomentType.firstTechnologyOfNewEra and other.momentType == MomentType.firstTechnologyOfNewEra:
 			return self.eraType == other.eraType and other.eraType is not None
 
-		# 56 - firstTier1Government(governmentType: GovernmentType)  # 56 #
-		# firstTier1GovernmentInWorld(governmentType: GovernmentType)  # 57 #
-		# firstTier2Government(governmentType: GovernmentType)  # 58 #
-		# firstTier2GovernmentInWorld(governmentType: GovernmentType)  # 59 #
-		# firstTier3Government(governmentType: GovernmentType)  # 60 #
-		# firstTier3GovernmentInWorld(governmentType: GovernmentType)  # 61 #
-		# firstTier4Government(governmentType: GovernmentType)  # 62 #
-		# firstTier4GovernmentInWorld(governmentType: GovernmentType)  # 63 #
-		# firstTradingPostsInAllCivilizations  # 64 #
-		# firstUnitPromotedWithDistinction  # 65 #
-		# firstWaterParkFullyDeveloped 66
-		# freeCityJoins 67
-		# generalDefeatsEnemy  # 68 #
-		# goldenAgeBegins  # 69 #
-		# governorFullyPromoted  # 70
-		# greatPersonLuredByFaith 71
-		# greatPersonLuredByGold 72
-		# heroicAgeBegins  # 73 #
-		# inquisitionBegins 74
-		# leviedArmyStandsDown 75
-		# metAllCivilizations  # 76 #
-		# nationalParkFounded  # 77 #
-		# normalAgeBegins  # 78 #
-		# onTheWaves  # 79 #
-		# religionAdoptsAllBeliefs  # 80 #
-		# religionFounded(religion: ReligionType)  # 81
-		# rivalHolyCityConverted  # 82 #
-		# splendidCampusCompleted  # 83 #
-		# splendidCommercialHubCompleted  # 84 #
-		# splendidHarborCompleted  # 85 #
-		# splendidHolySiteCompleted  # 86 #
-		# splendidIndustrialZoneCompleted  # 87 #
-		# splendidTheaterSquareCompleted  # 88 #
-		# takingFlight  # 89 #
-		# threateningCampDestroyed  # 90 #
-		# tradingPostsInAllCivilizations  # 91 #
-		# uniqueBuildingConstructed 92
-		# uniqueDistrictCompleted 93
-		# uniqueTileImprovementBuilt 94
-		# uniqueUnitMarches 95
-		# worldsFirstArmada 96
-		# worldsFirstArmy 97
-		# worldsFirstBustlingCity(cityName: String)  # 98
-		# worldsFirstCircumnavigation  # 99
-		# worldsFirstCivicOfNewEra(eraType: EraType)  # 100
-		# worldsFirstCorps 101
-		# worldsFirstEnormousCity(cityName: String)  # 102
-		# worldsFirstExoplanetExpeditionLaunched  # 103 #
+		# 56 - firstTier1Government(governmentType: GovernmentType)
+		# 57 - firstTier1GovernmentInWorld(governmentType: GovernmentType)
+		# 58 - firstTier2Government(governmentType: GovernmentType)
+		# 59 - firstTier2GovernmentInWorld(governmentType: GovernmentType)
+		# 60 - firstTier3Government(governmentType: GovernmentType)
+		# 61 - firstTier3GovernmentInWorld(governmentType: GovernmentType)
+		# 62 - firstTier4Government(governmentType: GovernmentType)
+		# 63 - firstTier4GovernmentInWorld(governmentType: GovernmentType)
+		# 64 - firstTradingPostsInAllCivilizations
+		# 65 - firstUnitPromotedWithDistinction
+		# 66 - firstWaterParkFullyDeveloped
+		# 67 - freeCityJoins
+		# 68 - generalDefeatsEnemy
+		# 69 - goldenAgeBegins
+		# 70 - governorFullyPromoted
+		# 71 - greatPersonLuredByFaith
+		# 72 - greatPersonLuredByGold
+		# 73 - heroicAgeBegins
+		# 74 - inquisitionBegins
+		# 75 - leviedArmyStandsDown
+		# 76 - metAllCivilizations
+		# 77 - nationalParkFounded
+		# 78 - normalAgeBegins
+		# 79 - onTheWaves
+		# 80 - religionAdoptsAllBeliefs
+		# 81 - religionFounded(religion: ReligionType)
+		# 82 - rivalHolyCityConverted
+		# 83 - splendidCampusCompleted
+		# 84 - splendidCommercialHubCompleted
+		# 85 - splendidHarborCompleted
+		# 86 - splendidHolySiteCompleted
+		# 87 - splendidIndustrialZoneCompleted
+		# 88 - splendidTheaterSquareCompleted
+		# 89 - takingFlight
+		# 90 - threateningCampDestroyed
+		# 91 - tradingPostsInAllCivilizations
+		# 92 - uniqueBuildingConstructed
+		# 93 - uniqueDistrictCompleted
+		# 94 - uniqueTileImprovementBuilt
+		# 95 - uniqueUnitMarches
+		# 96 - worldsFirstArmada
+		# 97 - worldsFirstArmy
+		# 98 - worldsFirstBustlingCity(cityName: String)
+		# 99 - worldsFirstCircumnavigation
+		# 100 - worldsFirstCivicOfNewEra(eraType: EraType)
+		# 101 - worldsFirstCorps
+		# 102 - worldsFirstEnormousCity(cityName: String)
+		# 103 - worldsFirstExoplanetExpeditionLaunched
 		# 104 - worldsFirstFleet
 		# 105 - worldsFirstFlight
-		# worldsFirstGiganticCity(cityName: String)  # 106
-		# worldsFirstInquisition 107
-		# worldsFirstLandingOnTheMoon  # 108 #
-		# worldsFirstLargeCity(cityName: String)  # 109
-		# worldsFirstMartianColonyEstablished  # 110 #
-		# worldsFirstNationalPark  # 111 #
+		# 106 - worldsFirstGiganticCity(cityName: String)
+		# 107 - worldsFirstInquisition
+		# 108 - worldsFirstLandingOnTheMoon
+		# 109 - worldsFirstLargeCity(cityName: String)
+		# 110 - worldsFirstMartianColonyEstablished
+		# 111 - worldsFirstNationalPark
 
 		# 112 - worldsFirstNeighborhood
 		elif self.momentType == MomentType.worldsFirstNeighborhood and other.momentType == MomentType.worldsFirstNeighborhood:
 			return True
 
-		# worldsFirstPantheon  # 113
-		# worldsFirstReligion  # 114
-		# worldsFirstReligionToAdoptAllBeliefs  # 115 #
-		# worldsFirstSatelliteInOrbit  # 116 #
-		# worldsFirstSeafaring  # 117 #
-		# worldsFirstSeasideResort  # 118 #
-		# worldsFirstShipwreckExcavated  # 119 #
-		# worldsFirstStrategicResourcePotentialUnleashed  # 120 #
+		# 113 - worldsFirstPantheon
+		# 114 - worldsFirstReligion
+		# 115 - worldsFirstReligionToAdoptAllBeliefs
+		# 116 - worldsFirstSatelliteInOrbit
+		# 117 - worldsFirstSeafaring
+		# 118 - worldsFirstSeasideResort
+		# 119 - worldsFirstShipwreckExcavated
+		# 120 - worldsFirstStrategicResourcePotentialUnleashed
 
 		# 121 - worldsFirstTechnologyOfNewEra
 		elif self.momentType == MomentType.worldsFirstTechnologyOfNewEra and other.momentType == MomentType.worldsFirstTechnologyOfNewEra:
 			return self.eraType == other.eraType and other.eraType is not None
 
-		# worldsFirstToMeetAllCivilizations  # 122 #
+		# 122 - worldsFirstToMeetAllCivilizations
 
 		# 123 - worldsLargestCivilization
 		elif self.momentType == MomentType.worldsLargestCivilization and other.momentType == MomentType.worldsLargestCivilization:
@@ -566,62 +581,62 @@ class Moment:
 			return True
 
 		# minor
-		# aggressiveCityPlacement  # 200 #
-		# artifactExtracted  # 201 #
-		# barbarianCampDestroyed  # 202
-		# causeForWar(warType: CasusBelliType, civilizationType: CivilizationType)  # 203 #
-		# cityReturnsToOriginalOwner(cityName: String, originalCivilization: CivilizationType)  # 204 #
-		# cityStateArmyLevied  # 205 #
-		# coastalFloodMitigated  # 206 #
+		# 200 - aggressiveCityPlacement
+		# 201 - artifactExtracted
+		# 202 - barbarianCampDestroyed
+		# 203 - causeForWar(warType: CasusBelliType, civilizationType: CivilizationType)
+		# 204 - cityReturnsToOriginalOwner(cityName: String, originalCivilization: CivilizationType)
+		# 205 - cityStateArmyLevied
+		# 206 - coastalFloodMitigated
 
 		# 207 - desertCity = 'desertCity'  # (cityName: String)
 		elif self.momentType == MomentType.desertCity and other.momentType == MomentType.desertCity:
 			return self.cityName == other.cityName and other.cityName is not None
 
-		# diplomaticVictoryResolutionWon  # 208 #
-		# firstArmada 209
-		# firstArmy  # 210 #
-		# firstCorps  # 211 #
-		# firstFleet  # 212 #
-		# foreignCapitalTaken  # 213 #
-		# greatPersonRecruited  # 214
-		# heroClaimed  # 215 #
-		# heroDeparted  # 216 #
-		# heroRecalled  # 217 #
-		# landedOnTheMoon  # 218 #
-		# manhattanProjectCompleted  # 219 #
-		# martianColonyEstablished  # 220 #
-		# masterSpyEarned  # 221 #
+		# 208 - diplomaticVictoryResolutionWon
+		# 209 - firstArmada
+		# 210 - firstArmy
+		# 211 - firstCorps
+		# 212 - firstFleet
+		# 213 - foreignCapitalTaken
+		# 214 - greatPersonRecruited
+		# 215 - heroClaimed
+		# 216 - heroDeparted
+		# 217 - heroRecalled
+		# 218 - landedOnTheMoon
+		# 219 - manhattanProjectCompleted
+		# 220 - martianColonyEstablished
+		# 221 - masterSpyEarned
 
 		# 222 - metNewCivilization
 		elif self.momentType == MomentType.metNewCivilization and other.momentType == MomentType.metNewCivilization:
 			return self.civilization == other.civilization and other.civilization is not None
 
-		# oldGreatPersonRecruited  # 223
-		# oldWorldWonderCompleted  # 224
-		# operationIvyCompleted 225
-		# pantheonFounded(pantheon: PantheonType)  # 226
-		# riverFloodMitigated  # 227 #
-		# satelliteLaunchedIntoOrbit  # 228 #
+		# 223 - oldGreatPersonRecruited
+		# 224 oldWorldWonderCompleted
+		# 225 - operationIvyCompleted
+		# 226 - pantheonFounded(pantheon: PantheonType)
+		# 227 - riverFloodMitigated
+		# 228 - satelliteLaunchedIntoOrbit
 
 		# 229 - snowCity (cityName: String)
 		elif self.momentType == MomentType.snowCity and other.momentType == MomentType.snowCity:
 			return self.cityName == other.cityName and other.cityName is not None
 
-		# strategicResourcePotentialUnleashed  # 230 #
-		# tradingPostEstablishedInNewCivilization(civilization: CivilizationType)  # 231
-		# tribalVillageContacted  # 232
+		# 230 - strategicResourcePotentialUnleashed
+		# 231 - tradingPostEstablishedInNewCivilization(civilization: CivilizationType)
+		# 232 - tribalVillageContacted
 
 		# 233 - tundraCity (cityName: String)
 		elif self.momentType == MomentType.tundraCity and other.momentType == MomentType.tundraCity:
 			return self.cityName == other.cityName and other.cityName is not None
 
-		# unitPromotedWithDistinction  # 234
-		# wonderCompleted(wonder: WonderType)  # 235
+		# 234 - unitPromotedWithDistinction
+		# 235 - wonderCompleted(wonder: WonderType)
 
 		# hidden
-		# shipSunk  # 300 for artifacts
-		# battleFought  # 301
+		# 300 - shipSunk
+		# 301 - battleFought
 
 		# 302 - dedicationTriggered
 		elif self.momentType == MomentType.dedicationTriggered and other.momentType == MomentType.dedicationTriggered:
