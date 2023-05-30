@@ -28,6 +28,10 @@ class WeightedBuildList(WeightedBaseList):
 
 
 # noinspection PyRedeclaration
+class FlowDirection(ExtendedEnum):
+	northEast = 'northEast'
+
+
 class Tile:
 	"""
 		class that holds a single tile of a Map
@@ -49,6 +53,7 @@ class Tile:
 		self._resourceValue = ResourceType.none  # property is hidden
 		self._resourceQuantity = 0
 		self._riverValue = 0
+		self._riverName = None
 		self._climateZone = ClimateZone.temperate
 		self._route = RouteType.none
 		self._improvementValue = ImprovementType.none
@@ -205,6 +210,14 @@ class Tile:
 			return target.isRiverInNorthEast()
 		elif direction == HexDirection.northWest:
 			return target.isRiverInSouthEast()
+
+	def setRiver(self, river, flow: FlowDirection):
+		self._riverName = river.name()
+		self.setRiverFlow(flow)
+
+	def isRiver(self) -> bool:
+		return self._riverName is not None and (
+				self.isRiverInNorth() or self.isRiverInNorthEast() or self.isRiverInSouthEast())
 
 	def to_dict(self):
 		return {
@@ -707,6 +720,22 @@ class Tile:
 	def appealLevel(self, simulation) -> AppealLevel:
 		return AppealLevel.fromAppeal(self.appeal(simulation))
 
+	def setRiverFlow(self, flow):
+		if flow == FlowDirection.northEast:
+			self.setRiverFlowInSouthEast(flow)
+		elif flow == FlowDirection.southWest:
+			self.setRiverFlowInSouthEast(flow)
+		elif flow == FlowDirection.northWest:
+			self.setRiverFlowInNorthEast(flow)
+		elif flow == FlowDirection.southEast:
+			self.setRiverFlowInNorthEast(flow)
+		elif flow == FlowDirection.east:
+			self.setRiverFlowInNorth(flow)
+		elif flow == FlowDirection.west:
+			self.setRiverFlowInNorth(flow)
+		else:
+			raise Exception(f'flow: {flow}')
+
 
 class TileStatistics:
 	def __init__(self):
@@ -747,47 +776,47 @@ class ContinentType(ExtendedEnum):
 	none = 'none'
 
 	africa = 'africa'
-	AMASIA = 2
-	AMERICA = 3
-	ANTARCTICA = 4
-	ARCTICA = 5
-	ASIA = 6
-	ASIAMERICA = 7
-	ATLANTICA = 8
-	ATLANTIS = 9
-	AUSTRALIA = 10
-	AVALONIA = 11
-	AZANIA = 12
-	BALTICA = 13
-	CIMMERIA = 14
-	COLUMBIA = 15
-	CONGOCRATON = 16
-	EURAMERICA = 17
-	EUROPE = 18
-	GONDWANA = 19
-	KALAHARIA = 20
-	KAZAKHSTANIA = 21
-	KERNORLAND = 22
-	KUMARIKANDAM = 23
-	LAURASIA = 24
-	LAURENTIA = 25
-	LEMURIA = 26
-	MU = 27
-	NENA = 28
-	NORTH_AMERICA = 29
-	NOVO_PANGAEA = 30
-	NUNA = 31
-	PANGAEA = 32
-	PANGAEA_ULTIMA = 33
-	PANNOTIA = 34
-	RODINIA = 35
-	SIBERIA = 36
-	SOUTH_AMERICA = 37
-	TERRA_AUSTRALIS = 38
-	UR = 39
-	VAALBARA = 40
-	VENDIAN = 41
-	ZEALANDIA = 42
+	amasia = 2
+	america = 3
+	antarctica = 4
+	arctica = 5
+	asia = 6
+	asiamerica = 7
+	atlantica = 8
+	atlantis = 9
+	australia = 10
+	avalonia = 11
+	azania = 12
+	baltica = 13
+	cimmeria = 14
+	columbia = 15
+	congocraton = 16
+	euramerica = 17
+	europe = 18
+	gondwana = 19
+	kalaharia = 20
+	kazakhstania = 21
+	kernorland = 22
+	kumarikandam = 23
+	laurasia = 24
+	laurentia = 25
+	lemuria = 26
+	mu = 27
+	nena = 28
+	northAmerica = 29
+	novoPangaea = 30
+	nuna = 31
+	pangaea = 32
+	pangaeaUltima = 33
+	pannotia = 34
+	rodinia = 35
+	siberia = 36
+	southAmerica = 37
+	terraAustralis = 38
+	ur = 39
+	vaalbara = 40
+	vendian = 41
+	zealandia = 42
 
 
 class Map:

@@ -992,7 +992,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.pyramids:
 			# Must be built on Desert(including Floodplains) without Hills.
-			if not tile.isLand() or tile.hasHills():
+			if not tile.isLand() or tile.isHills():
 				return False
 
 			# no mountains
@@ -1011,7 +1011,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.oracle:
 			# Must be built on Hills.
-			if not tile.isLand() or not tile.hasHills():
+			if not tile.isLand() or not tile.isHills():
 				return False
 
 			# no mountains
@@ -1026,7 +1026,7 @@ class WonderType(ExtendedEnum):
 				return False
 
 			# Must be built on flat land adjacent to Stone.
-			if not tile.isLand() or tile.hasHills():
+			if not tile.isLand() or tile.isHills():
 				return False
 
 			return self.adjacentToResource(ResourceType.stone, location, simulation)
@@ -1051,7 +1051,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.greatLibrary:
 			# Must be built on flat land adjacent to a Campus with a Library.
-			if not tile.isLand() or tile.hasHills():
+			if not tile.isLand() or tile.isHills():
 				return False
 
 			# no mountains
@@ -1078,7 +1078,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.colosseum:
 			# Must be built on flat land adjacent to an Entertainment Complex district with an Arena.
-			if not tile.isLand() or tile.hasHills():
+			if not tile.isLand() or tile.isHills():
 				return False
 
 			# no mountains
@@ -1107,7 +1107,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.mausoleumAtHalicarnassus:
 			# Must be built on a coastal tile adjacent to a Harbor district.
-			if not simulation.isCoastal(location):
+			if not simulation.isCoastalAt(location):
 				return False
 
 			return self.adjacentToDistrict(DistrictType.harbor, location, simulation)
@@ -1128,7 +1128,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.petra:
 			# Must be built on Desert or Floodplains without Hills.
-			if not tile.isLand() or tile.hasHills():
+			if not tile.isLand() or tile.isHills():
 				return False
 
 			# no mountains
@@ -1139,7 +1139,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.terracottaArmy:
 			# Must be built on flat Grassland or Plains adjacent to an Encampment district with a Barracks or Stable.
-			if not tile.isLand() or tile.hasHills():
+			if not tile.isLand() or tile.isHills():
 				return False
 
 			# no mountains
@@ -1161,7 +1161,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.statueOfZeus:
 			# Must be built on flat land adjacent to an Encampment with a Barracks.
-			if not tile.isLand() or tile.hasHills():
+			if not tile.isLand() or tile.isHills():
 				return False
 			
 			# no mountains
@@ -1175,7 +1175,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.alhambra:
 			# Must be built on Hills adjacent to an Encampment district.
-			if not tile.hasHills():
+			if not tile.isHills():
 				return False
 
 			# no mountains
@@ -1202,7 +1202,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.hagiaSophia:
 			# Must be built on flat land adjacent to a Holy Site district, and player must have founded a religion.
-			if tile.hasHills() or not tile.isLand():
+			if tile.isHills() or not tile.isLand():
 				return False
 
 			# no mountains
@@ -1231,7 +1231,7 @@ class WonderType(ExtendedEnum):
 			
 		elif self == WonderType.kilwaKisiwani:
 			# Must be built on a flat tile adjacent to a Coast.
-			if tile.hasHills() or not tile.isLand():
+			if tile.isHills() or not tile.isLand():
 				return False
 			
 			# no mountains
@@ -1311,7 +1311,7 @@ class WonderType(ExtendedEnum):
 
 		elif self == WonderType.forbiddenCity:
 			# Must be built on flat land adjacent to City Center.
-			if not tile.isLand() or tile.hasHills():
+			if not tile.isLand() or tile.isHills():
 				return False
 			
 			# no mountains
@@ -1343,7 +1343,7 @@ class WonderType(ExtendedEnum):
 				return False
 			
 			# Must be built on a Hill adjacent to a Mountain.
-			if not tile.hasHills():
+			if not tile.isHills():
 				return False
 			
 			return self.adjacentToFeature(FeatureType.mountains, location, simulation)

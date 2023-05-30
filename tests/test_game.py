@@ -67,9 +67,17 @@ class TestGameAssets(unittest.TestCase):
 		for district in list(DistrictType):
 			_ = district.name()
 
+			map = MapMock(10, 10, TerrainType.grass)
+			simulation = Game(map=map)
+			_ = district.canBuildOn(HexPoint(1, 1), simulation)
+
 	def test_wonders_data(self):
 		for wonder in list(WonderType):
 			_ = wonder.name()
+
+			map = MapMock(10, 10, TerrainType.grass)
+			simulation = Game(map=map)
+			_ = wonder.canBuildOn(HexPoint(1, 1), simulation)
 
 	def test_buildings_data(self):
 		for building in list(BuildingType):

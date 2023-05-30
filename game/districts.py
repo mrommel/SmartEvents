@@ -480,7 +480,7 @@ class DistrictType(ExtendedEnum):
 		elif self == DistrictType.preserve:
 			return DistrictType.canBuildPreserveOn(tile.point, simulation)  # Cannot be adjacent to the City Center
 		elif self == DistrictType.spaceport:
-			return tile.isLand() and not tile.hasHills()
+			return tile.isLand() and not tile.isHills()
 		elif self == DistrictType.governmentPlaza:
 			return tile.isLand()
 
@@ -502,8 +502,7 @@ class DistrictType(ExtendedEnum):
 				neighborTile.hasFeature(FeatureType.mountains):
 				nextToWaterSource = True
 
-
-			if tile.workingCity().location == neighbor:
+			if tile.workingCity() is not None and tile.workingCity().location == neighbor:
 				nextToCityCenter = True
 
 		return nextToCityCenter and nextToWaterSource
