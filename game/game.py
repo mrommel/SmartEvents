@@ -17,6 +17,7 @@ from game.states.victories import VictoryType
 from game.types import TechType, EraType
 from game.unitTypes import UnitMapType, UnitAbilityType, UnitPromotionType, MoveOptions
 from game.units import Unit
+from game.wonders import WonderType
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.map import Map, Tile, ContinentType, Continent
@@ -648,6 +649,13 @@ class Game:
 	                 eraType: Optional[EraType] = None) -> bool:
 		for player in self.players:
 			if player.hasMoment(momentType, civilization=civilization, eraType=eraType):
+				return True
+
+		return False
+
+	def alreadyBuiltWonder(self, wonderType: WonderType) -> bool:
+		for player in self.players:
+			if player.hasWonder(wonderType, self):
 				return True
 
 		return False

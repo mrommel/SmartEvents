@@ -75,20 +75,28 @@ class GrandStrategyAIDict:
 		self.councilStrategy = GrandStrategyAIEntry(GrandStrategyAIType.council)
 
 	def add(self, value, grandStrategyAIType):
-		if grandStrategyAIType == GrandStrategyAIType.conquest:
+		if grandStrategyAIType == GrandStrategyAIType.none:
+			pass
+		elif grandStrategyAIType == GrandStrategyAIType.conquest:
 			self.conquestStrategy.value += value
 		elif grandStrategyAIType == GrandStrategyAIType.culture:
 			self.cultureStrategy.value += value
 		elif grandStrategyAIType == GrandStrategyAIType.council:
 			self.councilStrategy.value += value
+		else:
+			raise InvalidEnumError(grandStrategyAIType)
 
-	def value(self, grandStrategyAIType):
-		if grandStrategyAIType == GrandStrategyAIType.conquest:
+	def value(self, grandStrategyAIType) -> float:
+		if grandStrategyAIType == GrandStrategyAIType.none:
+			return 0
+		elif grandStrategyAIType == GrandStrategyAIType.conquest:
 			return self.conquestStrategy.value
 		elif grandStrategyAIType == GrandStrategyAIType.culture:
 			return self.cultureStrategy.value
 		elif grandStrategyAIType == GrandStrategyAIType.council:
 			return self.councilStrategy.value
+		else:
+			raise InvalidEnumError(grandStrategyAIType)
 
 
 class GrandStrategyAI:
@@ -102,6 +110,9 @@ class GrandStrategyAI:
 		grandStrategyAIDict = GrandStrategyAIDict()
 
 		for grandStrategyAIType in list(GrandStrategyAIType):
+			if grandStrategyAIType == GrandStrategyAIType.none:
+				continue
+
 			# Base Priority looks at Personality Flavors (0 - 10) and multiplies * the Flavors attached to a Grand
 			# Strategy (0-10), so expect a number between 0 and 100 back from this
 			grandStrategyAIDict.add(self.priority(grandStrategyAIType), grandStrategyAIType)

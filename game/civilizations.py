@@ -19,6 +19,8 @@ class CivilizationAbility(ExtendedEnum):
 	allRoadsLeadToRome = 'allRoadsLeadToRome'
 	workshopOfTheWorld = 'workshopOfTheWorld'
 	platosRepublic = 'platosRepublic'
+	grandTour = 'grandTour'
+	iteru = 'iteru'
 
 	def name(self) -> str:
 		return 'ability'

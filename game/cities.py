@@ -16,7 +16,9 @@ from game.governors import GovernorType, GovernorTitle, Governor
 from game.greatPersons import GreatPersonType
 from game.loyalties import LoyaltyState
 from game.moments import MomentType
+from game.notifications import NotificationType
 from game.policyCards import PolicyCardType
+from game.projects import ProjectType
 from game.religions import PantheonType
 from game.specialists import SpecialistType
 from game.states.ages import AgeType
@@ -723,6 +725,9 @@ class BuildQueue:
 	def __init__(self):
 		self._items: [BuildableItem] = []
 
+	def append(self, buildableItem: BuildableItem):
+		self._items.append(buildableItem)
+
 	def peek(self) -> Optional[BuildableItem]:
 		if len(self._items) == 0:
 			return None
@@ -742,6 +747,9 @@ class BuildQueue:
 			return item
 
 		return None
+
+	def pop(self):
+		self._items.pop()
 
 
 class City:
@@ -776,6 +784,7 @@ class City:
 		self.numPlotsAcquiredList = LeaderWeightList()
 
 		self._featureProductionValue = 0.0
+		self._productionLastTurnValue = 0.0
 		self._buildQueue = BuildQueue()
 
 		# ai
@@ -3034,6 +3043,9 @@ class City:
 		return False
 
 	def canBuildDistrict(self, districtType: DistrictType, location: Optional[HexPoint] = None, simulation = None):
+		if districtType == DistrictType.none:
+			return False
+
 		if simulation is None:
 			raise Exception('simulation cannot be None')
 
@@ -3053,7 +3065,7 @@ class City:
 				return False
 
 		requiredCivic = districtType.requiredCivic()
-		if requiredTech is not None:
+		if requiredCivic is not None:
 			if not self.player.hasCivic(requiredCivic):
 				return False
 
@@ -3093,6 +3105,9 @@ class City:
 		return int((int(self._populationValue) + 2) / 3)
 
 	def canBuildBuilding(self, buildingType: BuildingType, simulation) -> bool:
+		if buildingType == BuildingType.none:
+			return False
+
 		# at least one required building is needed( if there is one)
 		hasOneRequiredBuilding = False
 		for requiredBuilding in buildingType.requiredBuildings():
@@ -3133,6 +3148,62 @@ class City:
 
 		return True
 
+	def canBuildWonder(self, wonderType: WonderType, location: Optional[HexPoint] = None, simulation = None) -> bool:
+		if wonderType == WonderType.none:
+			return False
+
+		if simulation is None:
+			raise Exception('simulation cannot be None')
+
+		if location is not None:
+			tile = simulation.tileAt(location)
+
+			# can't build wonders in cities, districts or other wonders
+			if tile.isCity() or tile.district() != DistrictType.none or tile.wonder() != WonderType.none:
+				return False
+
+			if tile.workingCity() is not None and tile.workingCity().location != self.location:
+				return False
+
+			# check tile
+			if not wonderType.canBuildOn(location, simulation):
+				return False
+
+		# only major player can build wonders
+		if not self.player.isHuman() and not self.player.isMajorAI():
+			return False
+
+		if self.wonders.hasWonder(wonderType):
+			return False
+
+		requiredTech = wonderType.requiredTech()
+		if requiredTech is not None:
+			if not self.player.hasTech(requiredTech):
+				return False
+
+		requiredCivic = wonderType.requiredCivic()
+		if requiredCivic is not None:
+			if not self.player.hasCivic(requiredCivic):
+				return False
+
+		# check other cities of user (if they are currently building)
+		cities = simulation.citiesOf(self.player)
+
+		# loop thru all cities but skip this city
+		for loopCity in cities:
+			if loopCity.location == self.location:
+				continue
+
+			if loopCity.buildQueue.isBuildingWonder(wonderType):
+				return False
+
+		# has another player built this wonder already?
+		if simulation.alreadyBuiltWonder(wonderType):
+			return False
+
+		return True
+
+
 	def buildingProductionTurnsLeftFor(self, buildingType: BuildingType) -> int:
 		buildingTypeItem = self._buildQueue.buildingOf(buildingType)
 		if buildingTypeItem is not None:
@@ -3141,6 +3212,9 @@ class City:
 		return 100
 
 	def canTrainUnit(self, unitType: UnitType, simulation) -> bool:
+		if unitType == UnitType.none:
+			return False
+
 		# city states cant build settlers or prophets
 		if self.player.isCityState() and (unitType == UnitType.settler or unitType == UnitType.prophet):
 			return False
@@ -3195,3 +3269,92 @@ class City:
 			return int(unitTypeItem.productionLeftFor(self.player) / self.productionLastTurnValue)
 
 		return 100
+
+	def bestLocationForWonder(self, wonderType: WonderType, simulation) -> Optional[HexPoint]:
+		for loopLocation in self.cityCitizens.workingTileLocations():
+			if wonderType.canBuildOn(loopLocation, simulation):
+				return loopLocation
+
+		return None
+
+	def startTrainingUnit(self, unitType: UnitType):
+		self._buildQueue.append(BuildableItem(unitType))
+
+	def startBuildingBuilding(self, buildingType: BuildingType):
+		self._buildQueue.append(BuildableItem(buildingType))
+
+	def startBuildingWonder(self, wonderType: WonderType, location: HexPoint, simulation):
+		tile = simulation.tileAt(location)
+
+		tile.startBuildingWonder(wonderType)
+		simulation.userInterface.refreshTile(tile)
+
+		self._buildQueue.append(BuildableItem(wonderType, location))
+
+		# send gossip
+		simulation.sendGossip(GossipType.wonderStarted, wonder=wonderType, cityName=self.name, player=self.player)
+
+	def startBuildingDistrict(self, districtType: DistrictType, location: HexPoint, simulation):
+		tile = simulation.tileAt(location)
+
+		tile.startBuildingDistrict(districtType)
+		simulation.userInterface.refreshTile(tile)
+
+		self._buildQueue.append(BuildableItem(districtType, location))
+
+
+	def startBuildingProject(self, projectType: ProjectType, location: HexPoint, simulation):
+		self._buildQueue.append(BuildableItem(projectType, location))
+
+	def updateProduction(self, productionPerTurn: float, simulation):
+		currentBuilding = self.currentBuildableItem()
+		if currentBuilding is not None:
+			currentBuilding.addProduction(productionPerTurn)
+
+			if currentBuilding.ready(self.player):
+				self._buildQueue.pop()
+
+				if currentBuilding.buildableType == BuildableType.unit:
+					unitType = currentBuilding.unitType
+					self.trainUnit(unitType, simulation)
+
+				elif currentBuilding.buildableType == BuildableType.building:
+					buildingType = currentBuilding.buildingType
+					self.buildBuilding(buildingType, simulation)
+
+				elif currentBuilding.buildableType == BuildableType.wonder:
+					wonderType = currentBuilding.wonderType,
+					wonderLocation = currentBuilding.location
+					self.buildWonder(wonderType, wonderLocation, simulation)
+
+				elif currentBuilding.buildableType == BuildableType.district:
+					districtType = currentBuilding.districtType,
+					districtLocation = currentBuilding.location
+					self.buildDistrict(districtType, districtLocation, simulation)
+
+				elif currentBuilding.buildableType == BuildableType.project:
+					# NOOP - FIXME
+					pass
+
+				self.player.doUpdateTradeRouteCapacity(simulation)
+
+				if self.player.isHuman():
+					self.player.notifications().addNotification(NotificationType.productionNeeded, cityName=self.name, location=self.location)
+				else:
+					self.cityStrategy.chooseProduction(simulation)
+
+		else:
+			if self.player.isHuman():
+				self.player.notifications().addNotification(NotificationType.productionNeeded, cityName=self.name, location=self.location)
+			else:
+				self.cityStrategy.chooseProduction(simulation)
+
+		self._productionLastTurnValue = productionPerTurn
+
+	def productionWonderType(self) -> Optional[WonderType]:
+		currentProduction = self._buildQueue.peek()
+		if currentProduction is not None:
+			if currentProduction.buildableType == BuildableType.wonder:
+				return currentProduction.wonderType
+
+		return None

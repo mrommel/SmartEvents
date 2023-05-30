@@ -18,7 +18,7 @@ from game.notifications import Notifications, NotificationType, Notification
 from game.playerMechanics import PlayerTechs, PlayerCivics, BuilderTaskingAI, TacticalAI, DiplomacyAI, \
 	DiplomacyRequests, PlayerMoments
 from game.policyCards import PolicyCardType
-from game.religions import PantheonType
+from game.religions import PantheonType, ReligionType
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
@@ -200,6 +200,9 @@ class PlayerReligion:
 	def pantheon(self) -> PantheonType:
 		return PantheonType.none
 
+	def currentReligion(self) -> ReligionType:
+		return ReligionType.none
+
 
 class PlayerTourism:
 	def __init__(self, player):
@@ -298,7 +301,7 @@ class Player:
 		self._citiesFoundValue: int = 0
 
 	def initialize(self):
-		pass
+		self.setupFlavors()
 
 	def doTurn(self, simulation):
 		self.doEurekas(simulation)
@@ -720,7 +723,11 @@ class Player:
 	def hasDedication(self, dedication: DedicationType) -> bool:
 		return dedication in self.currentDedicationsVal
 
-	def hasWonder(self, wonder: WonderType, simulation) -> bool:
+	def hasWonder(self, wonderType: WonderType, simulation) -> bool:
+		for city in simulation.citiesOf(self):
+			if city.hasWonder(wonderType):
+				return True
+
 		return False
 
 	def isSuzerainOf(self, cityState: CityStateType, simulation) -> bool:
@@ -1165,3 +1172,41 @@ class Player:
 	def tradingCapacity(self) -> int:
 		# fixme
 		return 0
+
+	def setupFlavors(self):
+		if not self.personalityFlavors.isEmpty():
+			return
+
+		defaultFlavorValue = 5  # DEFAULT_FLAVOR_VALUE
+
+		if self.isHuman():
+			# Human player, just set all flavors to average(5)
+			for flavorType in list(FlavorType):
+				self.personalityFlavors.set(flavorType, defaultFlavorValue)
+		else:
+			for flavorType in list(FlavorType):
+				leaderFlavor = self.leader.flavor(flavorType)
+
+				# If no Flavor value is set use the Default
+				if leaderFlavor == 0:
+					leaderFlavor = defaultFlavorValue
+
+				self.personalityFlavors.set(flavorType, leaderFlavor)
+
+			# Tweak from default values
+			# Make a random adjustment to each flavor value for this leader so they don't play exactly the same
+			for flavorType in list(FlavorType):
+				currentFlavor = self.personalityFlavors.value(flavorType)
+
+				# Don't modify it if it's zero - ed out in the XML
+				if currentFlavor == 0:
+					continue
+
+				adjustedFlavor = Flavors.adjustedValue(currentFlavor, plusMinus=2, minimum=0, maximum=20)
+				self.personalityFlavors.set(flavorType, adjustedFlavor)
+
+		return
+
+	def hasRetired(self, greatPerson: GreatPersonType) -> bool:
+		# fixme
+		return False

@@ -2,6 +2,7 @@ import unittest
 
 from game.ai.cities import BuildableType
 from game.baseTypes import HandicapType
+from game.buildings import BuildingType
 from game.cities import City
 from game.civilizations import LeaderType
 from game.game import Game
@@ -34,4 +35,5 @@ class TestCityProduction(unittest.TestCase):
 
 		# THEN
 		self.assertNotEqual(city.currentBuildableItem(), None)
-		self.assertNotEqual(city.currentBuildableItem().buildableType == BuildableType.district)
+		self.assertEqual(city.currentBuildableItem().buildableType, BuildableType.building)
+		self.assertEqual(city.currentBuildableItem().buildingType, BuildingType.monument)

@@ -13,3 +13,10 @@ class PantheonType(ExtendedEnum):
 	godOfTheOpenSky = 'godOfTheOpenSky'
 	goddessOfFestivals = 'goddessOfFestivals'
 	initiationRites = 'initiationRites'
+	cityPatronGoddess = 'cityPatronGoddess'
+	godOfTheForge = 'godOfTheForge'
+	monumentToTheGods = 'monumentToTheGods'
+
+
+class ReligionType(ExtendedEnum):
+	none = 'none'

@@ -140,11 +140,11 @@ class PolicyCardType(ExtendedEnum):
 	# freeMarket
 	liberalism = 'liberalism'
 	# wisselbanken
-	# pressGangs
+	pressGangs = 'pressGangs'
 
 	# industrial
 	# nativeConquest
-	# grandeArmee
+	grandeArmee = 'grandeArmee'
 	# nationalIdentity
 	# colonialTaxes
 	# raj
@@ -173,7 +173,7 @@ class PolicyCardType(ExtendedEnum):
 	theirFinestHour = 'theirFinestHour'
 	# arsenalOfDemocracy
 	newDeal = 'newDeal'
-	# lightningWarfare
+	lightningWarfare = 'lightningWarfare'
 	thirdAlternative = 'thirdAlternative'
 	# martialLaw
 	# gunboatDiplomacy
@@ -184,11 +184,11 @@ class PolicyCardType(ExtendedEnum):
 
 	# atomic
 	# cryptography
-	# internationalWaters
+	internationalWaters = 'internationalWaters'
 	# containment
 	# heritageTourism
 	# sportsMedia
-	# militaryFirst
+	militaryFirst = 'militaryFirst'
 	# satelliteBroadcasts
 	# musicCensorship
 	integratedSpaceCell = 'integratedSpaceCell'
@@ -886,11 +886,31 @@ class PolicyCardType(ExtendedEnum):
 				flavors=[]
 			)
 		# wisselbanken
-		# pressGangs
+		elif self == PolicyCardType.pressGangs:
+			# https://civilization.fandom.com/wiki/Press_Gangs_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_PRESS_GANGS_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_PRESS_GANGS_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.exploration,
+				obsoleteCivic=CivicType.coldWar,
+				replace=[PolicyCardType.maritimeIndustries],
+				flavors=[]
+			)
 
 		# industrial
 		# nativeConquest
-		# grandeArmee
+		elif self == PolicyCardType.grandeArmee:
+			# https://civilization.fandom.com/wiki/Grande_Arm%C3%A9e_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_GRANDE_ARMEE_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_GRANDE_ARMEE_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.nationalism,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.militaryFirst],
+				flavors=[]
+			)
 		# nationalIdentity
 		# colonialTaxes
 		# raj
@@ -982,7 +1002,17 @@ class PolicyCardType(ExtendedEnum):
 				],
 				flavors=[]
 			)
-		# lightningWarfare
+		elif self == PolicyCardType.lightningWarfare:
+			# https://civilization.fandom.com/wiki/Lightning_Warfare_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_LIGHTNING_WARFARE_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_LIGHTNING_WARFARE_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.totalitarianism,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.chivalry, PolicyCardType.maneuver],
+				flavors=[]
+			)
 		elif self == PolicyCardType.thirdAlternative:
 			# https://civilization.fandom.com/wiki/Third_Alternative_(Civ6)
 			return PolicyCardTypeData(
@@ -1013,11 +1043,31 @@ class PolicyCardType(ExtendedEnum):
 
 		# atomic
 		# cryptography
-		# internationalWaters
+		elif self == PolicyCardType.internationalWaters:
+			# https://civilization.fandom.com/wiki/International_Waters_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_INTERNATIONAL_WATERS_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_INTERNATIONAL_WATERS_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.coldWar,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.maritimeIndustries, PolicyCardType.pressGangs],
+				flavors=[]
+			)
 		# containment
 		# heritageTourism
 		# sportsMedia
-		# militaryFirst
+		elif self == PolicyCardType.militaryFirst:
+			# https://civilization.fandom.com/wiki/Military_First_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_MILITARY_FIRST_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_MILITARY_FIRST_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.rapidDeployment,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.grandeArmee],
+				flavors=[]
+			)
 		# satelliteBroadcasts
 		# musicCensorship
 		elif self == PolicyCardType.integratedSpaceCell:

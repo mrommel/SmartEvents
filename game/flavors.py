@@ -1,3 +1,5 @@
+import random
+
 from utils.base import ExtendedEnum
 
 
@@ -38,6 +40,9 @@ class Flavor:
         self.flavorType = flavorType
         self.value = value
 
+        if isinstance(value, FlavorType):
+            raise Exception('wrong type')
+
     def __str__(self) -> str:
         return f'Flavor({self.flavorType}, {self.value})'
 
@@ -56,7 +61,7 @@ class Flavors:
         self._items = []
 
     def set(self, flavorType: FlavorType, value: int):
-        item = next((flavor for flavor in self._items if flavor.flavorType == flavorType), None)
+        item = next(filter(lambda flavor: flavor.flavorType == flavorType, self._items), None)
 
         if item is not None:
             item.value = value
@@ -64,7 +69,8 @@ class Flavors:
             self._items.append(Flavor(flavorType, value))
 
     def value(self, flavorType: FlavorType):
-        item = next((flavor for flavor in self._items if flavor.flavorType == flavorType), None)
+        item = next(filter(lambda flavor: flavor.flavorType == flavorType, self._items), None)
+        # (flavor for flavor in  if flavor.flavorType == flavorType)
 
         if item is not None:
             return item.value
@@ -96,3 +102,16 @@ class Flavors:
             item.value += value
         else:
             self._items.append(Flavor(flavorType, value))
+
+    @classmethod
+    def adjustedValue(cls, originalValue: int, plusMinus: int, minimum: int, maximum: int):
+        """Add a random plus/minus to an integer (but keep it in range)"""
+        adjust = random.randint(0, plusMinus * 2 + 1)
+        rtnValue = originalValue + adjust - plusMinus
+
+        if rtnValue < minimum:
+            rtnValue = minimum
+        elif rtnValue > maximum:
+            rtnValue = maximum
+
+        return rtnValue

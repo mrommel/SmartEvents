@@ -161,6 +161,9 @@ class BuildingType(ExtendedEnum):
 	def maintenanceCost(self) -> float:
 		return self._data().maintenanceCost
 
+	def productionCost(self) -> float:
+		return self._data().productionCost
+
 	def _flavors(self) -> [Flavor]:
 		return self._data().flavors
 

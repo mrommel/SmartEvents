@@ -461,13 +461,15 @@ class DistrictType(ExtendedEnum):
 		elif self == DistrictType.commercialHub:
 			return tile.isLand()
 		elif self == DistrictType.harbor:
-			return tile.terrain() == TerrainType.shore  # must be built on water adjacent to land
+			# must be built on water adjacent to land
+			return tile.terrain() == TerrainType.shore
 		elif self == DistrictType.entertainmentComplex:
 			return tile.isLand()
 		elif self == DistrictType.industrialZone:
 			return tile.isLand()
 		elif self == DistrictType.waterPark:
-			return tile.terrain() == TerrainType.shore or tile.hasFeature(FeatureType.lake)  # must be built on a Coast or Lake tile adjacent to land.
+			# must be built on a Coast or Lake tile adjacent to land.
+			return tile.terrain() == TerrainType.shore or tile.hasFeature(FeatureType.lake)
 		elif self == DistrictType.aqueduct:
 			return DistrictType.canBuildAqueductOn(tile.point, simulation)
 		elif self == DistrictType.neighborhood:

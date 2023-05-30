@@ -1,10 +1,15 @@
 from typing import Optional
 
+from game.buildings import BuildingType
+from game.districts import DistrictType
 from game.flavors import Flavor, FlavorType
 from game.greatworks import GreatWorkSlotType
+from game.religions import ReligionType
 from game.types import CivicType, TechType, EraType
-from map.types import Yields
-from utils.base import ExtendedEnum
+from map.base import HexPoint
+from map.improvements import ImprovementType
+from map.types import Yields, FeatureType, TerrainType, ResourceType
+from utils.base import ExtendedEnum, InvalidEnumError
 
 
 class WonderTypeData:
@@ -50,11 +55,49 @@ class WonderType(ExtendedEnum):
 	machuPicchu = 'machuPicchu'
 	statueOfZeus = 'statueOfZeus'
 
-	# ???
-	hueyTeocalli = 'hueyTeocalli'
-	stBasilsCathedral = 'stBasilsCathedral'
+	# medieval
+	alhambra = 'alhambra'
 	angkorWat = 'angkorWat'
 	chichenItza = 'chichenItza'
+	hagiaSophia = 'hagiaSophia'
+	hueyTeocalli = 'hueyTeocalli'
+	kilwaKisiwani = 'kilwaKisiwani'
+	kotokuIn = 'kotokuIn'
+	meenakshiTemple = 'meenakshiTemple'
+	montStMichel = 'montStMichel'
+	universityOfSankore = 'universityOfSankore'
+
+	# renaissance
+	casaDeContratacion = 'casaDeContratacion'
+	forbiddenCity = 'forbiddenCity'
+	greatZimbabwe = 'greatZimbabwe'
+	potalaPalace = 'potalaPalace'
+	stBasilsCathedral = 'stBasilsCathedral'
+	tajMahal = 'tajMahal'
+	torreDeBelem = 'torreDeBelem'
+	venetianArsenal = 'venetianArsenal'
+
+	# industrial
+	# Big Ben
+	# Bolshoi Theatre
+	# Hermitage
+	# Országház
+	# Oxford University
+	# Panama Canal
+	# Ruhr Valley
+	# Statue of Liberty
+
+	# modern
+	# Broadway
+	# Cristo Redentor
+	# Eiffel Tower
+	# Golden Gate Bridge
+
+	# atomic
+	# Amundsen - Scott Research Station
+	# Biosphère
+	# Estádio do Maracanã
+	# Sydney Opera House
 
 	def name(self) -> str:
 		return self._data().name
@@ -309,7 +352,7 @@ class WonderType(ExtendedEnum):
 				productionCost=400,
 				requiredTech=None,
 				requiredCivic=CivicType.gamesAndRecreation,
-				amenities=0.0, # is handled differently !
+				amenities=0.0,  # is handled differently !
 				yields=Yields(food=0.0, production=0.0, gold=0.0, culture=2.0),
 				slots=[],
 				flavors=[
@@ -562,4 +605,841 @@ class WonderType(ExtendedEnum):
 				]
 			)
 
+		# medieval
+		elif self == WonderType.alhambra:
+			# https://civilization.fandom.com/wiki/Alhambra_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_ALHAMBRA_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_ALHAMBRA_EFFECT1",
+					"TXT_KEY_WONDER_ALHAMBRA_EFFECT2",
+					"TXT_KEY_WONDER_ALHAMBRA_EFFECT3",
+					"TXT_KEY_WONDER_ALHAMBRA_EFFECT4"  #
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=TechType.castles,
+				requiredCivic=None,
+				amenities=2,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.greatPeople, value=8),
+					Flavor(FlavorType.cityDefense, value=5)
+				]
+			)
+		elif self == WonderType.angkorWat:
+			# https://civilization.fandom.com/wiki/Angkor_Wat_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_ANGKOR_WAT_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_ANGKOR_WAT_EFFECT1",
+					"TXT_KEY_WONDER_ANGKOR_WAT_EFFECT2",
+					"TXT_KEY_WONDER_ANGKOR_WAT_EFFECT3"
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=None,
+				requiredCivic=CivicType.medievalFaires,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0, faith=2),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.growth, value=10),
+					Flavor(FlavorType.religion, value=2)
+				]
+			)
+		elif self == WonderType.chichenItza:
+			# https://civilization.fandom.com/wiki/Chichen_Itza_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_CHICHEN_ITZA_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_CHICHEN_ITZA_EFFECT1"
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=None,
+				requiredCivic=CivicType.guilds,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.production, value=4)
+				]
+			)
+		elif self == WonderType.hagiaSophia:
+			# https://civilization.fandom.com/wiki/Hagia_Sophia_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_HAGIA_SOPHIA_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_HAGIA_SOPHIA_EFFECT1",
+					"TXT_KEY_WONDER_HAGIA_SOPHIA_EFFECT2"  #
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=TechType.buttress,
+				requiredCivic=None,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0, faith=4),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.religion, value=10)
+				]
+			)
+		elif self == WonderType.hueyTeocalli:
+			# https://civilization.fandom.com/wiki/Huey_Teocalli_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_HUEY_TEOCALLI_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_HUEY_TEOCALLI_EFFECT1",
+					"TXT_KEY_WONDER_HUEY_TEOCALLI_EFFECT2"
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=TechType.militaryTactics,
+				requiredCivic=None,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.growth, value=7)
+				]
+			)
+		elif self == WonderType.kilwaKisiwani:
+			# https://civilization.fandom.com/wiki/Kilwa_Kisiwani_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_KILWA_KISIWANI_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_KILWA_KISIWANI_EFFECT1",  #
+					"TXT_KEY_WONDER_KILWA_KISIWANI_EFFECT2"  #
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=TechType.machinery,
+				requiredCivic=None,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.diplomacy, value=4)
+				]
+			)
+		elif self == WonderType.kotokuIn:
+			# https://civilization.fandom.com/wiki/Kotoku-in_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_KOTOKU_IN_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_KOTOKU_IN_EFFECT1",
+					"TXT_KEY_WONDER_KOTOKU_IN_EFFECT2"  #
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=None,
+				requiredCivic=CivicType.divineRight,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.religion, value=10)
+				]
+			)
+		elif self == WonderType.meenakshiTemple:
+			# https://civilization.fandom.com/wiki/Meenakshi_Temple_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_MEENAKSHI_TEMPLE_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_MEENAKSHI_TEMPLE_EFFECT1",
+					"TXT_KEY_WONDER_MEENAKSHI_TEMPLE_EFFECT2",  #
+					"TXT_KEY_WONDER_MEENAKSHI_TEMPLE_EFFECT3",  #
+					"TXT_KEY_WONDER_MEENAKSHI_TEMPLE_EFFECT4"  #
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=None,
+				requiredCivic=CivicType.civilService,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0, faith=3),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.religion, value=10)
+				]
+			)
+		elif self == WonderType.montStMichel:
+			# https://civilization.fandom.com/wiki/Mont_St._Michel_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_MONT_ST_MICHEL_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_MONT_ST_MICHEL_EFFECT1",
+					"TXT_KEY_WONDER_MONT_ST_MICHEL_EFFECT2",
+					"TXT_KEY_WONDER_MONT_ST_MICHEL_EFFECT3"  #
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=None,
+				requiredCivic=CivicType.divineRight,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0, faith=2),
+				slots=[GreatWorkSlotType.relic, GreatWorkSlotType.relic],
+				flavors=[
+					Flavor(FlavorType.religion, value=10)
+				]
+			)
+		elif self == WonderType.universityOfSankore:
+			# https://civilization.fandom.com/wiki/University_of_Sankore_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_UNIVERSITY_OF_SANKORE_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_UNIVERSITY_OF_SANKORE_EFFECT1",
+					"TXT_KEY_WONDER_UNIVERSITY_OF_SANKORE_EFFECT2",
+					"TXT_KEY_WONDER_UNIVERSITY_OF_SANKORE_EFFECT3",  #
+					"TXT_KEY_WONDER_UNIVERSITY_OF_SANKORE_EFFECT4",  #
+					"TXT_KEY_WONDER_UNIVERSITY_OF_SANKORE_EFFECT5",  #
+					"TXT_KEY_WONDER_UNIVERSITY_OF_SANKORE_EFFECT6"  #
+				],
+				era=EraType.medieval,
+				productionCost=710,
+				requiredTech=TechType.education,
+				requiredCivic=None,
+				amenities=0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0, science=3, faith=1),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.science, value=8),
+					Flavor(FlavorType.gold, value=3)
+				]
+			)
+
+		# renaissance
+		elif self == WonderType.casaDeContratacion:
+			# https://civilization.fandom.com/wiki/Casa_de_Contrataci%C3%B3n_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_CASA_DE_CONTRATACIO_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_CASA_DE_CONTRATACIO_EFFECT1",  #
+					"TXT_KEY_WONDER_CASA_DE_CONTRATACIO_EFFECT2",  #
+					"TXT_KEY_WONDER_CASA_DE_CONTRATACIO_EFFECT3"  #
+				],
+				era=EraType.renaissance,
+				productionCost=920,
+				requiredTech=TechType.cartography,
+				requiredCivic=None,
+				amenities=0.0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.greatPeople, value=8)
+				]
+			)
+		elif self == WonderType.forbiddenCity:
+			# https://civilization.fandom.com/wiki/Forbidden_City_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_FORBIDDEN_CITY_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_FORBIDDEN_CITY_EFFECT1",  #
+					"TXT_KEY_WONDER_FORBIDDEN_CITY_EFFECT2"
+				],
+				era=EraType.renaissance,
+				productionCost=920,
+				requiredTech=TechType.printing,
+				requiredCivic=None,
+				amenities=0.0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0, culture=5.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.culture, value=8)
+				]
+			)
+		elif self == WonderType.greatZimbabwe:
+			# https://civilization.fandom.com/wiki/Great_Zimbabwe_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_GREAT_ZIMBABWE_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_GREAT_ZIMBABWE_EFFECT1",  #
+					"TXT_KEY_WONDER_GREAT_ZIMBABWE_EFFECT2",
+					"TXT_KEY_WONDER_GREAT_ZIMBABWE_EFFECT3",  #
+					"TXT_KEY_WONDER_GREAT_ZIMBABWE_EFFECT4"  #
+				],
+				era=EraType.renaissance,
+				productionCost=920,
+				requiredTech=TechType.banking,
+				requiredCivic=None,
+				amenities=0.0,
+				yields=Yields(food=0.0, production=0.0, gold=5.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.gold, value=8)
+				]
+			)
+		elif self == WonderType.potalaPalace:
+			# https://civilization.fandom.com/wiki/Potala_Palace_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_POTALA_PALACE_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_POTALA_PALACE_EFFECT1",  #
+					"TXT_KEY_WONDER_POTALA_PALACE_EFFECT2",
+					"TXT_KEY_WONDER_POTALA_PALACE_EFFECT3",
+					"TXT_KEY_WONDER_POTALA_PALACE_EFFECT4"  #
+				],
+				era=EraType.renaissance,
+				productionCost=1060,
+				requiredTech=TechType.astronomy,
+				requiredCivic=None,
+				amenities=0.0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0, culture=2.0, faith=3.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.diplomacy, value=7),
+					Flavor(FlavorType.culture, value=3),
+					Flavor(FlavorType.religion, value=3)
+				]
+			)
+		elif self == WonderType.stBasilsCathedral:
+			# https://civilization.fandom.com/wiki/St._Basil%27s_Cathedral_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_ST_BASILS_CATHEDRAL_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_ST_BASILS_CATHEDRAL_EFFECT1",
+					"TXT_KEY_WONDER_ST_BASILS_CATHEDRAL_EFFECT2",  #
+					"TXT_KEY_WONDER_ST_BASILS_CATHEDRAL_EFFECT3"  #
+				],
+				era=EraType.renaissance,
+				productionCost=920,
+				requiredTech=None,
+				requiredCivic=CivicType.reformedChurch,
+				amenities=0.0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[GreatWorkSlotType.relic, GreatWorkSlotType.relic, GreatWorkSlotType.relic],
+				flavors=[
+					Flavor(FlavorType.religion, value=10)
+				]
+			)
+		elif self == WonderType.tajMahal:
+			# https://civilization.fandom.com/wiki/Taj_Mahal_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_TAJ_MAHAL_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_TAJ_MAHAL_EFFECT1"  #
+				],
+				era=EraType.renaissance,
+				productionCost=920,
+				requiredTech=None,
+				requiredCivic=CivicType.humanism,
+				amenities=0.0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.religion, value=2)
+				]
+			)
+		elif self == WonderType.torreDeBelem:
+			# https://civilization.fandom.com/wiki/Torre_de_Bel%C3%A9m_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_TORRE_DE_BELEM_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_TORRE_DE_BELEM_EFFECT1",  #
+					"TXT_KEY_WONDER_TORRE_DE_BELEM_EFFECT2",  #
+					"TXT_KEY_WONDER_TORRE_DE_BELEM_EFFECT3",
+					"TXT_KEY_WONDER_TORRE_DE_BELEM_EFFECT4"  #
+				],
+				era=EraType.renaissance,
+				productionCost=920,
+				requiredTech=None,
+				requiredCivic=CivicType.mercantilism,
+				amenities=0.0,
+				yields=Yields(food=0.0, production=0.0, gold=5.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.gold, value=8)
+				]
+			)
+		elif self == WonderType.venetianArsenal:
+			# https://civilization.fandom.com/wiki/Venetian_Arsenal_(Civ6)
+			return WonderTypeData(
+				name="TXT_KEY_WONDER_VENETIAN_ARSENAL_TITLE",
+				effects=[
+					"TXT_KEY_WONDER_VENETIAN_ARSENAL_EFFECT1",  #
+					"TXT_KEY_WONDER_VENETIAN_ARSENAL_EFFECT2"  #
+				],
+				era=EraType.renaissance,
+				productionCost=920,
+				requiredTech=TechType.massProduction,
+				requiredCivic=None,
+				amenities=0.0,
+				yields=Yields(food=0.0, production=0.0, gold=0.0),
+				slots=[],
+				flavors=[
+					Flavor(FlavorType.navalGrowth, value=8),
+					Flavor(FlavorType.naval, value=3)
+				]
+			)
+
 		raise AttributeError(f'cant get data for wonder {self}')
+
+	def canBuildOn(self, location: HexPoint, simulation):
+		tile = simulation.tileAt(location)
+		hasReligion = False if tile.owner() is None else tile.owner().religion.currentReligion() != ReligionType.none
+
+		if self == WonderType.none:
+			return False
+
+		elif self == WonderType.greatBath:
+			# It must be built on Floodplains.
+			return tile.hasFeature(FeatureType.floodplains)
+
+		elif self == WonderType.etemenanki:
+			# Must be built on Floodplains or Marsh.
+			return tile.hasFeature(FeatureType.floodplains) or tile.hasFeature(FeatureType.marsh)
+
+		elif self == WonderType.pyramids:
+			# Must be built on Desert(including Floodplains) without Hills.
+			if not tile.isLand() or tile.hasHills():
+				return False
+
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			return tile.terrain() == TerrainType.desert or tile.hasFeature(FeatureType.floodplains)
+
+		elif self == WonderType.hangingGardens:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			# Must be built next to a River.
+			return simulation.riverAt(location)
+
+		elif self == WonderType.oracle:
+			# Must be built on Hills.
+			if not tile.isLand() or not tile.hasHills():
+				return False
+
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			return True
+
+		elif self == WonderType.stonehenge:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			# Must be built on flat land adjacent to Stone.
+			if not tile.isLand() or tile.hasHills():
+				return False
+
+			return self.adjacentToResource(ResourceType.stone, location, simulation)
+
+		elif self == WonderType.templeOfArtemis:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			# Must be built next to a Camp.
+			return self.adjacentToImprovement(ImprovementType.camp, location, simulation)
+
+		elif self == WonderType.greatLighthouse:
+			# Must be built on the Coast and adjacent to a Harbor district with a Lighthouse.
+			if not tile.terrain() == TerrainType.shore:
+				return False
+
+			if not self.adjacentToBuilding(BuildingType.lighthouse, location, simulation):
+				return False
+
+			return self.adjacentToDistrict(DistrictType.harbor, location, simulation)
+
+		elif self == WonderType.greatLibrary:
+			# Must be built on flat land adjacent to a Campus with a Library.
+			if not tile.isLand() or tile.hasHills():
+				return False
+
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			if not self.adjacentToBuilding(BuildingType.library, location, simulation):
+				return False
+
+			return self.adjacentToDistrict(DistrictType.campus, location, simulation)
+
+		elif self == WonderType.apadana:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			# Must be built adjacent to a Capital.
+			for player in simulation.players:
+				for city in simulation.citiesOf(player):
+					if city.isCapital() and location.isNeighborOf(city.location):
+						return True
+
+			return False
+
+		elif self == WonderType.colosseum:
+			# Must be built on flat land adjacent to an Entertainment Complex district with an Arena.
+			if not tile.isLand() or tile.hasHills():
+				return False
+
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			if not self.adjacentToBuilding(BuildingType.arena, location, simulation):
+				return False
+
+			return self.adjacentToDistrict(DistrictType.entertainmentComplex, location, simulation)
+
+		elif self == WonderType.colossus:
+			# Must be built on Coast and adjacent to a Harbor district.
+			if not tile.terrain() == TerrainType.shore:
+				return False
+
+			return self.adjacentToDistrict(DistrictType.harbor, location, simulation)
+
+		elif self == WonderType.jebelBarkal:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			# Must be built on a Desert Hills tile.
+			return tile.terrain() == TerrainType.desert
+
+		elif self == WonderType.mausoleumAtHalicarnassus:
+			# Must be built on a coastal tile adjacent to a Harbor district.
+			if not simulation.isCoastal(location):
+				return False
+
+			return self.adjacentToDistrict(DistrictType.harbor, location, simulation)
+
+		elif self == WonderType.mahabodhiTemple:
+			# Must be built on Woods adjacent to a Holy Site district with a Temple,
+			# and player must have founded a religion.
+			if not tile.hasFeature(FeatureType.forest):
+				return False
+
+			if not hasReligion:
+				return False
+
+			if not self.adjacentToBuilding(BuildingType.temple, location, simulation):
+				return False
+
+			return self.adjacentToDistrict(DistrictType.holySite, location, simulation)
+
+		elif self == WonderType.petra:
+			# Must be built on Desert or Floodplains without Hills.
+			if not tile.isLand() or tile.hasHills():
+				return False
+
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			return tile.terrain() == TerrainType.desert or tile.hasFeature(FeatureType.floodplains)
+
+		elif self == WonderType.terracottaArmy:
+			# Must be built on flat Grassland or Plains adjacent to an Encampment district with a Barracks or Stable.
+			if not tile.isLand() or tile.hasHills():
+				return False
+
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			if tile.terrain() != TerrainType.grass and tile.terrain() != TerrainType.plains:
+				return False
+
+			if not self.adjacentToBuilding(BuildingType.barracks, location, simulation) and \
+				not self.adjacentToBuilding(BuildingType.stable, location, simulation):
+				return False
+
+			return self.adjacentToDistrict(DistrictType.encampment, location, simulation)
+
+		elif self == WonderType.machuPicchu:
+			# Must be built on a Mountain tile that does not contain a Volcano.
+			return tile.hasFeature(FeatureType.mountains)
+
+		elif self == WonderType.statueOfZeus:
+			# Must be built on flat land adjacent to an Encampment with a Barracks.
+			if not tile.isLand() or tile.hasHills():
+				return False
+			
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			if not self.adjacentToBuilding(BuildingType.barracks, location, simulation):
+				return False
+			
+			return self.adjacentToDistrict(DistrictType.encampment, location, simulation)
+
+		elif self == WonderType.alhambra:
+			# Must be built on Hills adjacent to an Encampment district.
+			if not tile.hasHills():
+				return False
+
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			return self.adjacentToDistrict(DistrictType.encampment, location, simulation)
+
+		elif self == WonderType.angkorWat:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			# Must be built adjacent to an Aqueduct district.
+			return self.adjacentToDistrict(DistrictType.aqueduct, location, simulation)
+
+		elif self == WonderType.chichenItza:
+			# no  mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			# Must be built on Rainforest.
+			return tile.hasFeature(FeatureType.rainforest)
+
+		elif self == WonderType.hagiaSophia:
+			# Must be built on flat land adjacent to a Holy Site district, and player must have founded a religion.
+			if tile.hasHills() or not tile.isLand():
+				return False
+
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+
+			if not hasReligion:
+				return False
+
+			return self.adjacentToDistrict(DistrictType.holySite, location, simulation)
+
+		elif self == WonderType.hueyTeocalli:
+			# Must be built on a Lake tile adjacent to land.
+			if not tile.hasFeature(FeatureType.lake):
+				return False
+			
+			nextToLand: bool = False
+			
+			for neighbor in location.neighbors():
+				neighborTile = simulation.tileAt(neighbor)
+			
+				if neighborTile.isLand():
+					nextToLand = True
+			
+			return nextToLand
+			
+		elif self == WonderType.kilwaKisiwani:
+			# Must be built on a flat tile adjacent to a Coast.
+			if tile.hasHills() or not tile.isLand():
+				return False
+			
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			nextToCoast: bool = False
+			
+			for neighbor in location.neighbors():
+				neighborTile = simulation.tileAt(neighbor)
+			
+				if neighborTile.isWater():
+					nextToCoast = True
+			
+			return nextToCoast
+
+		elif self == WonderType.kotokuIn:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			# Must be built adjacent to a Holy Site with a Temple.
+			if not self.adjacentToDistrict(DistrictType.holySite, location, simulation):
+				return False
+			
+			if not self.adjacentToBuilding(BuildingType.temple, location, simulation):
+				return False
+			
+			return True
+
+		elif self == WonderType.meenakshiTemple:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			# Must be built adjacent to a Holy Site district, and player must have founded a religion.
+			if not hasReligion:
+				return False
+			
+			return self.adjacentToDistrict(DistrictType.holySite, location, simulation)
+
+		elif self == WonderType.montStMichel:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			# Must be built on Floodplains or Marsh.
+			if not tile.hasFeature(FeatureType.floodplains) and not tile.hasFeature(FeatureType.marsh):
+				return False
+			
+			return True
+
+		elif self == WonderType.universityOfSankore:
+			# Must be built on a Desert or Desert Hill adjacent to a Campus with a University.
+			if not tile.terrain() == TerrainType.desert:
+				return False
+			
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			if not self.adjacentToDistrict(DistrictType.campus, location, simulation):
+				return False
+			
+			if not self.adjacentToBuilding(BuildingType.university, location, simulation):
+				return False
+			
+			return True
+
+		elif self == WonderType.casaDeContratacion:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			# Must be built adjacent to a Government Plaza.
+			return self.adjacentToDistrict(DistrictType.governmentPlaza, location, simulation)
+
+		elif self == WonderType.forbiddenCity:
+			# Must be built on flat land adjacent to City Center.
+			if not tile.isLand() or tile.hasHills():
+				return False
+			
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			return self.adjacentToDistrict(DistrictType.cityCenter, location, simulation)
+
+		elif self == WonderType.greatZimbabwe:
+			# Must be built adjacent to Cattle and a Commercial Hub district with a Market.
+			if not self.adjacentToResource(ResourceType.cattle, location, simulation):
+				return False
+			
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			if not self.adjacentToDistrict(DistrictType.commercialHub, location, simulation):
+				return False
+			
+			if not self.adjacentToBuilding(BuildingType.market, location, simulation):
+				return False
+			
+			return True
+
+		elif self == WonderType.potalaPalace:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			# Must be built on a Hill adjacent to a Mountain.
+			if not tile.hasHills():
+				return False
+			
+			return self.adjacentToFeature(FeatureType.mountains, location, simulation)
+
+		elif self == WonderType.stBasilsCathedral:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			# Must be built adjacent to a City Center
+			return self.adjacentToDistrict(DistrictType.cityCenter, location, simulation)
+
+		elif self == WonderType.tajMahal:
+			# no mountains
+			if tile.hasFeature(FeatureType.mountains):
+				return False
+			
+			# Must be built next to a River.
+			return simulation.riverAt(location)
+
+		elif self == WonderType.torreDeBelem:
+			# It must be built on Coast adjacent to land and a Harbor. It cannot be built on a Lake.
+			if not tile.isWater():
+				return False
+
+			return self.adjacentToDistrict(DistrictType.harbor, location, simulation)
+
+		elif self == WonderType.venetianArsenal:
+			# It must be built on Coast adjacent to an Industrial Zone. It cannot be built on a Lake.
+			if not tile.isWater():
+				return False
+			
+			return self.adjacentToDistrict(DistrictType.industrialZone, location, simulation)
+			
+		raise InvalidEnumError(self)
+
+	def adjacentToResource(self, resource: ResourceType, location: HexPoint, simulation) -> bool:
+		nextToResource: bool = False
+
+		for neighbor in location.neighbors():
+			neighborTile = simulation.tileAt(neighbor)
+			player = neighborTile.owner()
+
+			if player is None:
+				continue
+
+			if neighborTile.hasResource(resource, player):
+				nextToResource = True
+
+		return nextToResource
+
+	def adjacentToBuilding(self, building: BuildingType, location: HexPoint, simulation) -> bool:
+		# fixme - buildings are in districts and not in city centers
+		nextToBuilding: bool = False
+
+		for neighbor in location.neighbors():
+			neighborTile = simulation.tileAt(neighbor)
+			city = neighborTile.workingCity()
+
+			if city is None:
+				continue
+
+			if city.hasBuilding(building):
+				nextToBuilding = True
+
+		return nextToBuilding
+
+	def adjacentToDistrict(self, district: DistrictType, location: HexPoint, simulation) -> bool:
+		nextToDistrict: bool = False
+
+		for neighbor in location.neighbors():
+			neighborTile = simulation.tileAt(neighbor)
+
+			if neighborTile.hasDistrict(district):
+				nextToDistrict = True
+
+		return nextToDistrict
+
+	def adjacentToImprovement(self, improvement: ImprovementType, location: HexPoint, simulation) -> bool:
+		nextToImprovement: bool = False
+
+		for neighbor in location.neighbors():
+			neighborTile = simulation.tileAt(neighbor)
+
+			if neighborTile.hasImprovement(improvement):
+				nextToImprovement = True
+
+		return nextToImprovement
+
+	def adjacentToFeature(self, feature: FeatureType, location: HexPoint, simulation) -> bool:
+		nextToFeature: bool = False
+
+		for neighbor in location.neighbors():
+			neighborTile = simulation.tileAt(neighbor)
+
+			if neighborTile.hasFeature(feature):
+				nextToFeature = True
+
+		return nextToFeature

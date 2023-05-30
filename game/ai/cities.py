@@ -131,6 +131,9 @@ class BuildingProductionAI:
 
 	def initWeights(self):
 		for flavorType in list(FlavorType):
+			if flavorType == FlavorType.none:
+				continue
+
 			leaderFlavor = self.player.personalAndGrandStrategyFlavor(flavorType)
 
 			for buildingType in list(BuildingType):
@@ -178,12 +181,20 @@ class UnitProductionAI:
 		return self.unitWeights.weight(unitType)
 
 
+class WonderWeights(WeightedBaseList):
+	def __init__(self):
+		super().__init__()
+		for wonderType in list(WonderType):
+			self.addWeight(0.0, wonderType)
+
+
 class WonderProductionAI:
 	def __init__(self, player):
 		self.player = player
+		self.wonderWeights = WonderWeights()
 
 	def weight(self, wonderType: WonderType) -> float:
-		pass
+		return self.wonderWeights.weight(wonderType)
 
 
 class BuildableItemWeights(WeightedBaseList):
@@ -209,6 +220,7 @@ class BuildableItem:
 			self.wonderType = None
 			self.projectType = None
 			self.location = location
+			self.production = 0.0
 		elif isinstance(item, BuildingType):
 			self.buildableType = BuildableType.building
 			self.districtType = None
@@ -217,6 +229,7 @@ class BuildableItem:
 			self.wonderType = None
 			self.projectType = None
 			self.location = None  # buildings don't need a location
+			self.production = 0.0
 		elif isinstance(item, UnitType):
 			self.buildableType = BuildableType.unit
 			self.districtType = None
@@ -225,22 +238,83 @@ class BuildableItem:
 			self.wonderType = None
 			self.projectType = None
 			self.location = None  # buildings don't need a location
+			self.production = 0.0
+		elif isinstance(item, WonderType):
+			self.buildableType = BuildableType.wonder
+			self.districtType = None
+			self.buildingType = None
+			self.unitType = None
+			self.wonderType = item
+			self.projectType = None
+			self.location = location
+			self.production = 0.0
+		elif isinstance(item, ProjectType):
+			self.buildableType = BuildableType.project
+			self.districtType = None
+			self.buildingType = None
+			self.unitType = None
+			self.wonderType = None
+			self.projectType = item
+			self.location = location
+			self.production = 0.0
 		else:
 			raise Exception(f'unsupported buildable type: {type(item)}')
+
+	def __repr__(self):
+		if self.buildableType == BuildableType.district:
+			return f'BuildableItem(BuildableType.district, {self.districtType}, {self.location})'
+		elif self.buildableType == BuildableType.building:
+			return f'BuildableItem(BuildableType.building, {self.buildingType})'
+		elif self.buildableType == BuildableType.unit:
+			return f'BuildableItem(BuildableType.unit, {self.unitType})'
+		elif self.buildableType == BuildableType.wonder:
+			return f'BuildableItem(BuildableType.wonder, {self.wonderType}, {self.location})'
+		elif self.buildableType == BuildableType.project:
+			return f'BuildableItem(BuildableType.project, {self.projectType})'
+
+		raise Exception(f'unsupported buildable type: {self.buildableType}')
+
+	def addProduction(self, productionDelta: float):
+		self.production += productionDelta
+
+	def productionLeft(self, player) -> float:
+
+		if self.buildableType == BuildableType.unit:
+			unitType = self.unitType
+			return float(player.productionCostOfUnit(unitType)) - self.production
+
+		elif self.buildableType == BuildableType.building:
+			buildingType = self.buildingType
+			return float(buildingType.productionCost()) - self.production
+
+		elif self.buildableType == BuildableType.wonder:
+			wonderType = self.wonderType
+			return float(wonderType.productionCost()) - self.production
+
+		elif self.buildableType == BuildableType.district:
+			districtType = self.districtType
+			return float(districtType.productionCost()) - self.production
+
+		elif self.buildableType == BuildableType.project:
+			projectType = self.projectType
+			return float(projectType.productionCost()) - self.production
+
+	def ready(self, player) -> bool:
+		return self.productionLeft(player) <= 0
 
 
 class CityStrategyAI:
 	"""
-		 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-		  CLASS:      CvCityStrategyAI
-		 !  brief        Manages operations for a single city in the game world
+		++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		CLASS:      CvCityStrategyAI
+		!  brief        Manages operations for a single city in the game world
 
-		 !  Key Attributes:
-		 !  - One instance for each city
-		 !  - Receives instructions from other AI components (usually as flavor changes) to
-		 !    specialize, switch production, etc.
-		 !  - Oversees both the city governor AI and the AI managing what the city is building
-		 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		!  Key Attributes:
+		!  - One instance for each city
+		!  - Receives instructions from other AI components (usually as flavor changes) to
+		!    specialize, switch production, etc.
+		!  - Oversees both the city governor AI and the AI managing what the city is building
+		++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	"""
 
 	def __init__(self, city):
@@ -364,9 +438,15 @@ class CityStrategyAI:
 
 		# Loop through adding the available districts
 		for districtType in list(DistrictType):
+			if districtType == DistrictType.none or districtType == DistrictType.cityCenter:
+				continue
+
 			if self.city.canBuildDistrict(districtType, simulation=simulation):
 				weight: float = float(self.buildingProductionAI.weight(districtType))
 				bestDistrictLocation = self.city.bestLocationForDistrict(districtType, simulation)
+
+				if bestDistrictLocation is None:
+					raise Exception(f'District {districtType} need a location')
 
 				if self.city.canBuildDistrict(districtType, bestDistrictLocation, simulation):
 					buildableItem = BuildableItem(districtType, bestDistrictLocation)
@@ -411,9 +491,9 @@ class CityStrategyAI:
 
 		# Loop through adding the available wonders
 		for wonderType in list(WonderType):
-			if self.city.canBuildWonder(wonderType, simulation):
+			if self.city.canBuildWonder(wonderType, location=None, simulation=simulation):
 				weight: float = float(self.wonderProductionAI.weight(wonderType))
-				bestWonderLocation = self.city.bestLocationFor(wonderType, simulation)
+				bestWonderLocation = self.city.bestLocationForWonder(wonderType, simulation)
 
 				if bestWonderLocation is None:
 					raise Exception("cant get valid wonder location")
