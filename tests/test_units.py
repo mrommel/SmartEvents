@@ -5,10 +5,12 @@ from game.cities import City
 from game.civilizations import LeaderType
 from game.game import Game
 from game.players import Player
+from game.states.builds import BuildType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitMissionType, UnitType
 from game.units import Unit
 from map.base import HexPoint
+from map.improvements import ImprovementType
 from map.types import TerrainType
 from tests.testBasics import MapMock, UserInterfaceMock
 
@@ -123,3 +125,34 @@ class TestUnitMissions(unittest.TestCase):
 		self.assertIsNone(playerTrajanWarrior.peekMission())
 		self.assertEqual(playerTrajanWarrior.isFortified(), True)
 		self.assertEqual(playerTrajanWarrior.location, HexPoint(15, 16))
+
+	def test_build(self):
+		# GIVEN
+		mapModel = MapMock(24, 20, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+
+		# player
+		playerTrajan = Player(LeaderType.trajan, human=True)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# unit
+		playerTrajanBuilder = Unit(HexPoint(15, 16), UnitType.builder, playerTrajan)
+		simulation.addUnit(playerTrajanBuilder)
+
+		mission = UnitMission(missionType=UnitMissionType.build, buildType=BuildType.farm)
+		mission.unit = playerTrajanBuilder
+
+		mapModel.tileAt(HexPoint(15, 16)).setOwner(playerTrajan)
+
+		# WHEN
+		mission.start(simulation)
+		mission.continueMission(2, simulation)
+
+		# THEN
+		self.assertIsNone(playerTrajanBuilder.peekMission())
+		self.assertEqual(playerTrajanBuilder.location, HexPoint(15, 16))
+		self.assertEqual(mapModel.improvementAt(HexPoint(15, 16)), ImprovementType.farm)

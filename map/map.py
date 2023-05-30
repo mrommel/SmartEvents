@@ -471,6 +471,9 @@ class Tile:
 	def setImprovementPillaged(self, value: bool):
 		self._improvementPillagedValue = value
 
+	def buildProgressOf(self, buildType: BuildType) -> int:
+		return int(self._buildProgressList.weight(buildType))
+
 	def changeBuildProgressOf(self, build: BuildType, change: int, player: Player, simulation) -> bool:
 		"""Returns true if build finished ..."""
 		finished = False
@@ -735,6 +738,22 @@ class Tile:
 			self.setRiverFlowInNorth(flow)
 		else:
 			raise Exception(f'flow: {flow}')
+
+	def canBuild(self, buildType: BuildType, player) -> bool:
+		# Can't build nothing!
+		if buildType == BuildType.none:
+			return False
+
+		improvement = buildType.improvement()
+		if improvement is not None:
+			if self.district() is not None:
+				return False
+
+			if not improvement.isPossibleOn(self):
+				return False
+
+		return True
+
 
 
 class TileStatistics:
@@ -1137,3 +1156,6 @@ class Map:
 		tile = self.tileAt(location)
 		tile.continentIdentifier = continent.identifier
 
+	def improvementAt(self, location: HexPoint) -> ImprovementType:
+		tile = self.tileAt(location)
+		return tile.improvement()

@@ -74,6 +74,13 @@ class BuildType(ExtendedEnum):
 
 		return False
 
+	def required(self) -> Optional[TechType]:
+		return self._data().requiredTech
+
+	def isKill(self) -> bool:
+		# fixme
+		return False
+
 	def _data(self) -> BuildTypeData:
 		if self == BuildType.none:
 			return BuildTypeData(
@@ -299,7 +306,7 @@ class BuildType(ExtendedEnum):
 
 		return False
 
-	def improvement(self) -> ImprovementType:
+	def improvement(self) -> Optional[ImprovementType]:
 		return self._data().improvement
 
 	def route(self):
@@ -310,6 +317,9 @@ class BuildType(ExtendedEnum):
 
 	def willRemoveRoute(self) -> bool:
 		return self._data().removeRoad
+
+	def isWater(self) -> bool:
+		return self._data().isWater
 
 	@classmethod
 	def fromImprovement(cls, improvement) -> Optional[BuildType]:

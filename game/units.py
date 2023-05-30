@@ -8,6 +8,7 @@ from game.notifications import NotificationType
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType
 from game.states.ages import AgeType
+from game.states.builds import BuildType
 from game.states.dedications import DedicationType
 from game.types import EraType, TechType
 from game.unitMissions import UnitMission
@@ -16,7 +17,7 @@ from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOption
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
 from map.path_finding.path import HexPath
-from map.types import UnitDomainType, YieldType
+from map.types import UnitDomainType, YieldType, ResourceType
 from utils.base import ExtendedEnum
 
 
@@ -51,8 +52,12 @@ class Unit:
 		self._activityTypeValue = UnitActivityType.none
 		self._automationType = UnitAutomationType.none
 		self._processedInTurnValue = False
+
 		self._missions = []
 		self._missionTimerValue = 0
+		self._buildTypeValue = None
+		self._buildChargesValue = unitType.buildCharges()
+
 		self._fortifyTurnsValue = 0
 		self._fortifiedThisTurnValue = False
 		self._fortifyValue = 0
@@ -338,7 +343,7 @@ class Unit:
 			if mission.target is not None:
 				return self.canTransferToAnotherCity()
 		elif mission.missionType == UnitMissionType.build:
-			if self.canBuild(mission.buildType, mission.unit.location, simulation):
+			if self.canBuild(buildType=mission.buildType, location=mission.unit.location, simulation=simulation):
 				return True
 		elif mission.missionType == UnitMissionType.routeTo:
 			if simulation.valid(mission.target) and mission.unit.pathTowards(mission.target, options=None, simulation=simulation) is not None:
@@ -882,3 +887,159 @@ class Unit:
 
 	def isHuman(self) -> bool:
 		return self.player.isHuman()
+
+	def canBuild(self, buildType: BuildType, location: HexPoint, testVisible: Optional[bool] = False,
+	             testGold: Optional[bool] = True, simulation = None):
+		if simulation is None:
+			raise Exception('Simulation must not be None')
+
+		tile = simulation.tileAt(location)
+
+		# don't build twice
+		if buildType.improvement() is not None:
+			if tile.hasImprovement(buildType.improvement()):
+				return False
+
+		# no improvements in cities
+		if buildType.improvement() != ImprovementType.none:
+			if tile.isCity():
+				return False
+
+		if not self.unitType.canBuild(buildType):
+			return False
+
+		if not self.player.canBuild(buildType, location, testGold=testGold, simulation=simulation):
+			return False
+
+		validBuildPlot = self.domain() == tile.terrain().domain()  # self.isNativeDomain(at: point, in: gameModel)
+		validBuildPlot = validBuildPlot or (buildType.isWater() and self.domain() == UnitDomainType.land and
+		                                    tile.isWater() and (self.canEmbark(simulation) or self.isEmbarked()))
+
+		if not validBuildPlot:
+			return False
+
+		if testVisible:
+			# check for any other units working in this plot
+			for loopUnit in simulation.unitsAt(location):
+				if loopUnit.isEqualTo(self):
+					continue
+
+				loopMission = loopUnit.peekMission()
+				if loopMission is not None:
+					if loopMission.buildType is not None:
+						return False
+
+		return True
+
+	def continueBuilding(self, buildType: BuildType, simulation) -> bool:
+		"""Returns true if build should continue..."""
+		canContinue = False
+
+		tile = simulation.tileAt(self.location)
+		if tile is None:
+			return False
+
+		if self.isAutomated():
+			if tile.improvement() != ImprovementType.none and tile.improvement() != ImprovementType.ruins:
+				resource = tile.resourceFor(self.player)
+				if resource == ResourceType.none or resource.techCityTrade():
+					if tile.improvement().pillageImprovement() != ImprovementType.none:
+						return False
+
+		# Don't check for Gold cost here (2nd false) because this function is called from continueMission... we spend the Gold then check to see if we can Build
+		if self.canBuild(buildType, self.location, testVisible=False, testGold=False, simulation=simulation):
+			canContinue = True
+
+			if self.doBuild(buildType, simulation):
+				canContinue = False
+
+		return canContinue
+
+	def doBuild(self, buildType: BuildType, simulation) -> bool:
+		"""
+		Returns true if build finished...
+        bool CvUnit::build(BuildTypes eBuild)
+
+		@param buildType:
+		@param simulation:
+		@return:
+		"""
+		tile = simulation.tileAt(self.location)
+
+		self._buildTypeValue = buildType
+
+		if tile is not None:
+			resource = tile.resourceFor(self.player)
+			if resource != ResourceType.none:
+				player = tile.owner()
+				if player is not None:
+					resourceQuantity = tile.resourceQuantity()
+					player.changeNumberOfAvailableResource(resource, float(resourceQuantity))
+
+		finished: bool = False
+
+		# Don't test Gold
+		if not self.canBuild(buildType, self.location, testVisible=False, testGold=False, simulation=simulation):
+			return False
+
+		startedYet = tile.buildProgressOf(buildType)
+
+		# if we are starting something new, wipe out the old thing immediately
+		if startedYet == 0:
+			if buildType.improvement() is not None:
+				if tile.improvement() != ImprovementType.none:
+					tile.setImprovement(ImprovementType.none)
+
+				# FIXME wipe out all build progress also
+
+		rate = self.unitType.workRate()
+		finished = tile.changeBuildProgressOf(buildType, change=rate, player=self.player, simulation=simulation)
+
+		# needs to be at bottom because movesLeft() can affect workRate()...
+		self.finishMoves()
+
+		if finished:
+			if buildType.isKill():
+				if self.isGreatPerson():
+					raise Exception("niy")
+					# player.doGreatPersonExpended(of: self.type)
+
+				self.doKill(delayed=True, player=None, simulation=simulation)
+
+			if self.unitType == UnitType.builder:
+				self.changeBuildChargesBy(-1)
+
+				# handle builder expended
+				if not self.hasBuildCharges():
+					self.doKill(delayed=True, player=None, simulation=simulation)
+
+			# Add to player's Improvement count, which will increase cost of future Improvements
+			if buildType.improvement() is not None or buildType.route() is not None:
+				# Prevents chopping Forest or Jungle from counting
+				self.player.changeTotalImprovementsBuiltBy(1)
+
+			simulation.userInterface.refreshTile(tile)
+		else:
+			# we are not done doing this
+			if startedYet == 0:
+				if tile.isVisibleTo(self.player):
+					if buildType.improvement() is not None:
+						simulation.userInterface.refreshTile(tile)
+					elif buildType.route() is not None:
+						simulation.userInterface.refreshTile(tile)
+
+		return finished
+
+	def changeBuildChargesBy(self, change: int):
+		if self._buildChargesValue + change < 0:
+			print("buildCharges cant be negative")
+			return
+
+		self._buildChargesValue += change
+		return
+
+	def buildCharges(self) -> int:
+		return self._buildChargesValue
+
+	def hasBuildCharges(self) -> bool:
+		return self._buildChargesValue > 0

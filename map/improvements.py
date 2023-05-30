@@ -3,7 +3,7 @@ from typing import Optional
 from game.civilizations import CivilizationType
 from game.flavors import Flavor
 from game.types import TechType, CivicType
-from map.types import Yields
+from map.types import Yields, TerrainType, FeatureType
 from utils.base import ExtendedEnum, InvalidEnumError
 
 
@@ -30,8 +30,12 @@ class ImprovementType(ExtendedEnum):
 	fishingBoats = 'fishingBoats'
 	pasture = 'pasture'
 	oilWell = 'oilWell'
+
 	fort = 'fort'
+	citadelle = 'citadelle'
+
 	goodyHut = 'goodyHut'
+	ruins = 'ruins'
 
 	def name(self):
 		return self._data().name
@@ -189,6 +193,24 @@ class ImprovementType(ExtendedEnum):
 				civilization=None,
 				flavors=[]
 			)
+		elif self == ImprovementType.citadelle:
+			#
+			return ImprovementTypeData(
+				name="Citadelle",
+				effects=[],
+				requiredTech=TechType.siegeTactics,
+				civilization=None,
+				flavors=[]
+			)
+		elif self == ImprovementType.ruins:
+			#
+			return ImprovementTypeData(
+				name="Ruins",
+				effects=[],
+				requiredTech=None,
+				civilization=None,
+				flavors=[]
+			)
 
 		raise InvalidEnumError(self)
 
@@ -326,5 +348,77 @@ class ImprovementType(ExtendedEnum):
 			return yieldValue
 		elif self == ImprovementType.fort:
 			return Yields(food=0, production=0, gold=0, science=0)
+		elif self == ImprovementType.citadelle:
+			return Yields(food=0, production=0, gold=0, science=0)
+		elif self == ImprovementType.ruins:
+			return Yields(food=0, production=0, gold=0, science=0)
 
 		raise InvalidEnumError(self)
+
+	def civilization(self) -> CivilizationType:
+		return self._data().civilization
+
+	def isPossibleOn(self, tile) -> bool:
+		# can't set an improvement to unowned tile or can we?
+		if tile.owner() is None:
+			return False
+
+		if self == ImprovementType.none:
+			return False  # invalid everywhere
+
+		elif self == ImprovementType.barbarianCamp:
+			return self.isBarbarianCampPossibleOn(tile)
+		elif self == ImprovementType.goodyHut:
+			return self.isGoodyHutPossibleOn(tile)
+		elif self == ImprovementType.ruins:
+			return False
+
+		elif self == ImprovementType.farm:
+			return self.isFarmPossibleOn(tile)
+		elif self == ImprovementType.mine:
+			return self.isMinePossibleOn(tile)
+		elif self == ImprovementType.quarry:
+			return self.isQuarryPossibleOn(tile)
+		elif self == ImprovementType.camp:
+			return self.isCampPossibleOn(tile)
+		elif self == ImprovementType.pasture:
+			return self.isPasturePossibleOn(tile)
+		elif self == ImprovementType.plantation:
+			return self.isPlantationPossibleOn(tile)
+		elif self == ImprovementType.fishingBoats:
+			return self.isFishingBoatsPossibleOn(tile)
+		elif self == ImprovementType.oilWell:
+			return self.isOilWellPossibleOn(tile)
+		elif self == ImprovementType.fort:
+			return True  #
+		elif self == ImprovementType.citadelle:
+			return False  #
+
+		raise InvalidEnumError(self)
+
+	def isFarmPossibleOn(self, tile):
+		"""
+		Farms can be built on non-desert and non-tundra flat lands, which are the most available tiles in Civilization VI.
+		https://civilization.fandom.com/wiki/Farm_(Civ6)
+
+		@param tile:
+		@return:
+		"""
+		owner = tile.owner()
+		if owner is None:
+			raise Exception("can check without owner")
+
+		# Initially, it can be constructed only on flatland Grassland, Plains, ...
+		if (tile.terrain() == TerrainType.grass or tile.terrain() == TerrainType.plains) and not tile.isHills():
+			return True
+
+		# or Floodplains tiles
+		if tile.terrain() == TerrainType.desert and not tile.isHills() and tile.hasFeature(FeatureType.floodplains):
+			return True
+
+		# but researching Civil Engineering enables Farms to be built on Grassland Hills and Plains Hills.
+		if (tile.terrain() == TerrainType.grass or tile.terrain() == TerrainType.plains) and tile.isHills() and \
+			owner.hasCivic(CivicType.civilEngineering):
+			return True
+
+		return False

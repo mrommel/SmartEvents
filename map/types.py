@@ -196,6 +196,9 @@ class TerrainType(ExtendedEnum):
 	def isLand(self):
 		return not self.isWater()
 
+	def domain(self) -> UnitDomainType:
+		return self._data().domain
+
 	def _data(self) -> TerrainData:
 		if self == TerrainType.desert:
 			return TerrainData(

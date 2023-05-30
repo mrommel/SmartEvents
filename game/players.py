@@ -20,6 +20,7 @@ from game.playerMechanics import PlayerTechs, PlayerCivics, BuilderTaskingAI, Ta
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType, ReligionType
 from game.states.ages import AgeType
+from game.states.builds import BuildType
 from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
 from game.states.ui import ScreenType
@@ -28,6 +29,7 @@ from game.types import EraType, TechType, CivicType
 from game.unitTypes import UnitMissionType, UnitTaskType, UnitMapType
 from game.wonders import WonderType
 from map.base import HexPoint
+from map.improvements import ImprovementType
 from map.types import Tutorials, Yields, TerrainType, FeatureType, UnitMovementType
 
 
@@ -299,6 +301,7 @@ class Player:
 		self.numberOfDarkAgesVal: int = 0
 		self.numberOfGoldenAgesVal: int = 0
 		self._citiesFoundValue: int = 0
+		self._totalImprovementsBuilt: int = 0
 
 	def initialize(self):
 		self.setupFlavors()
@@ -1210,3 +1213,48 @@ class Player:
 	def hasRetired(self, greatPerson: GreatPersonType) -> bool:
 		# fixme
 		return False
+
+	def canBuild(self, buildType: BuildType, location: HexPoint, testGold: bool, simulation) -> bool:
+		tile = simulation.tileAt(location)
+
+		if not tile.canBuild(buildType, self):
+			return False
+
+		required = buildType.required()
+		if required is not None:
+			if not self.hasTech(required):
+				return False
+
+		# Is this an improvement that is only useable by a specific civ?
+		improvement = buildType.improvement()
+		if improvement != ImprovementType.none:
+			improvementCivilization = improvement.civilization()
+			if improvementCivilization is not None:
+				if improvementCivilization != self.leader.civilization():
+					return False
+
+		# IsBuildBlockedByFeature
+		if tile.hasAnyFeature():
+			for feature in list(FeatureType):
+				if tile.hasFeature(feature):
+					if buildType.keepsFeature(feature):
+						continue
+
+					if not buildType.canRemoveFeature(feature):
+						return False
+
+					removeTech = buildType.requiredRemoveTechFor(feature)
+					if removeTech is not None:
+						if not self.hasTech(removeTech):
+							return False
+
+		if testGold:
+			# if (max(0, self.treasury.value()) < getBuildCost(pPlot, eBuild)):
+			#	return False
+			pass
+
+		return True
+
+	def changeTotalImprovementsBuiltBy(self, change: int):
+		self._totalImprovementsBuilt += change
+

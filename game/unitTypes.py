@@ -4,6 +4,7 @@ from typing import Optional
 
 from game.civilizations import CivilizationType
 from game.flavors import Flavor, FlavorType
+from game.states.builds import BuildType
 from game.types import EraType, TechType, CivicType
 from map.types import UnitMovementType, ResourceType, UnitDomainType
 from utils.base import ExtendedEnum
@@ -47,6 +48,7 @@ class UnitTaskType(ExtendedEnum):
 
 
 class UnitAbilityType(ExtendedEnum):
+	canBuildRoads = 'canBuildRoads'
 	ignoreZoneOfControl = 'ignoreZoneOfControl'
 	oceanImpassable = 'oceanImpassable'
 	experienceFromTribal = 'experienceFromTribal'
@@ -215,6 +217,12 @@ class UnitType(ExtendedEnum):
 	def moves(self) -> int:
 		return self._data().moves
 
+	def buildCharges(self) -> int:
+		if self == UnitType.builder:
+			return 3
+
+		return 0
+
 	def range(self) -> int:
 		return self._data().range
 
@@ -285,6 +293,26 @@ class UnitType(ExtendedEnum):
 
 	def flavors(self) -> [Flavor]:
 		return self._data().flavors
+
+	def workRate(self) -> int:
+		# in civ6 builders are building improvements immediately
+		if self == UnitType.builder:
+			return 1000  # used to be 100
+
+		return 0
+
+	def canBuild(self, buildType: BuildType) -> bool:
+		if buildType == BuildType.repair or buildType == BuildType.removeRoad or buildType == BuildType.farm or \
+			buildType == BuildType.mine or buildType == BuildType.quarry or buildType == BuildType.plantation or \
+			buildType == BuildType.camp or buildType == BuildType.pasture or buildType == BuildType.fishingBoats or \
+			buildType == BuildType.removeForest or buildType == BuildType.removeRainforest or \
+			buildType == BuildType.removeMarsh:
+			return self.hasAbility(UnitAbilityType.canImprove)
+
+		if buildType == BuildType.ancientRoad or buildType == BuildType.classicalRoad:
+			return self.hasAbility(UnitAbilityType.canBuildRoads)
+
+		return False
 
 	def _data(self) -> UnitTypeData:
 		# default ------------------------------
