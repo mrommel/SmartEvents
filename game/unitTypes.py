@@ -1,4 +1,3 @@
-import sys
 from enum import Enum
 from typing import Optional
 
@@ -184,6 +183,9 @@ class UnitType(ExtendedEnum):
 	# naval ranged ------------------------------
 	quadrireme = 'quadrireme'  # classical
 
+	# great persons -----------------------------
+	general = 'general'
+
 	# player overrides
 
 	# barbarians  ------------------------------
@@ -246,13 +248,11 @@ class UnitType(ExtendedEnum):
 		return 0
 
 	def power(self) -> int:
-		powerVal = 0
-
 		# ***************
 		# Main Factors - Strength & Moves
 		# ***************
 
-		#  We want a Unit that has twice the strength to be roughly worth 3x as much with regards to Power
+		#  We want a Unit that has twice the strength to be roughly worth 3x as much in regard to Power
 		powerVal = int(pow(float(self.meleeStrength()), 1.5))
 
 		# Ranged Strength
@@ -265,7 +265,8 @@ class UnitType(ExtendedEnum):
 		if rangedPower > 0:
 			powerVal = rangedPower
 
-		# We want Movement rate to be important, but not a dominating factor; a Unit with double the moves of a similarly-strengthed Unit should be ~1.5x as Powerful
+		# We want Movement rate to be important, but not a dominating factor; a Unit with double the moves of a
+		# similarly-strengthed Unit should be ~1.5x as Powerful
 		powerVal = int(float(powerVal) * pow(float(self.moves()), 0.3))
 
 		# ***************
@@ -1184,6 +1185,44 @@ class UnitType(ExtendedEnum):
 				rangedAttack=25,
 				moves=3,
 				requiredTech=TechType.shipBuilding,
+				obsoleteTech=None,
+				requiredCivic=None,
+				upgradesFrom=[],
+				flavors=[]
+			)
+
+		# great persons ----------------------------
+
+		elif self == UnitType.general:
+			#
+			return UnitTypeData(
+				name="TXT_KEY_UNIT_GENERAL_NAME",
+				baseType=UnitType.general,
+				domain=UnitDomainType.land,
+				effects=[
+					"TXT_KEY_UNIT_GENERAL_EFFECT1"
+				],
+				abilities=[],
+				era=EraType.ancient,
+				requiredResource=None,
+				civilization=None,
+				unitTasks=[],
+				defaultTask=UnitTaskType.unknown,
+				movementType=UnitMovementType.walk,
+				productionCost=-1,
+				purchaseCost=-1,
+				faithCost=-1,
+				maintenanceCost=0,
+				sight=2,
+				range=0,
+				supportDistance=0,
+				strength=0,
+				targetType=UnitClassType.civilian,
+				flags=None,
+				meleeAttack=0,
+				rangedAttack=0,
+				moves=3,
+				requiredTech=None,
 				obsoleteTech=None,
 				requiredCivic=None,
 				upgradesFrom=[],

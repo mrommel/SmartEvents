@@ -14,7 +14,7 @@ from game.states.dedications import DedicationType
 from game.types import EraType, TechType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOptions, UnitMissionType, UnitActivityType, \
-	UnitMapType, UnitAbilityType
+	UnitMapType
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
 from map.path_finding.path import HexPath

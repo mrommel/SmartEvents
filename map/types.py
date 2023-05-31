@@ -689,22 +689,22 @@ class ResourceUsage(ExtendedEnum):
 
 class ResourceTypeData:
 	def __init__(self, name: str, usage: ResourceUsage, revealTech: Optional[TechType],
-	             revealCivic: Optional[CivicType], placement_order: int, base_amount: int, place_on_hills: bool,
-	             place_on_river_side: bool, place_on_flatlands: bool, place_on_features, place_on_feature_terrains,
-	             place_on_terrains, yields: Yields):
+	             revealCivic: Optional[CivicType], placementOrder: int, baseAmount: int, placeOnHills: bool,
+	             placeOnRiverSide: bool, placeOnFlatlands: bool, placeOnFeatures: [FeatureType],
+	             placeOnFeatureTerrains: [TerrainType], placeOnTerrains: [TerrainType], yields: Yields):
 		self.name = name
 		self.usage = usage
 		self.revealTech = revealTech
 		self.revealCivic = revealCivic
-		self.placement_order = placement_order
-		self.base_amount = base_amount
+		self.placementOrder = placementOrder
+		self.baseAmount = baseAmount
 
-		self.place_on_hills = place_on_hills
-		self.place_on_river_side = place_on_river_side
-		self.place_on_flatlands = place_on_flatlands
-		self.place_on_features = place_on_features
-		self.place_on_feature_terrains = place_on_feature_terrains
-		self.place_on_terrains = place_on_terrains
+		self.placeOnHills = placeOnHills
+		self.placeOnRiverSide = placeOnRiverSide
+		self.placeOnFlatlands = placeOnFlatlands
+		self.placeOnFeatures = placeOnFeatures
+		self.placeOnFeatureTerrains = placeOnFeatureTerrains
+		self.placeOnTerrains = placeOnTerrains
 
 		self.yields = yields
 
@@ -748,24 +748,24 @@ class ResourceType(ExtendedEnum):
 		return self._data().usage
 
 	def placementOrder(self) -> int:
-		return self._data().placement_order
+		return self._data().placementOrder
 
 	def _data(self) -> ResourceTypeData:
 		# default
 		if self == ResourceType.none:
 			return ResourceTypeData(
-				'none',
-				ResourceUsage.bonus,
-				None,
-				None,
-				-1,
-				0,
-				False,
-				False,
-				False,
-				[],
-				[],
-				[],
+				name='none',
+				usage=ResourceUsage.bonus,
+				revealTech=None,
+				revealCivic=None,
+				placementOrder=-1,
+				baseAmount=0,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=False,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[],
 				yields=Yields(food=0, production=0, gold=0)
 			)
 
@@ -776,14 +776,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.bonus,
 				revealTech=TechType.pottery,
 				revealCivic=None,
-				placement_order=4,
-				base_amount=18,
-				place_on_hills=False,
-				place_on_river_side=False,
-				place_on_flatlands=True,
-				place_on_features=[FeatureType.floodplains],
-				place_on_feature_terrains=[TerrainType.desert],
-				place_on_terrains=[TerrainType.plains],
+				placementOrder=4,
+				baseAmount=18,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.floodplains],
+				placeOnFeatureTerrains=[TerrainType.desert],
+				placeOnTerrains=[TerrainType.plains],
 				yields=Yields(food=1, production=0, gold=0)
 			)
 		elif self == ResourceType.rice:
@@ -792,14 +792,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.bonus,
 				revealTech=TechType.pottery,
 				revealCivic=None,
-				placement_order=4,
-				base_amount=14,
-				place_on_hills=False,
-				place_on_river_side=False,
-				place_on_flatlands=True,
-				place_on_features=[FeatureType.marsh],
-				place_on_feature_terrains=[TerrainType.grass],
-				place_on_terrains=[TerrainType.grass],
+				placementOrder=4,
+				baseAmount=14,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.marsh],
+				placeOnFeatureTerrains=[TerrainType.grass],
+				placeOnTerrains=[TerrainType.grass],
 				yields=Yields(food=1, production=0, gold=0)
 			)
 		elif self == ResourceType.deer:
@@ -808,14 +808,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.bonus,
 				revealTech=TechType.animalHusbandry,
 				revealCivic=None,
-				placement_order=4,
-				base_amount=16,
-				place_on_hills=False,
-				place_on_river_side=False,
-				place_on_flatlands=True,
-				place_on_features=[FeatureType.forest],
-				place_on_feature_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra, TerrainType.snow],
-				place_on_terrains=[TerrainType.tundra],
+				placementOrder=4,
+				baseAmount=16,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.forest],
+				placeOnFeatureTerrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra, TerrainType.snow],
+				placeOnTerrains=[TerrainType.tundra],
 				yields=Yields(food=0, production=1, gold=0)
 			)
 		elif self == ResourceType.sheep:
@@ -824,14 +824,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.bonus,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=4,
-				base_amount=20,
-				place_on_hills=True,
-				place_on_river_side=True,
-				place_on_flatlands=False,
-				place_on_features=[FeatureType.forest],
-				place_on_feature_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra, TerrainType.snow],
-				place_on_terrains=[TerrainType.tundra],
+				placementOrder=4,
+				baseAmount=20,
+				placeOnHills=True,
+				placeOnRiverSide=True,
+				placeOnFlatlands=False,
+				placeOnFeatures=[FeatureType.forest],
+				placeOnFeatureTerrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra, TerrainType.snow],
+				placeOnTerrains=[TerrainType.tundra],
 				yields=Yields(food=1, production=0, gold=0)
 			)
 		elif self == ResourceType.copper:
@@ -840,14 +840,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.bonus,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=4,
-				base_amount=6,
-				place_on_hills=True,
-				place_on_river_side=False,
-				place_on_flatlands=False,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra],
+				placementOrder=4,
+				baseAmount=6,
+				placeOnHills=True,
+				placeOnRiverSide=False,
+				placeOnFlatlands=False,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra],
 				yields=Yields(food=0, production=1, gold=0)
 			)
 		elif self == ResourceType.stone:
@@ -856,14 +856,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.bonus,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=4,
-				base_amount=12,
-				place_on_hills=True,
-				place_on_river_side=False,
-				place_on_flatlands=True,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass],
+				placementOrder=4,
+				baseAmount=12,
+				placeOnHills=True,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass],
 				yields=Yields(food=0, production=1, gold=0)
 			)
 		elif self == ResourceType.banana:
@@ -872,14 +872,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.bonus,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=4,
-				base_amount=2,
-				place_on_hills=False,
-				place_on_river_side=False,
-				place_on_flatlands=True,
-				place_on_features=[FeatureType.rainforest],
-				place_on_feature_terrains=[TerrainType.grass, TerrainType.plains],
-				place_on_terrains=[],
+				placementOrder=4,
+				baseAmount=2,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.rainforest],
+				placeOnFeatureTerrains=[TerrainType.grass, TerrainType.plains],
+				placeOnTerrains=[],
 				yields=Yields(food=1, production=0, gold=0)
 			)
 		elif self == ResourceType.cattle:
@@ -888,14 +888,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.bonus,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=4,
-				base_amount=22,
-				place_on_hills=False,
-				place_on_river_side=True,
-				place_on_flatlands=True,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass],
+				placementOrder=4,
+				baseAmount=22,
+				placeOnHills=False,
+				placeOnRiverSide=True,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass],
 				yields=Yields(food=1, production=0, gold=0)
 			)
 		elif self == ResourceType.fish:
@@ -904,14 +904,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.bonus,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=4,
-				base_amount=36,
-				place_on_hills=False,
-				place_on_river_side=False,
-				place_on_flatlands=False,
-				place_on_features=[FeatureType.lake],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.shore],
+				placementOrder=4,
+				baseAmount=36,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=False,
+				placeOnFeatures=[FeatureType.lake],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.shore],
 				yields=Yields(food=1, production=0, gold=0)
 			)
 
@@ -922,14 +922,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.luxury,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=3,
-				base_amount=2,
-				place_on_hills=False,
-				place_on_river_side=False,
-				place_on_flatlands=True,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains],
+				placementOrder=3,
+				baseAmount=2,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains],
 				yields=Yields(food=2, production=0, gold=0)
 			)
 		elif self == ResourceType.whales:
@@ -938,14 +938,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.luxury,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=3,
-				base_amount=6,
-				place_on_hills=False,
-				place_on_river_side=False,
-				place_on_flatlands=True,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.shore],
+				placementOrder=3,
+				baseAmount=6,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.shore],
 				yields=Yields(food=0, production=1, gold=1)
 			)
 
@@ -956,14 +956,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.strategic,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=1,
-				base_amount=14,
-				place_on_hills=False,
-				place_on_river_side=True,
-				place_on_flatlands=True,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra],
+				placementOrder=1,
+				baseAmount=14,
+				placeOnHills=False,
+				placeOnRiverSide=True,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra],
 				yields=Yields(food=1, production=1, gold=0)
 			)
 		elif self == ResourceType.iron:
@@ -972,15 +972,15 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.strategic,
 				revealTech=TechType.bronzeWorking,
 				revealCivic=None,
-				placement_order=0,
-				base_amount=12,
-				place_on_hills=False,
-				place_on_river_side=True,
-				place_on_flatlands=True,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra, TerrainType.desert,
-				                   TerrainType.snow],
+				placementOrder=0,
+				baseAmount=12,
+				placeOnHills=False,
+				placeOnRiverSide=True,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra, TerrainType.desert,
+				                 TerrainType.snow],
 				yields=Yields(food=0, production=0, gold=0, science=1)
 			)
 		elif self == ResourceType.coal:
@@ -989,14 +989,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.strategic,
 				revealTech=TechType.industrialization,
 				revealCivic=None,
-				placement_order=2,
-				base_amount=10,
-				place_on_hills=True,
-				place_on_river_side=False,
-				place_on_flatlands=False,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.plains, TerrainType.grass],
+				placementOrder=2,
+				baseAmount=10,
+				placeOnHills=True,
+				placeOnRiverSide=False,
+				placeOnFlatlands=False,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.plains, TerrainType.grass],
 				yields=Yields(food=0, production=2, gold=0)
 			)
 		elif self == ResourceType.oil:
@@ -1005,14 +1005,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.strategic,
 				revealTech=TechType.refining,
 				revealCivic=None,
-				placement_order=2,
-				base_amount=8,
-				place_on_hills=False,
-				place_on_river_side=True,
-				place_on_flatlands=True,
-				place_on_features=[FeatureType.rainforest, FeatureType.marsh],
-				place_on_feature_terrains=[TerrainType.grass, TerrainType.plains],
-				place_on_terrains=[TerrainType.desert, TerrainType.tundra, TerrainType.snow, TerrainType.shore],
+				placementOrder=2,
+				baseAmount=8,
+				placeOnHills=False,
+				placeOnRiverSide=True,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.rainforest, FeatureType.marsh],
+				placeOnFeatureTerrains=[TerrainType.grass, TerrainType.plains],
+				placeOnTerrains=[TerrainType.desert, TerrainType.tundra, TerrainType.snow, TerrainType.shore],
 				yields=Yields(food=0, production=3, gold=0)
 			)
 		elif self == ResourceType.aluminum:
@@ -1021,14 +1021,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.strategic,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=2,
-				base_amount=8,
-				place_on_hills=True,
-				place_on_river_side=False,
-				place_on_flatlands=False,
-				place_on_features=[],
-				place_on_feature_terrains=[TerrainType.plains],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains],
+				placementOrder=2,
+				baseAmount=8,
+				placeOnHills=True,
+				placeOnRiverSide=False,
+				placeOnFlatlands=False,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[TerrainType.plains],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains],
 				yields=Yields(food=0, production=0, gold=0, science=1)
 			)
 		elif self == ResourceType.uranium:
@@ -1037,17 +1037,17 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.strategic,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=2,
-				base_amount=4,
-				place_on_hills=False,
-				place_on_river_side=True,
-				place_on_flatlands=True,
-				place_on_features=[FeatureType.rainforest, FeatureType.marsh, FeatureType.forest],
-				place_on_feature_terrains=[
+				placementOrder=2,
+				baseAmount=4,
+				placeOnHills=False,
+				placeOnRiverSide=True,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.rainforest, FeatureType.marsh, FeatureType.forest],
+				placeOnFeatureTerrains=[
 					TerrainType.grass, TerrainType.plains, TerrainType.desert,
 					TerrainType.tundra, TerrainType.snow
 				],
-				place_on_terrains=[
+				placeOnTerrains=[
 					TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra,
 					TerrainType.snow
 				],
@@ -1059,14 +1059,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.strategic,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=2,
-				base_amount=8,
-				place_on_hills=False,
-				place_on_river_side=False,
-				place_on_flatlands=True,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra],
+				placementOrder=2,
+				baseAmount=8,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra],
 				yields=Yields(food=1, production=1, gold=0)
 			)
 
@@ -1077,14 +1077,14 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.artifacts,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=-1,
-				base_amount=0,
-				place_on_hills=True,
-				place_on_river_side=True,
-				place_on_flatlands=True,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[
+				placementOrder=-1,
+				baseAmount=0,
+				placeOnHills=True,
+				placeOnRiverSide=True,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[
 					TerrainType.grass, TerrainType.plains, TerrainType.desert, TerrainType.tundra, TerrainType.snow
 				],
 				yields=Yields(food=0.0, production=0.0, gold=0.0)
@@ -1095,36 +1095,36 @@ class ResourceType(ExtendedEnum):
 				usage=ResourceUsage.artifacts,
 				revealTech=None,
 				revealCivic=None,
-				placement_order=-1,
-				base_amount=0,
-				place_on_hills=False,
-				place_on_river_side=False,
-				place_on_flatlands=False,
-				place_on_features=[],
-				place_on_feature_terrains=[],
-				place_on_terrains=[TerrainType.shore, TerrainType.ocean],
+				placementOrder=-1,
+				baseAmount=0,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=False,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.shore, TerrainType.ocean],
 				yields=Yields(food=0.0, production=0.0, gold=0.0)
 			)
 
 		raise AttributeError(f'cant determine data of {self}')
 
 	def canBePlacedOnFeature(self, feature: FeatureType) -> bool:
-		return feature in self._data().place_on_features
+		return feature in self._data().placeOnFeatures
 
 	def canBePlacedOnFeatureTerrain(self, terrain: TerrainType) -> bool:
-		return terrain in self._data().place_on_feature_terrains
+		return terrain in self._data().placeOnFeatureTerrains
 
 	def canBePlacedOnTerrain(self, terrain: TerrainType) -> bool:
-		return terrain in self._data().place_on_terrains
+		return terrain in self._data().placeOnTerrains
 
 	def canBePlacedOnHills(self) -> bool:
-		return self._data().place_on_hills
+		return self._data().placeOnHills
 
 	def canBePlacedOnFlatlands(self):
-		return self._data().place_on_flatlands
+		return self._data().placeOnFlatlands
 
 	def baseAmount(self):
-		return self._data().base_amount
+		return self._data().baseAmount
 
 	def absoluteVarPercent(self):
 		if self == ResourceType.fish:
