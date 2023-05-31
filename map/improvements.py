@@ -9,11 +9,12 @@ from utils.base import ExtendedEnum, InvalidEnumError
 
 class ImprovementTypeData:
 	def __init__(self, name: str, effects: [str], requiredTech: Optional[TechType],
-				 civilization: Optional[CivilizationType], flavors: [Flavor]):
+				 civilization: Optional[CivilizationType], canBePillaged: bool, flavors: [Flavor]):
 		self.name = name
 		self.effects = effects
 		self.requiredTech = requiredTech
 		self.civilization = civilization
+		self.canBePillaged = canBePillaged
 		self.flavors = flavors
 
 
@@ -40,6 +41,9 @@ class ImprovementType(ExtendedEnum):
 	def name(self):
 		return self._data().name
 
+	def canBePillaged(self) -> bool:
+		return self._data().canBePillaged
+
 	def _data(self) -> ImprovementTypeData:
 		if self == ImprovementType.none:
 			return ImprovementTypeData(
@@ -47,6 +51,7 @@ class ImprovementType(ExtendedEnum):
 				effects=[],
 				requiredTech=None,
 				civilization=None,
+				canBePillaged=False,
 				flavors=[]
 			)
 		elif self == ImprovementType.barbarianCamp:
@@ -56,6 +61,7 @@ class ImprovementType(ExtendedEnum):
 				effects=[],
 				requiredTech=None,
 				civilization=None,
+				canBePillaged=False,
 				flavors=[]
 			)
 		elif self == ImprovementType.mine:
@@ -71,6 +77,7 @@ class ImprovementType(ExtendedEnum):
 				],
 				requiredTech=TechType.mining,
 				civilization=None,
+				canBePillaged=True,
 				flavors=[]
 			)
 		elif self == ImprovementType.plantation:
@@ -85,6 +92,7 @@ class ImprovementType(ExtendedEnum):
 				],
 				requiredTech=TechType.irrigation,
 				civilization=None,
+				canBePillaged=True,
 				flavors=[]
 			)
 		elif self == ImprovementType.farm:
@@ -99,6 +107,7 @@ class ImprovementType(ExtendedEnum):
 				],
 				requiredTech=None,
 				civilization=None,
+				canBePillaged=True,
 				flavors=[]
 			)
 		elif self == ImprovementType.quarry:
@@ -115,6 +124,7 @@ class ImprovementType(ExtendedEnum):
 				],
 				requiredTech=TechType.mining,
 				civilization=None,
+				canBePillaged=True,
 				flavors=[]
 			)
 		elif self == ImprovementType.camp:
@@ -130,6 +140,7 @@ class ImprovementType(ExtendedEnum):
 				],
 				requiredTech=TechType.animalHusbandry,
 				civilization=None,
+				canBePillaged=True,
 				flavors=[]
 			)
 		elif self == ImprovementType.fishingBoats:
@@ -144,6 +155,7 @@ class ImprovementType(ExtendedEnum):
 				],
 				requiredTech=TechType.sailing,
 				civilization=None,
+				canBePillaged=True,
 				flavors=[]
 			)
 		elif self == ImprovementType.pasture:
@@ -158,6 +170,7 @@ class ImprovementType(ExtendedEnum):
 				],
 				requiredTech=TechType.animalHusbandry,
 				civilization=None,
+				canBePillaged=True,
 				flavors=[]
 			)
 		elif self == ImprovementType.oilWell:
@@ -170,6 +183,7 @@ class ImprovementType(ExtendedEnum):
 				],
 				requiredTech=TechType.steel,
 				civilization=None,
+				canBePillaged=True,
 				flavors=[]
 			)
 		elif self == ImprovementType.fort:
@@ -182,6 +196,7 @@ class ImprovementType(ExtendedEnum):
 				],
 				requiredTech=TechType.siegeTactics,
 				civilization=None,
+				canBePillaged=True,
 				flavors=[]
 			)
 		elif self == ImprovementType.goodyHut:
@@ -191,6 +206,7 @@ class ImprovementType(ExtendedEnum):
 				effects=[],
 				requiredTech=None,
 				civilization=None,
+				canBePillaged=False,
 				flavors=[]
 			)
 		elif self == ImprovementType.citadelle:
@@ -200,6 +216,7 @@ class ImprovementType(ExtendedEnum):
 				effects=[],
 				requiredTech=TechType.siegeTactics,
 				civilization=None,
+				canBePillaged=True,
 				flavors=[]
 			)
 		elif self == ImprovementType.ruins:
@@ -209,6 +226,7 @@ class ImprovementType(ExtendedEnum):
 				effects=[],
 				requiredTech=None,
 				civilization=None,
+				canBePillaged=False,
 				flavors=[]
 			)
 

@@ -411,6 +411,9 @@ class Tile:
 	def hasImprovement(self, improvement: ImprovementType) -> bool:
 		return self._improvementValue == improvement
 
+	def removeImprovement(self):
+		self.setImprovement(ImprovementType.none)
+
 	def route(self) -> RouteType:
 		return self._route
 
@@ -754,7 +757,44 @@ class Tile:
 
 		return True
 
+	def isFriendlyTerritoryFor(self, player, simulation) -> bool:
+		"""Is this a plot that's friendly to our team? (owned by us or someone we have Open Borders with)"""
+		# No friendly territory for barbs!
+		if player.isBarbarian():
+			return False
 
+		# Nobody owns this plot
+		if not self.hasOwner():
+			return False
+
+		# Our territory
+		if player.isEqualTo(self.owner()):
+			return True
+
+		# territory of player we have open border with
+		if player.diplomaticAI.isOpenBorderAgreementActiveWith(self.owner()):
+			return True
+
+		return False
+
+	def isEnemyTerritoryFor(self, player, simulation) -> bool:
+		# only enemy territory for barbs!
+		if player.isBarbarian():
+			return True
+
+		# Nobody owns this plot
+		if not self.hasOwner():
+			return False
+
+		# Our territory
+		if player.isEqualTo(self.owner()):
+			return False
+
+		# territory of player we have open border with
+		if player.diplomaticAI.isAtWarWith(self.owner()):
+			return True
+
+		return False
 
 class TileStatistics:
 	def __init__(self):
@@ -1056,8 +1096,10 @@ class Map:
 	def _sightCity(self, city, simulation):
 		for pt in city.location.areaWithRadius(3):
 			tile = self.tileAt(pt)
-			tile.discoverBy(city.player, simulation)
-			tile.sightBy(city.player)
+
+			if tile is not None:
+				tile.discoverBy(city.player, simulation)
+				tile.sightBy(city.player)
 
 	def tileStatistics(self, grid_point: HexPoint, radius: int):
 

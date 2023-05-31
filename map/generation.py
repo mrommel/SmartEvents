@@ -471,7 +471,7 @@ class StartPositioner:
             raise Exception("wrong number of sub divisions")
 
     def chooseCityStateLocations(self, cityStateTypes: [CityStateType]):
-        for _ in cityStateTypes:
+        for cityState in cityStateTypes:
             bestArea: Optional[StartArea] = None
             bestValue: int = 0
             bestLocation: HexPoint = HexPoint(-1, -1)
@@ -506,12 +506,16 @@ class StartPositioner:
                         bestLocation = startPoint
                         bestArea = startArea
 
+            if bestArea is None:
+                print(f'Warning: Can\'t find valid start location for city state: {cityState}')
+                continue
+
             # remove current start area
-            self.startAreas = list(filter(lambda area: area.area.identifier != bestArea.area.identifier, self.startAreas))
+            self.startAreas = list(filter(lambda startArea: startArea.area.identifier != bestArea.area.identifier, self.startAreas))
 
             # sanity check - should restart
             if bestLocation == HexPoint(-1, -1):
-                print("Warning: Can't find valid start location for city state")
+                print(f'Warning: Can\'t find valid start location for city state: {cityState}')
             else:
                 self.cityStateStartLocations.append(StartLocation(bestLocation, LeaderType.cityState, False))
 

@@ -284,20 +284,22 @@ class UnitMission:
 						done = True
 
 				elif self.missionType == UnitMissionType.garrison:
-					targetCity = simulation.cityAt(self.target)
-					if targetCity is not None:
-						# check to see if the city exists, is on our team, and does not have a garrisoned unit
-						if targetCity.player.leader != self.unit.player.leader or simulation.unitAt(self.target, UnitMapType.combat) is not None:
-							action = False
-							done = True
-							break
-
-						# are we there yet
-						if self.unit.location != self.target:
-							if self.unit.doMoveOnPathTowards(self.target, previousETA=0, buildingRoute=False, simulation=simulation) > 0:
-								action = True
-							else:
+					if self.target is None:
+						targetCity = simulation.cityAt(self.target)
+						if targetCity is not None:
+							# check to see if the city exists, is on our team, and does not have a garrisoned unit
+							if targetCity.player.leader != self.unit.player.leader or \
+									simulation.unitAt(self.target, UnitMapType.combat) is not None:
+								action = False
 								done = True
+								break
+
+							# are we there yet
+							if self.unit.location != self.target:
+								if self.unit.doMoveOnPathTowards(self.target, previousETA=0, buildingRoute=False, simulation=simulation) > 0:
+									action = True
+								else:
+									done = True
 
 				elif self.missionType == UnitMissionType.rangedAttack:
 					if self.unit.doRangeAttackAt(self.target, simulation):
@@ -317,7 +319,7 @@ class UnitMission:
 					targetCity = simulation.cityAt(self.target)
 					if targetCity is not None:
 						# check to see if the city exists, is on our team, and does not have a garrisoned unit
-						if targetCity.player.leader != self.unit.player.leader or simulation.unitAt(self.target, UnitMapType.combat) is not None:
+						if targetCity.player.leader != self.unit.player.leader:
 							action = False
 							done = True
 							break
@@ -325,9 +327,8 @@ class UnitMission:
 						# are we there yet?
 						if self.unit.location == self.target:
 							self.unit.doGarrison(simulation)
-							self.unit.setActivityType(UnitActivityType.sleep, simulation) # sleep here after we complete the mission
+							self.unit.setActivityType(UnitActivityType.sleep, simulation)  # sleep here after we complete the mission
 							action = True
-
 
 			# check to see if mission is done
 			if not done:

@@ -3,6 +3,7 @@ from typing import Optional
 
 from game.buildings import BuildingType
 from game.combat import Combat
+from game.governors import GovernorTitle
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.policyCards import PolicyCardType
@@ -13,11 +14,11 @@ from game.states.dedications import DedicationType
 from game.types import EraType, TechType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOptions, UnitMissionType, UnitActivityType, \
-	UnitMapType
+	UnitMapType, UnitAbilityType
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
 from map.path_finding.path import HexPath
-from map.types import UnitDomainType, YieldType, ResourceType
+from map.types import UnitDomainType, YieldType, ResourceType, RouteType
 from utils.base import ExtendedEnum
 
 
@@ -61,6 +62,8 @@ class Unit:
 		self._fortifyTurnsValue = 0
 		self._fortifiedThisTurnValue = False
 		self._fortifyValue = 0
+
+		self._garrisonedValue: bool = False
 
 	def name(self) -> str:
 		return self._name
@@ -365,8 +368,8 @@ class Unit:
 	def army(self) -> Optional[Army]:
 		return None
 
-	def isGarrisoned(self):
-		return False
+	def isGarrisoned(self) -> bool:
+		return self._garrisonedValue
 
 	def damage(self) -> int:
 		return max(0, int(Unit.maxHealth) - int(self._healthPointsValue))
@@ -382,6 +385,31 @@ class Unit:
 
 	def isHurt(self) -> bool:
 		return self.damage() > 0
+
+	def doHeal(self, simulation):
+		# no heal for barbarians
+		if self.isBarbarian():
+			return
+
+		healRate = self.healRateAt(self.location, simulation)
+
+		# governor effect guard
+		unitTile = simulation.tileAt(self.location)
+
+		city = unitTile.workingCity()
+		if city is not None:
+			governor = city.governor()
+			if governor is not None:
+				# layingOnOfHands - All Governor's units heal fully in one turn in tiles of this city.
+				if governor.hasTitle(GovernorTitle.layingOnOfHands):
+					healRate = int(Unit.maxHealth) - self._healthPointsValue
+
+		self._healthPointsValue += healRate
+
+		if self._healthPointsValue > int(Unit.maxHealth):
+			self._healthPointsValue = int(Unit.maxHealth)
+
+		return
 
 	def isFound(self) -> bool:
 		return self.unitType.canFound()
@@ -855,8 +883,22 @@ class Unit:
 			return False
 
 		# only one unit per tile, or we are the units?
-		if simulation.unitAt(point, self.unitMapType()) is not None and self.location == point:
+		if simulation.unitAt(point, self.unitMapType()) is not None and self.location != point:
 			return False
+
+		return True
+
+	def doGarrison(self, simulation) -> bool:
+		# garrison only in cities guard
+		city = simulation.cityAt(self.location)
+		if city is None:
+			return False
+
+		if not self.canGarrisonAt(self.location, simulation):
+			return False
+
+		city.setGarrison(unit=self)
+		self._garrisonedValue = True
 
 		return True
 
@@ -1043,3 +1085,136 @@ class Unit:
 
 	def hasBuildCharges(self) -> bool:
 		return self._buildChargesValue > 0
+
+	def canHeal(self, simulation):
+		# No barb healing
+		if self.isBarbarian():
+			return False
+
+		# only damaged units can heal
+		if self.damage() == 0:
+			return False
+
+		# Embarked Units can't heal
+		if self.isEmbarked():
+			return False
+
+		if self.healRateAt(self.location, simulation) == 0:
+			return False
+
+		# twilightValor - All units +5 Combat Strength for all melee attack units.
+		# BUT: Cannot heal outside your territory.
+		if self.player.government.hasCard(PolicyCardType.twilightValor):
+			unitTile = simulation.tileAt(self.location)
+			return unitTile.isFriendlyTerritoryFor(self.player, simulation)
+
+		return True
+
+	def healRateAt(self, location: HexPoint, simulation):
+		if self.player.isBarbarian():
+			return 0
+
+		totalHeal = 0
+
+		if simulation.cityAt(location) is not None:
+			totalHeal += 10 # CITY_HEAL_RATE
+
+		# Heal from religion
+		# next to a city or in the city - check for beliefs
+
+		# Heal from units - medic/supply convoy
+		extraHealFromUnits: int = 0
+		for neighbor in location.neighbors():
+			unit = simulation.unitAt(neighbor, UnitMapType.civilian)
+			if unit is not None:
+				# friends or us
+				if self.player.isEqualTo(unit.player) or self.player.diplomacyAI.isAllianceActiveWith(unit.player):
+					extraHealFromUnits += unit.unitType.healingAdjacentUnits()
+
+		# Heal from territory ownership (friendly, enemy, etc.)
+		tile = simulation.tileAt(location)
+		if tile is not None:
+			if tile.isFriendlyTerritoryFor(self.player, simulation):
+				totalHeal += 20
+			elif tile.isEnemyTerritoryFor(self.player, simulation):
+				totalHeal += 5
+			else:
+				totalHeal += 10
+
+		return totalHeal + extraHealFromUnits
+
+	def canPillageAt(self, location, simulation):
+		tile = simulation.tileAt(location)
+
+		if self.isEmbarked():
+			return False
+
+		if not self.unitType.canPillage():
+			return False
+
+		# Barbarian boats not allowed to pillage, as they're too annoying :)
+		if self.isBarbarian() and self.domain() == UnitDomainType.sea:
+			return False
+
+		if tile.isCity():
+			return False
+
+		improvementType = tile.improvement()
+		if improvementType == ImprovementType.none:
+			if tile.hasRoute(RouteType.none):
+				return False
+		elif improvementType == ImprovementType.ruins:
+			return False
+		elif improvementType == ImprovementType.goodyHut:
+			return False
+
+		# Either nothing to pillage or everything is pillaged to its max
+		if (improvementType == ImprovementType.none or tile.isImprovementPillaged()) and \
+			(tile.hasRoute(RouteType.none) or tile.isRoutePillaged()):
+			return False
+
+		# if tile.hasOwner():
+		# 	if (!potentialWarAction(pPlot)):
+		# 		if ((eImprovementType == NO_IMPROVEMENT and !pPlot->isRoute()) or (pPlot->getOwner() != getOwner())):
+		# 			return False
+
+		# can no longer pillage our tiles
+		if self.player.isEqualTo(tile.owner()):
+			return False
+
+		return True
+
+	def doPillage(self, simulation) -> bool:
+		if not self.canPillageAt(self.location, simulation):
+			return False
+
+		tile = simulation.tileAt(self.location)
+		if tile is not None:
+			improvement = tile.improvement()
+			if not improvement.canBePillaged():
+				return False
+			else:
+				movesCost: int = 2
+
+				# depredation - Pillaging costs only 1 Movement point.
+				if self.hasPromotion(UnitPromotionType.depredation):
+					movesCost = 1
+
+				self._movesValue -= movesCost
+
+				if self._movesValue < 0:
+					self._movesValue = 0
+
+				tile.setImprovementPillaged(True)
+
+				resource = tile.resourceFor(self.player)
+				if resource != ResourceType.none:
+					player = tile.owner()
+					if player is not None:
+						resourceQuantity = tile.resourceQuantity()
+						player.changeNumberOfAvailableResource(resource, change=-float(resourceQuantity))
+
+				return True
+
+		return False
+

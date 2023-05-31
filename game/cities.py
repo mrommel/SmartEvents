@@ -2962,7 +2962,13 @@ class City:
 		return strengthValue
 
 	def garrisonedUnit(self) -> Optional[Unit]:
-		return None
+		return self._garrisonedUnitValue
+
+	def setGarrison(self, unit):
+		self._garrisonedUnitValue = unit
+
+	def hasGarrison(self) -> bool:
+		return self._garrisonedUnitValue is not None
 
 	def maintenanceCostsPerTurn(self) -> float:
 		costs = 0.0

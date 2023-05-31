@@ -20,6 +20,7 @@ class UnitPromotionType(ExtendedEnum):
 	pursuit = 'pursuit'
 	sentry = 'sentry'
 	rutter = 'rutter'
+	depredation = 'depredation'
 
 
 class UnitMapType(ExtendedEnum):
@@ -46,6 +47,8 @@ class UnitTaskType(ExtendedEnum):
 	settle = 'settle'
 	workerSea = 'workerSea'
 
+	shadow = 'shadow'
+
 
 class UnitAbilityType(ExtendedEnum):
 	canBuildRoads = 'canBuildRoads'
@@ -57,6 +60,7 @@ class UnitAbilityType(ExtendedEnum):
 	canImprove = 'canImprove'
 	canFound = 'canFound'
 	canCapture = 'canCapture'
+	canHeal = 'canHeal'
 
 
 class OperationType(ExtendedEnum):
@@ -313,6 +317,12 @@ class UnitType(ExtendedEnum):
 			return self.hasAbility(UnitAbilityType.canBuildRoads)
 
 		return False
+
+	def canPillage(self) -> bool:
+		if self.unitClass() == UnitClassType.civilian:
+			return False
+
+		return True
 
 	def _data(self) -> UnitTypeData:
 		# default ------------------------------
@@ -1288,6 +1298,8 @@ class UnitMissionType(Enum):
 	rebase = 'rebase'
 	swapUnits = 'swapUnits'
 	moveToUnit = 'moveToUnit'
+
+	group = 'group'
 
 	def name(self) -> str:
 		return self._data().name

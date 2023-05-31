@@ -230,7 +230,7 @@ class PolicyCardType(ExtendedEnum):
 	# rogueState
 	# samoderzhaviye
 	# softTargets
-	# twilightValor
+	twilightValor = 'twilightValor'
 
 	def name(self) -> str:
 		return self._data().name
@@ -1191,7 +1191,20 @@ class PolicyCardType(ExtendedEnum):
 		# rogueState
 		# samoderzhaviye
 		# softTargets
-		# twilightValor
+		elif self == PolicyCardType.twilightValor:
+			# https://civilization.fandom.com/wiki/Twilight_Valor_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_TWILIGHT_VALOR_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_TWILIGHT_VALOR_BONUS",
+				slot=PolicyCardSlot.wildcard,
+				requiredCivic=None,
+				obsoleteCivic=None,
+				startEra=EraType.classical,
+				endEra=EraType.renaissance,
+				replace=[],
+				flavors=[],
+				requiresDarkAge=True
+			)
 
 		# information
 		elif self == PolicyCardType.strategicAirForce:
