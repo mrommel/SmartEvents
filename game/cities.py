@@ -751,6 +751,18 @@ class BuildQueue:
 	def pop(self):
 		self._items.pop()
 
+	def isCurrentlyBuildingDistrict(self):
+		return len(list(filter(lambda itemIterator: itemIterator.buildableType == BuildableType.district, self._items))) > 0
+
+	def isCurrentlyBuildingBuilding(self):
+		return len(list(filter(lambda itemIterator: itemIterator.buildableType == BuildableType.building, self._items))) > 0
+
+	def isCurrentlyBuildingWonder(self):
+		return len(list(filter(lambda itemIterator: itemIterator.buildableType == BuildableType.wonder, self._items))) > 0
+
+	def isCurrentlyTrainingUnit(self):
+		return len(list(filter(lambda itemIterator: itemIterator.buildableType == BuildableType.unit, self._items))) > 0
+
 
 class City:
 	workRadius = 3

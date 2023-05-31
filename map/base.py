@@ -431,7 +431,7 @@ class Array2D:
 		if fill_value is None:
 			fill_value = 0
 
-		self.values = [[fill_value] * self.width for i in range(self.height)]
+		self.values = [[fill_value] * self.width for _ in range(self.height)]
 
 	def valid(self, point_or_x, y=None):
 		"""

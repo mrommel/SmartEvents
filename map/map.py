@@ -27,7 +27,6 @@ class WeightedBuildList(WeightedBaseList):
 			self.setWeight(0.0, build)
 
 
-# noinspection PyRedeclaration
 class FlowDirection(ExtendedEnum):
 	none = 0
 	any = -1
