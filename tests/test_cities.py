@@ -1,6 +1,6 @@
 import unittest
 
-from game.ai.cities import BuildableType
+from game.ai.cities import BuildableType, CityStrategyAdoptions, CityStrategyType
 from game.baseTypes import HandicapType
 from game.buildings import BuildingType
 from game.cities import City

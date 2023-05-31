@@ -237,7 +237,7 @@ class BuildableItem:
 			self.unitType = item
 			self.wonderType = None
 			self.projectType = None
-			self.location = None  # buildings don't need a location
+			self.location = None  # units don't need a location
 			self.production = 0.0
 		elif isinstance(item, WonderType):
 			self.buildableType = BuildableType.wonder
