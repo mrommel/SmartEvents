@@ -29,7 +29,28 @@ class WeightedBuildList(WeightedBaseList):
 
 # noinspection PyRedeclaration
 class FlowDirection(ExtendedEnum):
-	northEast = 'northEast'
+	none = 0
+	any = -1
+
+	# flow of river on north edge
+	east = 1
+	west = 2
+
+	# flow of river on north-east edge
+	northWest = 4
+	southEast = 8
+
+	# flow of river on south-east edge
+	northEast = 16
+	southWest = 32
+
+
+class River:
+	def __init__(self, name: str):
+		self._name = name
+
+	def name(self) -> str:
+		return self._name
 
 
 class Tile:
@@ -52,8 +73,11 @@ class Tile:
 		self._featureValue = FeatureType.none
 		self._resourceValue = ResourceType.none  # property is hidden
 		self._resourceQuantity = 0
+
+		# river
 		self._riverValue = 0
 		self._riverName = None
+
 		self._climateZone = ClimateZone.temperate
 		self._route = RouteType.none
 		self._improvementValue = ImprovementType.none
@@ -211,7 +235,7 @@ class Tile:
 		elif direction == HexDirection.northWest:
 			return target.isRiverInSouthEast()
 
-	def setRiver(self, river, flow: FlowDirection):
+	def setRiver(self, river: River, flow: FlowDirection):
 		self._riverName = river.name()
 		self.setRiverFlow(flow)
 
@@ -233,21 +257,18 @@ class Tile:
 
 	def isRiverInNorth(self):
 		"""river in north can flow from east or west direction"""
-		# 0x01 => east
-		# 0x02 => west
-		return self._riverValue & 0x01 > 0 or self._riverValue & 0x02 > 0
+		return self._riverValue & int(FlowDirection.east.value) > 0 or \
+			self._riverValue & int(FlowDirection.west.value) > 0
 
 	def isRiverInNorthEast(self):
 		"""river in north-east can flow to northwest or southeast direction"""
-		# 0x04 => northWest
-		# 0x08 => southEast
-		return self._riverValue & 0x04 > 0 or self._riverValue & 0x08 > 0
+		return self._riverValue & int(FlowDirection.northWest.value) > 0 or \
+			self._riverValue & int(FlowDirection.southEast.value) > 0
 
 	def isRiverInSouthEast(self):
 		"""river in south-east can flow to northeast or southwest direction"""
-		# 0x16 => northWest
-		# 0x32 => southEast
-		return self._riverValue & 0x10 > 0 or self._riverValue & 0x20 > 0
+		return self._riverValue & int(FlowDirection.northEast.value) > 0 or \
+			self._riverValue & int(FlowDirection.southWest.value) > 0
 
 	def hasAnyRoute(self):
 		return self._route != RouteType.none
@@ -727,17 +748,11 @@ class Tile:
 		return AppealLevel.fromAppeal(self.appeal(simulation))
 
 	def setRiverFlow(self, flow):
-		if flow == FlowDirection.northEast:
+		if flow == FlowDirection.northEast or flow == FlowDirection.southWest:
 			self.setRiverFlowInSouthEast(flow)
-		elif flow == FlowDirection.southWest:
-			self.setRiverFlowInSouthEast(flow)
-		elif flow == FlowDirection.northWest:
+		elif flow == FlowDirection.northWest or flow == FlowDirection.southEast:
 			self.setRiverFlowInNorthEast(flow)
-		elif flow == FlowDirection.southEast:
-			self.setRiverFlowInNorthEast(flow)
-		elif flow == FlowDirection.east:
-			self.setRiverFlowInNorth(flow)
-		elif flow == FlowDirection.west:
+		elif flow == FlowDirection.east or flow == FlowDirection.west:
 			self.setRiverFlowInNorth(flow)
 		else:
 			raise Exception(f'flow: {flow}')
@@ -795,6 +810,37 @@ class Tile:
 			return True
 
 		return False
+
+	def isRiverIn(self, flow: FlowDirection) -> bool:
+		return self._riverValue & int(flow.value) > 0
+
+	def setRiverFlowInNorth(self, flow: FlowDirection):
+		if flow != FlowDirection.east and flow != FlowDirection.west:
+			raise Exception(f'{flow} unsupported in north')
+
+		if not self.isRiverIn(flow):
+			self._riverValue += int(flow.value)
+
+		return
+
+	def setRiverFlowInSouthEast(self, flow: FlowDirection):
+		if flow != FlowDirection.northEast and flow != FlowDirection.southWest:
+			raise Exception(f'{flow} unsupported in southEast')
+
+		if not self.isRiverIn(flow):
+			self._riverValue += int(flow.value)
+
+		return
+
+	def setRiverFlowInNorthEast(self, flow:  FlowDirection):
+		if flow != FlowDirection.northWest and flow != FlowDirection.southEast:
+			raise Exception(f'{flow} unsupported in northEast')
+
+		if not self.isRiverIn(flow):
+			self._riverValue += int(flow.value)
+
+		return
+
 
 class TileStatistics:
 	def __init__(self):

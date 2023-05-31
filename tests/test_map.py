@@ -8,7 +8,7 @@ from game.types import TechType
 from map.base import Array2D, HexPoint, HexCube, HexDirection, Size, BoundingBox, HexArea
 from map.generation import MapOptions, MapGenerator, HeightMap
 from map.improvements import ImprovementType
-from map.map import Tile, Map
+from map.map import Tile, Map, FlowDirection, River
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, AStarPathfinder, MoveTypeIgnoreUnitsPathfinderDataSource
 from map.types import FeatureType, TerrainType, UnitMovementType, MapSize, MapType, AppealLevel, ResourceType
 from tests.testBasics import UserInterfaceMock, MapMock
@@ -365,7 +365,7 @@ class TestTile(unittest.TestCase):
 
 	def test_river_ne(self):
 		tile = Tile(HexPoint(3, 2), TerrainType.tundra)
-		tile._riverValue = 4
+		tile.setRiverFlowInNorthEast(FlowDirection.northWest)
 
 		self.assertEqual(tile.isRiverInNorth(), False)
 		self.assertEqual(tile.isRiverInNorthEast(), True)
@@ -528,7 +528,6 @@ class TestMap(unittest.TestCase):
 	def test_sight(self):
 		# GIVEN
 		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
 
 		player = Player(LeaderType.trajan, human=True)
 		player.initialize()
@@ -543,6 +542,26 @@ class TestMap(unittest.TestCase):
 		# THEN
 		self.assertEqual(discoveredBefore, False)
 		self.assertEqual(discoveredAfter, True)
+
+	def test_isRiverToCrossTowards_ns(self):
+		# GIVEN
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+
+		tileNorth = mapModel.tileAt(HexPoint(3, 1))
+		tileSouth = mapModel.tileAt(HexPoint(3, 2))
+
+		# WHEN
+		riverNorthSouthBefore = tileNorth.isRiverToCrossTowards(tileSouth)
+		riverSouthNorthBefore = tileSouth.isRiverToCrossTowards(tileNorth)
+		tileSouth.setRiver(River('Spree'), FlowDirection.west)
+		riverNorthSouthAfter = tileNorth.isRiverToCrossTowards(tileSouth)
+		riverSouthNorthAfter = tileSouth.isRiverToCrossTowards(tileNorth)
+
+		# THEN
+		self.assertEqual(riverNorthSouthBefore, False)
+		self.assertEqual(riverSouthNorthBefore, False)
+		self.assertEqual(riverNorthSouthAfter, True)
+		self.assertEqual(riverSouthNorthAfter, True)
 
 
 class TestMapGenerator(unittest.TestCase):

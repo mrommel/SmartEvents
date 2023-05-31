@@ -524,15 +524,15 @@ class StartPositioner:
 
 
 class ContinentFinder:
-    NOT_ANALYZED = -2
-    NO_CONTINENT = -1
+    notAnalyzed = -2
+    noContinent = -1
 
     def __init__(self, width: int, height: int):
         self.continentIdentifiers = Array2D(width, height)
-        self.continentIdentifiers.fill(ContinentFinder.NOT_ANALYZED)
+        self.continentIdentifiers.fill(ContinentFinder.notAnalyzed)
 
     def evaluated(self, value) -> bool:
-        return value != ContinentFinder.NOT_ANALYZED and value != ContinentFinder.NO_CONTINENT
+        return value != ContinentFinder.notAnalyzed and value != ContinentFinder.noContinent
 
     def executeOn(self, grid):
         for x in range(self.continentIdentifiers.width):
@@ -583,11 +583,11 @@ class ContinentFinder:
             southPoint = currentPoint.neighbor(HexDirection.southWest)
 
             northContinent = self.continentIdentifiers.values[northPoint.y][northPoint.x] if grid.valid(
-                northPoint) else ContinentFinder.NOT_ANALYZED
+                northPoint) else ContinentFinder.notAnalyzed
             nortwestContinent = self.continentIdentifiers.values[nortwestPoint.y][nortwestPoint.x] if grid.valid(
-                nortwestPoint) else ContinentFinder.NOT_ANALYZED
+                nortwestPoint) else ContinentFinder.notAnalyzed
             southContinent = self.continentIdentifiers.values[southPoint.y][southPoint.x] if grid.valid(
-                southPoint) else ContinentFinder.NOT_ANALYZED
+                southPoint) else ContinentFinder.notAnalyzed
 
             if self.evaluated(northContinent):
                 self.continentIdentifiers.values[y][x] = northContinent
@@ -609,7 +609,7 @@ class ContinentFinder:
             elif self.evaluated(northContinent) and self.evaluated(southContinent) and northContinent != southContinent:
                 self.replace(northContinent, southContinent)
         else:
-            self.continentIdentifiers.values[y][x] = ContinentFinder.NO_CONTINENT
+            self.continentIdentifiers.values[y][x] = ContinentFinder.noContinent
 
     def firstFreeIdentifier(self):
         freeIdentifiers = 256 * bitarray('1')
@@ -624,7 +624,7 @@ class ContinentFinder:
             if freeIdentifiers[index]:
                 return index
 
-        return ContinentFinder.NO_CONTINENT
+        return ContinentFinder.noContinent
 
     def replace(self, oldIdentifier: int, newIdentifier: int):
         for x in range(self.continentIdentifiers.width):
@@ -1027,7 +1027,7 @@ class MapGenerator:
         random.shuffle(points)
 
         for pt in points:
-            tile = grid.tileAt(pt)
+            tile: Tile = grid.tileAt(pt)
 
             if tile.terrain().isWater():
                 continue
