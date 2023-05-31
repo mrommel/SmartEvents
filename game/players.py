@@ -1258,3 +1258,6 @@ class Player:
 	def changeTotalImprovementsBuiltBy(self, change: int):
 		self._totalImprovementsBuilt += change
 
+	def changeUnassignedEnvoysBy(self, envoys: int):
+		pass
+

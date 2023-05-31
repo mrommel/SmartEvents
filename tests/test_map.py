@@ -4,7 +4,7 @@ import unittest
 from game.civilizations import LeaderType
 from game.game import Game
 from game.players import Player
-from game.types import TechType
+from game.types import TechType, CivicType
 from map.base import Array2D, HexPoint, HexCube, HexDirection, Size, BoundingBox, HexArea
 from map.generation import MapOptions, MapGenerator, HeightMap
 from map.improvements import ImprovementType
@@ -388,10 +388,45 @@ class TestTile(unittest.TestCase):
 		mountains_tile = Tile(HexPoint(3, 1), TerrainType.grass)
 		mountains_tile.setFeature(FeatureType.mountains)
 		ocean_tile = Tile(HexPoint(3, 1), TerrainType.shore)
+		naturalWonder_tile = Tile(HexPoint(3, 1), TerrainType.grass)
+		naturalWonder_tile.setFeature(FeatureType.mountKilimanjaro)
 
 		self.assertEqual(grass_tile.movementCost(UnitMovementType.walk, tundra_tile), 1)
 		self.assertEqual(mountains_tile.movementCost(UnitMovementType.walk, tundra_tile), 3)
 		self.assertEqual(ocean_tile.movementCost(UnitMovementType.walk, tundra_tile), UnitMovementType.max.value)
+		self.assertEqual(naturalWonder_tile.movementCost(UnitMovementType.walk, tundra_tile), UnitMovementType.max.value)
+
+	def test_isImpassable(self):
+		naturalWonder_tile = Tile(HexPoint(3, 1), TerrainType.grass)
+		naturalWonder_tile.setFeature(FeatureType.mountKilimanjaro)
+
+		self.assertEqual(naturalWonder_tile.isImpassable(UnitMovementType.walk), True)
+
+	def test_resource_visibility(self):
+		tile = Tile(HexPoint(3, 1), TerrainType.grass)
+		tile._resourceValue = ResourceType.oil
+
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+
+		simulation = Game(mapModel)
+		simulation.userInterface = UserInterfaceMock()
+
+		player = Player(LeaderType.trajan, human=False)
+		player.initialize()
+
+		self.assertEqual(tile.resourceFor(player), ResourceType.none)
+
+		player.techs.discover(TechType.refining, simulation)
+
+		self.assertEqual(tile.resourceFor(player), ResourceType.oil)
+
+		tile._resourceValue = ResourceType.antiquitySite
+
+		self.assertEqual(tile.resourceFor(player), ResourceType.none)
+
+		player.civics.discover(CivicType.naturalHistory, simulation)
+
+		self.assertEqual(tile.resourceFor(player), ResourceType.antiquitySite)
 
 	def test_improvement_getset(self):
 		tile = Tile(HexPoint(3, 2), TerrainType.grass)
@@ -414,6 +449,25 @@ class TestTile(unittest.TestCase):
 
 		tile.setImprovementPillaged(False)
 		self.assertEqual(tile.isImprovementPillaged(), False)
+
+	def test_seeThroughLevel(self):
+		tile = Tile(HexPoint(3, 2), TerrainType.tundra)
+		self.assertEqual(tile.seeThroughLevel(), 0)
+
+		tile.setHills(True)
+		self.assertEqual(tile.seeThroughLevel(), 1)
+
+		tile.setFeature(FeatureType.mountains)
+		self.assertEqual(tile.seeThroughLevel(), 4)
+
+		tile.setHills(False)
+		self.assertEqual(tile.seeThroughLevel(), 3)
+
+		tile.setFeature(FeatureType.forest)
+		self.assertEqual(tile.seeThroughLevel(), 1)
+
+		tile.setHills(True)
+		self.assertEqual(tile.seeThroughLevel(), 2)
 
 
 class TestBoundingBox(unittest.TestCase):
@@ -504,6 +558,42 @@ class TestMap(unittest.TestCase):
 		# GIVEN
 		self.assertEqual(appeal, 0)
 		self.assertEqual(appealLevel, AppealLevel.average)
+
+	def test_breathtaking_appeal(self):
+		# GIVEN
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+
+		simulation = Game(mapModel)
+		simulation.userInterface = UserInterfaceMock()
+
+		tile = mapModel.tileAt(HexPoint(3, 3))
+		tile.setFeature(FeatureType.mountains)
+
+		# WHEN
+		appeal = tile.appeal(simulation)
+		appealLevel = tile.appealLevel(simulation)
+
+		# GIVEN
+		self.assertEqual(appeal, 4)
+		self.assertEqual(appealLevel, AppealLevel.breathtaking)
+
+	def test_breathtaking_appeal2(self):
+		# GIVEN
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+
+		simulation = Game(mapModel)
+		simulation.userInterface = UserInterfaceMock()
+
+		tile = mapModel.tileAt(HexPoint(3, 3))
+		tile.setFeature(FeatureType.mountKilimanjaro)
+
+		# WHEN
+		appeal = tile.appeal(simulation)
+		appealLevel = tile.appealLevel(simulation)
+
+		# GIVEN
+		self.assertEqual(appeal, 5)
+		self.assertEqual(appealLevel, AppealLevel.breathtaking)
 
 	def test_discovery(self):
 		# GIVEN

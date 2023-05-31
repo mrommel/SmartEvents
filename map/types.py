@@ -1072,11 +1072,12 @@ class ResourceType(ExtendedEnum):
 
 		# artifacts
 		elif self == ResourceType.antiquitySite:
+			#
 			return ResourceTypeData(
 				name='Antiquity Site',
 				usage=ResourceUsage.artifacts,
 				revealTech=None,
-				revealCivic=None,
+				revealCivic=CivicType.naturalHistory,
 				placementOrder=-1,
 				baseAmount=0,
 				placeOnHills=True,
@@ -1094,7 +1095,7 @@ class ResourceType(ExtendedEnum):
 				name='Shipwreck',
 				usage=ResourceUsage.artifacts,
 				revealTech=None,
-				revealCivic=None,
+				revealCivic=CivicType.culturalHeritage,
 				placementOrder=-1,
 				baseAmount=0,
 				placeOnHills=False,

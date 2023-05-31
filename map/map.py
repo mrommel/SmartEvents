@@ -139,13 +139,13 @@ class Tile:
 			reveal_tech = self._resourceValue.revealTech()
 			if reveal_tech is not None:
 				if player is not None:
-					if not player.has(reveal_tech):
+					if not player.hasTech(reveal_tech):
 						valid = False
 
 			reveal_civic = self._resourceValue.revealCivic()
 			if reveal_civic is not None:
 				if player is not None:
-					if not player.has(reveal_civic):
+					if not player.hasCivic(reveal_civic):
 						valid = False
 
 			if valid:

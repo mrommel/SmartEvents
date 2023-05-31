@@ -659,3 +659,6 @@ class Game:
 				return True
 
 		return False
+
+	def checkArchaeologySites(self):
+		pass
