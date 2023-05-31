@@ -42,7 +42,6 @@ class MapSize(Enum):
 	def size(self) -> Size:
 		return self._data().size
 
-
 	def numberOfPlayers(self):
 		return self._data().numPlayers
 
@@ -688,13 +687,13 @@ class ResourceUsage(ExtendedEnum):
 
 
 class ResourceTypeData:
-	def __init__(self, name: str, usage: ResourceUsage, reveal_tech, reveal_civic, placement_order: int,
+	def __init__(self, name: str, usage: ResourceUsage, revealTech, revealCivic, placement_order: int,
 	             base_amount: int, place_on_hills: bool, place_on_river_side: bool, place_on_flatlands: bool,
 	             place_on_features, place_on_feature_terrains, place_on_terrains, yields: Yields):
 		self.name = name
 		self.usage = usage
-		self.reveal_tech = reveal_tech
-		self.reveal_civic = reveal_civic
+		self.revealTech = revealTech
+		self.revealCivic = revealCivic
 		self.placement_order = placement_order
 		self.base_amount = base_amount
 
@@ -773,7 +772,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Wheat',
 				usage=ResourceUsage.bonus,
-				reveal_tech=TechType.pottery,
+				revealTech=TechType.pottery,
 				reveal_civic=None,
 				placement_order=4,
 				base_amount=18,
@@ -789,7 +788,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Rice',
 				usage=ResourceUsage.bonus,
-				reveal_tech=TechType.pottery,
+				revealTech=TechType.pottery,
 				reveal_civic=None,
 				placement_order=4,
 				base_amount=14,
@@ -805,7 +804,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Deer',
 				usage=ResourceUsage.bonus,
-				reveal_tech=TechType.animalHusbandry,
+				revealTech=TechType.animalHusbandry,
 				reveal_civic=None,
 				placement_order=4,
 				base_amount=16,
@@ -821,7 +820,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Sheep',
 				usage=ResourceUsage.bonus,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=4,
 				base_amount=20,
@@ -837,7 +836,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Copper',
 				usage=ResourceUsage.bonus,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=4,
 				base_amount=6,
@@ -853,7 +852,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Stone',
 				usage=ResourceUsage.bonus,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=4,
 				base_amount=12,
@@ -869,7 +868,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Banana',
 				usage=ResourceUsage.bonus,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=4,
 				base_amount=2,
@@ -885,7 +884,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Cattle',
 				usage=ResourceUsage.bonus,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=4,
 				base_amount=22,
@@ -901,7 +900,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Fish',
 				usage=ResourceUsage.bonus,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=4,
 				base_amount=36,
@@ -919,7 +918,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Citrus',
 				usage=ResourceUsage.luxury,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=3,
 				base_amount=2,
@@ -935,7 +934,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Whales',
 				usage=ResourceUsage.luxury,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=3,
 				base_amount=6,
@@ -953,7 +952,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Horses',
 				usage=ResourceUsage.strategic,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=1,
 				base_amount=14,
@@ -969,7 +968,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Iron',
 				usage=ResourceUsage.strategic,
-				reveal_tech=TechType.bronzeWorking,
+				revealTech=TechType.bronzeWorking,
 				reveal_civic=None,
 				placement_order=0,
 				base_amount=12,
@@ -986,7 +985,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Coal',
 				usage=ResourceUsage.strategic,
-				reveal_tech=TechType.industrialization,
+				revealTech=TechType.industrialization,
 				reveal_civic=None,
 				placement_order=2,
 				base_amount=10,
@@ -1002,7 +1001,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Oil',
 				usage=ResourceUsage.strategic,
-				reveal_tech=TechType.refining,
+				revealTech=TechType.refining,
 				reveal_civic=None,
 				placement_order=2,
 				base_amount=8,
@@ -1018,7 +1017,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Aluminum',
 				usage=ResourceUsage.strategic,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=2,
 				base_amount=8,
@@ -1034,7 +1033,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Uranium',
 				usage=ResourceUsage.strategic,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=2,
 				base_amount=4,
@@ -1056,7 +1055,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Niter',
 				usage=ResourceUsage.strategic,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=2,
 				base_amount=8,
@@ -1074,7 +1073,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Antiquity Site',
 				usage=ResourceUsage.artifacts,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=-1,
 				base_amount=0,
@@ -1092,7 +1091,7 @@ class ResourceType(ExtendedEnum):
 			return ResourceTypeData(
 				name='Shipwreck',
 				usage=ResourceUsage.artifacts,
-				reveal_tech=None,
+				revealTech=None,
 				reveal_civic=None,
 				placement_order=-1,
 				base_amount=0,
@@ -1136,14 +1135,14 @@ class ResourceType(ExtendedEnum):
 			returns the tech that reveals the resource
 			:return: tech that is needed to reveal the resource
 		"""
-		return self._data().reveal_tech
+		return self._data().revealTech
 
 	def revealCivic(self):
 		"""
 			returns the civic that reveals the resource
 			:return: civic that is needed to reveal the resource
 		"""
-		return self._data().reveal_civic
+		return self._data().revealCivic
 
 	def texture(self) -> str:
 		# default
