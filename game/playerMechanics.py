@@ -883,6 +883,15 @@ class DiplomaticPlayerDict:
 		else:
 			raise Exception("not gonna happen")
 
+	def isAtWarWith(self, otherPlayer):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			return item.warState != PlayerWarStateType.none
+
+		return False
+
 
 class DiplomacyAI:
 	def __init__(self, player):
@@ -1316,6 +1325,19 @@ class DiplomacyAI:
 
 	def doCounters(self, simulation):
 		pass
+
+	def isAtWarWith(self, otherPlayer) -> bool:
+		# player is not at war with his self
+		if self.player.isEqualTo(otherPlayer):
+			return False
+
+		if self.player.isBarbarian():
+			return True
+
+		if otherPlayer.isBarbarian():
+			return True
+
+		return self.playerDict.isAtWarWith(otherPlayer)
 
 
 class DiplomacyRequests:

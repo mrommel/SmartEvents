@@ -307,6 +307,9 @@ class Player:
 	def initialize(self):
 		self.setupFlavors()
 
+	def __repr__(self):
+		return f'Player({self.leader}, {self.leader.civilization()}, {("Human" if self.human else "AI")})'
+
 	def doTurn(self, simulation):
 		self.doEurekas(simulation)
 		self.doResourceStockpile(simulation)
@@ -824,7 +827,7 @@ class Player:
 
 	def verifyAlive(self, simulation):
 		if self.isAlive():
-			if not self.isBarbarian(): # and not self.isFreeCity():
+			if not self.isBarbarian():  # and not self.isFreeCity():
 				if self.numberOfCities(simulation) == 0 and self.numberOfUnits(simulation) == 0:
 					self.setAliveTo(False, simulation)
 		else:

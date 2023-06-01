@@ -72,6 +72,9 @@ class CityStrategyType(ExtendedEnum):
 	def obsoleteTech(self) -> Optional[TechType]:
 		return self._data().obsoleteTech
 
+	def flavorModifiers(self) -> [Flavor]:
+		return self._data().flavorModifiers
+
 	def weightThreshold(self) -> int:
 		return self._data().weightThreshold
 
@@ -460,7 +463,7 @@ class CityStrategyType(ExtendedEnum):
 			numImprovedResources = 0
 
 			# Look at all Tiles this City could potentially work to see if there are any Water Resources that could be improved
-			for pt in city.location.areaWithRadius(3):  # City.radius - causes circular import
+			for pt in city.location.areaWithRadius(3):  # City.workRadius - causes circular import
 				tile = simulation.tileAt(pt)
 				if tile is not None:
 					if tile.hasOwner() and tile.owner().leader == city.player.leader:
@@ -585,7 +588,7 @@ class CityStrategyType(ExtendedEnum):
 				# the same turn and both want Workboats for it; By the time this Strategy is called for a City
 				# another City isn't guaranteed to have popped its previous order and registered that it's now
 				# training a Workboat! :(
-				if city.cityCitizens.isCanWorkAt(workingTileLocation, simulation):
+				if city.cityCitizens.canWorkAt(workingTileLocation, simulation):
 					# Does this Tile already have a Resource, and if so, is it already improved?
 					if loopPlot.resourceFor(city.player) != FeatureType.none and loopPlot.improvement() == ImprovementType.none:
 						numUnimprovedWaterResources += 1
@@ -598,7 +601,7 @@ class CityStrategyType(ExtendedEnum):
 
 		return False
 
-	def _shouldBeActiveEnoughNavalTileImprovement(self, city):
+	def _shouldBeActiveEnoughNavalTileImprovement(self, city) -> bool:
 		""" "Enough Naval Tile Improvement" City Strategy: If we're not running "Need Naval Tile Improvement" then
 		there's no need to worry about it at all"""
 		if not city.cityStrategyAI.adopted(CityStrategyType.needNavalTileImprovement):
@@ -606,20 +609,20 @@ class CityStrategyType(ExtendedEnum):
 
 		return False
 
-	def _shouldBeActiveNeedImprovementFood(self, city, simulation):
+	def _shouldBeActiveNeedImprovementFood(self, city, simulation) -> bool:
 		""" "Need Improvement" City Strategy: if we need to get an improvement that increases a yield amount"""
 		if city.cityStrategyAI.deficientYield(simulation) == YieldType.food:
 			return True
 
 		return False
 
-	def _shouldBeActiveNeedImprovementProduction(self, city, simulation):
+	def _shouldBeActiveNeedImprovementProduction(self, city, simulation) -> bool:
 		if city.cityStrategyAI.deficientYield(simulation) == YieldType.production:
 			return True
 
 		return False
 
-	def _shouldBeActiveHaveTrainingFacility(self, city):
+	def _shouldBeActiveHaveTrainingFacility(self, city) -> bool:
 		if city.buildings.hasBuilding(BuildingType.barracks):
 			return True
 
@@ -628,7 +631,7 @@ class CityStrategyType(ExtendedEnum):
 
 		return False
 
-	def _shouldBeActiveCapitalNeedSettler(self, city, simulation):
+	def _shouldBeActiveCapitalNeedSettler(self, city, simulation) -> bool:
 		""" "Capital Need Settler" City Strategy: have capital build a settler ASAP"""
 		if not city.isCapital():
 			return False
@@ -655,7 +658,7 @@ class CityStrategyType(ExtendedEnum):
 
 		return False
 
-	def _shouldBeActiveCapitalUnderThreat(self, city, simulation):
+	def _shouldBeActiveCapitalUnderThreat(self, city, simulation) -> bool:
 		""" "Capital Under Threat" City Strategy: need military units, don't build buildings!"""
 		if not city.isCapital():
 			return False
@@ -667,16 +670,77 @@ class CityStrategyType(ExtendedEnum):
 
 		return False
 
-	def _shouldBeActiveUnderBlockade(self, city):
+	def _shouldBeActiveUnderBlockade(self, city) -> bool:
 		# fixme
 		return False
 
-	def _shouldBeActiveCoastCity(self, city, simulation):
+	def _shouldBeActiveCoastCity(self, city, simulation) -> bool:
 		""" "Coast City" City Strategy: give a little flavor to this city"""
 		return simulation.isCoastalAt(city.location)
 
-	def _shouldBeActiveRiverCity(self, city, simulation):
+	def _shouldBeActiveRiverCity(self, city, simulation) -> bool:
 		return simulation.riverAt(city.location)
+
+	def _shouldBeActiveMountainCity(self, city, simulation) -> bool:
+		""" "Mountain City" City Strategy: give a little flavor to this city"""
+		# scan the nearby tiles to see if there is a mountain close enough to build an observatory
+		for pt in city.location.areaWithRadius(3):  # City.workRadius - causes circular import
+			tile = simulation.tileAt(pt)
+
+			if tile is not None and tile.hasFeature(FeatureType.mountains):
+				return True
+
+		return False
+
+	def _shouldBeActiveHillCity(self, city, simulation) -> bool:
+		""" "Hill City" City Strategy: give a little flavor to this city"""
+		numHills = 0
+
+		# scan the nearby tiles to see if there are at least *two* hills in the vicinity
+		for pt in city.location.areaWithRadius(3):  # City.workRadius - causes circular import
+			tile = simulation.tileAt(pt)
+
+			if tile is not None and tile.hasOwner() and tile.owner().leader == city.player.leader and tile.isHills():
+				numHills += 1
+
+				if numHills > 1:
+					return True
+
+		return False
+
+	def _shouldBeActiveForestCity(self, city, simulation):
+		""" "Forest City" City Strategy: give a little flavor to this city"""
+		numForests = 0
+
+		# scan the nearby tiles to see if there are at least two forests in the vicinity
+		for pt in city.location.areaWithRadius(3):  # City.workRadius - causes circular import
+			tile = simulation.tileAt(pt)
+
+			if tile is not None and tile.hasOwner() and tile.owner().leader == city.player.leader and \
+				tile.hasFeature(FeatureType.forest):
+				numForests += 1
+
+				if numForests > 1:
+					return True
+
+		return False
+
+	def _shouldBeActiveJungleCity(self, city, simulation):
+		""" "Jungle City" City Strategy: give a little flavor to this city"""
+		numForests = 0
+
+		# scan the nearby tiles to see if there are at least two jungles in the vicinity
+		for pt in city.location.areaWithRadius(3):  # City.workRadius - causes circular import
+			tile = simulation.tileAt(pt)
+
+			if tile is not None and tile.hasOwner() and tile.owner().leader == city.player.leader and \
+				tile.hasFeature(FeatureType.rainforest):
+				numForests += 1
+
+				if numForests > 1:
+					return True
+
+		return False
 
 
 class WeightedFlavorList(WeightedBaseList):

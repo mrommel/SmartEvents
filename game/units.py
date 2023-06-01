@@ -244,7 +244,10 @@ class Unit:
 	def pushMission(self, mission, simulation):
 		self._missions.append(mission)
 
-		print(f">>> pushed mission: {mission.missionType} {mission.target} for {self.unitType}")
+		if mission.target is not None:
+			print(f">>> pushed mission: {mission.missionType} {mission.target} for {self.unitType}")
+		else:
+			print(f">>> pushed mission: {mission.missionType} for {self.unitType}")
 
 		mission.unit = self
 		mission.start(simulation)

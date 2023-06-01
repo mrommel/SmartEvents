@@ -120,6 +120,12 @@ class HexArea:
 	def __iter__(self):
 		return self.points.__iter__()
 
+	def __eq__(self, other):
+		if isinstance(other, HexArea):
+			return self.identifier == other.identifier
+		else:
+			raise Exception(f'HexArea can only be compared to HexArea and not to {type(other)}')
+
 	def boundingBox(self) -> BoundingBox:
 		return self._boundingBox
 

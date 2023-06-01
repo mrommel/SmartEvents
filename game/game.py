@@ -39,7 +39,7 @@ class Game:
 		self.handicap = handicap
 		self._map = map
 		self.userInterface = None
-		self.gameStateValue = GameState.on
+		self._gameStateValue = GameState.on
 
 		# game ai
 		self.barbarianAI = BarbarianAI()
@@ -116,7 +116,7 @@ class Game:
 			# self.testAlive()
 
 			if not self.humanPlayer().isAlive():
-				self.setGameState(GameState.over)
+				self.setGameStateTo(GameState.over)
 
 			# next player ???
 			self.checkPlayerTurnDeactivate()
@@ -203,10 +203,10 @@ class Game:
 		return self.waitDiploPlayer is not None
 
 	def gameState(self) -> GameState:
-		return self.gameStateValue
+		return self._gameStateValue
 
-	def setGameState(self, gameState: GameState):
-		self.gameStateValue = gameState
+	def setGameStateTo(self, gameState: GameState):
+		self._gameStateValue = gameState
 
 	def turnSlice(self) -> int:
 		return self.turnSliceValue
@@ -611,7 +611,7 @@ class Game:
 		if tile.isVisibleTo(player):
 			enemyUnit = self.unitAt(location, unitMapType)
 
-			if player.diplomacyAI.isAtWar(enemyUnit.player):
+			if enemyUnit is not None and player.diplomacyAI.isAtWarWith(enemyUnit.player):
 				return enemyUnit
 
 		return None
@@ -663,5 +663,5 @@ class Game:
 	def checkArchaeologySites(self):
 		pass
 
-	def setGameStateTo(self, gameState: GameState):
-		self.gameStateValue = gameState
+	def isEnemyVisibleAt(self, location: HexPoint, player, unitMapType: UnitMapType = UnitMapType.combat) -> bool:
+		return self.visibleEnemyAt(location, player, unitMapType) is not None

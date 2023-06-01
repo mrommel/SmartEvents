@@ -330,6 +330,22 @@ class CityCitizens:
 
 		return locations
 
+	def canWorkAt(self, location: HexPoint, simulation) -> bool:
+		"""Can our City work a particular CvPlot?"""
+		tile = simulation.tileAt(location)
+
+		if tile.workingCity() is not None and tile.workingCity().location != self.city.location:
+			return False
+
+		yields = tile.yields(self.city.player, ignoreFeature=False)
+		if yields.food <= 0 and yields.production <= 0 and yields.gold <= 0 and yields.science <= 0 and yields.culture <= 0:
+			return False
+
+		if self.isBlockaded(tile, simulation):
+			return False
+
+		return True
+
 	def setWorkedAt(self, location: HexPoint, worked: bool, useUnassignedPool: bool = True):
 		# Tell a City to start or stop working a Plot.  Citizens will go to/from the Unassigned Pool
 		# if the 3rd argument is true
@@ -672,6 +688,23 @@ class CityCitizens:
 
 		return result
 
+	def isBlockaded(self, tile, simulation):
+		"""Is there a naval blockade on this water tile?"""
+		# See if there are any enemy boats near us that are blockading this plot
+		blockadeDistance = 2  # NAVAL_PLOT_BLOCKADE_RANGE
+
+		# Might be a better way to do this that'd be slightly less CPU-intensive
+		for nearbyPoint in tile.point.areaWithRadius(blockadeDistance):
+			nearbyTile = simulation.tileAt(nearbyPoint)
+
+			# Must be water in the same Area
+			if nearbyTile is not None and nearbyTile.terrain().isWater() and nearbyTile.area() == tile.area():
+				# Enemy boat within range to blockade our plot?
+				if simulation.isEnemyVisibleAt(nearbyTile.point, self.city.player):
+					return True
+
+		return False
+
 
 class CityGreatWorks:
 	def __init__(self, city):
@@ -724,6 +757,9 @@ class YieldValues:
 class BuildQueue:
 	def __init__(self):
 		self._items: [BuildableItem] = []
+
+	def __iter__(self):
+		return self._items.__iter__()
 
 	def append(self, buildableItem: BuildableItem):
 		self._items.append(buildableItem)
@@ -1585,7 +1621,7 @@ class City:
 
 		if not self.isProduction() and self.player.isHuman() and not self.isProductionAutomated():
 
-			self.player.notifications().addNotification(NotificationType.productionNeeded, cityName=self.name, location=self.location)
+			self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name, location=self.location)
 			return okay
 
 		# ...

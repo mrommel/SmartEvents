@@ -540,11 +540,13 @@ class TestSimulation(unittest.TestCase):
 
 		playerTrajan.foundCity(HexPoint(4, 5), "Berlin", simulation)
 
+		playerAlexander.foundCity(HexPoint(14, 5), "Potsdam", simulation)
+
 		# WHEN
 		iteration = 0
 		while not(playerAlexander.hasProcessedAutoMoves() and playerAlexander.turnFinished()) and iteration < 25:
 			simulation.update()  # the checks happen here
-			print(f'-- loop -- active player: {simulation.activePlayer()} --', flush=True)
+			print(f'-- loop {iteration} -- active player: {simulation.activePlayer()} --', flush=True)
 
 			if playerAlexander.isTurnActive():
 				playerAlexander.setProcessedAutoMovesTo(True)  # units have moved

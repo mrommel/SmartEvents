@@ -383,7 +383,7 @@ class FeatureType(ExtendedEnum):
 			return FeatureData(
 				name='None',
 				yields=Yields(food=0, production=0, gold=0),
-				isWonder=True,
+				isWonder=False,
 				isRemovable=False
 			)
 		if self == FeatureType.forest or self == FeatureType.pine:

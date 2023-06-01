@@ -1,6 +1,8 @@
 from enum import Enum
+from typing import Optional
 
 from game.ai.baseTypes import MilitaryStrategyType
+from game.cities import City
 from game.civilizations import TraitType
 from game.flavors import Flavors, FlavorType
 from game.unitTypes import UnitDomainType, UnitTaskType, UnitMapType
@@ -360,3 +362,6 @@ class MilitaryAI:
             if self.militaryStrategyAdoption.adopted(militaryStrategyType):
                 for militaryStrategyTypeFlavor in militaryStrategyType.flavorModifiers():
                     self._flavors += militaryStrategyTypeFlavor
+
+    def mostThreatenedCity(self, simulation) -> Optional[City]:
+        return None

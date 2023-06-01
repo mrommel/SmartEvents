@@ -9,7 +9,7 @@ from game.types import TechType, CivicType
 from game.unitTypes import UnitMapType
 from game.units import Unit
 from game.wonders import WonderType
-from map.base import HexPoint, HexDirection, Size, Array2D
+from map.base import HexPoint, HexDirection, Size, Array2D, HexArea
 from map.improvements import ImprovementType
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
 	Tutorials, Yields, AppealLevel
@@ -90,12 +90,16 @@ class Tile:
 		self._owner = None
 		self._workingCity = None
 		self._buildProgressList = WeightedBuildList()
+		self._area = None
 
 	def owner(self) -> Player:
 		return self._owner
 
 	def hasOwner(self) -> bool:
 		return self._owner is not None
+
+	def area(self) -> Optional[HexArea]:
+		return self._area
 
 	def isWater(self):
 		"""
