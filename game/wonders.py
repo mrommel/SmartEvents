@@ -108,6 +108,9 @@ class WonderType(ExtendedEnum):
 	def requiredTech(self) -> Optional[TechType]:
 		return self._data().requiredTech
 
+	def productionCost(self) -> float:
+		return self._data().productionCost
+
 	def _data(self) -> WonderTypeData:
 		# default
 		if self == WonderType.none:

@@ -37,3 +37,28 @@ class TestCityProduction(unittest.TestCase):
 		self.assertNotEqual(city.currentBuildableItem(), None)
 		self.assertEqual(city.currentBuildableItem().buildableType, BuildableType.building)
 		self.assertEqual(city.currentBuildableItem().buildingType, BuildingType.monument)
+
+
+class TestCity(unittest.TestCase):
+	def test_turn(self):
+		# GIVEN
+		mapModel = MapMock(24, 20, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# players
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
+		city.initialize(simulation)
+
+		# WHEN
+		city.doTurn(simulation=simulation)
+
+		# THEN
+		self.assertNotEqual(city.currentBuildableItem(), None)

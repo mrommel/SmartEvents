@@ -781,7 +781,7 @@ class City:
 		self.originalLeaderValue = player.leader
 		self.previousLeaderValue = None
 
-		self.isFeatureSurroundedValue = False
+		self._isFeatureSurroundedValue = False
 		self.threatVal = 0
 		self._garrisonedUnitValue = None
 
@@ -1463,7 +1463,6 @@ class City:
 		self.updateFeatureSurrounded(simulation)
 
 		self.cityStrategy.doTurn(simulation)
-
 		self.cityCitizens.doTurn(simulation)
 
 		#  AI_doTurn();
@@ -1579,11 +1578,21 @@ class City:
 	def setMadeAttackTo(self, madeAttack):
 		pass
 
-	def updateFeatureSurrounded(self, simulation):
-		pass
-
 	def doCheckProduction(self, simulation):
-		pass
+		okay = True
+
+		# ...
+
+		if not self.isProduction() and self.player.isHuman() and not self.isProductionAutomated():
+
+			self.player.notifications().addNotification(NotificationType.productionNeeded, cityName=self.name, location=self.location)
+			return okay
+
+		# ...
+
+		okay = self.cleanUpQueue(simulation)
+
+		return okay
 
 	def doGrowth(self, simulation):
 		# update housing value
@@ -3376,3 +3385,56 @@ class City:
 				return currentProduction.wonderType
 
 		return None
+
+	def canBuildProject(self, projectType: ProjectType) -> bool:
+		return False
+
+	def isFeatureSurrounded(self) -> bool:
+		return self._isFeatureSurroundedValue
+
+	def updateFeatureSurrounded(self, simulation):
+		totalPlots = 0
+		featuredPlots = 0
+
+		# Look two tiles around this city in every direction to see if at least half the plots are covered in a
+		# removable feature
+		range = City.workRadius
+
+		surroundingArea = self.location.areaWithRadius(range)
+
+		for pt in surroundingArea:
+
+			if not simulation.valid(pt):
+				continue
+
+			# Increase total plot count
+			totalPlots += 1
+
+			tile = simulation.tileAt(pt)
+			if tile is not None:
+				hasRemovableFeature = False
+				for feature in list(FeatureType):
+					if tile.hasFeature(feature) and feature.isRemovable():
+						hasRemovableFeature = True
+
+				if hasRemovableFeature:
+					featuredPlots += 1
+
+		# At least half have coverage?
+		if featuredPlots >= totalPlots / 2:
+			self._isFeatureSurroundedValue = True
+		else:
+			self._isFeatureSurroundedValue = False
+
+		return
+
+	def cleanUpQueue(self, simulation) -> bool:
+		"""remove items in the queue that are no longer valid"""
+		okay = True
+
+		for buildItem in self._buildQueue:
+			if not self.canContinueProductionItem(buildItem, simulation):
+				self.buildQueue.removeItem(buildItem)
+				okay = False
+
+		return okay

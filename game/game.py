@@ -662,3 +662,6 @@ class Game:
 
 	def checkArchaeologySites(self):
 		pass
+
+	def setGameStateTo(self, gameState: GameState):
+		self.gameStateValue = gameState

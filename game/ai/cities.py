@@ -1,14 +1,17 @@
 import random
 from typing import Union, Optional
 
+from game.ai.baseTypes import MilitaryStrategyType, PlayerStateAllWars
 from game.buildings import BuildingType
 from game.districts import DistrictType
-from game.flavors import Flavors, FlavorType
+from game.flavors import Flavors, FlavorType, Flavor
 from game.projects import ProjectType
+from game.types import TechType
 from game.unitTypes import UnitTaskType, UnitType
 from game.wonders import WonderType
 from map.base import HexPoint
-from map.types import YieldType
+from map.improvements import ImprovementType
+from map.types import YieldType, FeatureType
 from utils.base import ExtendedEnum, InvalidEnumError, WeightedBaseList
 
 
@@ -19,8 +22,661 @@ class CitySpecializationType(ExtendedEnum):
 	generalEconomic = 'generalEconomic'
 
 
+
+class CityStrategyTypeData:
+	def __init__(self, name: str, requiredTech: Optional[TechType], obsoleteTech: Optional[TechType],
+				 weightThreshold: int, flavorModifiers: [Flavor], flavorThresholdModifiers: [Flavor]):
+		self.name = name
+		self.requiredTech = requiredTech
+		self.obsoleteTech = obsoleteTech
+		self.weightThreshold = weightThreshold
+		self.flavorModifiers = flavorModifiers
+		self.flavorThresholdModifiers = flavorThresholdModifiers
+
+
 class CityStrategyType(ExtendedEnum):
-	pass
+	none = 'none'
+
+	tinyCity = 'tinyCity'
+	smallCity = 'smallCity'
+	mediumCity = 'mediumCity'
+	largeCity = 'largeCity'
+	landLocked = 'landLocked'
+
+	needTileImprovers = 'needTileImprovers'
+	wantTileImprovers = 'wantTileImprovers'
+	enoughTileImprovers = 'enoughTileImprovers'
+	needNavalGrowth = 'needNavalGrowth'
+	needNavalTileImprovement = 'needNavalTileImprovement'
+	enoughNavalTileImprovement = 'enoughNavalTileImprovement'
+	needImprovementFood = 'needImprovementFood'
+	needImprovementProduction = 'needImprovementProduction'
+	haveTrainingFacility = 'haveTrainingFacility'
+	capitalNeedSettler = 'capitalNeedSettler'
+	capitalUnderThreat = 'capitalUnderThreat'
+	underBlockade = 'underBlockade'
+
+	coastCity = 'coastCity'
+	riverCity = 'riverCity'
+	mountainCity = 'mountainCity'
+	hillCity = 'hillCity'
+	forestCity = 'forestCity'
+	jungleCity = 'jungleCity'
+
+	def name(self) -> str:
+		return self._data().name
+
+	def requiredTech(self) -> Optional[TechType]:
+		return self._data().requiredTech
+
+	def obsoleteTech(self) -> Optional[TechType]:
+		return self._data().obsoleteTech
+
+	def weightThreshold(self) -> int:
+		return self._data().weightThreshold
+
+	def weightThresholdModifierFor(self, player) -> int:
+		value = 0
+
+		for flavor in list(FlavorType):
+			value += player.valueOfPersonalityFlavor(flavor) * self.flavorThresholdModifierFor(flavor)
+
+		return value
+
+	def flavorThresholdModifiers(self) -> [Flavor]:
+		return self._data().flavorThresholdModifiers
+
+	def flavorThresholdModifierFor(self, flavorType: FlavorType) -> int:
+		modifier = next(filter(lambda modifierItem: modifierItem.flavorType == flavorType, self.flavorThresholdModifiers()), None)
+		if modifier is not None:
+			return modifier.value
+
+		return 0
+
+	def shouldBeActiveFor(self, city, simulation) -> bool:
+		if self == CityStrategyType.none:
+			return False
+
+		elif self == CityStrategyType.tinyCity:
+			return self._shouldBeActiveTinyCity(city)
+		elif self == CityStrategyType.smallCity:
+			return self._shouldBeActiveSmallCity(city)
+		elif self == CityStrategyType.mediumCity:
+			return self._shouldBeActiveMediumCity(city)
+		elif self == CityStrategyType.largeCity:
+			return self._shouldBeActiveLargeCity(city)
+		elif self == CityStrategyType.landLocked:
+			return self._shouldBeActiveLandLocked(city, simulation)
+
+		elif self == CityStrategyType.needTileImprovers:
+			return self._shouldBeActiveNeedTileImprovers(city, simulation)
+		elif self == CityStrategyType.wantTileImprovers:
+			return self._shouldBeActiveWantTileImprovers(city, simulation)
+		elif self == CityStrategyType.enoughTileImprovers:
+			return self._shouldBeActiveEnoughTileImprovers(city, simulation)
+		elif self == CityStrategyType.needNavalGrowth:
+			return self._shouldBeActiveNeedNavalGrowth(city, simulation)
+		elif self == CityStrategyType.needNavalTileImprovement:
+			return self._shouldBeActiveNeedNavalTileImprovement(city, simulation)
+		elif self == CityStrategyType.enoughNavalTileImprovement:
+			return self._shouldBeActiveEnoughNavalTileImprovement(city)
+		elif self == CityStrategyType.needImprovementFood:
+			return self._shouldBeActiveNeedImprovementFood(city, simulation)
+		elif self == CityStrategyType.needImprovementProduction:
+			return self._shouldBeActiveNeedImprovementProduction(city, simulation)
+		elif self == CityStrategyType.haveTrainingFacility:
+			return self._shouldBeActiveHaveTrainingFacility(city)
+		elif self == CityStrategyType.capitalNeedSettler:
+			return self._shouldBeActiveCapitalNeedSettler(city, simulation)
+		elif self == CityStrategyType.capitalUnderThreat:
+			return self._shouldBeActiveCapitalUnderThreat(city, simulation)
+		elif self == CityStrategyType.underBlockade:
+			return self._shouldBeActiveUnderBlockade(city)
+
+		elif self == CityStrategyType.coastCity:
+			return self._shouldBeActiveCoastCity(city, simulation)
+		elif self == CityStrategyType.riverCity:
+			return self._shouldBeActiveRiverCity(city, simulation)
+		elif self == CityStrategyType.mountainCity:
+			return self._shouldBeActiveMountainCity(city, simulation)
+		elif self == CityStrategyType.hillCity:
+			return self._shouldBeActiveHillCity(city, simulation)
+		elif self == CityStrategyType.forestCity:
+			return self._shouldBeActiveForestCity(city, simulation)
+		elif self == CityStrategyType.jungleCity:
+			return self._shouldBeActiveJungleCity(city, simulation)
+	
+		raise InvalidEnumError(self)
+
+	def _data(self) -> CityStrategyTypeData:
+		if self == CityStrategyType.none:
+			return CityStrategyTypeData(
+				name='None',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+
+		elif self == CityStrategyType.tinyCity:
+			return CityStrategyTypeData(
+				name='tinyCity',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.smallCity:
+			return CityStrategyTypeData(
+				name='smallCity',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.mediumCity:
+			return CityStrategyTypeData(
+				name='mediumCity',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.largeCity:
+			return CityStrategyTypeData(
+				name='largeCity',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.landLocked:
+			return CityStrategyTypeData(
+				name='landLocked',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+
+		elif self == CityStrategyType.needTileImprovers:
+			return CityStrategyTypeData(
+				name='needTileImprovers',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.wantTileImprovers:
+			return CityStrategyTypeData(
+				name='wantTileImprovers',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.enoughTileImprovers:
+			return CityStrategyTypeData(
+				name='enoughTileImprovers',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.needNavalGrowth:
+			return CityStrategyTypeData(
+				name='needNavalGrowth',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.needNavalTileImprovement:
+			return CityStrategyTypeData(
+				name='needNavalTileImprovement',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.enoughNavalTileImprovement:
+			return CityStrategyTypeData(
+				name='enoughNavalTileImprovement',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.needImprovementFood:
+			return CityStrategyTypeData(
+				name='needImprovementFood',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.needImprovementProduction:
+			return CityStrategyTypeData(
+				name='needImprovementProduction',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.haveTrainingFacility:
+			return CityStrategyTypeData(
+				name='haveTrainingFacility',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.capitalNeedSettler:
+			return CityStrategyTypeData(
+				name='capitalNeedSettler',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.capitalUnderThreat:
+			return CityStrategyTypeData(
+				name='capitalUnderThreat',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.underBlockade:
+			return CityStrategyTypeData(
+				name='underBlockade',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+
+		elif self == CityStrategyType.coastCity:
+			return CityStrategyTypeData(
+				name='coastCity',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.riverCity:
+			return CityStrategyTypeData(
+				name='riverCity',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.mountainCity:
+			return CityStrategyTypeData(
+				name='mountainCity',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.hillCity:
+			return CityStrategyTypeData(
+				name='hillCity',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.forestCity:
+			return CityStrategyTypeData(
+				name='forestCity',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+		elif self == CityStrategyType.jungleCity:
+			return CityStrategyTypeData(
+				name='jungleCity',
+				requiredTech=None,
+				obsoleteTech=None,
+				weightThreshold=0,
+				flavorModifiers=[],
+				flavorThresholdModifiers=[]
+			)
+
+		raise InvalidEnumError(self)
+
+	def _shouldBeActiveTinyCity(self, city) -> bool:
+		""" "Tiny City" City Strategy: If a City is under 2 Population tweak a number of different Flavors"""
+		return city.population() == 1
+
+	def _shouldBeActiveSmallCity(self, city) -> bool:
+		""" "Small City" City Strategy: If a City is under 3 Population tweak a number of different Flavors"""
+		return 2 <= city.population() <= 4
+
+	def _shouldBeActiveMediumCity(self, city) -> bool:
+		""" "Medium City" City Strategy: If a City is 8 or above Population boost science"""
+		return 5 <= city.population() <= 11
+
+	def _shouldBeActiveLargeCity(self, city) -> bool:
+		""" "Large City" City Strategy: If a City is 15 or above, boost science a LOT"""
+		return 12 <= city.population()
+
+	def _shouldBeActiveLandLocked(self, city, simulation) -> bool:
+		if not simulation.isCoastalAt(city.location):
+			return True
+
+		return False
+
+	def _shouldBeActiveNeedTileImprovers(self, city, simulation) -> bool:
+		""" "Need Tile Improvers" City Strategy: Do we REALLY need to train some Workers?"""
+		currentNumberOfCities = len(simulation.citiesOf(city.player))
+
+		lastTurnBuilderDisbanded = city.player.economicAI.lastTurnBuilderDisbanded()
+		if lastTurnBuilderDisbanded is not None:
+			if lastTurnBuilderDisbanded > 0 and simulation.currentTurn - lastTurnBuilderDisbanded <= 25:
+				return False
+
+		numberOfBuilders = len(list(filter(lambda unit: unit.task() == UnitTaskType.work, simulation.unitsOf(city.player))))
+		numberOfCities = max(1, int((currentNumberOfCities * 3) / 4))
+		if numberOfBuilders >= numberOfCities:
+			return False
+
+		# If we're losing at war, also return false
+		if city.player.diplomacyAI.stateOfAllWars == PlayerStateAllWars.losing:
+			return False
+
+		# If we're under attack from Barbs and have 1 or fewer Cities and no credible defense then training more
+		# Workers will only hurt us
+		if currentNumberOfCities <= 1:
+			if city.player.militaryAI.adopted(MilitaryStrategyType.eradicateBarbarians) and \
+				city.player.militaryAI.adopted(MilitaryStrategyType.empireDefenseCritical):
+				return False
+
+		moddedNumberOfBuilders = numberOfBuilders * 67
+		moddedNumberOfCities = currentNumberOfCities + len(list(filter(lambda city: city.isFeatureSurrounded(), simulation.citiesOf(city.player))))
+
+		# We have fewer than we think we should, or we have none at all
+		if moddedNumberOfBuilders <= moddedNumberOfCities or moddedNumberOfBuilders == 0:
+			# If we don't have any Workers by turn 30 we really need to get moving
+			if simulation.currentTurn > 30:
+				# AI_CITYSTRATEGY_NEED_TILE_IMPROVERS_DESPERATE_TURN
+				return True
+
+		return False
+
+	def _shouldBeActiveWantTileImprovers(self, city, simulation) -> bool:
+		currentNumberOfCities = len(simulation.citiesOf(city.player))
+
+		lastTurnBuilderDisbanded = city.player.economicAI.lastTurnBuilderDisbanded()
+		if lastTurnBuilderDisbanded is not None:
+			if lastTurnBuilderDisbanded > 0 and simulation.currentTurn - lastTurnBuilderDisbanded <= 25:
+				return False
+
+		playerUnits = simulation.unitsOf(city.player)
+		numSettlers = len(list(filter(lambda unit: unit.task() == UnitTaskType.settle, playerUnits)))
+		numBuilders = len(list(filter(lambda unit: unit.task() == UnitTaskType.work, playerUnits)))
+
+		numberOfCities = max(1, int((currentNumberOfCities * 3) / 4))
+		if numBuilders >= numberOfCities:
+			return False
+
+		# Don't get desperate for training a Builder here unless the City is at least of a certain size
+		if city.population() >= 2:  # AI_CITYSTRATEGY_WANT_TILE_IMPROVERS_MINIMUM_SIZE
+			# If we don't even have 1 builder on map or in a queue, turn this on immediately
+			if numBuilders < 1:
+				return True
+
+
+			weightThresholdModifier = self.weightThresholdModifierFor(city.player)  # 2 Extra Weight per TILE_IMPROVEMENT Flavor
+			perCityThreshold = self.weightThreshold() + weightThresholdModifier  # 40
+
+			numResources = 0
+			numImprovedResources = 0
+
+			# Look at all Tiles this City could potentially work to see if there are any Water Resources that could be improved
+			for pt in city.location.areaWithRadius(3):  # City.radius - causes circular import
+				tile = simulation.tileAt(pt)
+				if tile is not None:
+					if tile.hasOwner() and tile.owner().leader == city.player.leader:
+						if tile.terrain().isLand():
+							if not tile.hasAnyResource(city.player):
+								continue
+
+							improvements = tile.possibleImprovements()
+
+							# no valid build found
+							if len(improvements) == 0:
+								continue
+
+							# already build
+							if tile.hasImprovement(improvements[0]):
+								numImprovedResources += 1
+
+							numResources += 1
+
+			manyUnimproveResources = (2 * (numResources - numImprovedResources)) > numResources
+			multiplier = numberOfCities
+			multiplier += len(list(filter(lambda city: city.isFeatureSurrounded(), simulation.citiesOf(city.player))))
+			if manyUnimproveResources:
+				multiplier += 1
+
+			multiplier += numSettlers
+
+			weightThreshold = (perCityThreshold * multiplier)
+
+			# Do we want more Builders?
+			if (numBuilders * 100) < weightThreshold:
+				return city.player.treasury.value() > 10
+
+		return False
+
+	def _shouldBeActiveEnoughTileImprovers(self, city, simulation):
+		""" "Enough Tile Improvers" City Strategy: This is not a Player Strategy because we only want to prevent the
+		training of new Builders, not nullify new Techs or Policies, which could still be very useful"""
+		lastTurnWorkerDisbanded = city.player.economicAI.lastTurnBuilderDisbanded()
+		if lastTurnWorkerDisbanded is not None and lastTurnWorkerDisbanded >= 0 and \
+			(simulation.currentTurn - lastTurnWorkerDisbanded) <= 10:
+			return True
+
+		if city.cityStrategyAI.adopted(CityStrategyType.needTileImprovers):
+			return False
+
+		numberOfBuilders = city.player.countUnitsWithDefaultTask(UnitTaskType.work, simulation)
+
+		# If it's a minor with at least 1 worker per city, always return true
+		# if (GET_PLAYER(pCity->getOwner()).isMinorCiv())
+		# 	if (iNumBuilders >= kPlayer.getNumCities())
+		# 		return True
+
+		cityStrategy: CityStrategyType = CityStrategyType.enoughTileImprovers
+
+		weightThresholdModifier = cityStrategy.weightThresholdModifierFor(city.player)  # 10 Extra Weight per TILE_IMPROVEMENT Flavor
+		perCityThreshold = cityStrategy.weightThreshold() + weightThresholdModifier // 100
+
+		moddedNumberOfCities = city.player.numberOfCities(simulation) + city.player.countCitiesFeatureSurrounded(simulation)
+		weightThreshold = (perCityThreshold * moddedNumberOfCities)
+
+		# Average Player wants no more than 1.50 Builders per City[150 Weight is Average; range is 100 to 200]
+		if numberOfBuilders * 100 >= weightThreshold:
+			return True
+
+		return False
+
+	def _shouldBeActiveNeedNavalGrowth(self, city, simulation) -> bool:
+		""" "Need Naval Growth" City Strategy: Looks at the Tiles this City can work, and if there are a lot of Ocean
+		tiles prioritizes NAVAL_GROWTH: should give us a Harbor eventually"""
+		numOceanPlots = 0
+		numTotalWorkablePlots = 0
+
+		# Look at all Tiles this City could potentially work
+		for workingTileLocation in city.cityCitizens.workingTileLocations():
+			loopPlot = simulation.tileAt(workingTileLocation)
+
+			if loopPlot is None:
+				continue
+
+			if loopPlot.isCity():
+				continue
+
+			if not city.player.isEqualTo(loopPlot.owner()):
+				continue
+
+			numTotalWorkablePlots += 1
+
+			if loopPlot.isWater() and loopPlot.feature() != FeatureType.lake:
+				numOceanPlots += 1
+
+		if numTotalWorkablePlots > 0:
+			cityStrategy: CityStrategyType = CityStrategyType.needNavalGrowth
+			weightThresholdModifier = cityStrategy.weightThresholdModifierFor(city.player) # -1 Weight per NAVAL_GROWTH Flavor
+			weightThreshold = cityStrategy.weightThreshold() + weightThresholdModifier # 40
+
+			# If at least 35% (Average Player) of a City's workable Tiles are low-food Water then we really should be building a Harbor
+			# [35 Weight is Average; range is 30 to 40]
+			if (numOceanPlots * 100) / numTotalWorkablePlots >= weightThreshold:
+				return True
+
+		return False
+
+	def _shouldBeActiveNeedNavalTileImprovement(self, city, simulation) -> bool:
+		""" "Need Naval Tile Improvement" City Strategy: If there's an unimproved Resource in the water that we could
+		be using, HIGHLY prioritize NAVAL_TILE_IMPROVEMENT in this City: should give us a Workboat in short order"""
+		numUnimprovedWaterResources = 0
+
+		# Look at all Tiles this City could potentially work to see if there are any Water Resources that could
+		# be improved
+		for workingTileLocation in city.cityCitizens.workingTileLocations():
+			loopPlot = simulation.tileAt(workingTileLocation)
+
+			if loopPlot is None:
+				continue
+
+			if not city.player.isEqualTo(loopPlot.owner()):
+				continue
+
+			if loopPlot.isWater():
+				# Only look at Tiles THIS City can use; Prevents issue where two Cities can look at the same tile
+				# the same turn and both want Workboats for it; By the time this Strategy is called for a City
+				# another City isn't guaranteed to have popped its previous order and registered that it's now
+				# training a Workboat! :(
+				if city.cityCitizens.isCanWorkAt(workingTileLocation, simulation):
+					# Does this Tile already have a Resource, and if so, is it already improved?
+					if loopPlot.resourceFor(city.player) != FeatureType.none and loopPlot.improvement() == ImprovementType.none:
+						numUnimprovedWaterResources += 1
+
+		numWaterTileImprovers = city.player.countUnitsWithDefaultTask(UnitTaskType.workerSea, simulation)
+
+		# Are there more Water Resources we can build an Improvement on than we have Naval Tile Improvers?
+		if numUnimprovedWaterResources > numWaterTileImprovers:
+			return True
+
+		return False
+
+	def _shouldBeActiveEnoughNavalTileImprovement(self, city):
+		""" "Enough Naval Tile Improvement" City Strategy: If we're not running "Need Naval Tile Improvement" then
+		there's no need to worry about it at all"""
+		if not city.cityStrategyAI.adopted(CityStrategyType.needNavalTileImprovement):
+			return True
+
+		return False
+
+	def _shouldBeActiveNeedImprovementFood(self, city, simulation):
+		""" "Need Improvement" City Strategy: if we need to get an improvement that increases a yield amount"""
+		if city.cityStrategyAI.deficientYield(simulation) == YieldType.food:
+			return True
+
+		return False
+
+	def _shouldBeActiveNeedImprovementProduction(self, city, simulation):
+		if city.cityStrategyAI.deficientYield(simulation) == YieldType.production:
+			return True
+
+		return False
+
+	def _shouldBeActiveHaveTrainingFacility(self, city):
+		if city.buildings.hasBuilding(BuildingType.barracks):
+			return True
+
+		if city.buildings.hasBuilding(BuildingType.armory):
+			return True
+
+		return False
+
+	def _shouldBeActiveCapitalNeedSettler(self, city, simulation):
+		""" "Capital Need Settler" City Strategy: have capital build a settler ASAP"""
+		if not city.isCapital():
+			return False
+
+		numberOfCities = len(simulation.citiesOf(city.player))
+		numberOfSettlers = city.player.countUnitsWithDefaultTask(UnitTaskType.settle, simulation)
+		numberOfCitiesAndSettlers = numberOfCities + numberOfSettlers
+
+		if numberOfCitiesAndSettlers < 3:
+			if simulation.currentTurn > 100 and city.cityStrategy.adopted(CityStrategyType.capitalUnderThreat):
+				return False
+
+			if city.player.militaryAI.adopted(MilitaryStrategyType.warMobilization):
+				return False
+
+			weightThresholdModifier = self.weightThresholdModifierFor(city.player)
+			weightThreshold = self.weightThreshold() + weightThresholdModifier
+
+			if numberOfCitiesAndSettlers == 1 and simulation.currentTurn * 4 > weightThreshold:
+				return True
+
+			if numberOfCitiesAndSettlers == 2 and simulation.currentTurn > weightThreshold:
+				return True
+
+		return False
+
+	def _shouldBeActiveCapitalUnderThreat(self, city, simulation):
+		""" "Capital Under Threat" City Strategy: need military units, don't build buildings!"""
+		if not city.isCapital():
+			return False
+
+		mostThreatenedCity = city.player.militaryAI.mostThreatenedCity(simulation)
+		if mostThreatenedCity is not None:
+			if mostThreatenedCity.location == city.location and mostThreatenedCity.threatValue() > 200:
+				return True
+
+		return False
+
+	def _shouldBeActiveUnderBlockade(self, city):
+		# fixme
+		return False
+
+	def _shouldBeActiveCoastCity(self, city, simulation):
+		""" "Coast City" City Strategy: give a little flavor to this city"""
+		return simulation.isCoastalAt(city.location)
+
+	def _shouldBeActiveRiverCity(self, city, simulation):
+		return simulation.riverAt(city.location)
 
 
 class WeightedFlavorList(WeightedBaseList):
@@ -341,9 +997,9 @@ class CityStrategyAI:
 			#	cont
 
 			# check tech
-			requiredTech = cityStrategyType.required()
+			requiredTech = cityStrategyType.requiredTech()
 			isTechGiven = True if requiredTech is None else self.city.player.hasTech(requiredTech)
-			obsoleteTech = cityStrategyType.obsolete()
+			obsoleteTech = cityStrategyType.obsoleteTech()
 			isTechObsolete = False if obsoleteTech is None else self.city.player.hasTech(obsoleteTech)
 
 			# Do we already have this CityStrategy adopted?
@@ -552,3 +1208,16 @@ class CityStrategyAI:
 					self.city.startBuildingProject(projectType, projectLocation, simulation)
 
 		return
+
+	def deficientYield(self, simulation) -> YieldType:
+		"""Determines what yield type is in a deficient state. If none, then NO_YIELD is returned"""
+		if self.isDeficientFor(YieldType.food, simulation):
+			return YieldType.food
+		elif self.isDeficientFor(YieldType.production, simulation):
+			return YieldType.production
+
+		return YieldType.none
+
+	def isDeficientFor(self, yieldType: YieldType, simulation) -> bool:
+		# Fixme
+		return False

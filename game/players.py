@@ -26,7 +26,7 @@ from game.states.gossips import GossipType
 from game.states.ui import ScreenType
 from game.tradeRoutes import TradeRoutes
 from game.types import EraType, TechType, CivicType
-from game.unitTypes import UnitMissionType, UnitTaskType, UnitMapType
+from game.unitTypes import UnitMissionType, UnitTaskType, UnitMapType, UnitType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.improvements import ImprovementType
@@ -302,6 +302,7 @@ class Player:
 		self.numberOfGoldenAgesVal: int = 0
 		self._citiesFoundValue: int = 0
 		self._totalImprovementsBuilt: int = 0
+		self._trainedSettlersValue: int = 0
 
 	def initialize(self):
 		self.setupFlavors()
@@ -832,10 +833,10 @@ class Player:
 				self.setAliveTo(True, simulation)
 
 	def numberOfCities(self, simulation) -> int:
-		return simulation.citiesOf(player=self)
+		return len(simulation.citiesOf(player=self))
 
 	def numberOfUnits(self, simulation) -> int:
-		return simulation.unitsOf(player=self)
+		return len(simulation.unitsOf(player=self))
 
 	def setAliveTo(self, alive, simulation):
 		if self.isAliveVal != alive:
@@ -1261,3 +1262,28 @@ class Player:
 	def changeUnassignedEnvoysBy(self, envoys: int):
 		pass
 
+	def productionCostOfUnit(self, unitType: UnitType) -> float:
+		if unitType == UnitType.settler:
+			policyCardModifier: float = 1.0
+
+			# expropriation - Settler cost reduced by 50%. Plot purchase cost reduced by 20 %.
+			if self.government.hasCard(PolicyCardType.expropriation):
+				policyCardModifier -= 0.5
+
+			# The Production cost of a Settler scales according to the following formula, in which x is the number of
+			# Settlers you've trained (including your initial one): 30*x+50
+			return int(float(30 * self._trainedSettlersValue + 50) * policyCardModifier)
+
+		return unitType.productionCost()
+
+	def countUnitsWithDefaultTask(self, taskType: UnitTaskType, simulation) -> int:
+		playerUnits = simulation.unitsOf(self)
+		return len(list(filter(lambda unit: unit.defaultTask() == taskType, playerUnits)))
+
+	def countCitiesFeatureSurrounded(self, simulation) -> int:
+		playerCities = simulation.citiesOf(self)
+		return len(list(filter(lambda city: city.isFeatureSurrounded(), playerCities)))
+
+	def hasDiscoveredNaturalWonder(self) -> bool:
+		# fixme
+		return False

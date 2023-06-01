@@ -1,19 +1,25 @@
 import unittest
 
 from game.ai.cities import WeightedFlavorList, WeightedYieldList, BuildableType, BuildableItemWeights, BuildingWeights, \
-	DistrictWeights, UnitWeights, WonderWeights, CityStrategyAdoptions, CityStrategyType, BuildableItem
+	DistrictWeights, UnitWeights, WonderWeights, CityStrategyAdoptions, CityStrategyType, BuildableItem, CityStrategyAI
+from game.baseTypes import HandicapType
 from game.buildings import BuildingType
-from game.civilizations import WeightedCivilizationList, CivilizationType
+from game.cities import City
+from game.civilizations import WeightedCivilizationList, CivilizationType, LeaderType
 from game.districts import DistrictType
 from game.flavors import FlavorType
+from game.game import Game
 from game.playerMechanics import WeightedCivicList, WeightedTechList
+from game.players import Player
+from game.projects import ProjectType
 from game.states.builds import BuildType
 from game.types import CivicType, TechType
 from game.unitTypes import UnitType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.map import WeightedBuildList
-from map.types import YieldType
+from map.types import YieldType, TerrainType
+from tests.testBasics import UserInterfaceMock, MapMock
 from utils.base import WeightedStringList
 
 
@@ -119,18 +125,23 @@ class TestWeightedList(unittest.TestCase):
 
 class TestBuildableItem(unittest.TestCase):
 	def test_constructor(self):
+		player = Player(LeaderType.trajan, human=True)
+		player.initialize()
+
 		item = BuildableItem(DistrictType.campus, HexPoint(2, 3))
 
 		self.assertEqual(item.buildableType, BuildableType.district)
 		self.assertEqual(item.districtType, DistrictType.campus)
 		self.assertEqual(item.location, HexPoint(2, 3))
+		self.assertEqual(item.productionLeft(player), 54.0)
 		self.assertIsNotNone(item.__repr__())
 
-		item = BuildableItem(BuildingType.palace)
+		item = BuildableItem(BuildingType.monument)
 
 		self.assertEqual(item.buildableType, BuildableType.building)
-		self.assertEqual(item.buildingType, BuildingType.palace)
+		self.assertEqual(item.buildingType, BuildingType.monument)
 		self.assertIsNone(item.location)
+		self.assertEqual(item.productionLeft(player), 60.0)
 		self.assertIsNotNone(item.__repr__())
 
 		item = BuildableItem(UnitType.warrior)
@@ -138,6 +149,7 @@ class TestBuildableItem(unittest.TestCase):
 		self.assertEqual(item.buildableType, BuildableType.unit)
 		self.assertEqual(item.unitType, UnitType.warrior)
 		self.assertIsNone(item.location)
+		self.assertEqual(item.productionLeft(player), 40.0)
 		self.assertIsNotNone(item.__repr__())
 
 		item = BuildableItem(WonderType.colosseum, HexPoint(2, 3))
@@ -145,6 +157,15 @@ class TestBuildableItem(unittest.TestCase):
 		self.assertEqual(item.buildableType, BuildableType.wonder)
 		self.assertEqual(item.wonderType, WonderType.colosseum)
 		self.assertEqual(item.location, HexPoint(2, 3))
+		self.assertEqual(item.productionLeft(player), 400.0)
+		self.assertIsNotNone(item.__repr__())
+
+		item = BuildableItem(ProjectType.none, HexPoint(2, 3))
+
+		self.assertEqual(item.buildableType, BuildableType.project)
+		self.assertEqual(item.projectType, ProjectType.none)
+		self.assertEqual(item.location, HexPoint(2, 3))
+		self.assertEqual(item.productionLeft(player), 0.0)
 		self.assertIsNotNone(item.__repr__())
 
 
@@ -155,3 +176,30 @@ class TestCityStrategyAdoption(unittest.TestCase):
 		for cityStrategyType in list(CityStrategyType):
 			self.assertEqual(adoptions.adopted(cityStrategyType), False)
 			self.assertEqual(adoptions.turnOfAdoption(cityStrategyType), -1)
+
+
+class TestCityStrategyAI(unittest.TestCase):
+	def test_constructor(self):
+		# GIVEN
+		mapModel = MapMock(24, 20, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# players
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
+		city.initialize(simulation)
+
+		cityStrategy = CityStrategyAI(city)
+
+		# WHEN
+		cityStrategy.doTurn(simulation)
+
+		# THEN
+		self.assertIsNotNone(cityStrategy)

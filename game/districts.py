@@ -68,6 +68,9 @@ class DistrictType(ExtendedEnum):
 
 		return 0
 
+	def productionCost(self) -> int:
+		return self._data().productionCost
+
 	def yields(self) -> Yields:
 		return Yields(food=0, production=0, gold=0)
 

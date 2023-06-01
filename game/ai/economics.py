@@ -1,3 +1,5 @@
+from typing import Optional
+
 from utils.base import InvalidEnumError
 from game.ai.economicStrategies import EconomicStrategyType
 from game.ai.militaryStrategies import ReconStateType
@@ -145,3 +147,6 @@ class EconomicAI:
 
     def updatePlots(self, simulation):
         pass
+
+    def lastTurnBuilderDisbanded(self) -> Optional[int]:
+        return None
