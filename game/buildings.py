@@ -155,6 +155,9 @@ class BuildingType(ExtendedEnum):
 	def requiredTech(self) -> TechType:
 		return self._data().requiredTech
 
+	def defense(self):
+		return self._data().defense
+
 	def yields(self) -> Yields:
 		return self._data().yields
 

@@ -60,7 +60,7 @@ class CityDistricts:
 		return len(list(filter(lambda item: item.district != DistrictType.cityCenter, self._items))) > 0
 
 	def hasAnySpecialtyDistrict(self) -> bool:
-		return len(list(filter(lambda item: item.districtisSpecialty(), self._items))) > 0
+		return len(list(filter(lambda item: item.district.isSpecialty(), self._items))) > 0
 
 	def hasDistrict(self, district: DistrictType) -> bool:
 		return len(list(filter(lambda item: item.district == district, self._items))) > 0
@@ -93,10 +93,10 @@ class CityBuildings:
 		if building in self._buildings:
 			raise Exception(f'Error: {building} already build in {self.city.name}')
 
+		self._buildings.append(building)
+
 		self._updateDefense()
 		self.updateHousing()
-
-		self._buildings.append(building)
 
 		# update current health when walls are built
 		if building == BuildingType.ancientWalls or building == BuildingType.medievalWalls or building == BuildingType.renaissanceWalls:
@@ -950,6 +950,9 @@ class City:
 			self.player.setCapitalCity(city=self, simulation=simulation)
 
 		self.setPopulation(newPopulation=1, reassignCitizen=True, simulation=simulation)
+
+	def addHealthPoints(self, healthPoints):
+		self.healthPointsValue += healthPoints
 
 	def featureProduction(self) -> float:
 		return self._featureProductionValue
