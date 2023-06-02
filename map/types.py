@@ -787,28 +787,43 @@ class ResourceType(ExtendedEnum):
 	none = 'none'
 
 	# bonus
-	wheat = 'wheat'
-	rice = 'rice'
-	deer = 'deer'
-	sheep = 'sheep'
-	copper = 'copper'
-	stone = 'stone'  # https://civilization.fandom.com/wiki/Stone_(Civ6)
 	banana = 'banana'
 	cattle = 'cattle'
+	copper = 'copper'
+	crab = 'crab'
+	deer = 'deer'
 	fish = 'fish'
+	rice = 'rice'
+	sheep = 'sheep'
+	stone = 'stone'
+	wheat = 'wheat'
 
 	# luxury
 	citrus = 'citrus'
+	cocoa = 'cocoa'
+	cotton = 'cotton'
+	dyes = 'dyes'
+	furs = 'furs'
+	incense = 'incense'
+	ivory = 'ivory'
+	pearls = 'pearls'
+	salt = 'salt'
+	silk = 'silk'
+	silver = 'silver'
+	spices = 'spices'
+	sugar = 'sugar'
+	tea = 'tea'
 	whales = 'whales'
+	wine = 'wine'
 
 	# strategic
 	horses = 'horses'
-	iron = 'iron'  # https://civilization.fandom.com/wiki/Iron_(Civ6)
-	coal = 'coal'  # https://civilization.fandom.com/wiki/Coal_(Civ6)
-	oil = 'oil'  # https://civilization.fandom.com/wiki/Oil_(Civ6)
-	aluminum = 'aluminum'  # https://civilization.fandom.com/wiki/Aluminum_(Civ6)
-	uranium = 'uranium'  # https://civilization.fandom.com/wiki/Uranium_(Civ6)
-	niter = 'niter'  # https://civilization.fandom.com/wiki/Niter_(Civ6)
+	iron = 'iron'
+	coal = 'coal'
+	oil = 'oil'
+	aluminum = 'aluminum'
+	uranium = 'uranium'
+	niter = 'niter'
 
 	# artifacts
 	antiquitySite = 'antiquitySite'  # https://civilization.fandom.com/wiki/Antiquity_Site_(Civ6)
@@ -843,6 +858,23 @@ class ResourceType(ExtendedEnum):
 			)
 
 		# bonus
+		if self == ResourceType.crab:
+			# https://civilization.fandom.com/wiki/Crabs_(Civ6)
+			return ResourceTypeData(
+				name="Crab",
+				usage=ResourceUsage.bonus,
+				revealTech=TechType.sailing,
+				revealCivic=None,
+				placementOrder=4,
+				baseAmount=8,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=False,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.shore],
+				yields=Yields(food=0, production=0, gold=2)
+			)
 		if self == ResourceType.wheat:
 			return ResourceTypeData(
 				name='Wheat',
@@ -989,7 +1021,9 @@ class ResourceType(ExtendedEnum):
 			)
 
 		# luxury
+
 		elif self == ResourceType.citrus:
+			# https://civilization.fandom.com/wiki/Citrus_(Civ6)
 			return ResourceTypeData(
 				name='Citrus',
 				usage=ResourceUsage.luxury,
@@ -1005,7 +1039,229 @@ class ResourceType(ExtendedEnum):
 				placeOnTerrains=[TerrainType.grass, TerrainType.plains],
 				yields=Yields(food=2, production=0, gold=0)
 			)
+		elif self == ResourceType.cocoa:
+			# https://civilization.fandom.com/wiki/Cocoa_(Civ6)
+			return ResourceTypeData(
+				name="Cocoa",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.irrigation,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=2,
+				placeOnHills=True,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.rainforest],  # only on rainforest
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains],
+				yields=Yields(food=1, production=0, gold=1)
+			)
+		elif self == ResourceType.cotton:
+			# https://civilization.fandom.com/wiki/Cotton_(Civ6)
+			return ResourceTypeData(
+				name="Cotton",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.irrigation,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=1,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains],
+				yields=Yields(food=0, production=0, gold=3)
+			)
+		elif self == ResourceType.dyes:
+			# https://civilization.fandom.com/wiki/Dyes_(Civ6)
+			return ResourceTypeData(
+				name="Dyes",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.irrigation,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=2,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.rainforest, FeatureType.forest],  # only on rainforest
+				placeOnFeatureTerrains=[TerrainType.grass, TerrainType.plains],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains],
+				yields=Yields(food=0, production=0, gold=0, faith=1)
+			)
+		elif self == ResourceType.furs:
+			# https://civilization.fandom.com/wiki/Furs_(Civ6)
+			return ResourceTypeData(
+				name="Furs",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.animalHusbandry,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=12,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.forest],
+				placeOnFeatureTerrains=[TerrainType.grass, TerrainType.plains, TerrainType.tundra, TerrainType.snow],
+				placeOnTerrains=[TerrainType.tundra],
+				yields=Yields(food=1, production=0, gold=1)
+			)
+		elif self == ResourceType.incense:
+			# https://civilization.fandom.com/wiki/Incense_(Civ6)
+			return ResourceTypeData(
+				name="Incense",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.irrigation,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=4,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.plains, TerrainType.desert],
+				yields=Yields(food=0, production=0, gold=0, faith=1)
+			)
+		elif self == ResourceType.ivory:
+			# https://civilization.fandom.com/wiki/Ivory_(Civ6)
+			return ResourceTypeData(
+				name="Ivory",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.animalHusbandry,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=4,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.plains, TerrainType.desert],
+				yields=Yields(food=0, production=1, gold=1)
+			)
+		elif self == ResourceType.pearls:
+			# https://civilization.fandom.com/wiki/Pearls_(Civ6)
+			return ResourceTypeData(
+				name="Pearls",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.sailing,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=6,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=False,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.shore],
+				yields=Yields(food=0, production=0, gold=0, faith=1)
+			)
+		elif self == ResourceType.salt:
+			# https://civilization.fandom.com/wiki/Salt_(Civ6)
+			return ResourceTypeData(
+				name="Salt",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.mining,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=2,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.plains, TerrainType.desert, TerrainType.tundra],
+				yields=Yields(food=1, production=0, gold=1)
+			)
+		elif self == ResourceType.silk:
+			# https://civilization.fandom.com/wiki/Silk_(Civ6)
+			return ResourceTypeData(
+				name="Silk",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.irrigation,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=1,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.forest],  # only on forest
+				placeOnFeatureTerrains=[TerrainType.grass, TerrainType.plains],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains],
+				yields=Yields(food=0, production=0, gold=0, faith=1)
+			)
+		elif self == ResourceType.silver:
+			# https://civilization.fandom.com/wiki/Silver_(Civ6)
+			return ResourceTypeData(
+				name="Silver",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.mining,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=10,
+				placeOnHills=True,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.desert, TerrainType.tundra],
+				yields=Yields(food=0, production=0, gold=3)
+			)
+		elif self == ResourceType.spices:
+			# https://civilization.fandom.com/wiki/Spices_(Civ6)
+			return ResourceTypeData(
+				name="Spices",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.irrigation,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=4,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.rainforest],  # only on rainforest
+				placeOnFeatureTerrains=[TerrainType.grass, TerrainType.plains],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains],
+				yields=Yields(food=2, production=0, gold=0)
+			)
+		elif self == ResourceType.sugar:
+			# https://civilization.fandom.com/wiki/Sugar_(Civ6)
+			return ResourceTypeData(
+				name="Sugar",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.irrigation,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=1,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[FeatureType.floodplains, FeatureType.marsh],  # only on rainforest feature
+				placeOnFeatureTerrains=[TerrainType.grass, TerrainType.plains, TerrainType.desert],
+				placeOnTerrains=[],
+				yields=Yields(food=2, production=0, gold=0)
+			)
+		elif self == ResourceType.tea:
+			# https://civilization.fandom.com/wiki/Tea_(Civ6)
+			return ResourceTypeData(
+				name="Tea",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.irrigation,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=2,
+				placeOnHills=True,
+				placeOnRiverSide=False,
+				placeOnFlatlands=False,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass],
+				yields=Yields(food=0, production=0, gold=0, culture=1)
+			)
 		elif self == ResourceType.whales:
+			# https://civilization.fandom.com/wiki/Whales_(Civ6)
 			return ResourceTypeData(
 				name='Whales',
 				usage=ResourceUsage.luxury,
@@ -1021,9 +1277,27 @@ class ResourceType(ExtendedEnum):
 				placeOnTerrains=[TerrainType.shore],
 				yields=Yields(food=0, production=1, gold=1)
 			)
+		elif self == ResourceType.wine:
+			# https://civilization.fandom.com/wiki/Wine_(Civ6)
+			return ResourceTypeData(
+				name="Wine",
+				usage=ResourceUsage.luxury,
+				revealTech=TechType.irrigation,
+				revealCivic=None,
+				placementOrder=3,
+				baseAmount=12,
+				placeOnHills=False,
+				placeOnRiverSide=False,
+				placeOnFlatlands=True,
+				placeOnFeatures=[],
+				placeOnFeatureTerrains=[],
+				placeOnTerrains=[TerrainType.grass, TerrainType.plains],
+				yields=Yields(food=1, production=0, gold=1)
+			)
 
 		# strategic
 		elif self == ResourceType.horses:
+			# https://civilization.fandom.com/wiki/Horses_(Civ6)
 			return ResourceTypeData(
 				name='Horses',
 				usage=ResourceUsage.strategic,
@@ -1040,10 +1314,11 @@ class ResourceType(ExtendedEnum):
 				yields=Yields(food=1, production=1, gold=0)
 			)
 		elif self == ResourceType.iron:
+			# https://civilization.fandom.com/wiki/Iron_(Civ6)
 			return ResourceTypeData(
 				name='Iron',
 				usage=ResourceUsage.strategic,
-				revealTech=TechType.bronzeWorking,
+				revealTech=TechType.mining,
 				revealCivic=None,
 				placementOrder=0,
 				baseAmount=12,
@@ -1057,6 +1332,7 @@ class ResourceType(ExtendedEnum):
 				yields=Yields(food=0, production=0, gold=0, science=1)
 			)
 		elif self == ResourceType.coal:
+			# https://civilization.fandom.com/wiki/Coal_(Civ6)
 			return ResourceTypeData(
 				name='Coal',
 				usage=ResourceUsage.strategic,
@@ -1073,6 +1349,7 @@ class ResourceType(ExtendedEnum):
 				yields=Yields(food=0, production=2, gold=0)
 			)
 		elif self == ResourceType.oil:
+			# https://civilization.fandom.com/wiki/Oil_(Civ6)
 			return ResourceTypeData(
 				name='Oil',
 				usage=ResourceUsage.strategic,
@@ -1089,6 +1366,7 @@ class ResourceType(ExtendedEnum):
 				yields=Yields(food=0, production=3, gold=0)
 			)
 		elif self == ResourceType.aluminum:
+			# https://civilization.fandom.com/wiki/Aluminum_(Civ6)
 			return ResourceTypeData(
 				name='Aluminum',
 				usage=ResourceUsage.strategic,
@@ -1105,6 +1383,7 @@ class ResourceType(ExtendedEnum):
 				yields=Yields(food=0, production=0, gold=0, science=1)
 			)
 		elif self == ResourceType.uranium:
+			# https://civilization.fandom.com/wiki/Uranium_(Civ6)
 			return ResourceTypeData(
 				name='Uranium',
 				usage=ResourceUsage.strategic,
@@ -1127,6 +1406,7 @@ class ResourceType(ExtendedEnum):
 				yields=Yields(food=0, production=2, gold=0)
 			)
 		elif self == ResourceType.niter:
+			# https://civilization.fandom.com/wiki/Niter_(Civ6)
 			return ResourceTypeData(
 				name='Niter',
 				usage=ResourceUsage.strategic,
@@ -1248,8 +1528,38 @@ class ResourceType(ExtendedEnum):
 		# luxury
 		if self == ResourceType.citrus:
 			return 'resource_citrus@3x.png'
+		if self == ResourceType.cocoa:
+			return 'resource_cocoa@3x.png'
+		if self == ResourceType.cotton:
+			return 'resource_cotton@3x.png'
+		if self == ResourceType.crab:
+			return 'resource_crab@3x.png'
+		if self == ResourceType.dyes:
+			return 'resource_dyes@3x.png'
+		if self == ResourceType.furs:
+			return 'resource_furs@3x.png'
+		if self == ResourceType.incense:
+			return 'resource_incense@3x.png'
+		if self == ResourceType.ivory:
+			return 'resource_ivory@3x.png'
+		if self == ResourceType.pearls:
+			return 'resource_pearls@3x.png'
+		if self == ResourceType.salt:
+			return 'resource_salt@3x.png'
+		if self == ResourceType.silk:
+			return 'resource_silk@3x.png'
+		if self == ResourceType.silver:
+			return 'resource_silver@3x.png'
+		if self == ResourceType.spices:
+			return 'resource_spices@3x.png'
+		if self == ResourceType.sugar:
+			return 'resource_sugar@3x.png'
+		if self == ResourceType.tea:
+			return 'resource_tea@3x.png'
 		if self == ResourceType.whales:
 			return 'resource_whales@3x.png'
+		if self == ResourceType.wine:
+			return 'resource_wine@3x.png'
 
 		# strategic
 		if self == ResourceType.horses:

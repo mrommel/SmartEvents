@@ -160,6 +160,12 @@ class Tile:
 	def hasAnyResourceFor(self, player) -> bool:
 		return self.resourceFor(player) != ResourceType.none
 
+	def hasResource(self, resource: ResourceType, player) -> bool:
+		return self.resourceFor(player) == resource
+
+	def setResource(self, resource: ResourceType):
+		self._resourceValue = resource
+
 	def isImpassable(self, movement_ype):
 		# start with terrain cost
 		terrain_cost = self._terrainValue.movementCost(movement_ype)
@@ -527,7 +533,7 @@ class Tile:
 
 				# Remove Feature
 				if self.hasAnyFeature():
-					if not build.keepsFeature(self.feature()) and build.canRemoveFeature(self.feature()):
+					if not build.keepsFeature(self.feature()) and build.canRemove(self.feature()):
 
 						production, city = self.featureProductionBy(build, player)
 
@@ -843,6 +849,23 @@ class Tile:
 			self._riverValue += int(flow.value)
 
 		return
+
+	def featureProductionBy(self, build: BuildType, player):
+		if self._featureValue == FeatureType.none:
+			return (0, None)
+
+		city = self.workingCity()
+		if city is None:
+			raise Exception("niy - try to find next city to give production to")
+			# return (0, None)
+
+		# base value
+		production = build.productionFromRemovalOf(self._featureValue)
+
+		# Distance mod
+		production -= (max(0, self.point.distance(city.location) - 2) * 5)
+
+		return (production, city)
 
 
 class TileStatistics:

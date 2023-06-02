@@ -74,6 +74,14 @@ class BuildType(ExtendedEnum):
 
 		return False
 
+	def productionFromRemovalOf(self, feature: FeatureType) -> int:
+		featureBuild = next(filter(lambda fb: fb.featureType == feature, self._data().featureBuilds), None)
+
+		if featureBuild is not None:
+			return featureBuild.production
+
+		return 0
+
 	def required(self) -> Optional[TechType]:
 		return self._data().requiredTech
 

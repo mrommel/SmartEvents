@@ -140,14 +140,35 @@ class TestImprovementType(unittest.TestCase):
 		self.assertEqual(farmYields.production, 0)
 		self.assertEqual(farmYields.gold, 0)
 
+		tile = Tile(HexPoint(0, 0), TerrainType.grass)
+		tile.setOwner(player)
+		self.assertEqual(ImprovementType.farm.isPossibleOn(tile), True)
+
 	def test_mine_yields(self):
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+		simulation = Game(mapModel)
+
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
+		player.techs.discover(TechType.mining, simulation)
 
 		mineYields = ImprovementType.mine.yieldsFor(player)
 		self.assertEqual(mineYields.food, 0)
 		self.assertEqual(mineYields.production, 1)
 		self.assertEqual(mineYields.gold, 0)
+
+		tile = Tile(HexPoint(0, 0), TerrainType.grass)
+		self.assertEqual(ImprovementType.mine.isPossibleOn(tile), False)
+
+		tile.setOwner(player)
+		self.assertEqual(ImprovementType.mine.isPossibleOn(tile), False)
+
+		tile.setResource(ResourceType.iron)
+		self.assertEqual(ImprovementType.mine.isPossibleOn(tile), True)
+
+		tile.setResource(ResourceType.none)
+		tile.setHills(True)
+		self.assertEqual(ImprovementType.mine.isPossibleOn(tile), True)
 
 	def test_pasture_yields(self):
 		mapModel = MapMock(10, 10, TerrainType.ocean)
@@ -155,6 +176,7 @@ class TestImprovementType(unittest.TestCase):
 
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
+		player.techs.discover(TechType.animalHusbandry, simulation)
 
 		pastureYields = ImprovementType.pasture.yieldsFor(player)
 		self.assertEqual(pastureYields.food, 0)
@@ -179,32 +201,74 @@ class TestImprovementType(unittest.TestCase):
 		self.assertEqual(pastureYields.production, 3)
 		self.assertEqual(pastureYields.gold, 0)
 
+		tile = Tile(HexPoint(0, 0), TerrainType.grass)
+		self.assertEqual(ImprovementType.pasture.isPossibleOn(tile), False)
+
+		tile.setOwner(player)
+		self.assertEqual(ImprovementType.pasture.isPossibleOn(tile), False)
+
+		tile.setResource(ResourceType.cattle)
+		self.assertEqual(ImprovementType.pasture.isPossibleOn(tile), True)
+
 	def test_plantation_yields(self):
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+		simulation = Game(mapModel)
+
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
+		player.techs.discover(TechType.irrigation, simulation)
 
 		plantationYields = ImprovementType.plantation.yieldsFor(player)
 		self.assertEqual(plantationYields.food, 0)
 		self.assertEqual(plantationYields.production, 0)
 		self.assertEqual(plantationYields.gold, 2)
 
+		tile = Tile(HexPoint(0, 0), TerrainType.grass)
+		tile.setOwner(player)
+		self.assertEqual(ImprovementType.plantation.isPossibleOn(tile), False)
+
+		tile.setResource(ResourceType.citrus)
+		self.assertEqual(ImprovementType.plantation.isPossibleOn(tile), True)
+
 	def test_fishingBoats_yields(self):
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+		simulation = Game(mapModel)
+
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
+		player.techs.discover(TechType.sailing, simulation)
 
 		fishingBoatsYields = ImprovementType.fishingBoats.yieldsFor(player)
 		self.assertEqual(fishingBoatsYields.food, 1)
 		self.assertEqual(fishingBoatsYields.production, 0)
 		self.assertEqual(fishingBoatsYields.gold, 0)
 
+		tile = Tile(HexPoint(0, 0), TerrainType.grass)
+		tile.setOwner(player)
+		self.assertEqual(ImprovementType.fishingBoats.isPossibleOn(tile), False)
+
+		tile.setResource(ResourceType.whales)
+		self.assertEqual(ImprovementType.fishingBoats.isPossibleOn(tile), True)
+
 	def test_camp_yields(self):
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+		simulation = Game(mapModel)
+
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
+		player.techs.discover(TechType.animalHusbandry, simulation)
 
 		campYields = ImprovementType.camp.yieldsFor(player)
 		self.assertEqual(campYields.food, 0)
 		self.assertEqual(campYields.production, 0)
 		self.assertEqual(campYields.gold, 1)
+
+		tile = Tile(HexPoint(0, 0), TerrainType.grass)
+		tile.setOwner(player)
+		self.assertEqual(ImprovementType.camp.isPossibleOn(tile), False)
+
+		tile.setResource(ResourceType.furs)
+		self.assertEqual(ImprovementType.camp.isPossibleOn(tile), True)
 
 
 class TestFeatureType(unittest.TestCase):

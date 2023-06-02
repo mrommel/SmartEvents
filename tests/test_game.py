@@ -22,8 +22,7 @@ from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.states.gossips import GossipType
 from game.types import CivicType, TechType, EraType
-from game.unitMissions import UnitMission
-from game.unitTypes import UnitType, UnitMissionType
+from game.unitTypes import UnitType
 from game.units import Unit, UnitActivityType
 from game.wonders import WonderType
 from map.base import HexPoint
@@ -67,16 +66,16 @@ class TestGameAssets(unittest.TestCase):
 		for district in list(DistrictType):
 			_ = district.name()
 
-			map = MapMock(10, 10, TerrainType.grass)
-			simulation = Game(map=map)
+			mapModel = MapMock(10, 10, TerrainType.grass)
+			simulation = Game(map=mapModel)
 			_ = district.canBuildOn(HexPoint(1, 1), simulation)
 
 	def test_wonders_data(self):
 		for wonder in list(WonderType):
 			_ = wonder.name()
 
-			map = MapMock(10, 10, TerrainType.grass)
-			simulation = Game(map=map)
+			mapModel = MapMock(10, 10, TerrainType.grass)
+			simulation = Game(map=mapModel)
 			_ = wonder.canBuildOn(HexPoint(1, 1), simulation)
 
 	def test_buildings_data(self):

@@ -3,7 +3,7 @@ from typing import Optional
 from game.civilizations import CivilizationType
 from game.flavors import Flavor
 from game.types import TechType, CivicType
-from map.types import Yields, TerrainType, FeatureType
+from map.types import Yields, TerrainType, FeatureType, ResourceType
 from utils.base import ExtendedEnum, InvalidEnumError
 
 
@@ -414,7 +414,7 @@ class ImprovementType(ExtendedEnum):
 
 		raise InvalidEnumError(self)
 
-	def isFarmPossibleOn(self, tile):
+	def isFarmPossibleOn(self, tile) -> bool:
 		"""
 		Farms can be built on non-desert and non-tundra flat lands, which are the most available tiles in Civilization VI.
 		https://civilization.fandom.com/wiki/Farm_(Civ6)
@@ -424,7 +424,7 @@ class ImprovementType(ExtendedEnum):
 		"""
 		owner = tile.owner()
 		if owner is None:
-			raise Exception("can check without owner")
+			return False
 
 		# Initially, it can be constructed only on flatland Grassland, Plains, ...
 		if (tile.terrain() == TerrainType.grass or tile.terrain() == TerrainType.plains) and not tile.isHills():
@@ -440,3 +440,106 @@ class ImprovementType(ExtendedEnum):
 			return True
 
 		return False
+
+	def isMinePossibleOn(self, tile):
+		owner = tile.owner()
+		if owner is None:
+			return False
+
+		if not tile.terrain().isLand():
+			return False
+
+		hasSupportedResource = False
+
+		hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.iron, owner)
+		hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.niter, owner)
+		hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.coal, owner)
+		hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.aluminum, owner)
+		hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.uranium, owner)
+		# hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.diamonds, owner)
+		# hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.jade, owner)
+		# hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.mercury, owner)
+		hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.salt, owner)
+		hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.silver, owner)
+		# hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.amber, for: owner)
+		hasSupportedResource = hasSupportedResource or tile.hasResource(ResourceType.copper, owner)
+
+		# hills or Iron Niter Coal Aluminum Uranium Diamonds Jade Mercury Salt Silver Amber Copper
+		if not tile.isHills() and not hasSupportedResource:
+			return False
+
+		if not owner.hasTech(TechType.mining):
+			return False
+
+		return True
+
+	def isPasturePossibleOn(self, tile) -> bool:
+		owner = tile.owner()
+		if owner is None:
+			return False
+
+		if not owner.hasTech(TechType.animalHusbandry):
+			return False
+
+		requiredResources = [ResourceType.cattle, ResourceType.sheep, ResourceType.horses]
+		hasSupportedResource = False
+
+		for requiredResource in requiredResources:
+			hasSupportedResource = hasSupportedResource or tile.hasResource(requiredResource, owner)
+
+		return hasSupportedResource
+
+	def isPlantationPossibleOn(self, tile) -> bool:
+		owner = tile.owner()
+		if owner is None:
+			return False
+
+		if not owner.hasTech(TechType.irrigation):
+			return False
+
+		# .coffee, .olives, .tobacco
+		requiredResources = [
+			ResourceType.banana, ResourceType.citrus, ResourceType.cocoa, ResourceType.cotton,
+			ResourceType.dyes, ResourceType.incense, ResourceType.silk, ResourceType.spices,
+			ResourceType.sugar, ResourceType.tea, ResourceType.wine
+		]
+		hasSupportedResource = False
+
+		for requiredResource in requiredResources:
+			hasSupportedResource = hasSupportedResource or tile.hasResource(requiredResource, owner)
+
+		return hasSupportedResource
+
+	def isCampPossibleOn(self, tile):
+		owner = tile.owner()
+		if owner is None:
+			return False
+
+		if not owner.hasTech(TechType.animalHusbandry):
+			return False
+
+		# .truffles
+		requiredResources = [ResourceType.deer, ResourceType.furs, ResourceType.ivory]
+		hasSupportedResource = False
+
+		for requiredResource in requiredResources:
+			hasSupportedResource = hasSupportedResource or tile.hasResource(requiredResource, owner)
+
+		return hasSupportedResource
+
+	def isFishingBoatsPossibleOn(self, tile):
+		owner = tile.owner()
+		if owner is None:
+			return False
+
+		if not owner.hasTech(TechType.sailing):
+			return False
+
+		# ResourceType.amber, ResourceType.turtles
+		requiredResources = [ResourceType.fish, ResourceType.whales, ResourceType.pearls, ResourceType.crab]
+		hasSupportedResource = False
+
+		for requiredResource in requiredResources:
+			hasSupportedResource = hasSupportedResource or tile.hasResource(requiredResource, owner)
+
+		return hasSupportedResource
