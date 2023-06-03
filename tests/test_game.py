@@ -244,7 +244,7 @@ class TestCity(unittest.TestCase):
 		goldYield = self.city.goldPerTurn(simulation=self.simulation)
 
 		# THEN
-		self.assertEqual(foodYield, 4.0)
+		self.assertEqual(foodYield, 7.0)
 		self.assertEqual(productionYield, 4.0)
 		self.assertEqual(goldYield, 5.0)
 
@@ -261,7 +261,7 @@ class TestCity(unittest.TestCase):
 		goldYield = self.city.goldPerTurn(simulation=self.simulation)
 
 		# THEN
-		self.assertEqual(foodYield, 5.0)
+		self.assertEqual(foodYield, 8.0)
 		self.assertEqual(productionYield, 4.0)
 		self.assertEqual(goldYield, 5.0)
 
@@ -295,7 +295,7 @@ class TestCity(unittest.TestCase):
 
 		# THEN
 		self.assertEqual(foodBefore, 1.0)
-		self.assertEqual(foodAfter, 1.0)
+		self.assertAlmostEqual(foodAfter, 4.3)
 
 
 class TestPlayerTechs(unittest.TestCase):

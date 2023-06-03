@@ -160,8 +160,8 @@ class PolicyCardType(ExtendedEnum):
 	militaryOrganization = 'militaryOrganization'
 
 	# modern
-	# resourceManagement
-	# propaganda
+	resourceManagement = 'resourceManagement'
+	propaganda = 'propaganda'
 	leveeEnMasse = 'leveeEnMasse'
 	# laissezFaire
 	# marketEconomy
@@ -955,9 +955,31 @@ class PolicyCardType(ExtendedEnum):
 				flavors=[]
 			)
 
+		# ////////////////////
 		# modern
-		# resourceManagement
-		# propaganda
+
+		elif self == PolicyCardType.resourceManagement:
+			# https://civilization.fandom.com/wiki/Resource_Management_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_RESOURCE_MANAGEMENT_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_RESOURCE_MANAGEMENT_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.conservation,
+				obsoleteCivic=None,
+				replace=[],
+				flavors=[]
+			)
+		elif self == PolicyCardType.propaganda:
+			# https://civilization.fandom.com/wiki/Propaganda_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_PROPAGANDA_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_PROPAGANDA_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.massMedia,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.retainers],
+				flavors=[]
+			)
 		elif self == PolicyCardType.leveeEnMasse:
 			# https://civilization.fandom.com/wiki/Lev%C3%A9e_en_Masse_(Civ6)
 			return PolicyCardTypeData(

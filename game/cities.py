@@ -396,7 +396,11 @@ class CityCitizens:
 		return
 
 	def isWorkedAt(self, location: HexPoint) -> bool:
-		# Is our City working a CvPlot?
+		"""Is our City working a CvPlot?"""
+		# city center is always worked
+		if location == self.city.location:
+			return True
+
 		plot: Optional[WorkingPlot] = next((p for p in self._workingPlots if p.location == location), None)
 
 		if plot is None:
@@ -810,7 +814,10 @@ class City:
 		self.everCapitalValue = isCapital
 		self._populationValue = 0
 		self.gameTurnFoundedValue = 0
+
 		self._foodBasketValue = 1.0
+		self._lastTurnFoodEarnedValue = 0.0
+		self._lastTurnFoodHarvestedValue = 0.0
 
 		self.player = player
 		self.leader = player.leader
@@ -1606,7 +1613,16 @@ class City:
 		return self.capitalValue
 
 	def hasOnlySmallFoodSurplus(self) -> bool:
-		return False
+		exceedFood = self._lastTurnFoodEarnedValue - float(self.foodConsumption())
+		return 0.0 < exceedFood < 2.0
+
+	def hasFoodSurplus(self) -> bool:
+		exceedFood = self._lastTurnFoodEarnedValue - float(self.foodConsumption())
+		return 0.0 < exceedFood < 4.0
+
+	def hasEnoughFood(self) -> bool:
+		exceedFood = self._lastTurnFoodEarnedValue - float(self.foodConsumption())
+		return exceedFood > 0.0
 
 	def damage(self) -> int:
 		return 0
@@ -2062,11 +2078,14 @@ class City:
 	def setFoodBasket(self, value):
 		self._foodBasketValue = value
 
-	def setLastTurnFoodEarned(self, foodDiff):
-		pass
+	def lastTurnFoodEarned(self) -> float:
+		return self._lastTurnFoodEarnedValue
 
-	def setLastTurnFoodHarvested(self, foodPerTurn):
-		pass
+	def setLastTurnFoodEarned(self, foodEarned):
+		self._lastTurnFoodEarnedValue = foodEarned
+
+	def setLastTurnFoodHarvested(self, foodHarvested):
+		self._lastTurnFoodHarvestedValue = foodHarvested
 
 	def growthThreshold(self) -> float:
 		# https://forums.civfanatics.com/threads/formula-thread.600534/

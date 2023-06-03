@@ -1,6 +1,6 @@
 import unittest
 
-from game.ai.cities import BuildableType, CityStrategyAdoptions, CityStrategyType
+from game.ai.cities import BuildableType, CityStrategyAdoptions, CityStrategyType, CitySpecializationType
 from game.baseTypes import HandicapType
 from game.buildings import BuildingType
 from game.cities import City
@@ -43,7 +43,7 @@ class TestCityProduction(unittest.TestCase):
 		if city.currentBuildableItem().buildableType == BuildableType.building:
 			self.assertEqual(city.currentBuildableItem().buildingType, BuildingType.monument)
 		elif city.currentBuildableItem().buildableType == BuildableType.unit:
-			self.assertIn(city.currentBuildableItem().unitType, [UnitType.warrior, UnitType.builder, UnitType.slinger])
+			self.assertIn(city.currentBuildableItem().unitType, [UnitType.warrior, UnitType.builder, UnitType.scout, UnitType.slinger])
 
 
 class TestCityDistricts(unittest.TestCase):
@@ -104,6 +104,80 @@ class TestCityBuildings(unittest.TestCase):
 		self.assertEqual(city.buildings.hasBuilding(BuildingType.ancientWalls), True)
 		self.assertEqual(housingBefore, 1.0)
 		self.assertEqual(housingAfter, 2)
+
+
+class TestCityCitizens(unittest.TestCase):
+	def test_turn_small(self):
+		# GIVEN
+		mapModel = MapMock(24, 20, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# players
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=False, player=playerTrajan)
+		city.initialize(simulation)
+
+		# WHEN
+		city.setLastTurnFoodEarned(5)
+		city.cityCitizens.doTurn(simulation=simulation)
+
+		# THEN
+		# self.assertNotEqual(city.currentBuildableItem(), None)
+
+	def test_turn_capital(self):
+		# GIVEN
+		mapModel = MapMock(24, 20, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# players
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
+		city.initialize(simulation)
+
+		# WHEN
+		city.cityStrategy.specializationValue = CitySpecializationType.productionWonder
+		city.setLastTurnFoodEarned(2)
+		city.cityCitizens.doTurn(simulation=simulation)
+
+		# THEN
+		# self.assertNotEqual(city.currentBuildableItem(), None)
+
+	def test_workedTileLocations(self):
+		# GIVEN
+		mapModel = MapMock(24, 20, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# players
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
+		city.initialize(simulation)
+
+		# WHEN
+		workedTileLocations = city.cityCitizens.workedTileLocations()
+
+		# THEN
+		self.assertListEqual(workedTileLocations, [city.location])
 
 
 class TestCity(unittest.TestCase):

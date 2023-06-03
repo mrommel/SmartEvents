@@ -444,6 +444,9 @@ class Tile:
 	def removeImprovement(self):
 		self.setImprovement(ImprovementType.none)
 
+	def doImprovement(self):
+		pass
+
 	def route(self) -> RouteType:
 		return self._route
 
