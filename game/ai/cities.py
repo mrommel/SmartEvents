@@ -824,10 +824,22 @@ class BuildingWeights(WeightedBaseList):
 		for buildingType in list(BuildingType):
 			self.addWeight(0.0, buildingType)
 
+	def reset(self):
+		self.removeAll()
+
+		for buildingType in list(BuildingType):
+			self.addWeight(0.0, buildingType)
+
 
 class DistrictWeights(WeightedBaseList):
 	def __init__(self):
 		super().__init__()
+		for districtType in list(DistrictType):
+			self.addWeight(0.0, districtType)
+
+	def reset(self):
+		self.removeAll()
+
 		for districtType in list(DistrictType):
 			self.addWeight(0.0, districtType)
 
@@ -884,13 +896,17 @@ class UnitWeights(WeightedBaseList):
 
 
 class UnitProductionAI:
-	def __init__(self):
+	def __init__(self, city):
+		self.city = city
 		self.unitWeights = UnitWeights()
 
-	def addWeight(self, weight: int, flavorType: FlavorType):
-		for unitType in list(UnitType):
-			unitWeight = self.unitWeights.weight(unitType)
+		self.initWeights()
 
+	def addWeight(self, weight: int, flavorType: FlavorType):
+		if weight == 0:
+			return
+
+		for unitType in list(UnitType):
 			flavor = next(filter(lambda flavorIterator: flavorIterator.flavorType == flavorType, unitType.flavors()), None)
 			if flavor is not None:
 				self.unitWeights.setWeight(flavor.value * weight, unitType)
@@ -899,6 +915,19 @@ class UnitProductionAI:
 
 	def weight(self, unitType: UnitType) -> float:
 		return self.unitWeights.weight(unitType)
+
+	def initWeights(self):
+		for flavorType in list(FlavorType):
+			if flavorType == FlavorType.none:
+				continue
+
+			leaderFlavor = self.city.player.personalAndGrandStrategyFlavor(flavorType)
+
+			for unitType in list(UnitType):
+				unitFlavor = unitType.flavor(flavorType)
+				self.unitWeights.addWeight(unitFlavor * leaderFlavor, unitType)
+
+		return
 
 
 class WonderWeights(WeightedBaseList):
@@ -1045,7 +1074,7 @@ class CityStrategyAI:
 		self.focusYield = YieldType.none
 
 		self.buildingProductionAI = BuildingProductionAI(city.player)
-		self.unitProductionAI = UnitProductionAI()
+		self.unitProductionAI = UnitProductionAI(city)
 		self.wonderProductionAI = WonderProductionAI(city.player)
 
 		self.specializationValue = CitySpecializationType.generalEconomic

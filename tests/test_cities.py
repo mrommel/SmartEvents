@@ -9,6 +9,7 @@ from game.districts import DistrictType
 from game.game import Game
 from game.governments import GovernmentType
 from game.players import Player
+from game.unitTypes import UnitType
 from map.base import HexPoint
 from map.types import TerrainType
 from tests.testBasics import MapMock, UserInterfaceMock
@@ -37,8 +38,12 @@ class TestCityProduction(unittest.TestCase):
 
 		# THEN
 		self.assertNotEqual(city.currentBuildableItem(), None)
-		self.assertEqual(city.currentBuildableItem().buildableType, BuildableType.building)
-		self.assertEqual(city.currentBuildableItem().buildingType, BuildingType.monument)
+		self.assertIn(city.currentBuildableItem().buildableType, [BuildableType.building, BuildableType.unit])
+
+		if city.currentBuildableItem().buildableType == BuildableType.building:
+			self.assertEqual(city.currentBuildableItem().buildingType, BuildingType.monument)
+		elif city.currentBuildableItem().buildableType == BuildableType.unit:
+			self.assertIn(city.currentBuildableItem().unitType, [UnitType.warrior, UnitType.builder, UnitType.slinger])
 
 
 class TestCityDistricts(unittest.TestCase):

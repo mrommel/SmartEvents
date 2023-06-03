@@ -296,8 +296,16 @@ class UnitType(ExtendedEnum):
 	def movementType(self) -> UnitMovementType:
 		return self._data().movementType
 
-	def flavors(self) -> [Flavor]:
+	def _flavors(self) -> [Flavor]:
 		return self._data().flavors
+
+	def flavor(self, flavorType: FlavorType) -> int:
+		item = next((flavor for flavor in self._flavors() if flavor.flavorType == flavorType), None)
+
+		if item is not None:
+			return item.value
+
+		return 0
 
 	def workRate(self) -> int:
 		# in civ6 builders are building improvements immediately

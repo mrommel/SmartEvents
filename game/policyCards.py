@@ -156,7 +156,7 @@ class PolicyCardType(ExtendedEnum):
 	militaryResearch = 'militaryResearch'
 	# forceModernization
 	# totalWar
-	# expropriation
+	expropriation = 'expropriation'
 	militaryOrganization = 'militaryOrganization'
 
 	# modern
@@ -932,7 +932,17 @@ class PolicyCardType(ExtendedEnum):
 			)
 		# forceModernization
 		# totalWar
-		# expropriation
+		elif self == PolicyCardType.expropriation:
+			# https://civilization.fandom.com/wiki/Expropriation_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_EXPROPRIATION_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_EXPROPRIATION_BONUS",
+				slot=PolicyCardSlot.economic,
+				requiredCivic=CivicType.scorchedEarth,
+				obsoleteCivic=None,
+				replace=[PolicyCardType.colonization, PolicyCardType.landSurveyors],
+				flavors=[]
+			)
 		elif self == PolicyCardType.militaryOrganization:
 			# https://civilization.fandom.com/wiki/Military_Organization_(Civ6)
 			return PolicyCardTypeData(

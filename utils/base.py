@@ -66,6 +66,9 @@ class WeightedBaseList(dict):
 		sumValue = sum(self.values())
 		output = []
 
+		if len(self.items()) > 0 and sumValue == 0.0:
+			raise Exception(f'Cannot distribute weighted array - dict weights sum up to zero')
+
 		for key, value in self.items():
 			amount = int(value * 100.0 / sumValue)
 			for _ in range(amount):
