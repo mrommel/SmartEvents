@@ -826,6 +826,7 @@ class City:
 		self._isFeatureSurroundedValue = False
 		self.threatVal = 0
 		self._garrisonedUnitValue = None
+		self._numberOfAttacksMade = 0
 
 		self.healthPointsValue = 200
 		self.amenitiesForWarWearinessValue = 0
@@ -1624,13 +1625,33 @@ class City:
 		return exceedFood > 0.0
 
 	def damage(self) -> int:
-		return 0
+		return max(0, self.maxHealthPoints() - self.healthPointsValue)
+
+	def maxHealthPoints(self) -> int:
+		healthPointsVal = 200
+
+		if self.buildings.hasBuilding(BuildingType.ancientWalls):
+			healthPointsVal += 100
+
+		if self.buildings.hasBuilding(BuildingType.medievalWalls):
+			healthPointsVal += 100
+
+		if self.buildings.hasBuilding(BuildingType.renaissanceWalls):
+			healthPointsVal += 100
+
+		return healthPointsVal
 
 	def setDamage(self, damage: int):
-		pass
+		self.healthPointsValue = self.maxHealthPoints() - damage
 
-	def setMadeAttackTo(self, madeAttack):
-		pass
+		self.healthPointsValue = max(self.healthPointsValue, self.maxHealthPoints())
+		self.healthPointsValue = min(0, self.healthPointsValue)
+
+	def setMadeAttackTo(self, madeAttack: bool):
+		if madeAttack:
+			self._numberOfAttacksMade += 1
+		else:
+			self._numberOfAttacksMade = 0
 
 	def doCheckProduction(self, simulation):
 		okay = True
