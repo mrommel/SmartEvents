@@ -169,6 +169,9 @@ class WorkingPlot:
 		self.worked = worked
 		self.workedForced = workedForced
 
+	def __repr__(self):
+		return f'WorkingPlot({self.location}, {self.worked} / {self.workedForced})'
+
 
 class CityFocusType(ExtendedEnum):
 	none = 'none'  # NO_CITY_AI_FOCUS_TYPE
@@ -373,7 +376,7 @@ class CityCitizens:
 
 		return
 
-	def forceWorkingPlatAt(self, location: HexPoint, force: bool, simulation):
+	def forceWorkingPlotAt(self, location: HexPoint, force: bool, simulation):
 		"""Tell our City it MUST work a particular CvPlot"""
 		plot = next((p for p in self._workingPlots if p.location == location), None)
 
@@ -381,7 +384,6 @@ class CityCitizens:
 			raise Exception("not a valid plot to check for this city")
 
 		if plot.workedForced != force:
-
 			plot.workedForced = force
 
 			# Change the count of how many are forced
@@ -528,13 +530,13 @@ class CityCitizens:
 			raise Exception('cant get tile')
 
 		value = 0.0
-		yields = tile.yieldsFor(self.city.player, ignoreFeature=False)
+		yields = tile.yields(self.city.player, ignoreFeature=False)
 
 		# Yield Values
 		foodYieldValue = 12 * yields.value(YieldType.food)
 		productionYieldValue = 8 * yields.value(YieldType.production)
 		goldYieldValue = 10 * yields.value(YieldType.gold)
-		scienceYieldValue = 6 * yields.valueOf(YieldType.science)
+		scienceYieldValue = 6 * yields.value(YieldType.science)
 		cultureYieldValue = 8 * yields.culture
 
 		# How much surplus food are we making?
@@ -593,9 +595,6 @@ class CityCitizens:
 	def isAvoidGrowth(self) -> bool:
 		"""Is this City avoiding growth?"""
 		return self._avoidGrowthValue
-
-	def forceWorkingPlotAt(self, worstPlotPoint, force, simulation):
-		pass
 
 	def doVerifyWorkingPlots(self, simulation):
 		pass

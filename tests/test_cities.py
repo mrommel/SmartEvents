@@ -179,6 +179,30 @@ class TestCityCitizens(unittest.TestCase):
 		# THEN
 		self.assertListEqual(workedTileLocations, [city.location])
 
+	def test_turn_forceWorking(self):
+		# GIVEN
+		mapModel = MapMock(24, 20, TerrainType.grass)
+		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# players
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
+		city.initialize(simulation)
+
+		# WHEN
+		city.cityCitizens.forceWorkingPlotAt(HexPoint(4, 4), force=True, simulation=simulation)
+
+		# THEN
+		self.assertEqual(city.cityCitizens.isForcedWorkedAt(HexPoint(4, 4)), True)
+		self.assertEqual(city.cityCitizens.isForcedWorkedAt(HexPoint(4, 6)), False)
+
 
 class TestCity(unittest.TestCase):
 	def test_turn(self):

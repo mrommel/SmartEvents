@@ -120,6 +120,17 @@ class MapType(Enum):
 			)
 
 
+class YieldType(ExtendedEnum):
+	none = 'none'
+
+	food = 'food'
+	production = 'production'
+	gold = 'gold'
+	science = 'science'
+	culture = 'culture'
+	faith = 'faith'
+
+
 class Yields:
 	def __init__(self, food: float, production: float, gold: float, science: float = 0.0, culture: float = 0.0,
 	             faith: float = 0.0, housing: float = 0.0, appeal: float = 0.0):
@@ -147,16 +158,25 @@ class Yields:
 		else:
 			raise Exception(f'type is not accepted {type(other)}')
 
+	def value(self, yieldType: YieldType) -> float:
+		if yieldType == YieldType.food:
+			return self.food
+		if yieldType == YieldType.production:
+			return self.production
+		if yieldType == YieldType.gold:
+			return self.gold
+		if yieldType == YieldType.science:
+			return self.science
+		if yieldType == YieldType.culture:
+			return self.culture
+		if yieldType == YieldType.faith:
+			return self.faith
+		# if yieldType == YieldType.housing:
+		#	return self.housing
+		# if yieldType == YieldType.appeal:
+		#	return self.appeal
 
-class YieldType(ExtendedEnum):
-	none = 'none'
-
-	food = 'food'
-	production = 'production'
-	gold = 'gold'
-	science = 'science'
-	culture = 'culture'
-	faith = 'faith'
+		raise InvalidEnumError(yieldType)
 
 
 class YieldList(WeightedBaseList):
