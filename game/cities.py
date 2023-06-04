@@ -2758,44 +2758,35 @@ class City:
 
 		return scienceFromGovernors
 
-	def _scienceFromEnvoys(self, simulation) -> float:
-		# var scienceFromEnvoys: YieldValues = YieldValues(value: 0.0, percentage: 0.0)
-		# 
-		#         for effect in effects {
-		# 
-		#             // +2 Science Science in the Capital Capital.
-		#             if effect.isEqual(category: .scientific, at: .first) && self.capitalValue {
-		#                 scienceFromEnvoys += YieldValues(value: 2.0)
-		#             }
-		# 
-		#             // +2 Science Science in every Library building.
-		#             if effect.isEqual(category: .scientific, at: .third) && self.has(building: .library) {
-		#                 scienceFromEnvoys += YieldValues(value: 2.0)
-		#             }
-		# 
-		#             // +2 Science Science in every University building.
-		#             if effect.isEqual(category: .scientific, at: .sixth) && self.has(building: .university) {
-		#                 scienceFromEnvoys += YieldValues(value: 2.0)
-		#             }
-		# 
-		#             // taruga suzerain effect
-		#             // Your cities receive +5% [Science] Science for each different Strategic Resource they have.
-		#             if effect.cityState == .taruga && effect.level == .suzerain {
-		#                 let differentResources = float(self.numberOfDifferentStrategicResources(in: gameModel))
-		#                 scienceFromEnvoys += YieldValues(value: 5.0 * differentResources)
-		#             }
-		# 
-		#             // geneva suzerain effect
-		#             // Your cities earn +15% [Science] Science whenever you are not at war with any civilization.
-		#             if effect.cityState == .geneva && effect.level == .suzerain {
-		#                 if player.atWarCount() == 0 {
-		#                     scienceFromEnvoys += YieldValues(value: 0.0, percentage: 0.15)
-		#                 }
-		#             }
-		#         }
-		# 
-		#         return scienceFromEnvoys
-		return 0.0
+	def _scienceFromEnvoys(self, simulation) -> YieldValues:
+		scienceFromEnvoys: YieldValues = YieldValues(value=0.0, percentage=0.0)
+		effects = self.player.envoyEffects(simulation)
+
+		for effect in effects:
+			# +2 Science in the Capital.
+			if effect.isEqualCategory(CityStateCategory.scientific, EnvoyEffectLevel.first) and self.capitalValue:
+				scienceFromEnvoys += YieldValues(value=2.0)
+
+			# +2 Science in every Library building.
+			if effect.isEqualCategory(CityStateCategory.scientific, EnvoyEffectLevel.third) and self.hasBuilding(BuildingType.library):
+				scienceFromEnvoys += YieldValues(value=2.0)
+
+			# +2 Science in every University building.
+			if effect.isEqualCategory(CityStateCategory.scientific, EnvoyEffectLevel.sixth) and self.hasBuilding(BuildingType.university):
+				scienceFromEnvoys += YieldValues(value=2.0)
+			# taruga suzerain effect
+			# Your cities receive +5% Science for each different Strategic Resource they have.
+			if effect.cityState == CityStateType.taruga and effect.level == EnvoyEffectLevel.suzerain:
+				differentResources = float(self.numberOfDifferentStrategicResources(simulation))
+				scienceFromEnvoys += YieldValues(percentage=5.0 * differentResources)
+
+			# geneva suzerain effect
+			# Your cities earn +15% Science whenever you are not at war with any civilization.
+			if effect.cityState == CityStateType.geneva and effect.level == EnvoyEffectLevel.suzerain:
+				if self.player.atWarCount() == 0:
+					scienceFromEnvoys += YieldValues(value=0.0, percentage=0.15)
+
+		return scienceFromEnvoys
 
 	def hasGovernorTitle(self, title: GovernorTitle) -> bool:
 		if self.governor() is not None:

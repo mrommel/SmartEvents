@@ -113,7 +113,7 @@ class CityStateType(ExtendedEnum):
 	# carthage
 	# chinguetti
 	# fez
-	# geneva
+	geneva = 'geneva'
 	# granada
 	# hattusa
 	# hongKong
@@ -197,7 +197,13 @@ class CityStateType(ExtendedEnum):
 		# carthage
 		# chinguetti
 		# fez
-		# geneva
+		if self == CityStateType.geneva:
+			# https://civilization.fandom.com/wiki/Geneva_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_GENEVA_NAME"),
+				category=CityStateCategory.scientific,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_GENEVA_SUZARIN")
+			)
 		# granada
 		# hattusa
 		# hongKong
