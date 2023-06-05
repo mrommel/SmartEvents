@@ -295,7 +295,7 @@ class TestCity(unittest.TestCase):
 
 		# THEN
 		self.assertEqual(foodBefore, 1.0)
-		self.assertAlmostEqual(foodAfter, 4.3)
+		self.assertAlmostEqual(foodAfter, 6.5)
 
 
 class TestPlayerTechs(unittest.TestCase):

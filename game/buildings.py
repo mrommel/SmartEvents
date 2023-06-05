@@ -167,6 +167,12 @@ class BuildingType(ExtendedEnum):
 	def productionCost(self) -> float:
 		return self._data().productionCost
 
+	def specialistCount(self) -> int:
+		if self._data().specialSlots is None:
+			return 0
+
+		return len(self._data().specialSlots)
+
 	def _flavors(self) -> [Flavor]:
 		return self._data().flavors
 

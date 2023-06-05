@@ -195,13 +195,19 @@ class TestCityCitizens(unittest.TestCase):
 		# city
 		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
 		city.initialize(simulation)
+		# city.setPopulation(newPopulation=2, reassignCitizen=True, simulation=simulation)
 
 		# WHEN
-		city.cityCitizens.forceWorkingPlotAt(HexPoint(4, 4), force=True, simulation=simulation)
+		city.cityCitizens.doTurn(simulation)
+		# city.cityCitizens.forceWorkingPlotAt(HexPoint(4, 4), force=True, simulation=simulation)
 
 		# THEN
-		self.assertEqual(city.cityCitizens.isForcedWorkedAt(HexPoint(4, 4)), True)
-		self.assertEqual(city.cityCitizens.isForcedWorkedAt(HexPoint(4, 6)), False)
+		numUnassignedCitizens = city.cityCitizens.numberOfUnassignedCitizens()
+		numCitizensWorkingPlots = city.cityCitizens.numberOfCitizensWorkingPlots()
+		self.assertEqual(numUnassignedCitizens, 0)
+		self.assertEqual(numCitizensWorkingPlots, 1)
+		# self.assertEqual(city.cityCitizens.isForcedWorkedAt(HexPoint(4, 4)), True)
+		# self.assertEqual(city.cityCitizens.isForcedWorkedAt(HexPoint(4, 6)), False)
 
 
 class TestCity(unittest.TestCase):
