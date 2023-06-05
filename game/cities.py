@@ -24,7 +24,7 @@ from game.specialists import SpecialistType
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
-from game.types import EraType, TechType
+from game.types import EraType, TechType, CivicType
 from game.unitTypes import UnitType, UnitClassType
 from game.units import Unit
 from game.wonders import WonderType
@@ -32,7 +32,7 @@ from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType
-from utils.base import ExtendedEnum
+from utils.base import ExtendedEnum, WeightedBaseList
 
 
 class CityDistrictItem:
@@ -186,6 +186,13 @@ class CityFocusType(ExtendedEnum):
 	faith = 'faith'  # CITY_AI_FOCUS_TYPE_FAITH,
 
 
+class SpecialistCountList(WeightedBaseList):
+	def __init__(self):
+		super().__init__()
+		for specialist in list(SpecialistType):
+			self.setWeight(0.0, specialist)
+
+
 class CityCitizens:
 	# Keeps track of Citizens and Specialists in a City
 	def __init__(self, city):
@@ -204,15 +211,15 @@ class CityCitizens:
 		self._forceAvoidGrowthValue = False
 		self._noAutoAssignSpecialistsValue = False
 
-		# self.numberOfSpecialists = SpecialistCountList()
-		# self.numberOfSpecialists.fill()
-		#
+		self.numberOfSpecialists = SpecialistCountList()
 		self.numberOfSpecialistsInBuilding = []
 		self.numberOfForcedSpecialistsInBuilding = []
 
-	#
-	# self.specialistGreatPersonProgress = GreatPersonProgressList()
-	# self.specialistGreatPersonProgress.fill()
+		#
+		# self.specialistGreatPersonProgress = GreatPersonProgressList()
+		# self.specialistGreatPersonProgress.fill()
+		self.numberOfForcedSpecialistsValue = 0
+		self.numberOfDefaultSpecialistsValue = 0
 
 	def initialize(self, simulation):
 		for location in self.city.location.areaWithRadius(radius=City.workRadius):
@@ -654,7 +661,7 @@ class CityCitizens:
 		return False
 
 	def numberOfDefaultSpecialists(self) -> int:
-		return 0
+		return self.numberOfDefaultSpecialistsValue
 
 	def doRemoveWorstSpecialist(self, dontChangeSpecialist: SpecialistType, dontRemoveFromBuilding: BuildingType = BuildingType.none, simulation = None) -> bool:
 		"""Find the worst Specialist and remove him from duty"""
@@ -673,16 +680,25 @@ class CityCitizens:
 		return False
 
 	def numberOfForcedDefaultSpecialists(self) -> int:
-		return 0
+		return self.numberOfForcedSpecialistsValue
 
 	def changeNumberOfDefaultSpecialistsBy(self, delta: int):
-		pass
+		"""Changes how many Default Specialists are assigned in this City"""
+		self.numberOfDefaultSpecialistsValue += delta
+
+		specialistType: SpecialistType = SpecialistType.citizen
+		self.numberOfSpecialists.addWeight(delta, specialistType)
+		self.city.processSpecialist(specialistType, delta)
+
+		self.changeNumberOfUnassignedCitizensBy(-delta)
 
 	def changeNumberOfForcedDefaultSpecialists(self, delta: int):
-		pass
+		"""How many Default Specialists have been forced assigned in this City?"""
+		self.numberOfDefaultSpecialistsValue += delta
 
 	def bestCityPlotWithValue(self, wantBest: bool, wantWorked: bool, simulation) -> (Optional[HexPoint], int):
-		"""Find a Plot the City is either working or not, and the best/worst value for it - this function does "double duty" depending on what the user wants to find"""
+		"""Find a Plot the City is either working or not, and the best/worst value for it - this function does
+		"double duty" depending on what the user wants to find"""
 		bestPlotValue: int = -1
 		bestPlotID: [HexPoint] = None
 
@@ -1501,10 +1517,72 @@ class City:
 		pass
 
 	def doAcquirePlot(self, point: HexPoint, simulation):
-		pass
+		"""Acquire the plot and set its owner to us"""
+		tile = simulation.tileAt(point)
+
+		tile.setOwner(self.player)
+		tile.setWorkingCity(self)
+
+		self.player.addPlotAt(point)
+
+		self.doUpdateCheapestPlotInfluence(simulation)
+
+		# clear barbarian camps / goody huts
+		if tile.hasImprovement(ImprovementType.barbarianCamp):
+			self.player.doClearBarbarianCampAt(tile, simulation)
+		elif tile.hasImprovement(ImprovementType.goodyHut):
+			self.player.doGoodyHutAt(tile, None, simulation)
+
+		# repaint newly acquired tile...
+		simulation.userInterface.refreshTile(tile)
+
+		# ... and neighbors
+		for neighbor in point.neighbors():
+			neighborTile = simulation.tileAt(neighbor)
+
+			if neighborTile is None:
+				continue
+
+			simulation.userInterface.refreshTile(neighborTile)
+
+		return
 
 	def updateEurekas(self, simulation):
-		pass
+		# militaryTraining - Build any district.
+		if not self.player.civics.inspirationTriggeredFor(CivicType.stateWorkforce):
+			if self.districts.hasAny():
+				# city center is taken into account
+				self.player.civics.triggerInspirationFor(CivicType.stateWorkforce, simulation)
+
+		# militaryTraining - Build an Encampment.
+		if not self.player.civics.inspirationTriggeredFor(CivicType.militaryTraining):
+			if self.districts.hasDistrict(DistrictType.encampment):
+				self.player.civics.triggerInspirationFor(CivicType.militaryTraining, simulation)
+
+		# recordedHistory - Build 2 Campus Districts.
+		if not self.player.civics.inspirationTriggeredFor(CivicType.recordedHistory):
+			if self.player.numberOfDistricts(DistrictType.campus, simulation) >= 2:
+				self.player.civics.triggerInspirationFor(CivicType.recordedHistory, simulation)
+
+		# construction - Build water mill.
+		if not self.player.techs.eurekaTriggeredFor(TechType.construction):
+			if self.buildings.hasBuilding(BuildingType.waterMill):
+				self.player.techs.triggerEurekaFor(TechType.construction, simulation)
+
+		# engineering - Build ancient walls
+		if not self.player.techs.eurekaTriggeredFor(TechType.engineering):
+			if self.buildings.hasBuilding(BuildingType.ancientWalls):
+				self.player.techs.triggerEurekaFor(TechType.engineering, simulation)
+
+		# shipBuilding - Own 2 Galleys
+		if not self.player.techs.eurekaTriggeredFor(TechType.shipBuilding):
+			if len(list(filter(lambda unit: unit.unitType == UnitType.galley, simulation.unitsOf(self.player)))) >= 2:
+				self.player.techs.triggerEurekaFor(TechType.shipBuilding, simulation)
+
+		# economics - build 2 banks
+		if not self.player.techs.eurekaTriggeredFor(TechType.economics):
+			if self.player.numberBuildings(BuildingType.bank, simulation) >= 2:
+				self.player.techs.triggerEurekaFor(TechType.economics, simulation)
 
 	def governor(self) -> Optional[Governor]:
 		return None

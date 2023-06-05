@@ -10,6 +10,7 @@ from game.buildings import BuildingType
 from game.cities import City, CityStateType, YieldValues
 from game.cityConnections import CityConnections
 from game.civilizations import LeaderType, CivilizationType, CivilizationAbility
+from game.districts import DistrictType
 from game.flavors import Flavors, FlavorType
 from game.governments import PlayerGovernment
 from game.greatPersons import GreatPersonType
@@ -1290,3 +1291,21 @@ class Player:
 	def hasDiscoveredNaturalWonder(self) -> bool:
 		# fixme
 		return False
+
+	def numberOfDistricts(self, district: DistrictType, simulation) -> int:
+		numberOfDistricts = 0
+
+		for city in simulation.citiesOf(self):
+			if city.hasDistrict(district):
+				numberOfDistricts += 1
+
+		return numberOfDistricts
+
+	def numberBuildings(self, building: BuildingType, simulation) -> int:
+		numberOfBuildings = 0
+
+		for city in simulation.citiesOf(self):
+			if city.hasBuilding(building):
+				numberOfBuildings += 1
+
+		return numberOfBuildings
