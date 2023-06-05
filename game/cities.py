@@ -656,8 +656,21 @@ class CityCitizens:
 	def numberOfDefaultSpecialists(self) -> int:
 		return 0
 
-	def doRemoveWorstSpecialist(self, dontChangeSpecialist, simulation):
-		pass
+	def doRemoveWorstSpecialist(self, dontChangeSpecialist: SpecialistType, dontRemoveFromBuilding: BuildingType = BuildingType.none, simulation = None) -> bool:
+		"""Find the worst Specialist and remove him from duty"""
+		for buildingType in list(BuildingType):
+			if buildingType == dontRemoveFromBuilding:
+				continue
+
+			# We might not be allowed to change this Building's Specialists
+			if dontChangeSpecialist == buildingType.specialistType():
+				continue
+
+			if self.numberOfSpecialistsIn(buildingType) > 0:
+				self.doRemoveSpecialistFrom(buildingType, forced=True, simulation=simulation)
+				return True
+
+		return False
 
 	def numberOfForcedDefaultSpecialists(self) -> int:
 		return 0
@@ -1026,6 +1039,110 @@ class CityCitizens:
 		"""Remove forced status from all Specialists"""
 		# Loop through all Buildings
 		self.numberOfForcedSpecialistsInBuilding = []
+
+	def bestSpecialistBuilding(self, simulation) -> BuildingType:
+		"""What is the Building Type the AI likes the Specialist of most right now?"""
+		bestBuilding: BuildingType = BuildingType.none
+		bestSpecialistValue = -1
+
+		# Loop through all Buildings
+		for buildingType in list(BuildingType):
+
+			# Have this Building in the City?
+			if self.city.buildings.hasBuilding(buildingType):
+
+				# Can't add more than the max
+				if buildingType.canAddSpecialist():
+					specialistType = buildingType.specialistType()
+					value = self.specialistValueFor(specialistType, simulation)
+
+					# Add a bit more weight to a Building if it has more slots(10 % per).
+					# This will bias the AI to fill a single building over spreading Specialists out
+					temp = ((buildingType.specialistCount() - 1) * value * 10)
+					temp /= 100
+					value += temp
+
+					if value > bestSpecialistValue:
+						bestBuilding = buildingType
+						bestSpecialistValue = value
+
+		return bestBuilding
+
+	def specialistValueFor(self, specialistType, simulation) -> int:
+		"""How valuable is eSpecialist?"""
+		value = 20
+
+		deficientYield = self.city.cityStrategy.deficientYield(simulation)
+
+		# Does this Specialist help us with a Deficient Yield?
+		focusTypeValue = self.focusType()
+
+		if focusTypeValue == CityFocusType.science:
+			value += int(specialistType.yields().science) * 3
+		elif focusTypeValue == CityFocusType.culture:
+			value += int(specialistType.yields().culture) * 3
+		elif focusTypeValue == CityFocusType.gold:
+			value += int(specialistType.yields().gold) * 3
+		elif focusTypeValue == CityFocusType.production:
+			if deficientYield == YieldType.production:
+				value += (value * int(specialistType.yields().value(deficientYield)))
+
+			value += int(specialistType.yields().production) * 2
+		elif focusTypeValue == CityFocusType.greatPeople:
+			# FIXME value += (GetSpecialistGreatPersonProgress(eSpecialist) / 5);
+			if deficientYield != YieldType.none:
+				value += (value * int(specialistType.yields().value(deficientYield)))
+		elif focusTypeValue == CityFocusType.food:
+			value += int(specialistType.yields().food) * 3
+		elif focusTypeValue == CityFocusType.productionGrowth:
+			if deficientYield == YieldType.production:
+				value += (value * int(specialistType.yields().value(deficientYield)))
+
+			value += int(specialistType.yields().production) * 2
+		elif focusTypeValue == CityFocusType.goldGrowth:
+			value += int(specialistType.yields().gold) * 2
+		else:
+			if deficientYield != YieldType.none:
+				value += (value * int(specialistType.yields().value(deficientYield)))
+
+			# if we are nearing completion of a GP
+			value += (self.specialistGreatPersonProgressFor(specialistType) / 10)
+
+		# GPPs are always good
+		value += specialistType.greatPeopleRateChange()
+
+		return value
+
+	def doAddSpecialistToBuilding(self, buildingType: BuildingType, forced: bool, simulation):
+		"""Adds and initializes a Specialist for this building"""
+		specialistType = buildingType.specialistType()
+
+		# Can't add more than the max
+		if self.canAddSpecialistToBuilding(buildingType):
+			# If we're force-assigning a specialist, then we can reduce the count on forced default specialists
+			if forced:
+				if self.numberOfForcedDefaultSpecialists() > 0:
+					self.changeNumberOfForcedDefaultSpecialists(-1)
+
+			# If we don't already have an Unassigned Citizen to turn into a Specialist, find one from somewhere
+			if self.numberOfUnassignedCitizens() == 0:
+				self.doRemoveWorstCitizen(removeForcedStatus=True, dontChangeSpecialist=specialistType, simulation=simulation)
+
+				if self.numberOfUnassignedCitizens() == 0:
+					# Still nobody, all the citizens may be assigned to the eSpecialist we are looking for, try again
+					if not self.doRemoveWorstSpecialist(dontChangeSpecialist=buildingType, simulation=simulation):
+						return  # For some reason we can't do this, we must exit, else we will be going over the population count
+
+			# Increase count for the whole city
+			self.numberOfSpecialists.increaseNumberOf(specialistType)
+			self.increaseNumberOfSpecialists(simulation)
+
+			if forced:
+				self.increaseNumberOfForcedSpecialistsIn(buildingType)
+
+			self.city.processSpecialist(specialistType, 1)
+
+			self.changeNumberOfUnassignedCitizensBy(-1)
 
 
 class CityGreatWorks:
