@@ -81,8 +81,8 @@ class CityDistricts:
 		return sum(map(lambda item: 1 if item.district.isSpecialty() else 0, self._items))
 
 	def locationOfDistrict(self, district: DistrictType) -> Optional[HexPoint]:
-		districtItem = list(filter(lambda item: item.district == district, self._items))
-		
+		districtItem = next(filter(lambda item: item.district == district, self._items), None)
+
 		if districtItem is not None:
 			return districtItem.location
 

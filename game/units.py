@@ -4,6 +4,7 @@ from typing import Optional
 from game.buildings import BuildingType
 from game.combat import Combat
 from game.governors import GovernorTitle
+from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.policyCards import PolicyCardType
@@ -127,9 +128,9 @@ class Unit:
 		if (self.unitType.era() == EraType.classical or self.unitType.era() == EraType.medieval) and \
 			self.domain() == UnitDomainType.land:
 
-			boudicaNear = False  # @fixme gameModel.isGreatGeneral(type: .boudica, of: self.player, at: self.location, inRange: 2)
-			hannibalBarcaNear = False  # @fixme gameModel.isGreatGeneral(type:.hannibalBarca, of: self.player, at: self.location, inRange: 2)
-			sunTzuNear = False  # @fixme gameModel.isGreatGeneral(type:.sunTzu, of: self.player, at: self.location, inRange: 2)
+			boudicaNear = simulation.isGreatGeneral(GreatPersonType.boudica, self.player, self.location, range=2)
+			hannibalBarcaNear = simulation.isGreatGeneral(GreatPersonType.hannibalBarca, self.player, self.location, range=2)
+			sunTzuNear = simulation.isGreatGeneral(GreatPersonType.sunTzu, self.player, self.location, range=2)
 
 			if boudicaNear or hannibalBarcaNear or sunTzuNear:
 				# +1 Movement to Classical and Medieval era land units within 2 tiles.
@@ -141,13 +142,9 @@ class Unit:
 				moveVal += 2
 
 		# exodusOfTheEvangelists + golden - +2 Movement for Missionaries, Apostles and Inquisitors
-		# /* if player.currentAge() ==.golden and player.has(dedication: .
-		# 	exodusOfTheEvangelists) {
-		# if self.type ==.missionary or self.type ==.apostle or self.type ==.inquisitor
-		# {
-		# 	moveVal += 2
-		# }
-		# } * /
+		if self.player.currentAge() == AgeType.golden and self.player.hasDedication(DedicationType.exodusOfTheEvangelists):
+			if self.unitType == UnitType.missionary or self.unitType == UnitType.apostle or self.unitType == UnitType.inquisitor:
+				moveVal += 2
 
 		# commando - +1 Movement.
 		if self.hasPromotion(UnitPromotionType.commando):

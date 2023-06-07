@@ -20,6 +20,7 @@ from game.policyCards import PolicyCardType
 from game.states.accessLevels import AccessLevel
 from game.states.ages import AgeType
 from game.states.builds import BuildType
+from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
 from game.types import CivicType, TechType, EraType
 from game.unitTypes import UnitType
@@ -101,6 +102,10 @@ class TestGameAssets(unittest.TestCase):
 	def test_moment_data(self):
 		for moment in list(MomentType):
 			_ = moment.name()
+
+	def test_dedication_data(self):
+		for dedication in list(DedicationType):
+			_ = dedication.name()
 
 	def test_cityState_data(self):
 		for cityStateCategory in list(CityStateCategory):

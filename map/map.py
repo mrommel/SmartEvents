@@ -343,9 +343,8 @@ class Tile:
 			if simulation.tutorial() == Tutorials.movementAndExploration and player.isHuman():
 				numberOfDiscoveredPlots = player.numberOfDiscoveredPlots(simulation)
 				if numberOfDiscoveredPlots >= Tutorials.tilesToDiscover():
-					print(f'tutorial finished: MOVEMENT_AND_EXPLORATION')
-	#                     gameModel?.userInterface?.finish(tutorial: .movementAndExploration)
-	#                     gameModel?.enable(tutorial: .none)
+					simulation.userInterface.finishTutorial(Tutorials.movementAndExploration)
+					simulation.enableTutorial(Tutorials.none)
 
 	def isVisibleTo(self, player) -> bool:
 		return self.visible.get(str(player.leader), False)
@@ -1266,8 +1265,9 @@ class Map:
 	def continent(self, identifier: int) -> Continent:
 		return next((continent for continent in self.continents if continent.identifier == identifier), None)
 
-	#def continentAt(self, location: HexPoint) -> Continent:
-	#	tile = self.tileAt(location)
+	def continentAt(self, location: HexPoint) -> Continent:
+		tile = self.tileAt(location)
+		return next((continent for continent in self.continents if continent.identifier == tile.continentIdentifier), None)
 
 	def setContinent(self, continent: Continent, location: HexPoint):
 		tile = self.tileAt(location)

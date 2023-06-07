@@ -8,7 +8,7 @@ from game.types import TechType, CivicType
 from map.base import Array2D, HexPoint, HexCube, HexDirection, Size, BoundingBox, HexArea
 from map.generation import MapOptions, MapGenerator, HeightMap
 from map.improvements import ImprovementType
-from map.map import Tile, Map, FlowDirection, River
+from map.map import Tile, Map, FlowDirection, River, Continent
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, AStarPathfinder, MoveTypeIgnoreUnitsPathfinderDataSource
 from map.types import FeatureType, TerrainType, UnitMovementType, MapSize, MapType, AppealLevel, ResourceType
 from tests.testBasics import UserInterfaceMock, MapMock
@@ -716,6 +716,22 @@ class TestMap(unittest.TestCase):
 		self.assertEqual(riverSouthNorthBefore, False)
 		self.assertEqual(riverNorthSouthAfter, True)
 		self.assertEqual(riverSouthNorthAfter, True)
+
+	def test_continents(self):
+		# GIVEN
+		mapModel = MapMock(10, 10, TerrainType.grass)
+
+		continent = Continent(12, 'Europe', mapModel)
+		mapModel.continents.append(continent)
+
+		# WHEN
+		continentBefore = mapModel.continentAt(HexPoint(2, 2))
+		mapModel.setContinent(continent, HexPoint(2, 2))
+		continentAfter = mapModel.continentAt(HexPoint(2, 2))
+
+		# THEN
+		self.assertIsNone(continentBefore)
+		self.assertEqual(continentAfter, continent)
 
 
 class TestMapGenerator(unittest.TestCase):
