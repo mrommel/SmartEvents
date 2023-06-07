@@ -296,14 +296,15 @@ class Player:
 		self.tourism = PlayerTourism(player=self)
 		self.governors = PlayerGovernors(player=self)
 
-		self.currentEraVal: EraType = EraType.ancient
-		self.currentAgeVal: AgeType = AgeType.normal
-		self.currentDedicationsVal: [DedicationType] = []
-		self.numberOfDarkAgesVal: int = 0
-		self.numberOfGoldenAgesVal: int = 0
+		self._currentEraValue: EraType = EraType.ancient
+		self._currentAgeValue: AgeType = AgeType.normal
+		self._currentDedicationsValue: [DedicationType] = []
+		self._numberOfDarkAgesValue: int = 0
+		self._numberOfGoldenAgesValue: int = 0
 		self._citiesFoundValue: int = 0
 		self._totalImprovementsBuilt: int = 0
 		self._trainedSettlersValue: int = 0
+		self._discoveredNaturalWonders: [FeatureType] = []
 
 	def initialize(self):
 		self.setupFlavors()
@@ -397,7 +398,7 @@ class Player:
 		pass
 
 	def name(self) -> str:
-		return self.leader.name
+		return self.leader.name()
 
 	def isEqualTo(self, otherPlayer) -> bool:
 		if otherPlayer is None:
@@ -487,7 +488,8 @@ class Player:
 				simulation.enableTutorial(Tutorials.none)
 
 	def isAtWar(self) -> bool:
-		return False
+		"""is player at war with any player/leader?"""
+		return self.diplomacyAI.isAtWar()
 
 	def valueOfStrategyAndPersonalityFlavor(self, flavorType: FlavorType) -> int:
 		activeStrategy = self.grandStrategyAI.activeStrategy
@@ -726,10 +728,10 @@ class Player:
 		pass
 
 	def currentAge(self) -> AgeType:
-		return self.currentAgeVal
+		return self._currentAgeValue
 
 	def hasDedication(self, dedication: DedicationType) -> bool:
-		return dedication in self.currentDedicationsVal
+		return dedication in self._currentDedicationsValue
 
 	def hasWonder(self, wonderType: WonderType, simulation) -> bool:
 		for city in simulation.citiesOf(self):
@@ -908,7 +910,7 @@ class Player:
 		if simulation is None:
 			raise Exception('simulation not provided')
 
-		if not momentType.minEra() <= self.currentEraVal <= momentType.maxEra():
+		if not momentType.minEra() <= self._currentEraValue <= momentType.maxEra():
 			return
 
 		self.moments.addMomentOf(momentType, simulation.currentTurn, civilization=civilization,
@@ -1288,11 +1290,14 @@ class Player:
 		playerCities = simulation.citiesOf(self)
 		return len(list(filter(lambda city: city.isFeatureSurrounded(), playerCities)))
 
-	def hasDiscoveredNaturalWonder(self) -> bool:
-		# fixme
-		return False
+	def hasDiscovered(self, naturalWonder: FeatureType) -> bool:
+		return naturalWonder in self._discoveredNaturalWonders
+
+	def doDiscover(self, naturalWonder: FeatureType):
+		self._discoveredNaturalWonders.append(naturalWonder)
 
 	def numberOfDistricts(self, district: DistrictType, simulation) -> int:
+		"""Counts the number districts of type 'district' in all cities of this player"""
 		numberOfDistricts = 0
 
 		for city in simulation.citiesOf(self):
@@ -1302,6 +1307,7 @@ class Player:
 		return numberOfDistricts
 
 	def numberBuildings(self, building: BuildingType, simulation) -> int:
+		"""Counts the number buildings of type 'building' in all cities of this player"""
 		numberOfBuildings = 0
 
 		for city in simulation.citiesOf(self):
@@ -1309,3 +1315,10 @@ class Player:
 				numberOfBuildings += 1
 
 		return numberOfBuildings
+
+	def doDeclareWarTo(self, otherPlayer, simulation):
+		self.diplomacyAI.doDeclareWarTo(otherPlayer, simulation)
+
+		# inform other players, that war was declared
+		otherLeader = otherPlayer.leader
+		simulation.sendGossip(GossipType.declarationsOfWar, leader=otherLeader, player=self)

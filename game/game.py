@@ -602,7 +602,8 @@ class Game:
 		return numPlayerCities >= (numNextBestPlayersCities + 3)
 
 	def sendGossip(self, gossipType: GossipType, cityName: Optional[str] = None, tech: Optional[TechType] = None,
-	               player = None):
+	               player = None, leader: Optional[LeaderType] = None):
+		print('send gossip is not implemented')  # fixme
 		pass
 
 	def visibleEnemyAt(self, location: HexPoint, player, unitMapType: UnitMapType = UnitMapType.combat) -> Optional[Unit]:

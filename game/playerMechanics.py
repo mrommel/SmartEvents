@@ -13,6 +13,7 @@ from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.states.diplomaticMessages import DiplomaticRequestState, DiplomaticRequestMessage, LeaderEmotionType
 from game.states.gossips import GossipType
+from game.states.ui import PopupType
 from game.types import TechType, CivicType, EraType
 from map.types import FeatureType
 from utils.base import WeightedBaseList, ExtendedEnum, InvalidEnumError
@@ -75,8 +76,8 @@ class PlayerTechs:
 		self._progresses.addWeight(float(tech.cost()) * eurekaBoost, tech)
 
 		# freeInquiry + normal - Gain +1 Era Score when you trigger a [Eureka] Eureka
-		# if player.currentAge() == AgeType.normal and player.hasDedication(DedicationType.freeInquiry):
-		#    player.addMoment(of: .dedicationTriggered(dedicationType: .freeInquiry), in: gameModel)
+		if self.player.currentAge() == AgeType.normal and self.player.hasDedication(DedicationType.freeInquiry):
+			self.player.addMoment(MomentType.dedicationTriggered, dedication=DedicationType.freeInquiry, simulation=simulation)
 
 		# check quests
 		# for quest in player.ownQuests(in: gameModel):
@@ -102,7 +103,8 @@ class PlayerTechs:
 			if simulation.anyHasMoment(MomentType.worldsFirstTechnologyOfNewEra, eraType=tech.era()):
 				self.player.addMoment(MomentType.firstTechnologyOfNewEra, eraType=tech.era(), simulation=simulation)
 			else:
-				self.player.addMoment(MomentType.worldsFirstTechnologyOfNewEra, eraType=tech.era(), simulation=simulation)
+				self.player.addMoment(MomentType.worldsFirstTechnologyOfNewEra, eraType=tech.era(),
+				                      simulation=simulation)
 
 		self.updateEurekas(simulation)
 
@@ -146,18 +148,16 @@ class PlayerTechs:
 
 		# check for printing
 		# Researching the Printing technology. This will increase your visibility with all civilizations by one level.
-		# if tech == TechType.printing:
-		# 	for loopPlayer in gameModel.players:
-		#
-		# 		guard !loopPlayer.isBarbarian() & & !loopPlayer.isFreeCity() & & !loopPlayer.isCityState() else {
-		# 			continue
-		# 		}
-		#
-		# 		guard !loopPlayer.isEqual(to: player) else {
-		# 			continue
-		#
-		# 		if player.hasMet(with: loopPlayer) {
-		# 			player.diplomacyAI?.increaseAccessLevel(towards: loopPlayer)
+		if tech == TechType.printing:
+			for loopPlayer in simulation.players:
+				if loopPlayer.isBarbarian() or loopPlayer.isFreeCity() or loopPlayer.isCityState():
+					continue
+
+				if loopPlayer.isEqualTo(self.player):
+					continue
+
+				if self.player.hasMetWith(loopPlayer):
+					self.player.diplomacyAI.increaseAccessLevelTowards(loopPlayer)
 
 		self._techs.append(tech)
 
@@ -448,8 +448,7 @@ class PlayerCivics:
 
 		# penBrushAndVoice + normal - Gain + 1 Era Score when you trigger an Inspiration
 		if self.player.currentAge() == AgeType.normal and self.player.hasDedication(DedicationType.penBrushAndVoice):
-			# self.player.addMoment(of:.dedicationTriggered(dedicationType:.penBrushAndVoice), in: gameModel)
-			pass
+			self.player.addMoment(MomentType.dedicationTriggered, dedication=DedicationType.penBrushAndVoice, simulation=simulation)
 
 		# check quests
 		# for quest in player.ownQuests( in: gameModel):
@@ -460,8 +459,7 @@ class PlayerCivics:
 
 		# trigger event to user
 		if self.player.isHuman():
-			# simulation.userInterface?.showPopup(popupType:.inspirationTriggered(civic: civicType))
-			pass
+			simulation.userInterface.showPopup(PopupType.inspirationTriggered, civic=civic)
 
 		return
 
@@ -488,10 +486,11 @@ class TacticalAI:
 		pass
 
 
-class ApproachType:
+class PlayerApproachType:
 	pass
 
-class ApproachType(ExtendedEnum):
+
+class PlayerApproachType(ExtendedEnum):
 	none = 'none'
 
 	allied = 'allied'
@@ -503,21 +502,61 @@ class ApproachType(ExtendedEnum):
 	war = 'war'
 
 	@classmethod
-	def fromValue(cls, value) -> ApproachType:
+	def fromValue(cls, value) -> PlayerApproachType:
 		if value > 91:
-			return ApproachType.allied
+			return PlayerApproachType.allied
 		elif value > 74:
-			return ApproachType.declaredFriend
+			return PlayerApproachType.declaredFriend
 		elif value > 58:
-			return ApproachType.friendly
+			return PlayerApproachType.friendly
 		elif value > 41:
-			return ApproachType.neutral
+			return PlayerApproachType.neutral
 		elif value > 24:
-			return ApproachType.unfriendly
+			return PlayerApproachType.unfriendly
 		elif value > 8:
-			return ApproachType.denounced
+			return PlayerApproachType.denounced
 		else:
-			return ApproachType.war
+			return PlayerApproachType.war
+
+	def level(self):
+		if self == PlayerApproachType.none:
+			return 50
+		elif self == PlayerApproachType.war:
+			return 0
+		elif self == PlayerApproachType.denounced:
+			return 16
+		elif self == PlayerApproachType.unfriendly:
+			return 33
+		elif self == PlayerApproachType.neutral:
+			return 50
+		elif self == PlayerApproachType.friendly:
+			return 66
+		elif self == PlayerApproachType.declaredFriend:
+			return 83
+		elif self == PlayerApproachType.allied:
+			return 100
+
+		raise InvalidEnumError(self)
+
+	def __repr__(self):
+		if self == PlayerApproachType.none:
+			return 'None'
+		elif self == PlayerApproachType.war:
+			return 'War'
+		elif self == PlayerApproachType.denounced:
+			return 'Denounced'
+		elif self == PlayerApproachType.unfriendly:
+			return 'Unfriendly'
+		elif self == PlayerApproachType.neutral:
+			return 'Neutral'
+		elif self == PlayerApproachType.friendly:
+			return 'Friendly'
+		elif self == PlayerApproachType.declaredFriend:
+			return 'Declared Fried'
+		elif self == PlayerApproachType.allied:
+			return 'Allied'
+
+		raise InvalidEnumError(self)
 
 
 class PlayerOpinionType(ExtendedEnum):
@@ -535,13 +574,47 @@ class StrengthType(ExtendedEnum):
 
 
 class DiplomaticPact:
+	noDuration = -1
+	noStarted = -1
+
 	def __init__(self, duration: int = 25):
-		self.duration = duration
+		self._duration = duration
+
+		self._enabled = False
+		self._turnOfActivation = DiplomaticPact.noStarted
+
+	def isActive(self) -> bool:
+		return self._enabled
+
+	def isExpired(self, turn: int) -> bool:
+		# it can't expire, when it is not active
+		if not self._enabled:
+			return False
+
+		# it can't expire, if no duration
+		if self._duration == DiplomaticPact.noDuration:
+			return False
+
+		return self._turnOfActivation + self._duration <= turn
+
+	def activate(self, turn: int = -1):
+		self._enabled = True
+		self._turnOfActivation = turn
+
+	def abandon(self):
+		self._enabled = False
+		self._turnOfActivation = DiplomaticPact.noStarted
+
+	def pactIsActiveSince(self) -> int:
+		return self._turnOfActivation
 
 
 class PlayerProximityType(ExtendedEnum):
 	neighbors = 'neighbors'
 	none = 'none'
+	distant = 'distant'
+	far = 'far'
+	close = 'close'
 
 
 class PlayerWarFaceType(ExtendedEnum):
@@ -550,6 +623,12 @@ class PlayerWarFaceType(ExtendedEnum):
 
 class PlayerWarStateType(ExtendedEnum):
 	none = 'none'
+	offensive = 'offensive'
+	nearlyDefeated = 'nearlyDefeated'
+	defensive = 'defensive'
+	calm = 'calm'
+	nearlyWon = 'nearlyWon'
+	stalemate = 'stalemate'
 
 
 class PlayerTargetValueType(ExtendedEnum):
@@ -582,7 +661,7 @@ class LeaderAgendaType(ExtendedEnum):
 
 class ApproachModifierTypeData:
 	def __init__(self, summary: str, initialValue: int, reductionTurns: int, reductionValue: int,
-				 hiddenAgenda: Optional[LeaderAgendaType]):
+	             hiddenAgenda: Optional[LeaderAgendaType]):
 		self.summary = summary
 		self.initialValue = initialValue
 		self.reductionTurns = reductionTurns
@@ -671,7 +750,7 @@ class ApproachModifierType(ExtendedEnum):
 
 class DiplomaticAIPlayerApproachItem:
 	def __init__(self, approachModifierType: ApproachModifierType, initialValue: Optional[int] = None,
-				 reductionValue: Optional[int] = None):
+	             reductionValue: Optional[int] = None):
 		self.approachModifierType = approachModifierType
 
 		if initialValue is not None:
@@ -749,8 +828,8 @@ class DiplomaticAIPlayerItem:
 		self.musteringForAttack = False
 
 		# agreements
-		self.coopAgreements = None # DiplomaticPlayerArray < CoopWarState > ()
-		self.workingAgainstAgreements = None # DiplomaticPlayerArray < Bool > ()
+		self.coopAgreements = None  # DiplomaticPlayerArray < CoopWarState > ()
+		self.workingAgainstAgreements = None  # DiplomaticPlayerArray < Bool > ()
 
 		# peace treaty willingness
 		self.peaceTreatyWillingToOffer = PeaceTreatyType.none
@@ -770,6 +849,8 @@ class DiplomaticPlayerDict:
 		else:
 			self.items.append(DiplomaticAIPlayerItem(otherLeader, turnOfFirstContact=turn))
 
+		return
+
 	def hasMetWith(self, otherPlayer) -> bool:
 		otherLeader = otherPlayer.leader
 		item = next((item for item in self.items if item.leader == otherLeader), None)
@@ -788,9 +869,11 @@ class DiplomaticPlayerDict:
 		else:
 			raise Exception("not gonna happen")
 
-	def approachTowards(self, otherPlayer) -> ApproachType:
+		return
+
+	def approachTowards(self, otherPlayer) -> PlayerApproachType:
 		value = self.approachValueTowards(otherPlayer)
-		return ApproachType.fromValue(value)
+		return PlayerApproachType.fromValue(value)
 
 	def approachValueTowards(self, otherPlayer) -> int:
 		otherLeader = otherPlayer.leader
@@ -801,7 +884,8 @@ class DiplomaticPlayerDict:
 
 		return 50  # default
 
-	def addApproachOf(self, approachModifierType: ApproachModifierType, initialValue: int, reductionValue: int, otherPlayer):
+	def addApproachOf(self, approachModifierType: ApproachModifierType, initialValue: int, reductionValue: int,
+	                  otherPlayer):
 		otherLeader = otherPlayer.leader
 		item = next((item for item in self.items if item.leader == otherLeader), None)
 
@@ -810,6 +894,8 @@ class DiplomaticPlayerDict:
 			item.approachItems.append(approachItem)
 		else:
 			raise Exception("not gonna happen")
+
+		return
 
 	def militaryThreatOf(self, otherPlayer) -> MilitaryThreatType:
 		otherLeader = otherPlayer.leader
@@ -820,6 +906,8 @@ class DiplomaticPlayerDict:
 		else:
 			raise Exception("not gonna happen")
 
+		return
+
 	def updateMilitaryThreatOf(self, otherPlayer, strength: StrengthType):
 		otherLeader = otherPlayer.leader
 		item = next((item for item in self.items if item.leader == otherLeader), None)
@@ -828,6 +916,8 @@ class DiplomaticPlayerDict:
 			item.militaryStrength = strength
 		else:
 			raise Exception("not gonna happen")
+
+		return
 
 	def accessLevelTowards(self, otherPlayer) -> AccessLevel:
 		otherLeader = otherPlayer.leader
@@ -856,8 +946,10 @@ class DiplomaticPlayerDict:
 		else:
 			raise Exception("not gonna happen")
 
+		return
+
 	def addApproach(self, approachModifier: ApproachModifierType, initialValue: Optional[int] = None,
-	                reductionValue: Optional[int] = None, otherPlayer = None):
+	                reductionValue: Optional[int] = None, otherPlayer=None):
 		if otherPlayer is None:
 			raise Exception('otherPlayer must be filled')
 
@@ -874,6 +966,8 @@ class DiplomaticPlayerDict:
 		else:
 			raise Exception("not gonna happen")
 
+		return
+
 	def updateAccessLevelTo(self, accessLevel: AccessLevel, otherPlayer):
 		otherLeader = otherPlayer.leader
 		item = next((item for item in self.items if item.leader == otherLeader), None)
@@ -883,12 +977,96 @@ class DiplomaticPlayerDict:
 		else:
 			raise Exception("not gonna happen")
 
+		return
+
 	def isAtWarWith(self, otherPlayer):
 		otherLeader = otherPlayer.leader
 		item = next((item for item in self.items if item.leader == otherLeader), None)
 
 		if item is not None:
 			return item.warState != PlayerWarStateType.none
+
+		return False
+
+	def isAtWar(self) -> bool:
+		for item in self.items:
+			if item.warState != PlayerWarStateType.none:
+				return True
+
+		return False
+
+	def declaredWarTowards(self, otherPlayer, turn: int):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.declarationOfWar.activate(turn)
+			item.peaceTreaty.abandon()  # just in case
+			item.warState = PlayerWarStateType.offensive
+		else:
+			raise Exception("not gonna happen")
+
+		self.updateApproachValueTowards(otherPlayer, PlayerApproachType.war.level())
+		self.updateWarStateTowards(otherPlayer, PlayerWarStateType.offensive)  # fixme: duplicate?
+
+		return
+
+	def cancelAllDefensivePacts(self):
+		for item in self.items:
+			if item.defensivePact.isActive():
+				item.defensivePact.abandon()
+
+		return
+
+	def cancelDealsWith(self, otherPlayer):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			# FIXME: inform someone?
+			item.deals = []
+		else:
+			raise Exception("not gonna happen")
+
+		return
+
+	def updateApproachValueTowards(self, otherPlayer, value: int):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.approach = value
+		else:
+			raise Exception("not gonna happen")
+
+		return
+
+	def allPlayersWithDefensivePacts(self) -> [LeaderType]:
+		defPlayers: [LeaderType] = []
+
+		for item in self.items:
+			if item.defensivePact.isActive():
+				defPlayers.append(item.leader)
+
+		return defPlayers
+
+	def updateWarStateTowards(self, otherPlayer, warStateType: PlayerWarStateType):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.warState = warStateType
+		else:
+			raise Exception("not gonna happen")
+
+		return
+
+	def isPeaceTreatyActiveWith(self, otherPlayer) -> bool:
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			return item.peaceTreaty.isActive()
 
 		return False
 
@@ -970,7 +1148,8 @@ class DiplomacyAI:
 		activePlayer = simulation.activePlayer()
 		if activePlayer is not None:
 			# check if activePlayer is in greetPlayers
-			if reduce(lambda b0, b1: b0 or b1, map(lambda player: activePlayer.isEqualTo(player), self.greetPlayers), False):
+			if reduce(lambda b0, b1: b0 or b1, map(lambda player: activePlayer.isEqualTo(player), self.greetPlayers),
+			          False):
 				if self.player.isCityState() or activePlayer.isCityState():
 					if activePlayer.isHuman() and self.player.isCityState():
 						cityState = self.player.cityState
@@ -1038,7 +1217,7 @@ class DiplomacyAI:
 							simulation=simulation
 						)
 
-					self.greetPlayers =	[item for item in self.greetPlayers if not activePlayer.isEqualTo(item)]
+					self.greetPlayers = [item for item in self.greetPlayers if not activePlayer.isEqualTo(item)]
 
 		return
 
@@ -1053,7 +1232,8 @@ class DiplomacyAI:
 		self.updateMilitaryStrengthOf(otherPlayer, simulation)
 
 		impression = simulation.handicap.firstImpressionBaseValue() + random.randrange(-3, 3)
-		self.playerDict.addApproachOf(ApproachModifierType.firstImpression, impression, 1 if impression > 0 else -1, otherPlayer)
+		self.playerDict.addApproachOf(ApproachModifierType.firstImpression, impression, 1 if impression > 0 else -1,
+		                              otherPlayer)
 
 		# Humans don't say hi to ai player automatically
 		if not self.player.isHuman():
@@ -1068,8 +1248,8 @@ class DiplomacyAI:
 		for loopPlayer in simulation.players:
 			if loopPlayer.isAlive() and not loopPlayer.isEqualTo(self.player) and loopPlayer.hasMetWith(self.player):
 				# decay
-				if self.numTurnsLockedIntoWarWith(loopPlayer) > 0:
-					self.changeNumTurnsLockedIntoWarWith(loopPlayer, -1)
+				if self.numberOfTurnsLockedIntoWarWith(loopPlayer) > 0:
+					self.changeNumberOfTurnsLockedIntoWarWith(loopPlayer, -1)
 
 	def doWarDamageDecay(self, simulation):
 		"""Every turn we're at peace war damage goes down a bit"""
@@ -1089,32 +1269,32 @@ class DiplomacyAI:
 
 						self.changeWarValueLostWith(loopPlayer, -value)
 
-				# Update war damage other players have suffered from our viewpoint
-				# /*for(iThirdPlayerLoop = 0; iThirdPlayerLoop < MAX_CIV_PLAYERS; iThirdPlayerLoop++)
-				# {
-				#     eLoopThirdPlayer = (PlayerTypes) iThirdPlayerLoop;
-				#     eLoopThirdTeam = GET_PLAYER(eLoopThirdPlayer).getTeam();
-				#
-				#     // These two players not at war?
-				#     if(!GET_TEAM(eLoopThirdTeam).isAtWar(eLoopTeam))
-				#     {
-				#         iValue = GetOtherPlayerWarValueLost(eLoopPlayer, eLoopThirdPlayer);
-				#
-				#         if(iValue > 0)
-				#         {
-				#             // Go down by 1/20th every turn at peace
-				#             iValue /= 20;
-				#
-				#             // Make sure it's changing by at least 1
-				#             iValue = max(1, iValue);
-				#
-				#             ChangeOtherPlayerWarValueLost(eLoopPlayer, eLoopThirdPlayer, -iValue);
-				#         }
-				#     }
-				# }*/
+			# Update war damage other players have suffered from our viewpoint
+			# /*for(iThirdPlayerLoop = 0; iThirdPlayerLoop < MAX_CIV_PLAYERS; iThirdPlayerLoop++)
+			# {
+			#     eLoopThirdPlayer = (PlayerTypes) iThirdPlayerLoop;
+			#     eLoopThirdTeam = GET_PLAYER(eLoopThirdPlayer).getTeam();
+			#
+			#     // These two players not at war?
+			#     if(!GET_TEAM(eLoopThirdTeam).isAtWar(eLoopTeam))
+			#     {
+			#         iValue = GetOtherPlayerWarValueLost(eLoopPlayer, eLoopThirdPlayer);
+			#
+			#         if(iValue > 0)
+			#         {
+			#             // Go down by 1/20th every turn at peace
+			#             iValue /= 20;
+			#
+			#             // Make sure it's changing by at least 1
+			#             iValue = max(1, iValue);
+			#
+			#             ChangeOtherPlayerWarValueLost(eLoopPlayer, eLoopThirdPlayer, -iValue);
+			#         }
+			#     }
+			# }*/
 		return
 
-	def updateMilitaryStrengths(self,simulation):
+	def updateMilitaryStrengths(self, simulation):
 		for otherPlayer in simulation.players:
 			if otherPlayer.leader != self.player.leader and self.player.hasMetWith(otherPlayer):
 				self.updateMilitaryStrengthOf(otherPlayer, simulation)
@@ -1240,7 +1420,7 @@ class DiplomacyAI:
 
 			# update access level
 			self.increaseAccessLevelTowards(otherPlayer)
-		
+
 		return
 
 	def canSendDelegationTo(self, otherPlayer, simulation) -> bool:
@@ -1258,8 +1438,8 @@ class DiplomacyAI:
 			return False
 
 		approach = self.approachTowards(otherPlayer)
-		if approach == ApproachType.neutral or approach == ApproachType.friendly or \
-			approach == ApproachType.declaredFriend or approach == ApproachType.allied:
+		if approach == PlayerApproachType.neutral or approach == PlayerApproachType.friendly or \
+			approach == PlayerApproachType.declaredFriend or approach == PlayerApproachType.allied:
 			return True
 
 		return False
@@ -1267,7 +1447,7 @@ class DiplomacyAI:
 	def hasSentDelegationTo(self, otherPlayer):
 		return self.playerDict.hasSentDelegationTo(otherPlayer)
 
-	def approachTowards(self, otherPlayer) -> ApproachType:
+	def approachTowards(self, otherPlayer) -> PlayerApproachType:
 		return self.playerDict.approachTowards(otherPlayer)
 
 	def increaseAccessLevelTowards(self, otherPlayer):
@@ -1339,6 +1519,73 @@ class DiplomacyAI:
 
 		return self.playerDict.isAtWarWith(otherPlayer)
 
+	def isAtWar(self):
+		return self.playerDict.isAtWar()
+
+	def doDeclareWarTo(self, otherPlayer, simulation):
+		# Only do it if we are not already at war.
+		if self.isAtWarWith(otherPlayer):
+			return
+
+		# Since we declared war, all of OUR Defensive Pacts are nullified
+		self.doCancelDefensivePacts()
+
+		# Cancel Trade Deals
+		self.doCancelDealsWith(otherPlayer)
+
+		# Update the ATTACKED players' Diplomatic AI
+		otherPlayer.diplomacyAI.doHaveBeenDeclaredWarBy(self.player, simulation)
+
+		# If we've made a peace treaty before, this is bad news
+		if self.isPeaceTreatyActiveWith(otherPlayer):
+			self.updateHasBrokenPeaceTreatyTo(True)
+		# FIXME: => update counter of everyone who knows us
+
+		# Update what every Major Civ sees
+		# FIXME: let everyone know, we have attacked
+
+		self.playerDict.declaredWarTowards(otherPlayer, simulation.currentTurn)
+
+		# inform player that some declared war
+		if otherPlayer.isHuman():
+			self.player.notifications.addNotification(NotificationType.war, leader=otherPlayer.leader)
+
+		# inform other players, that a war was declared
+		simulation.sendGossip(GossipType.declarationsOfWar, leader=otherPlayer.leader, player=otherPlayer)
+
+	def doCancelDefensivePacts(self):
+		self.playerDict.cancelAllDefensivePacts()
+
+	def doCancelDealsWith(self, otherPlayer):
+		self.playerDict.cancelDealsWith(otherPlayer)
+		otherPlayer.diplomacyAI.playerDict.cancelDealsWith(self.player)
+
+	def isPeaceTreatyActiveWith(self, otherPlayer):
+		return self.playerDict.isPeaceTreatyActiveWith(otherPlayer)
+
+	def updateHasBrokenPeaceTreatyTo(self, value: bool):
+		self.hasBrokenPeaceTreatyValue = value
+
+	def proximityTo(self, otherPlayer) -> PlayerProximityType:
+		return self.playerDict.proximityTo(otherPlayer)
+
+	def doHaveBeenDeclaredWarBy(self, otherPlayer, simulation):
+		# Auto War for Defensive Pacts of other player
+		self.activateDefensivePactsAgainst(otherPlayer, simulation)
+
+		self.playerDict.updateApproachValueTowards(otherPlayer, PlayerApproachType.war.level())
+		self.playerDict.updateWarStateTowards(otherPlayer, PlayerWarStateType.defensive)
+
+	def activateDefensivePactsAgainst(self, otherPlayer, simulation):
+		for friendLeader in self.allPlayersWithDefensivePacts():
+			friendPlayer = simulation.playerFor(friendLeader)
+			friendPlayer.diplomacyAI.doDeclareWarFromDefensivePactTo(otherPlayer, simulation)
+
+		return
+
+	def allPlayersWithDefensivePacts(self) -> [LeaderType]:
+		return self.playerDict.allPlayersWithDefensivePacts()
+
 
 class DiplomacyRequests:
 	def __init__(self, player):
@@ -1378,12 +1625,12 @@ class PlayerMoments:
 		self._currentEraScore = 0
 
 	def hasMoment(self, momentType: MomentType, civilization: Optional[CivilizationType] = None,
-		          eraType: Optional[EraType] = None, cityName: Optional[str] = None,
-		          continentName: Optional[str] = None, naturalWonder: Optional[FeatureType] = None,
+	              eraType: Optional[EraType] = None, cityName: Optional[str] = None,
+	              continentName: Optional[str] = None, naturalWonder: Optional[FeatureType] = None,
 	              dedication: Optional[DedicationType] = None) -> bool:
 
 		tmpMoment = Moment(momentType=momentType, civilization=civilization, eraType=eraType, cityName=cityName,
-		          continentName=continentName, naturalWonder=naturalWonder, dedication=dedication, turn=0)
+		                   continentName=continentName, naturalWonder=naturalWonder, dedication=dedication, turn=0)
 
 		# check all player moments
 		for moment in self._momentsArray:

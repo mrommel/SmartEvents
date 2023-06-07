@@ -34,3 +34,4 @@ class ScreenType(ExtendedEnum):
 class PopupType(ExtendedEnum):
 	tutorialBadUnitAttack = 'tutorialBadUnitAttack'
 	tutorialCityAttack = 'tutorialCityAttack'
+	inspirationTriggered = 'inspirationTriggered'

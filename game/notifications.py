@@ -1,6 +1,7 @@
 from typing import Optional
 
 from game.cityStates import CityStateType
+from game.civilizations import LeaderType
 from game.moments import MomentType
 from map.base import HexPoint
 from utils.base import ExtendedEnum, InvalidEnumError
@@ -268,7 +269,8 @@ class NotificationType(ExtendedEnum):
 class Notification:
 	def __init__(self, notificationType: NotificationType, city=None, player=None,
 	             momentType: Optional[MomentType] = None, cityState: Optional[CityStateType] = None,
-	             first: Optional[bool] = None, location: Optional[HexPoint] = None, cityName: Optional[str] = None):
+	             first: Optional[bool] = None, location: Optional[HexPoint] = None, cityName: Optional[str] = None,
+	             leader: Optional[LeaderType] = None):
 		self.notificationType = notificationType
 		self.city = city
 		self.player = player
@@ -277,6 +279,7 @@ class Notification:
 		self.first = first
 		self.location = location
 		self.cityName = cityName
+		self.leader = leader
 
 
 class Notifications:
@@ -292,14 +295,16 @@ class Notifications:
 
 	def addNotification(self, notificationType: NotificationType, momentType: Optional[MomentType] = None,
 	                    cityState: Optional[CityStateType] = None, cityName: Optional[str] = None,
-	                    first: Optional[bool] = None, location: Optional[HexPoint] = None):
+	                    first: Optional[bool] = None, location: Optional[HexPoint] = None,
+	                    leader: Optional[LeaderType] = None):
 		notification = Notification(
 			notificationType=notificationType,
 			momentType=momentType,
 			cityState=cityState,
 			first=first,
 			cityName=cityName,
-			location=location
+			location=location,
+			leader=leader
 		)
 		self.notifications.append(notification)
 
