@@ -80,6 +80,14 @@ class CityDistricts:
 	def numberOfSpecialtyDistricts(self) -> int:
 		return sum(map(lambda item: 1 if item.district.isSpecialty() else 0, self._items))
 
+	def locationOfDistrict(self, district: DistrictType) -> Optional[HexPoint]:
+		districtItem = list(filter(lambda item: item.district == district, self._items))
+		
+		if districtItem is not None:
+			return districtItem.location
+
+		return None
+
 
 class CityBuildings:
 	def __init__(self, city):
@@ -192,6 +200,22 @@ class SpecialistCountList(WeightedBaseList):
 		for specialist in list(SpecialistType):
 			self.setWeight(0.0, specialist)
 
+	def increaseNumberOf(self, specialistType: SpecialistType):
+		self.addWeight(1, specialistType)
+
+
+class GreatPersonProgressList(WeightedBaseList):
+	def __init__(self):
+		super().__init__()
+		for greatPerson in list(GreatPersonType):
+			self.setWeight(0.0, greatPerson)
+
+
+class SpecialistBuilding:
+	def __init__(self, building: BuildingType, amount: int):
+		self.building = building
+		self.amount = amount
+
 
 class CityCitizens:
 	# Keeps track of Citizens and Specialists in a City
@@ -216,8 +240,7 @@ class CityCitizens:
 		self.numberOfForcedSpecialistsInBuilding = []
 
 		#
-		# self.specialistGreatPersonProgress = GreatPersonProgressList()
-		# self.specialistGreatPersonProgress.fill()
+		self.specialistGreatPersonProgress = GreatPersonProgressList()
 		self.numberOfForcedSpecialistsValue = 0
 		self.numberOfDefaultSpecialistsValue = 0
 
@@ -663,8 +686,11 @@ class CityCitizens:
 	def numberOfDefaultSpecialists(self) -> int:
 		return self.numberOfDefaultSpecialistsValue
 
-	def doRemoveWorstSpecialist(self, dontChangeSpecialist: SpecialistType, dontRemoveFromBuilding: BuildingType = BuildingType.none, simulation = None) -> bool:
+	def doRemoveWorstSpecialist(self, dontChangeSpecialist: SpecialistType = SpecialistType.none, dontRemoveFromBuilding: BuildingType = BuildingType.none, simulation = None) -> bool:
 		"""Find the worst Specialist and remove him from duty"""
+		if simulation is None:
+			raise Exception('simulation must not be None')
+
 		for buildingType in list(BuildingType):
 			if buildingType == dontRemoveFromBuilding:
 				continue
@@ -813,7 +839,7 @@ class CityCitizens:
 			return True
 		else:
 			# No valid Plot - change this guy into a default Specialist
-			self.changeNumDefaultSpecialistsChange(1)
+			self.changeNumberOfDefaultSpecialistsBy(1)
 
 		return False
 
@@ -1146,12 +1172,12 @@ class CityCitizens:
 
 				if self.numberOfUnassignedCitizens() == 0:
 					# Still nobody, all the citizens may be assigned to the eSpecialist we are looking for, try again
-					if not self.doRemoveWorstSpecialist(dontChangeSpecialist=buildingType, simulation=simulation):
+					if not self.doRemoveWorstSpecialist(dontRemoveFromBuilding=buildingType, simulation=simulation):
 						return  # For some reason we can't do this, we must exit, else we will be going over the population count
 
 			# Increase count for the whole city
 			self.numberOfSpecialists.increaseNumberOf(specialistType)
-			self.increaseNumberOfSpecialists(simulation)
+			self.increaseNumberOfSpecialists(buildingType)
 
 			if forced:
 				self.increaseNumberOfForcedSpecialistsIn(buildingType)
@@ -1159,6 +1185,30 @@ class CityCitizens:
 			self.city.processSpecialist(specialistType, 1)
 
 			self.changeNumberOfUnassignedCitizensBy(-1)
+
+	def specialistGreatPersonProgressFor(self, specialistType) -> int:
+		return int(self.specialistGreatPersonProgress.weight(specialistType))
+
+	def increaseNumberOfSpecialists(self, buildingType: BuildingType):
+		# update
+		specialistsTuple = next(filter(lambda spec: spec.buildingType == buildingType, self.numberOfSpecialistsInBuilding), None)
+		if specialistsTuple is not None:
+			specialistsTuple.specialists += 1
+			return
+
+		# create new entry
+		self.numberOfSpecialistsInBuilding.append(SpecialistBuilding(buildingType, 1))
+
+	def increaseNumberOfForcedSpecialistsIn(self, buildingType):
+		# update
+		specialistsTuple = next(
+			filter(lambda spec: spec.buildingType == buildingType, self.numberOfForcedSpecialistsInBuilding), None)
+		if specialistsTuple is not None:
+			specialistsTuple.specialists += 1
+			return
+
+		# create new entry
+		self.numberOfForcedSpecialistsInBuilding.append(SpecialistBuilding(buildingType, 1))
 
 
 class CityGreatWorks:
@@ -1768,7 +1818,7 @@ class City:
 			policyCardModifier += 1.0
 
 		if self.districts.hasDistrict(DistrictType.industrialZone):
-			industrialLocation = self.locationOf(DistrictType.industrialZone)
+			industrialLocation = self.locationOfDistrict(DistrictType.industrialZone)
 
 			for neighbor in industrialLocation.neighbors():
 				neighborTile = simulation.tileAt(neighbor)
@@ -3714,6 +3764,8 @@ class City:
 		return True
 
 	def bestLocationForDistrict(self, districtType: DistrictType, simulation) -> Optional[HexPoint]:
+		weightedLocations = WeightedBaseList()
+
 		for loopLocation in self.cityCitizens.workingTileLocations():
 			loopTile = simulation.tileAt(loopLocation)
 			if loopTile.workingCity() is not None:
@@ -3721,9 +3773,20 @@ class City:
 					continue
 
 			if districtType.canBuildOn(loopLocation, simulation):
-				return loopLocation
+				distance = loopLocation.distance(self.location)
+				weightedLocations.addWeight(5.0 - distance, loopLocation)
 
-		return None
+		if len(weightedLocations.items()) == 0:
+			return None
+
+		# select one
+		selectedIndex = random.randrange(100)
+
+		weightedLocations = weightedLocations.top3()
+		weightedLocationsArray = weightedLocations.distributeByWeight()
+		selectedLocation = weightedLocationsArray[selectedIndex]
+
+		return selectedLocation
 
 	def numberOfBuildableSpecialtyDistricts(self) -> int:
 		"""For example a city of 6 pop can only build 2 districts but 7 can build 3."""
@@ -4037,3 +4100,9 @@ class City:
 				okay = False
 
 		return okay
+
+	def locationOfDistrict(self, district: DistrictType) -> Optional[HexPoint]:
+		if district == DistrictType.cityCenter:
+			return self.location
+
+		return self.districts.locationOfDistrict(district)

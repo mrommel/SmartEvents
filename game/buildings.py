@@ -171,7 +171,13 @@ class BuildingType(ExtendedEnum):
 		if self._data().specialSlots is None:
 			return 0
 
-		return len(self._data().specialSlots)
+		return self._data().specialSlots.amount
+
+	def specialistType(self) -> SpecialistType:
+		if self._data().specialSlots is None:
+			return SpecialistType.none
+
+		return self._data().specialSlots.specialistType
 
 	def _flavors(self) -> [Flavor]:
 		return self._data().flavors
@@ -793,8 +799,8 @@ class BuildingType(ExtendedEnum):
 			return BuildingTypeData(
 				name="TXT_KEY_BUILDING_WARLORDS_THRONE_TITLE",
 				effects=[
-					"TXT_KEY_BUILDING_WARLORDS_THRONE_EFFECT1", #
-				    "TXT_KEY_BUILDING_WARLORDS_THRONE_EFFECT2" #
+					"TXT_KEY_BUILDING_WARLORDS_THRONE_EFFECT1",  #
+				    "TXT_KEY_BUILDING_WARLORDS_THRONE_EFFECT2"  #
 				],
 				category=BuildingCategoryType.government,
 				era=EraType.classical,
@@ -990,7 +996,7 @@ class BuildingType(ExtendedEnum):
 				slots=[],
 				specialSlots=None,
 				flavors=[
-					Flavor(FlavorType.diplomacy, value=6) # Flavor(FlavorType.cityState, value=6),
+					Flavor(FlavorType.diplomacy, value=6)  # Flavor(FlavorType.cityState, value=6),
 				]
 			)
 		elif self == BuildingType.grandMastersChapel:
@@ -1161,7 +1167,7 @@ class BuildingType(ExtendedEnum):
 					"TXT_KEY_BUILDING_BANK_EFFECT1",
 					"TXT_KEY_BUILDING_BANK_EFFECT2",
 					"TXT_KEY_BUILDING_BANK_EFFECT3"
-					# "+2 Great Works Slots for any type with Great Merchant Giovanni de' Medici activated." //  #
+					# +2 Great Works Slots for any type with Great Merchant Giovanni de Medici activated.
 				],
 				category=BuildingCategoryType.economic,
 				era=EraType.renaissance,
