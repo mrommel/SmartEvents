@@ -408,7 +408,7 @@ class Tile:
 
 				production += buildType.productionFromRemovalOf(feature)
 
-		return 0
+		return production
 
 	def terrain(self):
 		return self._terrainValue

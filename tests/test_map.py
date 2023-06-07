@@ -4,6 +4,7 @@ import unittest
 from game.civilizations import LeaderType
 from game.game import Game
 from game.players import Player
+from game.states.builds import BuildType
 from game.types import TechType, CivicType
 from map.base import Array2D, HexPoint, HexCube, HexDirection, Size, BoundingBox, HexArea
 from map.generation import MapOptions, MapGenerator, HeightMap
@@ -499,9 +500,11 @@ class TestTile(unittest.TestCase):
 
 		tile.setImprovement(ImprovementType.farm)
 		self.assertEqual(tile.improvement(), ImprovementType.farm)
+		self.assertEqual(tile.hasAnyImprovement(), True)
 
-		tile.setImprovement(ImprovementType.none)
+		tile.removeImprovement()
 		self.assertEqual(tile.improvement(), ImprovementType.none)
+		self.assertEqual(tile.hasAnyImprovement(), False)
 
 	def test_improvement_pillage(self):
 		tile = Tile(HexPoint(3, 2), TerrainType.tundra)
@@ -532,6 +535,22 @@ class TestTile(unittest.TestCase):
 
 		tile.setHills(True)
 		self.assertEqual(tile.seeThroughLevel(), 2)
+
+	def test_productionFromFeatureRemoval(self):
+		tile = Tile(HexPoint(3, 2), TerrainType.tundra)
+		tile.setFeature(FeatureType.forest)
+
+		self.assertEqual(tile.productionFromFeatureRemoval(BuildType.removeForest), 20)
+
+		tile = Tile(HexPoint(3, 2), TerrainType.grass)
+		tile.setFeature(FeatureType.forest)
+
+		self.assertEqual(tile.productionFromFeatureRemoval(BuildType.farm), 20)
+
+		tile = Tile(HexPoint(3, 2), TerrainType.grass)
+		tile.setFeature(FeatureType.forest)
+
+		self.assertEqual(tile.productionFromFeatureRemoval(BuildType.removeRoad), 0)
 
 
 class TestBoundingBox(unittest.TestCase):
