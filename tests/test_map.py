@@ -560,6 +560,8 @@ class TestTile(unittest.TestCase):
 
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
+		player.techs.discover(TechType.mining, simulation)  # for the mine check - to reveal iron
+		player.techs.discover(TechType.pottery, simulation)  # for the farm check - to reveal wheat
 
 		tile = Tile(HexPoint(3, 2), TerrainType.grass)
 
@@ -575,6 +577,10 @@ class TestTile(unittest.TestCase):
 		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.wheel), True)
 
 		# Irrigation - To Boost: Farm a resource
+		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.irrigation), False)
+		tile.setResource(ResourceType.wheat)
+		tile.updateEurekas(ImprovementType.farm, player, simulation)
+		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.irrigation), True)
 
 
 class TestBoundingBox(unittest.TestCase):

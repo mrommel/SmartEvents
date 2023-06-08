@@ -587,12 +587,12 @@ class Tile:
 		# Irrigation - To Boost: Farm a resource
 		if not player.techs.eurekaTriggeredFor(TechType.irrigation):
 			if improvement == ImprovementType.farm and self.hasAnyResourceFor(player):
-				player.techs.triggerEureka(TechType.irrigation, simulation)
+				player.techs.triggerEurekaFor(TechType.irrigation, simulation)
 
 		# Horseback Riding - To Boost: Build a pasture
 		if not player.techs.eurekaTriggeredFor(TechType.horsebackRiding):
 			if improvement == ImprovementType.pasture:
-				player.techs.triggerEureka(TechType.horsebackRiding, simulation)
+				player.techs.triggerEurekaFor(TechType.horsebackRiding, simulation)
 
 		# Iron Working - To Boost: Build an Iron Mine
 		if not player.techs.eurekaTriggeredFor(TechType.ironWorking):
