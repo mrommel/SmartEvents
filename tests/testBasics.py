@@ -1,4 +1,7 @@
-from game.states.ui import Interface
+from typing import Optional
+
+from game.states.ui import Interface, PopupType
+from game.types import TechType
 from map.map import Map
 from map.types import TerrainType
 
@@ -27,4 +30,7 @@ class UserInterfaceMock(Interface):
 		return False
 
 	def refreshTile(self, tile):
+		pass
+
+	def showPopup(self, popup: PopupType, tech: Optional[TechType]):
 		pass

@@ -31,7 +31,7 @@ from game.wonders import WonderType
 from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
-from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType
+from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType, Yields
 from utils.base import ExtendedEnum, WeightedBaseList
 
 
@@ -87,6 +87,26 @@ class CityDistricts:
 			return districtItem.location
 
 		return None
+
+	def domesticTradeYields(self) -> Yields:
+
+		yields = Yields(food=0.0, production=0.0, gold=0.0)
+
+		for district in list(DistrictType):
+			if self.hasDistrict(district):
+				yields += district.domesticTradeYields()
+
+		return yields
+
+	def foreignTradeYields(self) -> Yields:
+
+		yields = Yields(food=0.0, production=0.0, gold=0.0)
+
+		for district in list(DistrictType):
+			if self.hasDistrict(district):
+				yields += district.foreignTradeYields()
+
+		return yields
 
 
 class CityBuildings:
@@ -502,7 +522,7 @@ class CityCitizens:
 		numberOfCitizensToRemove = self.numberOfCitizensWorkingPlots()
 		for _ in range(numberOfCitizensToRemove):
 			self.doRemoveWorstCitizen(removeForcedStatus=False, dontChangeSpecialist=SpecialistType.none,
-			                          simulation=simulation)
+									  simulation=simulation)
 
 		# Remove Non-Forced Specialists in Buildings
 		for buildingType in list(BuildingType):
@@ -642,9 +662,9 @@ class CityCitizens:
 		return 0
 
 	def doRemoveWorstCitizen(self,
-	                         removeForcedStatus: bool = False,
-	                         dontChangeSpecialist: SpecialistType = SpecialistType.none,
-	                         simulation=None) -> bool:
+							 removeForcedStatus: bool = False,
+							 dontChangeSpecialist: SpecialistType = SpecialistType.none,
+							 simulation=None) -> bool:
 		"""Pick the worst Plot to stop working"""
 		# Are all of our guys already not working Plots?
 		if self.numberOfUnassignedCitizens() == self.city.population():
@@ -1277,8 +1297,8 @@ class BuildQueue:
 
 	def buildingOf(self, buildingType: BuildingType) -> Optional[BuildableItem]:
 		item = next(filter(lambda
-			                   itemIterator: itemIterator.buildableType == BuildableType.building and itemIterator.buildingType == buildingType,
-		                   self._items), None)
+							   itemIterator: itemIterator.buildableType == BuildableType.building and itemIterator.buildingType == buildingType,
+						   self._items), None)
 		if item is not None:
 			return item
 
@@ -1561,7 +1581,7 @@ class City:
 	def power(self, simulation) -> int:
 		return int(
 			pow(float(self.defensiveStrengthAgainst(unit=None, tile=None, ranged=False, simulation=simulation)) / 100.0,
-			    1.5))
+				1.5))
 
 	def doUpdateCheapestPlotInfluence(self, simulation):
 		pass
@@ -1732,7 +1752,7 @@ class City:
 
 				# etemenanki - +2 Science and +1 Production to all Marsh tiles in your empire.
 				if workedTile.hasFeature(FeatureType.marsh) and self.player.hasWonder(WonderType.etemenanki,
-				                                                                      simulation):
+																					  simulation):
 					productionValue += 1.0
 
 				# etemenanki - +1 Science and +1 Production on all Floodplains tiles in this city.
@@ -1746,7 +1766,7 @@ class City:
 
 				# ladyOfTheReedsAndMarshes - +2 Production from Marsh, Oasis, and Desert Floodplains.
 				if (workedTile.hasFeature(FeatureType.marsh) or workedTile.hasFeature(FeatureType.oasis) or
-				    workedTile.hasFeature(FeatureType.floodplains)) and \
+					workedTile.hasFeature(FeatureType.floodplains)) and \
 					self.player.religion.pantheon() == PantheonType.ladyOfTheReedsAndMarshes:
 					productionValue += 1.0
 
@@ -2232,7 +2252,7 @@ class City:
 
 		if not self.isProduction() and self.player.isHuman() and not self.isProductionAutomated():
 			self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name,
-			                                          location=self.location)
+													  location=self.location)
 			return okay
 
 		# ...
@@ -2495,8 +2515,8 @@ class City:
 				unitType = self.productionUnitType()
 				if unitType is not None:
 					if (unitType.unitClass() == UnitClassType.melee or unitType.unitClass() == UnitClassType.ranged or \
-					    unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or \
-					                                                            unitType.era() == EraType.classical):
+						unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or \
+																				unitType.era() == EraType.classical):
 						modifierPercentage += 0.50
 
 			# veterancy - +30 % Production toward Encampment and Harbor districts and buildings for those districts.
@@ -2516,9 +2536,9 @@ class City:
 				unitType = self.productionUnitType()
 				if unitType is not None:
 					if (unitType.unitClass() == UnitClassType.melee or unitType.unitClass() == UnitClassType.ranged or
-					    unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or
-					                                                            unitType.era() == EraType.classical or unitType.era() == EraType.medieval or
-					                                                            unitType.era() == EraType.renaissance):
+						unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or
+																				unitType.era() == EraType.classical or unitType.era() == EraType.medieval or
+																				unitType.era() == EraType.renaissance):
 						modifierPercentage += 0.50
 
 			# chivalry - +50%  Production toward Industrial era and earlier heavy and light cavalry units.
@@ -3197,7 +3217,7 @@ class City:
 
 				# etemenanki - +2 Science and +1 Production to all Marsh tiles in your empire.
 				if adjacentTile.hasFeature(FeatureType.marsh) and self.player.hasWonder(WonderType.etemenanki,
-				                                                                        simulation):
+																						simulation):
 					scienceFromTiles += 2.0
 
 				# etemenanki - +1 Science and +1 Production on all Floodplains tiles in this city.
@@ -3597,7 +3617,7 @@ class City:
 		# for this Era, so when you station such a unit in a city, its CS will increase accordingly;
 		if self.garrisonedUnit() is not None:
 			unitStrength = self.garrisonedUnit().attackStrengthAgainst(unit=None, city=None, tile=None,
-			                                                           simulation=simulation)
+																	   simulation=simulation)
 			warriorStrength = UnitType.warrior.meleeStrength() - 10
 			strengthValue = max(warriorStrength, unitStrength)
 		else:
@@ -4027,14 +4047,14 @@ class City:
 
 				if self.player.isHuman():
 					self.player.notifications().addNotification(NotificationType.productionNeeded, cityName=self.name,
-					                                            location=self.location)
+																location=self.location)
 				else:
 					self.cityStrategy.chooseProduction(simulation)
 
 		else:
 			if self.player.isHuman():
 				self.player.notifications().addNotification(NotificationType.productionNeeded, cityName=self.name,
-				                                            location=self.location)
+															location=self.location)
 			else:
 				self.cityStrategy.chooseProduction(simulation)
 

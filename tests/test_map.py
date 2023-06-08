@@ -552,6 +552,30 @@ class TestTile(unittest.TestCase):
 
 		self.assertEqual(tile.productionFromFeatureRemoval(BuildType.removeRoad), 0)
 
+	def test_eurekas(self):
+		mapModel = MapMock(10, 10, TerrainType.ocean)
+
+		simulation = Game(mapModel)
+		simulation.userInterface = UserInterfaceMock()
+
+		player = Player(LeaderType.trajan, human=False)
+		player.initialize()
+
+		tile = Tile(HexPoint(3, 2), TerrainType.grass)
+
+		# Masonry - To Boost: Build a quarry
+		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.masonry), False)
+		tile.updateEurekas(ImprovementType.quarry, player, simulation)
+		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.masonry), True)
+
+		# Wheel - To Boost: Mine a resource
+		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.wheel), False)
+		tile.setResource(ResourceType.iron)
+		tile.updateEurekas(ImprovementType.mine, player, simulation)
+		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.wheel), True)
+
+		# Irrigation - To Boost: Farm a resource
+
 
 class TestBoundingBox(unittest.TestCase):
 	def test_constructor(self):

@@ -35,3 +35,4 @@ class PopupType(ExtendedEnum):
 	tutorialBadUnitAttack = 'tutorialBadUnitAttack'
 	tutorialCityAttack = 'tutorialCityAttack'
 	inspirationTriggered = 'inspirationTriggered'
+	eurekaTriggered = 'eurekaTriggered'

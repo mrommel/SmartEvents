@@ -36,8 +36,8 @@ class TechEurekas:
 	def triggeredFor(self, tech: TechType) -> bool:
 		return self._eurekaTrigger.weight(tech) > 0.0
 
-	def triggerIncreaseFor(self, tech: TechType):
-		self._eurekaTrigger.addWeight(1.0, tech)
+	def triggerIncreaseFor(self, tech: TechType, change: float = 1.0):
+		self._eurekaTrigger.addWeight(change, tech)
 
 	def triggerCountFor(self, tech: TechType) -> int:
 		return int(self._eurekaTrigger.weight(tech))
@@ -89,9 +89,16 @@ class PlayerTechs:
 		#             cityStatePlayer?.fulfillQuest(by: player.leader, in: gameModel)
 
 		# trigger event to user
-		# if player.isHuman():
-		#    simulation.userInterface.showPopup(popupType: .eurekaTriggered(tech: tech))
+		if self.player.isHuman():
+			simulation.userInterface.showPopup(PopupType.eurekaTriggered, tech=tech)
+
 		return
+
+	def changeEurekaValue(self, tech: TechType, change: float = 1.0):
+		return self._eurekas.triggerIncreaseFor(tech, change)
+
+	def eurekaValue(self, tech: TechType):
+		return self._eurekas.triggerCountFor(tech)
 
 	def needToChooseTech(self) -> bool:
 		return self._currentTechValue is None
