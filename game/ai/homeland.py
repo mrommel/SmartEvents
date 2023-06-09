@@ -6,6 +6,7 @@ from game.flavors import FlavorType
 from game.states.builds import BuildType
 from game.unitTypes import UnitTaskType, UnitMapType, UnitMissionType
 from game.units import Unit, UnitAutomationType, UnitMission
+from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.types import UnitDomainType
@@ -607,7 +608,7 @@ class HomelandAI:
 						self.executeMoveToTarget(targetTile, garrisonIfPossible=False, simulation=simulation)
 
 						if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
-							print("Moving to goody hut (non-explorer), \(targetTile.point)")
+							print(f"Moving to goody hut (non-explorer), {targetTile.point}")
 							# LogHomelandMessage(strLogString);
 		return
 
@@ -768,7 +769,7 @@ class HomelandAI:
 						mission = UnitMission(
 							UnitMissionType.build,
 							buildType=BuildType.fromImprovement(targetIndex.improvement),
-							location=targetLocation,
+							target=targetLocation,
 							path=None,
 							options=None
 						)
@@ -800,8 +801,8 @@ class HomelandAI:
 						self.executeMoveToTarget(targetTile, garrisonIfPossible=False, simulation=simulation)
 
 						if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
-							print("Moving to sentry point, \(targetedSentryPoint.target ?? HexPoint.invalid), " +
-								"Priority: \(targetedSentryPoint.threatValue)")
+							print(f"Moving to sentry point, {targetedSentryPoint.target or constants.invalidHexPoint}), " +
+								f"Priority: {targetedSentryPoint.threatValue}")
 							# LogHomelandMessage(strLogString);
 
 		return

@@ -127,8 +127,8 @@ class TestHexPoint(unittest.TestCase):
 		area1 = hex1.areaWithRadius(1)
 		area2 = hex1.areaWithRadius(2)
 
-		self.assertEqual(len(area1.points), 7)  # 1 + 6
-		self.assertEqual(len(area2.points), 19)  # 1 + 6 + 12
+		self.assertEqual(len(area1._points), 7)  # 1 + 6
+		self.assertEqual(len(area2._points), 19)  # 1 + 6 + 12
 
 
 class TestImprovementType(unittest.TestCase):
@@ -562,6 +562,7 @@ class TestTile(unittest.TestCase):
 		player.initialize()
 		player.techs.discover(TechType.mining, simulation)  # for the mine check - to reveal iron
 		player.techs.discover(TechType.pottery, simulation)  # for the farm check - to reveal wheat
+		player.techs.discover(TechType.animalHusbandry, simulation)  # for the pasture check - to reveal horses
 
 		tile = Tile(HexPoint(3, 2), TerrainType.grass)
 
@@ -572,7 +573,7 @@ class TestTile(unittest.TestCase):
 
 		# Wheel - To Boost: Mine a resource
 		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.wheel), False)
-		tile.setResource(ResourceType.iron)
+		tile.setResource(ResourceType.copper)
 		tile.updateEurekas(ImprovementType.mine, player, simulation)
 		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.wheel), True)
 
@@ -581,6 +582,24 @@ class TestTile(unittest.TestCase):
 		tile.setResource(ResourceType.wheat)
 		tile.updateEurekas(ImprovementType.farm, player, simulation)
 		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.irrigation), True)
+
+		# Horseback Riding - To Boost: Build a pasture
+		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.horsebackRiding), False)
+		tile.setResource(ResourceType.horses)
+		tile.updateEurekas(ImprovementType.pasture, player, simulation)
+		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.horsebackRiding), True)
+
+		# Iron Working - To Boost: Build an Iron Mine
+		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.ironWorking), False)
+		tile.setResource(ResourceType.iron)
+		tile.updateEurekas(ImprovementType.mine, player, simulation)
+		self.assertEqual(player.techs.eurekaTriggeredFor(TechType.ironWorking), True)
+
+		# Apprenticeship - To Boost: Build 3 mines
+
+		# Ballistics - To Boost: Build 2 Forts
+
+		# Rifling - To Boost: Build a Niter Mine
 
 
 class TestBoundingBox(unittest.TestCase):
@@ -593,13 +612,13 @@ class TestBoundingBox(unittest.TestCase):
 class TestHexArea(unittest.TestCase):
 	def test_constructor(self):
 		area0 = HexArea([HexPoint(1, 1), HexPoint(2, 2), HexPoint(3, 3)])
-		self.assertEqual(area0.points, [HexPoint(1, 1), HexPoint(2, 2), HexPoint(3, 3)])
+		self.assertEqual(area0._points, [HexPoint(1, 1), HexPoint(2, 2), HexPoint(3, 3)])
 
 		area1 = HexArea(HexPoint(1, 1))
-		self.assertEqual(area1.points, [HexPoint(1, 1)])
+		self.assertEqual(area1._points, [HexPoint(1, 1)])
 
 		area2 = HexArea(HexPoint(1, 1), radius=1)
-		self.assertEqual(area2.points, [HexPoint(0, 0), HexPoint(0, 1), HexPoint(0, 2), HexPoint(2, 1), HexPoint(1, 0), HexPoint(1, 1), HexPoint(1, 2)])
+		self.assertEqual(area2._points, [HexPoint(0, 0), HexPoint(0, 1), HexPoint(0, 2), HexPoint(2, 1), HexPoint(1, 0), HexPoint(1, 1), HexPoint(1, 2)])
 
 	def test_center(self):
 		area = HexArea([HexPoint(1, 1), HexPoint(2, 2), HexPoint(3, 3)])

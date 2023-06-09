@@ -84,7 +84,7 @@ class Unit:
 		bestTile = None
 
 		area = HexArea(self.location, radius)
-		for loopPoint in area.points:
+		for loopPoint in area._points:
 			loopTile = simulation.tileAt(loopPoint)
 
 			if loopTile.isValidDomainFor(self):

@@ -309,7 +309,7 @@ class StartPositioner:
                 if 0 < numberOfCivsOnCurrentArea <= 12:
                     self.divideIntoRegions(int(numberOfCivsPerAreaValue), area)
 
-        self.startAreas = sorted(self.startAreas, key=lambda startArea: len(startArea.area.points),
+        self.startAreas = sorted(self.startAreas, key=lambda startArea: len(startArea.area.points()),
                                  reverse=True)  # by: { $0.area.points.count > $1.area.points.count})
 
         # debug
@@ -318,7 +318,7 @@ class StartPositioner:
         print(f'  global fertility of land plots: {globalFertilityOfLands}')
         print("  start areas")
         for startArea in self.startAreas:
-            print(f'  - start era: {startArea.area.boundingBox()} / {len(startArea.area.points)} points')
+            print(f'  - start era: {startArea.area.boundingBox()} / {len(startArea.area.points())} points')
 
         print("----")
 
@@ -340,9 +340,9 @@ class StartPositioner:
                 if startArea.used:
                     continue
 
-                print(f'evaluate area with {len(startArea.area.points)} points')
+                print(f'evaluate area with {len(startArea.area.points())} points')
 
-                for startPoint in startArea.area.points:
+                for startPoint in startArea.area.points():
                     smallestDistanceOther = min(
                         list(map(lambda n: startPoint.distance(n.location), self.startLocations)), default=10000)
 
@@ -636,8 +636,8 @@ class ContinentFinder:
 class MapGenerator:
     def __init__(self, options: MapOptions):
         self.options = options
-        self.width = options.mapSize.size().width
-        self.height = options.mapSize.size().height
+        self.width = options.mapSize.size().width()
+        self.height = options.mapSize.size().height()
 
         # prepare terrain, distanceToCoast and zones
         self.plots = Array2D(self.width, self.height)
@@ -1187,7 +1187,7 @@ class MapGenerator:
         # https://github.com/Gedemon/Civ5-YnAEMP/blob/db7cd1bc6a0684411aba700838184bcc6272b166/Override/WorldBuilderRandomItems.lua
         # get info about current resource in map
         info = self.numberOfResources(grid, resource)
-        mapFactor = grid.width * grid.height * 100 / (MapSize.standard.size().width * MapSize.standard.size().height)
+        mapFactor = grid.width * grid.height * 100 / (MapSize.standard.size().width() * MapSize.standard.size().height())
         absolute_amount = max(1, resource.baseAmount() * mapFactor / 100)
 
         # skip random altering for tests

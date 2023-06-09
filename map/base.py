@@ -15,14 +15,24 @@ class Size:
             @param height: given height of object
         """
 		if isinstance(width, int) and isinstance(height, int):
-			self.width = width
-			self.height = height
+			self._width = width
+			self._height = height
 		else:
 			raise AttributeError(f'Size with wrong attributes: {width} / {height}')
 
+	def width(self) -> int:
+		return self._width
+
+	def height(self) -> int:
+		return self._height
+
 	def __str__(self):
 		"""returns a string representation of the Size"""
-		return f'[Size x: {self.width}, y: {self.height}]'
+		return f'Size(width={self._width}, height={self._height})'
+
+	def __repr__(self):
+		"""returns a string representation of the Size"""
+		return f'Size(width={self._width}, height={self._height})'
 
 
 class Point:
@@ -113,12 +123,12 @@ class HexArea:
 			tmp = tmp.union(new_tmp)
 
 		tmp_points = list(tmp)
-		self.points = tmp_points
+		self._points = tmp_points
 
 		self._boundingBox = BoundingBox(tmp_points)
 
 	def __iter__(self):
-		return self.points.__iter__()
+		return self._points.__iter__()
 
 	def __eq__(self, other):
 		if isinstance(other, HexArea):
@@ -134,7 +144,7 @@ class HexArea:
 		sum_y = 0
 		num = 0
 
-		for point in self.points:
+		for point in self._points:
 			sum_x += point.x
 			sum_y += point.y
 
@@ -146,14 +156,17 @@ class HexArea:
 		return HexPoint(int(sum_x / num), int(sum_y / num))
 
 	def first(self) -> Optional[HexPoint]:
-		return next(iter(self.points), None)
+		return next(iter(self._points), None)
+
+	def points(self) -> [HexPoint]:
+		return self._points
 
 	def divideHorizontally(self, dx: int) -> (HexArea, HexArea):
 		# puts all points left of dx in first area and all points right of dx in second area
 		points_first = []
 		points_second = []
 
-		for point in self.points:
+		for point in self._points:
 			if point.x < dx:
 				points_first.append(point)
 			else:
@@ -166,7 +179,7 @@ class HexArea:
 		points_first = []
 		points_second = []
 
-		for point in self.points:
+		for point in self._points:
 			if point.y < dy:
 				points_first.append(point)
 			else:
@@ -174,9 +187,9 @@ class HexArea:
 
 		return HexArea(points_first), HexArea(points_second)
 
-
-# def __next__(self):
-#	return self.points.__next__()
+	def addPoint(self, point):
+		self._points.append(point)
+		self._boundingBox = BoundingBox(self._points)
 
 
 class HexCube:
@@ -215,8 +228,8 @@ class HexCube:
 		size = Size(36, 26)
 		origin = Point(270, 470)
 
-		x = int((f0 * self.q + f1 * self.r) * size.width)
-		y = int((f2 * self.q + f3 * self.r) * size.height)
+		x = int((f0 * self.q + f1 * self.r) * size.width())
+		y = int((f2 * self.q + f3 * self.r) * size.height())
 
 		return Point(x + origin.x, y + origin.y)
 

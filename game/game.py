@@ -18,12 +18,12 @@ from game.types import TechType, EraType
 from game.unitTypes import UnitMapType, UnitAbilityType, UnitPromotionType, MoveOptions
 from game.units import Unit
 from game.wonders import WonderType
-from map.base import HexPoint
+from map.base import HexPoint, Size
 from map.improvements import ImprovementType
 from map.map import Map, Tile, ContinentType, Continent
 from map.path_finding.finder import AStarPathfinder, MoveTypeIgnoreUnitsOptions, MoveTypeIgnoreUnitsPathfinderDataSource
 from map.path_finding.path import HexPath
-from map.types import FeatureType, Tutorials
+from map.types import FeatureType, Tutorials, MapSize
 
 
 class Game:
@@ -666,3 +666,6 @@ class Game:
 
 	def isEnemyVisibleAt(self, location: HexPoint, player, unitMapType: UnitMapType = UnitMapType.combat) -> bool:
 		return self.visibleEnemyAt(location, player, unitMapType) is not None
+
+	def mapSize(self) -> Size:
+		return self._map.bestMatchingSize().size()

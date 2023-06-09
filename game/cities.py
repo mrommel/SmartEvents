@@ -1316,20 +1316,29 @@ class BuildQueue:
 	def pop(self):
 		self._items.pop()
 
-	def isCurrentlyBuildingDistrict(self):
-		return len(
-			list(filter(lambda itemIterator: itemIterator.buildableType == BuildableType.district, self._items))) > 0
+	def isCurrentlyBuildingDistrict(self, district: Optional[DistrictType] = None) -> bool:
+		if district is None:
+			return len(list(filter(lambda it: it.buildableType == BuildableType.district, self._items))) > 0
+		else:
+			return len(list(filter(lambda it: it.buildableType == BuildableType.district and it.district == district, self._items))) > 0
 
-	def isCurrentlyBuildingBuilding(self):
-		return len(
-			list(filter(lambda itemIterator: itemIterator.buildableType == BuildableType.building, self._items))) > 0
+	def isCurrentlyBuildingBuilding(self, building: Optional[BuildingType] = None) -> bool:
+		if building is None:
+			return len(list(filter(lambda it: it.buildableType == BuildableType.building, self._items))) > 0
+		else:
+			return len(list(filter(lambda it: it.buildableType == BuildableType.building and it.building == building, self._items))) > 0
 
-	def isCurrentlyBuildingWonder(self):
-		return len(
-			list(filter(lambda itemIterator: itemIterator.buildableType == BuildableType.wonder, self._items))) > 0
+	def isCurrentlyBuildingWonder(self, wonder: Optional[WonderType] = None) -> bool:
+		if wonder is None:
+			return len(list(filter(lambda it: it.buildableType == BuildableType.wonder, self._items))) > 0
+		else:
+			return len(list(filter(lambda it: it.buildableType == BuildableType.wonder and it.wonder == wonder, self._items))) > 0
 
-	def isCurrentlyTrainingUnit(self):
-		return len(list(filter(lambda itemIterator: itemIterator.buildableType == BuildableType.unit, self._items))) > 0
+	def isCurrentlyTrainingUnit(self, unit: Optional[UnitType] = None) -> bool:
+		if unit is None:
+			return len(list(filter(lambda it: it.buildableType == BuildableType.unit, self._items))) > 0
+		else:
+			return len(list(filter(lambda it: it.buildableType == BuildableType.unit and it.unit == unit, self._items))) > 0
 
 
 class City:
@@ -1462,7 +1471,7 @@ class City:
 
 		# Founded cities start with eight additional tiles.
 		if self.player.leader.civilization().ability() == CivilizationAbility.motherRussia:
-			tiles = self.location.areaWithRadius(radius=2).points
+			tiles = self.location.areaWithRadius(radius=2).points()
 			random.shuffle(tiles)
 			additional = 0
 
@@ -2359,7 +2368,7 @@ class City:
 			self.setFoodBasket(0)
 
 			if self.population() > 1:
-				self.setPopulation(self.population() - 1, simulation=simulation)
+				self.setPopulation(self.population() - 1, reassignCitizen=False, simulation=simulation)
 
 	def doProduction(self, allowNoProduction, simulation):
 		if not self.player.isHuman() or self.isProductionAutomated():
@@ -4126,3 +4135,6 @@ class City:
 			return self.location
 
 		return self.districts.locationOfDistrict(district)
+
+	def setEverCapitalTo(self, value):
+		self.everCapitalValue = value

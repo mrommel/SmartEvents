@@ -29,7 +29,8 @@ from game.tradeRoutes import TradeRoutes
 from game.types import EraType, TechType, CivicType
 from game.unitTypes import UnitMissionType, UnitTaskType, UnitMapType, UnitType
 from game.wonders import WonderType
-from map.base import HexPoint
+from map import constants
+from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
 from map.types import Tutorials, Yields, TerrainType, FeatureType, UnitMovementType
 
@@ -305,6 +306,7 @@ class Player:
 		self._totalImprovementsBuilt: int = 0
 		self._trainedSettlersValue: int = 0
 		self._discoveredNaturalWonders: [FeatureType] = []
+		self._area = HexArea([])
 
 	def initialize(self):
 		self.setupFlavors()
@@ -718,14 +720,44 @@ class Player:
 	def setCanChangeGovernmentTo(self, param):
 		pass
 
-	def checkWorldCircumnavigated(self, game):
+	def checkWorldCircumnavigated(self, simulation):
 		pass
 
 	def updatePlots(self, simulation):
-		pass
+		"""This determines what plots the player has under control"""
+		# init
+		tmpArea = HexArea([])
+		mapSize = simulation.mapSize()
+		# tmpArea.points.reserveCapacity(mapSize.numberOfTiles())
+
+		for x in range(mapSize.width()):
+			for y in range(mapSize.height()):
+				pt = HexPoint(x, y)
+				tile = simulation.tileAt(pt)
+
+				if tile is not None:
+					if self.isEqualTo(tile.owner()):
+						tmpArea.addPoint(pt)
+
+		self._area = tmpArea
 
 	def setCapitalCity(self, city, simulation):
-		pass
+		if city is None:
+			for city in simulation.citiesOf(self):
+				city.setIsCapitalTo(False)
+		else:
+			currentCapitalCity = self.capitalCity(simulation)
+
+			if currentCapitalCity is not None and \
+				(currentCapitalCity.location != city.location or currentCapitalCity.name != city.name):
+
+				# Need to set our original capital x, y?
+				if self.originalCapitalLocationValue == constants.invalidHexPoint:
+					self.originalCapitalLocationValue = city.location
+
+			city.setEverCapitalTo(True)
+
+		return
 
 	def currentAge(self) -> AgeType:
 		return self._currentAgeValue
@@ -1322,3 +1354,6 @@ class Player:
 		# inform other players, that war was declared
 		otherLeader = otherPlayer.leader
 		simulation.sendGossip(GossipType.declarationsOfWar, leader=otherLeader, player=self)
+
+	def capitalCity(self, simulation):
+		return simulation.capitalOf(self)

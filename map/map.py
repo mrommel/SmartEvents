@@ -956,8 +956,8 @@ class Map:
 	def __init__(self, width, height=None):
 		if isinstance(width, Size) and height is None:
 			size = width
-			self.width = size.width
-			self.height = size.height
+			self.width = size.width()
+			self.height = size.height()
 		elif isinstance(width, int) and isinstance(height, int):
 			self.width = width
 			self.height = height
@@ -1230,7 +1230,7 @@ class Map:
 		bestMapSize = MapSize.tiny
 
 		for mapSize in list(MapSize):
-			delta = abs((mapSize.size().width * mapSize.size().height) - (self.width * self.height))
+			delta = abs((mapSize.size().width() * mapSize.size().height()) - (self.width * self.height))
 			if delta < bestDelta:
 				bestDelta = delta
 				bestMapSize = mapSize
