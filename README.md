@@ -5,7 +5,7 @@
 
 ## Testing
 ```
-coverage run --source=. -m unittest discover -s tests/ && coverage html
+coverage run -m unittest discover -s tests/ && coverage html
 ```
 
 ## Links

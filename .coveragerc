@@ -1,0 +1,5 @@
+[run]
+source =
+    game/
+    map/
+    utils/
