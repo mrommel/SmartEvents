@@ -10,7 +10,7 @@ from game.unitTypes import UnitType
 from game.units import Unit
 from map.base import HexPoint
 from map.types import TerrainType
-from tests.testBasics import MapMock
+from tests.testBasics import MapModelMock
 
 
 class TestHomeland(unittest.TestCase):
@@ -93,7 +93,7 @@ class TestEconomics(unittest.TestCase):
 
 class TestBuilds(unittest.TestCase):
 	def test_buildOn(self):
-		mapModel = MapMock(10, 10, TerrainType.grass)
+		mapModel = MapModelMock(10, 10, TerrainType.grass)
 		tile = mapModel.tileAt(HexPoint(1, 1))
 		buildTime = BuildType.farm.buildTimeOn(tile)
 

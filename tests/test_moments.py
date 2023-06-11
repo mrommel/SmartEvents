@@ -2,13 +2,14 @@ import unittest
 
 from game.baseTypes import HandicapType
 from game.civilizations import LeaderType, CivilizationType
-from game.game import Game
+from game.game import GameModel
 from game.moments import MomentType
 from game.players import Player
 from game.states.dedications import DedicationType
+from game.states.victories import VictoryType
 from game.types import EraType
 from map.types import TerrainType, FeatureType
-from tests.testBasics import MapMock, UserInterfaceMock
+from tests.testBasics import MapModelMock, UserInterfaceMock
 
 
 class TestMoments(unittest.TestCase):
@@ -19,8 +20,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_cityNearFloodableRiver(self):  # 4
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -39,8 +46,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_cityNearVolcano(self):  # 5
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -59,8 +72,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_cityOfAwe(self):  # 6
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -79,8 +98,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_cityOnNewContinent(self):  # 7
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -105,8 +130,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_discoveryOfANaturalWonder(self):  # 12
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -159,8 +190,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_firstNeighborhoodCompleted(self):  # 46
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -187,8 +224,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_firstTechnologyOfNewEra(self):  # 55
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -209,8 +252,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_metNewCivilization(self):  # 222
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -229,8 +278,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_trigger_metNewCivilization(self):
 		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		player = Player(LeaderType.trajan, human=True)
 		player.initialize()
@@ -306,8 +361,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_worldsFirstNeighborhood(self):  # 112
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -334,8 +395,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_worldsFirstTechnologyOfNewEra(self):  # 121
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -356,8 +423,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_worldsLargestCivilization(self):  # 123
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -375,8 +448,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_worldCircumnavigated(self):  # 124
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -394,8 +473,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_snowCity(self):  # 229
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -418,8 +503,14 @@ class TestMoments(unittest.TestCase):
 
 	def test_moment_tundraCity(self):  # 233
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -444,8 +535,14 @@ class TestMoments(unittest.TestCase):
 	# battleFought  # 301
 	def test_moment_dedicationTriggered(self):  # 302
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()

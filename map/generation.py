@@ -8,7 +8,7 @@ from bitarray import bitarray
 from game.cityStates import CityStateType
 from game.civilizations import LeaderType
 from map.base import HexPoint, HexDirection, Array2D, HexArea
-from map.map import Map, Tile, Continent, ContinentType
+from map.map import MapModel, Tile, Continent, ContinentType
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, MoveTypeIgnoreUnitsPathfinderDataSource, AStarPathfinder
 from map.perlin_noise.perlinNoise import PerlinNoise
 from map.types import TerrainType, MapType, MapAge, MapSize, ResourceType, ClimateZone, FeatureType, ResourceUsage, \
@@ -157,12 +157,12 @@ class StartLocation:
 
 
 class BaseSiteEvaluator:
-    def __init__(self, map: Map):
+    def __init__(self, map: MapModel):
         self.map = map
 
 
 class TileFertilityEvaluator(BaseSiteEvaluator):
-    def __init__(self, map: Map):
+    def __init__(self, map: MapModel):
         super().__init__(map)
 
     def placementFertility(self, tile: Tile, checkForCoastalLand: bool) -> float:
@@ -657,7 +657,7 @@ class MapGenerator:
 
     def generate(self, callback):
         callback(MapGeneratorState(0.0, _("TXT_KEY_MAP_GENERATOR_START")))
-        grid = Map(self.width, self.height)
+        grid = MapModel(self.width, self.height)
 
         height_map = self._generateHeightMap()
         moisture_map = HeightMap(self.width, self.height)

@@ -20,22 +20,19 @@ from game.units import Unit
 from game.wonders import WonderType
 from map.base import HexPoint, Size
 from map.improvements import ImprovementType
-from map.map import Map, Tile, ContinentType, Continent
+from map.map import MapModel, Tile, ContinentType, Continent
 from map.path_finding.finder import AStarPathfinder, MoveTypeIgnoreUnitsOptions, MoveTypeIgnoreUnitsPathfinderDataSource
 from map.path_finding.path import HexPath
 from map.types import FeatureType, Tutorials, MapSize
 
 
-class Game:
-	def __init__(self, map: Map, handicap: HandicapType = HandicapType.settler):
+class GameModel:
+	def __init__(self, victoryTypes: [VictoryType], handicap: HandicapType, turnsElapsed: int, players, map: MapModel):
 		self.turnSliceValue = 0
 		self.waitDiploPlayer = None
-		self.players = []
-		self.currentTurn = 0
-		self.victoryTypes = [
-			VictoryType.domination,
-			VictoryType.cultural
-		]
+		self.players = players
+		self.currentTurn = turnsElapsed
+		self.victoryTypes = victoryTypes
 		self.handicap = handicap
 		self._map = map
 		self.userInterface = None

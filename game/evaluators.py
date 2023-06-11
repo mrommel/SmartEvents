@@ -1,7 +1,7 @@
 import sys
 
 from map.base import HexPoint, HexArea
-from map.map import Map
+from map.map import MapModel
 from utils.base import ExtendedEnum
 
 
@@ -43,7 +43,7 @@ class CitySiteEvaluationType(ExtendedEnum):
 
 
 class TileFertilityEvaluator(BaseSiteEvaluator):
-	def __init__(self, map: Map):
+	def __init__(self, map: MapModel):
 		super().__init__()
 		self.map = map
 
@@ -52,7 +52,7 @@ class CitySiteEvaluator(BaseSiteEvaluator):
 
 	minCityDistance = 2
 
-	def __init__(self, map: Map):
+	def __init__(self, map: MapModel):
 		super().__init__()
 		self.map = map
 		self.tileFertilityEvaluator = TileFertilityEvaluator(map)

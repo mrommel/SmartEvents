@@ -1,18 +1,20 @@
 """ unittest module """
 import unittest
 
+from game.baseTypes import HandicapType
 from game.civilizations import LeaderType
-from game.game import Game
+from game.game import GameModel
 from game.players import Player
 from game.states.builds import BuildType
+from game.states.victories import VictoryType
 from game.types import TechType, CivicType
 from map.base import Array2D, HexPoint, HexCube, HexDirection, Size, BoundingBox, HexArea
 from map.generation import MapOptions, MapGenerator, HeightMap
 from map.improvements import ImprovementType
-from map.map import Tile, Map, FlowDirection, River, Continent
+from map.map import Tile, MapModel, FlowDirection, River, Continent
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, AStarPathfinder, MoveTypeIgnoreUnitsPathfinderDataSource
 from map.types import FeatureType, TerrainType, UnitMovementType, MapSize, MapType, AppealLevel, ResourceType
-from tests.testBasics import UserInterfaceMock, MapMock
+from tests.testBasics import UserInterfaceMock, MapModelMock
 
 
 class TestMapAssets(unittest.TestCase):
@@ -146,8 +148,14 @@ class TestImprovementType(unittest.TestCase):
 		self.assertEqual(ImprovementType.farm.isPossibleOn(tile), True)
 
 	def test_mine_yields(self):
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
@@ -172,8 +180,14 @@ class TestImprovementType(unittest.TestCase):
 		self.assertEqual(ImprovementType.mine.isPossibleOn(tile), True)
 
 	def test_pasture_yields(self):
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
@@ -212,8 +226,14 @@ class TestImprovementType(unittest.TestCase):
 		self.assertEqual(ImprovementType.pasture.isPossibleOn(tile), True)
 
 	def test_plantation_yields(self):
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
@@ -232,8 +252,14 @@ class TestImprovementType(unittest.TestCase):
 		self.assertEqual(ImprovementType.plantation.isPossibleOn(tile), True)
 
 	def test_fishingBoats_yields(self):
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
@@ -252,8 +278,14 @@ class TestImprovementType(unittest.TestCase):
 		self.assertEqual(ImprovementType.fishingBoats.isPossibleOn(tile), True)
 
 	def test_camp_yields(self):
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		player = Player(LeaderType.trajan, human=False)
 		player.initialize()
@@ -471,9 +503,15 @@ class TestTile(unittest.TestCase):
 		tile = Tile(HexPoint(3, 1), TerrainType.grass)
 		tile._resourceValue = ResourceType.oil
 
-		mapModel = MapMock(10, 10, TerrainType.ocean)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
 
-		simulation = Game(mapModel)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 		simulation.userInterface = UserInterfaceMock()
 
 		player = Player(LeaderType.trajan, human=False)
@@ -553,9 +591,15 @@ class TestTile(unittest.TestCase):
 		self.assertEqual(tile.productionFromFeatureRemoval(BuildType.removeRoad), 0)
 
 	def test_eurekas(self):
-		mapModel = MapMock(10, 10, TerrainType.ocean)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
 
-		simulation = Game(mapModel)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 		simulation.userInterface = UserInterfaceMock()
 
 		player = Player(LeaderType.trajan, human=False)
@@ -638,20 +682,20 @@ class TestHexArea(unittest.TestCase):
 class TestMap(unittest.TestCase):
 	def test_constructor(self):
 		"""Test that the map constructor versions work"""
-		map1 = Map(3, 4)
+		map1 = MapModel(3, 4)
 		self.assertEqual(map1.width, 3)
 		self.assertEqual(map1.height, 4)
 
-		map2 = Map(Size(5, 2))
+		map2 = MapModel(Size(5, 2))
 		self.assertEqual(map2.width, 5)
 		self.assertEqual(map2.height, 2)
 
 		with self.assertRaises(AttributeError):
-			_ = Map(5.2, 1)
+			_ = MapModel(5.2, 1)
 
 	def test_valid(self):
 		"""Test that a point is on the map (or not)"""
-		map1 = Map(3, 4)
+		map1 = MapModel(3, 4)
 
 		self.assertEqual(map1.valid(2, 3), True)
 		self.assertEqual(map1.valid(HexPoint(2, 3)), True)
@@ -667,7 +711,7 @@ class TestMap(unittest.TestCase):
 			HexPoint(1, 0),
 			HexPoint(1, 1),
 		]
-		map1 = Map(2, 2)
+		map1 = MapModel(2, 2)
 		map_points = map1.points()
 
 		self.assertEqual(len(map_points), 4)
@@ -676,9 +720,15 @@ class TestMap(unittest.TestCase):
 
 	def test_average_tile_appeal(self):
 		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.ocean)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
 
-		simulation = Game(mapModel)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 		simulation.userInterface = UserInterfaceMock()
 
 		tile = mapModel.tileAt(HexPoint(3, 3))
@@ -693,9 +743,15 @@ class TestMap(unittest.TestCase):
 
 	def test_breathtaking_appeal(self):
 		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.ocean)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
 
-		simulation = Game(mapModel)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 		simulation.userInterface = UserInterfaceMock()
 
 		tile = mapModel.tileAt(HexPoint(3, 3))
@@ -711,9 +767,15 @@ class TestMap(unittest.TestCase):
 
 	def test_breathtaking_appeal2(self):
 		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.ocean)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
 
-		simulation = Game(mapModel)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 		simulation.userInterface = UserInterfaceMock()
 
 		tile = mapModel.tileAt(HexPoint(3, 3))
@@ -729,8 +791,14 @@ class TestMap(unittest.TestCase):
 
 	def test_discovery(self):
 		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		player = Player(LeaderType.trajan, human=True)
 		player.initialize()
@@ -749,7 +817,7 @@ class TestMap(unittest.TestCase):
 
 	def test_sight(self):
 		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.ocean)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
 
 		player = Player(LeaderType.trajan, human=True)
 		player.initialize()
@@ -767,7 +835,7 @@ class TestMap(unittest.TestCase):
 
 	def test_isRiverToCrossTowards_ns(self):
 		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.ocean)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
 
 		tileNorth = mapModel.tileAt(HexPoint(3, 1))
 		tileSouth = mapModel.tileAt(HexPoint(3, 2))
@@ -787,7 +855,7 @@ class TestMap(unittest.TestCase):
 
 	def test_continents(self):
 		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.grass)
+		mapModel = MapModelMock(10, 10, TerrainType.grass)
 
 		continent = Continent(12, 'Europe', mapModel)
 		mapModel.continents.append(continent)
@@ -827,7 +895,7 @@ class TestMapGenerator(unittest.TestCase):
 class TestPathfinding(unittest.TestCase):
 	def test_generation_request(self):
 		"""Test astar"""
-		grid = Map(10, 10)
+		grid = MapModel(10, 10)
 		for pt in grid.points():
 			grid.modifyTerrainAt(pt, TerrainType.grass)
 

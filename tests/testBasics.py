@@ -2,11 +2,11 @@ from typing import Optional
 
 from game.states.ui import Interface, PopupType
 from game.types import TechType
-from map.map import Map
+from map.map import MapModel
 from map.types import TerrainType
 
 
-class MapMock(Map):
+class MapModelMock(MapModel):
 	def __init__(self, width: int, height: int, terrain: TerrainType):
 		super().__init__(width, height)
 

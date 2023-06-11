@@ -4,12 +4,13 @@ from game.baseTypes import HandicapType
 from game.cities import City
 from game.civilizations import LeaderType
 from game.flavors import Flavors, FlavorType, Flavor
-from game.game import Game
+from game.game import GameModel
 from game.playerMechanics import AccessLevel
 from game.players import Player
+from game.states.victories import VictoryType
 from map.base import HexPoint
 from map.types import TerrainType
-from tests.testBasics import MapMock, UserInterfaceMock
+from tests.testBasics import MapModelMock, UserInterfaceMock
 
 
 class TestFlavors(unittest.TestCase):
@@ -84,9 +85,15 @@ class AccessLevelTests(unittest.TestCase):
 		playerTrajan = Player(LeaderType.trajan)
 		playerTrajan.initialize()
 
-		# setup the map
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		# set up the map
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		simulation.userInterface = UserInterfaceMock()
 
@@ -107,9 +114,15 @@ class AccessLevelTests(unittest.TestCase):
 		playerTrajan = Player(LeaderType.trajan)
 		playerTrajan.initialize()
 
-		# setup the map
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		# set up the map
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		simulation.userInterface = UserInterfaceMock()
 
@@ -131,9 +144,15 @@ class AccessLevelTests(unittest.TestCase):
 		playerTrajan = Player(LeaderType.trajan)
 		playerTrajan.initialize()
 
-		# setup the map
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		# set up the map
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		simulation.userInterface = UserInterfaceMock()
 

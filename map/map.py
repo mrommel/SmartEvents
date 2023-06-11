@@ -952,7 +952,7 @@ class ContinentType(ExtendedEnum):
 	zealandia = 42
 
 
-class Map:
+class MapModel:
 	def __init__(self, width, height=None):
 		if isinstance(width, Size) and height is None:
 			size = width
@@ -974,6 +974,7 @@ class Map:
 		self._cities = []
 		self._units = []
 		self.startLocations = []
+		self.cityStateStartLocations = []
 		self.continents = []
 
 	def valid(self, x_or_hex, y=None):

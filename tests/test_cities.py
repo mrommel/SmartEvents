@@ -1,25 +1,32 @@
 import unittest
 
-from game.ai.cities import BuildableType, CityStrategyAdoptions, CityStrategyType, CitySpecializationType
+from game.ai.cities import BuildableType, CitySpecializationType
 from game.baseTypes import HandicapType
 from game.buildings import BuildingType
 from game.cities import City
 from game.civilizations import LeaderType
 from game.districts import DistrictType
-from game.game import Game
+from game.game import GameModel
 from game.governments import GovernmentType
 from game.players import Player
+from game.states.victories import VictoryType
 from game.unitTypes import UnitType
 from map.base import HexPoint
 from map.types import TerrainType
-from tests.testBasics import MapMock, UserInterfaceMock
+from tests.testBasics import MapModelMock, UserInterfaceMock
 
 
 class TestCityProduction(unittest.TestCase):
 	def test_chooseProduction(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -49,8 +56,14 @@ class TestCityProduction(unittest.TestCase):
 class TestCityDistricts(unittest.TestCase):
 	def test_districts(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -78,8 +91,14 @@ class TestCityDistricts(unittest.TestCase):
 class TestCityBuildings(unittest.TestCase):
 	def test_housing(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -109,8 +128,14 @@ class TestCityBuildings(unittest.TestCase):
 class TestCityCitizens(unittest.TestCase):
 	def test_turn_small(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -133,8 +158,14 @@ class TestCityCitizens(unittest.TestCase):
 
 	def test_turn_capital(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -158,8 +189,14 @@ class TestCityCitizens(unittest.TestCase):
 
 	def test_workedTileLocations(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -181,8 +218,14 @@ class TestCityCitizens(unittest.TestCase):
 
 	def test_turn_forceWorking(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -213,8 +256,14 @@ class TestCityCitizens(unittest.TestCase):
 class TestCity(unittest.TestCase):
 	def test_turn(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()
@@ -236,8 +285,14 @@ class TestCity(unittest.TestCase):
 
 	def test_bestLocationForDistrict(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()

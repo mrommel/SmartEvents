@@ -10,7 +10,8 @@ from game.cities import City, CityStateType
 from game.cityStates import CityStateCategory
 from game.civilizations import LeaderType, CivilizationType, CivilizationAbility
 from game.districts import DistrictType
-from game.game import Game
+from game.game import GameModel
+from game.generation import GameGenerator
 from game.governments import GovernmentType
 from game.loyalties import LoyaltyState
 from game.moments import MomentType
@@ -22,15 +23,16 @@ from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
+from game.states.victories import VictoryType
 from game.types import CivicType, TechType, EraType
 from game.unitTypes import UnitType
 from game.units import Unit, UnitActivityType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.improvements import ImprovementType
-from map.map import Map, Tile
+from map.map import MapModel, Tile
 from map.types import TerrainType
-from tests.testBasics import UserInterfaceMock, MapMock
+from tests.testBasics import UserInterfaceMock, MapModelMock
 
 
 class TestGameAssets(unittest.TestCase):
@@ -67,16 +69,28 @@ class TestGameAssets(unittest.TestCase):
 		for district in list(DistrictType):
 			_ = district.name()
 
-			mapModel = MapMock(10, 10, TerrainType.grass)
-			simulation = Game(map=mapModel)
+			mapModel = MapModelMock(10, 10, TerrainType.grass)
+			simulation = GameModel(
+				victoryTypes=[VictoryType.domination],
+				handicap=HandicapType.chieftain,
+				turnsElapsed=0,
+				players=[],
+				map=mapModel
+			)
 			_ = district.canBuildOn(HexPoint(1, 1), simulation)
 
 	def test_wonders_data(self):
 		for wonder in list(WonderType):
 			_ = wonder.name()
 
-			mapModel = MapMock(10, 10, TerrainType.grass)
-			simulation = Game(map=mapModel)
+			mapModel = MapModelMock(10, 10, TerrainType.grass)
+			simulation = GameModel(
+				victoryTypes=[VictoryType.domination],
+				handicap=HandicapType.chieftain,
+				turnsElapsed=0,
+				players=[],
+				map=mapModel
+			)
 			_ = wonder.canBuildOn(HexPoint(1, 1), simulation)
 
 	def test_buildings_data(self):
@@ -209,7 +223,7 @@ class TestGameAssets(unittest.TestCase):
 class TestCity(unittest.TestCase):
 
 	def setUp(self) -> None:
-		mapModel = Map(10, 10)
+		mapModel = MapModel(10, 10)
 
 		# center
 		centerTile = mapModel.tileAt(HexPoint(1, 1))
@@ -223,7 +237,13 @@ class TestCity(unittest.TestCase):
 		anotherTile.setHills(hills=True)
 		anotherTile.setImprovement(improvement=ImprovementType.mine)
 
-		simulation = Game(mapModel)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 		simulation.userInterface = UserInterfaceMock()
 
 		playerTrajan = Player(leader=LeaderType.trajan, human=False)
@@ -305,8 +325,14 @@ class TestCity(unittest.TestCase):
 
 class TestPlayerTechs(unittest.TestCase):
 	def setUp(self) -> None:
-		self.map = Map(10, 10)
-		self.simulation = Game(map=self.map)
+		self.map = MapModel(10, 10)
+		self.simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=self.map
+		)
 
 		self.player = Player(leader=LeaderType.alexander, cityState=None, human=False)
 		self.player.initialize()
@@ -384,8 +410,14 @@ class TestPlayerTechs(unittest.TestCase):
 
 class TestPlayerCivics(unittest.TestCase):
 	def setUp(self) -> None:
-		self.map = Map(10, 10)
-		self.simulation = Game(map=self.map)
+		self.map = MapModel(10, 10)
+		self.simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=self.map
+		)
 
 		self.player = Player(leader=LeaderType.alexander, cityState=None, human=False)
 		self.player.initialize()
@@ -459,8 +491,14 @@ class TestPlayerCivics(unittest.TestCase):
 class TestPlayerStrategies(unittest.TestCase):
 	def test_eradicate_barbarian(self):
 		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		player = Player(LeaderType.trajan, human=True)
 		player.initialize()
@@ -495,8 +533,14 @@ class TestPlayerStrategies(unittest.TestCase):
 class TestSimulation(unittest.TestCase):
 	def test_found_capital(self):
 		# GIVEN
-		mapModel = MapMock(10, 10, TerrainType.ocean)
-		simulation = Game(mapModel)
+		mapModel = MapModelMock(10, 10, TerrainType.ocean)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 		
 		playerTrajan = Player(LeaderType.trajan, human=True)
 		playerTrajan.initialize()
@@ -524,8 +568,14 @@ class TestSimulation(unittest.TestCase):
 
 	def test_player_turn(self):
 		# GIVEN
-		mapModel = MapMock(20, 10, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(20, 10, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		playerBarbar = Player(LeaderType.barbar, human=False)
 		playerBarbar.initialize()
@@ -565,8 +615,14 @@ class TestSimulation(unittest.TestCase):
 class TestUsecases(unittest.TestCase):
 	def test_first_city_build(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# players
 		playerBarbar = Player(LeaderType.barbar, human=False)
@@ -627,3 +683,16 @@ class TestUsecases(unittest.TestCase):
 
 		self.assertEqual(playerAugustusWarrior.activityType(), UnitActivityType.none)  # warrior has skipped
 		# XCTAssertEqual(playerAugustusWarrior.peekMission()!.buildType, BuildType.repair)
+
+
+class TestGameGeneration(unittest.TestCase):
+	def test_generation(self):
+		# GIVEN
+		generator = GameGenerator()
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+
+		# WHEN
+		game = generator.generate(mapModel, HandicapType.emperor)
+
+		# THEN
+		self.assertEqual(game.currentTurn, 0)

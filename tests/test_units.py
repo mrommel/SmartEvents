@@ -3,22 +3,29 @@ import unittest
 from game.baseTypes import HandicapType
 from game.cities import City
 from game.civilizations import LeaderType
-from game.game import Game
+from game.game import GameModel
 from game.players import Player
 from game.states.builds import BuildType
+from game.states.victories import VictoryType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitMissionType, UnitType, UnitActivityType
 from game.units import Unit
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.types import TerrainType
-from tests.testBasics import MapMock, UserInterfaceMock
+from tests.testBasics import MapModelMock, UserInterfaceMock
 
 
 class TestUnitMissions(unittest.TestCase):
 	def setUp(self) -> None:
-		self.mapModel = MapMock(24, 20, TerrainType.grass)
-		self.simulation = Game(map=self.mapModel, handicap=HandicapType.chieftain)
+		self.mapModel = MapModelMock(24, 20, TerrainType.grass)
+		self.simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=self.mapModel
+		)
 
 		self.playerTrajan = Player(leader=LeaderType.trajan, cityState=None, human=False)
 		self.playerTrajan.initialize()

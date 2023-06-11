@@ -8,18 +8,19 @@ from game.cities import City
 from game.civilizations import WeightedCivilizationList, CivilizationType, LeaderType
 from game.districts import DistrictType
 from game.flavors import FlavorType
-from game.game import Game
+from game.game import GameModel
 from game.playerMechanics import WeightedCivicList, WeightedTechList
 from game.players import Player
 from game.projects import ProjectType
 from game.states.builds import BuildType
+from game.states.victories import VictoryType
 from game.types import CivicType, TechType
 from game.unitTypes import UnitType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.map import WeightedBuildList
 from map.types import YieldType, TerrainType
-from tests.testBasics import UserInterfaceMock, MapMock
+from tests.testBasics import UserInterfaceMock, MapModelMock
 from utils.base import WeightedStringList
 
 
@@ -181,8 +182,14 @@ class TestCityStrategyAdoption(unittest.TestCase):
 class TestCityStrategyAI(unittest.TestCase):
 	def test_constructor(self):
 		# GIVEN
-		mapModel = MapMock(24, 20, TerrainType.grass)
-		simulation = Game(mapModel, handicap=HandicapType.chieftain)
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()

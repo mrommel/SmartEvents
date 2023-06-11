@@ -1,9 +1,11 @@
 import unittest
 
+from game.baseTypes import HandicapType
 from game.civilizations import LeaderType
-from game.game import Game
+from game.game import GameModel
 from game.players import Player
-from map.map import Map
+from game.states.victories import VictoryType
+from map.map import MapModel
 
 
 class TestDiplomacyAI(unittest.TestCase):
@@ -13,8 +15,14 @@ class TestDiplomacyAI(unittest.TestCase):
 
 	def test_atWar(self):
 		# GIVEN
-		map = Map(10, 10)
-		simulation = Game(map=map)
+		map = MapModel(10, 10)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=map
+		)
 
 		playerAlexander = Player(leader=LeaderType.alexander, cityState=None, human=False)
 		playerAlexander.initialize()
