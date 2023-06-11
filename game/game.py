@@ -14,10 +14,11 @@ from game.states.builds import BuildType
 from game.states.gossips import GossipType
 from game.states.ui import ScreenType
 from game.states.victories import VictoryType
-from game.types import TechType, EraType
+from game.types import TechType, EraType, CivicType
 from game.unitTypes import UnitMapType, UnitAbilityType, UnitPromotionType, MoveOptions
 from game.units import Unit
 from game.wonders import WonderType
+from map import constants
 from map.base import HexPoint, Size
 from map.improvements import ImprovementType
 from map.map import MapModel, Tile, ContinentType, Continent
@@ -42,10 +43,14 @@ class GameModel:
 		self.barbarianAI = BarbarianAI()
 		self.religions = Religions()
 
+		# stats
+		self.discoveredContinents = []
+
 	def initialize(self, humanLeader: LeaderType):
 		# init human player and units
 		humanPlayer = Player(humanLeader, human=True)
-		humanStartLocation = next((startLocation for startLocation in self._map.startLocations if startLocation.leader == humanLeader), None)
+		humanStartLocation = next(
+			(startLocation for startLocation in self._map.startLocations if startLocation.leader == humanLeader), None)
 
 		if humanStartLocation is None:
 			raise Exception(f'no start location for {humanLeader} provided')
@@ -59,10 +64,10 @@ class GameModel:
 
 		self.players.append(humanPlayer)
 
-		# add ai players
-		#for aiLeader in selectedLeaders:
-		#	aiPlayer = Player(aiLeader, human=False, barbarian=False)
-		#	self.players.append(aiPlayer)
+	# add ai players
+	# for aiLeader in selectedLeaders:
+	#	aiPlayer = Player(aiLeader, human=False, barbarian=False)
+	#	self.players.append(aiPlayer)
 
 	# def doTurn(self):
 	# 	print(f'start turn {self.currentTurn}')
@@ -104,7 +109,7 @@ class GameModel:
 			# self.updateWar()
 			self.updateMoves()
 
-			# And again, the player can change after the automoves and that can pause the game
+		# And again, the player can change after the automoves and that can pause the game
 		if not self.isPaused():
 			self.updateTimers()
 
@@ -169,7 +174,7 @@ class GameModel:
 				continue
 
 			neighborTile = self.tileAt(pt)
-			# self.userInterface.refreshTile(neighborTile)
+		# self.userInterface.refreshTile(neighborTile)
 
 		# update eureka
 		if not city.player.techs.eurekaTriggeredFor(TechType.sailing):
@@ -328,7 +333,7 @@ class GameModel:
 						if needsAIUpdate or not player.isHuman():
 							# ------- this is where the important stuff happens! --------------
 							player.unitUpdate(self)
-							# print("updateMoves() : player.unitUpdate() called for player \(player.leader.name())")
+						# print("updateMoves() : player.unitUpdate() called for player \(player.leader.name())")
 
 						readyUnitsNow = player.countReadyUnits(self)
 
@@ -345,13 +350,15 @@ class GameModel:
 									waitTime = 5
 
 									if self.turnSlice() - player.lastSliceMoved() > waitTime:
-										print("GAME HANG - Please show and send save. Stuck units will have their turn ended so game can advance.")
+										print(
+											"GAME HANG - Please show and send save. Stuck units will have their turn ended so game can advance.")
 										# debug
 										for unit in self.unitsOf(player):
 											if not unit.readyToMove():
 												continue
 
-											print(f"GAME HANG - unit of {player.leader.name()} has no orders: {unit.name()} at {unit.location}")
+											print(
+												f"GAME HANG - unit of {player.leader.name()} has no orders: {unit.name()} at {unit.location}")
 
 										# debug
 										player.endTurnsForReadyUnits(self)
@@ -365,29 +372,30 @@ class GameModel:
 									loopUnit.autoMission(self)
 
 									# Does the unit still have movement points left over?
-									if player.isHuman() and loopUnit.hasCompletedMoveMission(self) and loopUnit.canMove() and not loopUnit.isAutomated():
+									if player.isHuman() and loopUnit.hasCompletedMoveMission(
+										self) and loopUnit.canMove() and not loopUnit.isAutomated():
 
 										if player.turnFinished():
 											repeatAutomoves = True  # Do another pass.
 
-									# This is a short - term solution to a problem where a unit
-									# with an auto-mission (a queued, multi-turn) move order cannot reach its destination, but
-									# does not re-enter the "need order" list because this code is processed at the end of turns.The result is that the player could easily "miss" moving
-									# the unit this turn because it displays "next turn" rather than "skip unit turn" and the unit is not added to the "needs orders" list.
-									# To correctly fix this problem, we would need some way to determine if any of the auto-missions are invalid before the player can end the turn and
-									# activate the units that have a problem.
-									# The problem with evaluating this is that, with one unit per tile, we don't know what is a valid move until other units have moved.
-									# (For example, if one unit was to follow another, we would want the unit in the lead to move first and then have the following unit move, in order
-									# to prevent the following unit from constantly waking up because it can't move into the next tile. This is currently not supported.)
+								# This is a short - term solution to a problem where a unit
+								# with an auto-mission (a queued, multi-turn) move order cannot reach its destination, but
+								# does not re-enter the "need order" list because this code is processed at the end of turns.The result is that the player could easily "miss" moving
+								# the unit this turn because it displays "next turn" rather than "skip unit turn" and the unit is not added to the "needs orders" list.
+								# To correctly fix this problem, we would need some way to determine if any of the auto-missions are invalid before the player can end the turn and
+								# activate the units that have a problem.
+								# The problem with evaluating this is that, with one unit per tile, we don't know what is a valid move until other units have moved.
+								# (For example, if one unit was to follow another, we would want the unit in the lead to move first and then have the following unit move, in order
+								# to prevent the following unit from constantly waking up because it can't move into the next tile. This is currently not supported.)
 
-									# This short-term solution will reactivate a unit after the player clicks "next turn".It will appear strange, because the player will be asked to move
-									# a unit after they clicked "next turn", but it is to give the player a chance to move all of their units.
+								# This short-term solution will reactivate a unit after the player clicks "next turn".It will appear strange, because the player will be asked to move
+								# a unit after they clicked "next turn", but it is to give the player a chance to move all of their units.
 
-									# jrandall sez: In MP matches, let's not OOS or stall the game.
+								# jrandall sez: In MP matches, let's not OOS or stall the game.
 
 								repeatPassCount -= 1
 
-								if not(repeatAutomoves and repeatPassCount > 0):
+								if not (repeatAutomoves and repeatPassCount > 0):
 									break
 
 							# check if the(for now human) player is overstacked and move the units
@@ -444,12 +452,12 @@ class GameModel:
 					# debug
 					if player.isHuman():
 						print(f'auto moves: {player.hasProcessedAutoMoves()}')
-					#debug
+					# debug
 					if player.hasProcessedAutoMoves():
 						autoMovesComplete = False
 						if not player.hasBusyUnitOrCity():
 							autoMovesComplete = True
-							# print("+++ GameModel - CheckPlayerTurnDeactivate() : auto-moves complete for \(player.leader.name())")
+						# print("+++ GameModel - CheckPlayerTurnDeactivate() : auto-moves complete for \(player.leader.name())")
 
 						if autoMovesComplete:
 							# Activate the next player
@@ -480,9 +488,9 @@ class GameModel:
 							else:
 								# KWG: This doesn't actually do anything other than print to the debug log
 								print(f"Because the diplomatic screen is blocking, I am bumping this up for player "
-									  f"{player.leader}")
-								# changeNumGameTurnActive(1, std::string("Because the diplo screen is blocking I am
-								# bumping this up for player ") + getName());
+								      f"{player.leader}")
+							# changeNumGameTurnActive(1, std::string("Because the diplo screen is blocking I am
+							# bumping this up for player ") + getName());
 
 	def setWaitingForBlockingInput(self, player):
 		self.waitDiploPlayer = player
@@ -503,6 +511,9 @@ class GameModel:
 		for areaPoint in location.areaWithRadius(sight):
 			tile = self.tileAt(areaPoint)
 
+			if tile is None:
+				continue
+
 			if not tile.canSeeTile(currentTile, player, sight, hasSentry, self):
 				continue
 
@@ -517,15 +528,16 @@ class GameModel:
 			# check if tile is on another continent than the(original) capital
 			continent = self.continentAt(areaPoint)
 			if continent is not None:
-				tileContinent: ContinentType = self.continentAt(areaPoint).continentType()
-				# if tileContinent: ContinentType = self.continent(at: areaPoint)?.type()
-				#     capitalLocation = player.originalCapitalLocation()
-				#     if capitalLocation != HexPoint.invalid {
-				#         if let capitalContinent = self.continent(at: capitalLocation) {
-				#             if tileContinent != capitalContinent.type() and capitalContinent.type() !=.none & &
-				#                                   tileContinent !=.none
-				#                 if !civics.inspirationTriggered(for: .foreignTrade) {
-				#                     civics.triggerInspiration( for:.foreignTrade, in: self)
+				tileContinent: ContinentType = continent.continentType
+				capitalLocation = player.originalCapitalLocation()
+				if capitalLocation != constants.invalidHexPoint:
+					capitalContinent = self.continentAt(capitalLocation)
+					if capitalContinent is not None:
+						if tileContinent != capitalContinent.continentType and \
+							capitalContinent.continentType != ContinentType.none and \
+							tileContinent != ContinentType.none:
+							if not player.civics.inspirationTriggeredFor(CivicType.foreignTrade):
+								player.civics.triggerInspirationFor(CivicType.foreignTrade, simulation=self)
 
 			# found Natural wonder
 			feature = tile.feature()
@@ -540,7 +552,8 @@ class GameModel:
 						unit.changeExperienceBy(10, self)
 
 					if player.isHuman():
-						player.notifications().addNotification(NotificationType.naturalWonderDiscovered, location=areaPoint)
+						player.notifications().addNotification(NotificationType.naturalWonderDiscovered,
+						                                       location=areaPoint)
 
 				if not player.techs.eurekaTriggeredFor(TechType.astrology):
 					player.techs.triggerEurekaFor(TechType.astrology, self)
@@ -550,6 +563,7 @@ class GameModel:
 			player.checkWorldCircumnavigated(self)
 			if continent is not None:
 				self.checkDiscoveredContinent(continent, areaPoint, player)
+
 			self.userInterface.refreshTile(tile)
 
 		return
@@ -599,11 +613,12 @@ class GameModel:
 		return numPlayerCities >= (numNextBestPlayersCities + 3)
 
 	def sendGossip(self, gossipType: GossipType, cityName: Optional[str] = None, tech: Optional[TechType] = None,
-	               player = None, leader: Optional[LeaderType] = None):
+	               player=None, leader: Optional[LeaderType] = None):
 		print('send gossip is not implemented')  # fixme
 		pass
 
-	def visibleEnemyAt(self, location: HexPoint, player, unitMapType: UnitMapType = UnitMapType.combat) -> Optional[Unit]:
+	def visibleEnemyAt(self, location: HexPoint, player, unitMapType: UnitMapType = UnitMapType.combat) -> Optional[
+		Unit]:
 		tile = self.tileAt(location)
 
 		if tile.isVisibleTo(player):
@@ -666,3 +681,43 @@ class GameModel:
 
 	def mapSize(self) -> Size:
 		return self._map.bestMatchingSize().size()
+
+	def checkDiscoveredContinent(self, continentType: ContinentType, location: HexPoint, player):
+		"""
+		/// method to trigger the firstDiscoveryOfANewContinent moment, when player has discovered a new continent before everybody else
+	    ///
+	    /// - Parameters:
+	    ///   - continent: continent to check
+	    ///   - player: player to check and trigger the moment for
+
+		@param continentType:
+		@param location:
+		@param player:
+		@return:
+		"""
+		if player is None:
+			raise Exception('player must not be None')
+
+		if not self.hasDiscoveredContinent(continentType):
+			self.markContinentDiscovered(continentType)
+
+			continent = self._map.continentBy(continentType)
+			if continent is not None:
+				# only trigger discovery of new continent, if player has at least one city
+				# this prevents first city triggering this
+				if continent.points.count > 8 and len(self.citiesOf(player)) > 0:
+					player.addMoment(MomentType.firstDiscoveryOfANewContinent, self)
+
+					if player.isHuman():
+						player.notifications().addNotification(
+							NotificationType.continentDiscovered,
+							location=location,
+							continentName=continentType.name()
+						)
+		return
+
+	def hasDiscoveredContinent(self, continentType: ContinentType) -> bool:
+		return continentType in self.discoveredContinents
+
+	def markContinentDiscovered(self, continentType: ContinentType):
+		self.discoveredContinents.append(continentType)

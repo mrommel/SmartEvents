@@ -312,7 +312,14 @@ class Player:
 		self.setupFlavors()
 
 	def __repr__(self):
-		return f'Player({self.leader}, {self.leader.civilization()}, {("Human" if self.human else "AI")})'
+		if self.isBarbarian():
+			return f'Player({self.leader}, {self.leader.civilization()}, Barbarian)'
+		elif self.human:
+			return f'Player({self.leader}, {self.leader.civilization()}, Human)'
+		elif self.isCityState():
+			return f'Player(CityState, {self.cityState}, CityState)'
+		else:
+			return f'Player({self.leader}, {self.leader.civilization()}, AI)'
 
 	def doTurn(self, simulation):
 		self.doEurekas(simulation)
@@ -1357,3 +1364,6 @@ class Player:
 
 	def capitalCity(self, simulation):
 		return simulation.capitalOf(self)
+
+	def originalCapitalLocation(self) -> HexPoint:
+		return self.originalCapitalLocationValue

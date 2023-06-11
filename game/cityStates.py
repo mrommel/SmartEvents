@@ -95,22 +95,22 @@ class CityStateTypeData:
 
 class CityStateType(ExtendedEnum):
 	# akkad
-	# amsterdam
+	amsterdam = 'amsterdam'
 	# anshan
 	# antananarivo
 	# antioch
 	# armagh
 	auckland = 'auckland'
 	# ayutthaya
-	# babylon
+	babylon = 'babylon'
 	# bandarBrunei
-	# bologna
+	bologna = 'bologna'
 	# brussels
 	# buenosAires
 	# caguana
 	# cahokia
 	# cardiff
-	# carthage
+	carthage = 'carthage'
 	# chinguetti
 	# fez
 	geneva = 'geneva'
@@ -140,15 +140,15 @@ class CityStateType(ExtendedEnum):
 	# Preslav
 	# Rapa Nui
 	# samarkand
-	# seoul
+	seoul = 'seoul'
 	singapore = 'singapore'
-	# stockholm
+	stockholm = 'stockholm'
 	# taruga
-	# toronto
-	# valletta
+	toronto = 'toronto'
+	valletta = 'valletta'
 	# vaticanCity
-	# venice
-	# vilnius
+	venice = 'venice'
+	vilnius = 'vilnius'
 	# wolin
 	# yerevan
 	# zanzibar

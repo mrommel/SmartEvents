@@ -84,7 +84,7 @@ class Unit:
 		bestTile = None
 
 		area = HexArea(self.location, radius)
-		for loopPoint in area._points:
+		for loopPoint in area.points():
 			loopTile = simulation.tileAt(loopPoint)
 
 			if loopTile.isValidDomainFor(self):
@@ -92,9 +92,9 @@ class Unit:
 					if simulation.unitAt(loopPoint, self.unitMapType()) is None:
 						if not loopTile.hasOwner() or self.player == loopTile.owner():
 							if loopTile.isDiscoveredBy(self.player):
-								value = loopPoint.distanceTo(self.location)
+								value = loopPoint.distance(self.location)
 
-								if loopTile.continentIdentifier() != currentTile.continentIdentifier():
+								if loopTile.continentIdentifier != currentTile.continentIdentifier:
 									value *= 3
 
 								if value < bestValue:
@@ -103,9 +103,9 @@ class Unit:
 
 		if bestTile is not None:
 			fromString = f'(x: {self.location.x}, y: {self.location.y})'
-			toString = f'(x: {bestTile.location.x}, y: {bestTile.location.y})'
+			toString = f'(x: {bestTile.point.x}, y: {bestTile.point.y})'
 			print(f'Jump to nearest valid plot within range by {self.unitType}, from: {fromString} to: {toString}')
-			self.setLocation(bestTile.location, simulation)
+			self.setLocation(bestTile.point, simulation)
 			self.publishQueuedVisualizationMoves(simulation)
 		else:
 			print(f'Can\'t find a valid plot within range. for {self.unitType}, at X: {self.location.x}, Y: {self.location.y}')
@@ -1218,3 +1218,5 @@ class Unit:
 
 		return False
 
+	def canMoveAllTerrain(self):
+		return False

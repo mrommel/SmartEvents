@@ -29,9 +29,10 @@ from game.unitTypes import UnitType
 from game.units import Unit, UnitActivityType
 from game.wonders import WonderType
 from map.base import HexPoint
+from map.generation import MapGenerator, MapOptions
 from map.improvements import ImprovementType
 from map.map import MapModel, Tile
-from map.types import TerrainType
+from map.types import TerrainType, MapSize, MapType
 from tests.testBasics import UserInterfaceMock, MapModelMock
 
 
@@ -686,13 +687,18 @@ class TestUsecases(unittest.TestCase):
 
 
 class TestGameGeneration(unittest.TestCase):
-	def test_generation(self):
+	def test_generation_emperor(self):
 		# GIVEN
-		generator = GameGenerator()
-		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		mapModel = MapModelMock(MapSize.duel, TerrainType.grass)
+		options = MapOptions(mapSize=MapSize.duel, mapType=MapType.continents, leader=LeaderType.trajan)
+		mapGenerator = MapGenerator(options=options)
+		mapGenerator.update(mapModel)
+
+		gameGenerator = GameGenerator()
 
 		# WHEN
-		game = generator.generate(mapModel, HandicapType.emperor)
+		game = gameGenerator.generate(mapModel, HandicapType.emperor)
 
 		# THEN
 		self.assertEqual(game.currentTurn, 0)
+		self.assertEqual(len(game.players), 6)

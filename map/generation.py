@@ -146,14 +146,16 @@ class MapGeneratorState:
 
 
 class StartLocation:
-    def __init__(self, location: HexPoint, leader: LeaderType, isHuman: bool):
+    def __init__(self, location: HexPoint, leader: LeaderType, cityState: Optional[CityStateType], isHuman: bool):
         self.location = location
         self.leader = leader
+        self.cityState = cityState
         self.isHuman = isHuman
 
     def __str__(self):
         human_str = '(Human)' if self.isHuman else ''
-        return f'StartLocation at: {self.location} for {self.leader} {human_str}'
+        cityState_str = self.cityState.name() if self.cityState is not None else ''
+        return f'StartLocation at: {self.location} for {self.leader} {cityState_str} {human_str}'
 
 
 class BaseSiteEvaluator:
@@ -328,7 +330,7 @@ class StartPositioner:
         random.shuffle(combined)
 
         for leader in combined:
-            print(f'choose location for {leader.name}')
+            print(f'choose location for {leader.name()}')
             civ = leader.civilization()
 
             bestArea: Optional[StartArea] = None
@@ -382,7 +384,7 @@ class StartPositioner:
             if bestLocation == HexPoint(0, 0):
                 raise Exception("Can't find valid start location")
 
-            self.startLocations.append(StartLocation(bestLocation, leader, leader == human))
+            self.startLocations.append(StartLocation(bestLocation, leader, cityState=None, isHuman=leader == human))
 
         # sort human to the end
         self.startLocations = sorted(self.startLocations, key=lambda loc: 1 if loc.isHuman else 0)
@@ -517,7 +519,7 @@ class StartPositioner:
             if bestLocation == HexPoint(-1, -1):
                 print(f'Warning: Can\'t find valid start location for city state: {cityState}')
             else:
-                self.cityStateStartLocations.append(StartLocation(bestLocation, LeaderType.cityState, False))
+                self.cityStateStartLocations.append(StartLocation(bestLocation, LeaderType.cityState, cityState, False))
 
         # sort human to the end
         self.startLocations = sorted(self.startLocations, key=lambda loc: 1 if loc.isHuman else 0)
@@ -730,6 +732,25 @@ class MapGenerator:
         callback(MapGeneratorState(1.0, _("TXT_KEY_MAP_GENERATOR_READY")))
 
         return grid
+
+    def update(self, map: MapModel):
+        self._placeResources(map)
+
+        # 4th step: rivers
+        # self._placeRivers(self.options.rivers, map, height_map)
+
+        # 5th step: features
+        self._refineFeatures(map)
+
+        # 6th step: features
+        self._refineNaturalWonders(map)
+
+        # 7th step: continents & oceans
+        self._identifyContinents(map)
+        self._identifyOceans(map)
+        self._identifyStartPositions(map)
+
+        self._addGoodyHuts(map)
 
     def _generateHeightMap(self):
         if self.options.mapType == MapType.continents:

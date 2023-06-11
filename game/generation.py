@@ -8,6 +8,7 @@ from game.unitTypes import UnitType
 from game.units import Unit
 from map.base import HexPoint
 from map.map import MapModel
+from tests.testBasics import UserInterfaceMock
 
 
 class GameGenerator:
@@ -54,18 +55,18 @@ class GameGenerator:
 
 			# units
 			if startLocation.isHuman:
-				self._allocateUnits(units, startLocation.point, handicap.freeHumanStartingUnitTypes(), player)
+				self._allocateUnits(units, startLocation.location, handicap.freeHumanStartingUnitTypes(), player)
 			else:
-				self._allocateUnits(units, startLocation.point, handicap.freeAIStartingUnitTypes(), player)
+				self._allocateUnits(units, startLocation.location, handicap.freeAIStartingUnitTypes(), player)
 
 		# handle city states
 		for startLocation in map.cityStateStartLocations:
 
-			cityStatePlayer = Player(leader=startLocation.leader, human=startLocation.isHuman)
+			cityStatePlayer = Player(leader=startLocation.leader, human=False)
 			cityStatePlayer.initialize()
 			players.insert(1, cityStatePlayer)
 
-			self._allocateUnits(units, startLocation.point, self.freeCityStateStartingUnitTypes(), cityStatePlayer)
+			self._allocateUnits(units, startLocation.location, self.freeCityStateStartingUnitTypes(), cityStatePlayer)
 
 		gameModel = GameModel(
 			victoryTypes=[VictoryType.cultural, VictoryType.conquest, VictoryType.domination],
@@ -74,6 +75,9 @@ class GameGenerator:
 			players=players,
 			map=map
 		)
+
+		# add UI
+		gameModel.userInterface = UserInterfaceMock()
 
 		# add units
 		self._addUnits(units, gameModel)
@@ -89,7 +93,7 @@ class GameGenerator:
 		lastLeader: LeaderType = LeaderType.none
 		for unit in units:
 			gameModel.addUnit(unit)
-			gameModel.sightAt(unit.location, unit.sight(), unit.player)
+			gameModel.sightAt(unit.location, unit.sight(), unit, unit.player)
 
 			if lastLeader == unit.player.leader:
 				if len(gameModel.unitsAt(unit.location)) > 1:

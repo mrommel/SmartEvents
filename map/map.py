@@ -12,7 +12,7 @@ from game.wonders import WonderType
 from map.base import HexPoint, HexDirection, Size, Array2D, HexArea
 from map.improvements import ImprovementType
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
-	Tutorials, Yields, AppealLevel
+	Tutorials, Yields, AppealLevel, UnitDomainType
 from utils.base import WeightedBaseList, ExtendedEnum
 
 
@@ -869,6 +869,24 @@ class Tile:
 
 		return (production, city)
 
+	def isValidDomainFor(self, unit) -> bool:
+		if self.isValidDomainForActionOf(unit):
+			return True
+
+		return self.isCity()
+
+	def isValidDomainForActionOf(self, unit):
+		if unit.domain() == UnitDomainType.none:
+			return False
+		elif unit.domain() == UnitDomainType.land or unit.domain() == UnitDomainType.immobile:
+			return not (self.terrain().isWater() or unit.canMoveAllTerrain() or unit.isEmbarked())
+		elif unit.domain() == UnitDomainType.sea:
+			return self.terrain().isWater() or unit.canMoveAllTerrain()
+		elif unit.domain() == UnitDomainType.air:
+			return False
+
+		return False
+
 
 class TileStatistics:
 	def __init__(self):
@@ -909,47 +927,50 @@ class ContinentType(ExtendedEnum):
 	none = 'none'
 
 	africa = 'africa'
-	amasia = 2
-	america = 3
-	antarctica = 4
-	arctica = 5
-	asia = 6
-	asiamerica = 7
-	atlantica = 8
-	atlantis = 9
-	australia = 10
-	avalonia = 11
-	azania = 12
-	baltica = 13
-	cimmeria = 14
-	columbia = 15
-	congocraton = 16
-	euramerica = 17
-	europe = 18
-	gondwana = 19
-	kalaharia = 20
-	kazakhstania = 21
-	kernorland = 22
-	kumarikandam = 23
-	laurasia = 24
-	laurentia = 25
-	lemuria = 26
-	mu = 27
-	nena = 28
-	northAmerica = 29
-	novoPangaea = 30
-	nuna = 31
-	pangaea = 32
-	pangaeaUltima = 33
-	pannotia = 34
-	rodinia = 35
-	siberia = 36
-	southAmerica = 37
-	terraAustralis = 38
-	ur = 39
-	vaalbara = 40
-	vendian = 41
-	zealandia = 42
+	amasia = 'amasia'
+	america = 'america'
+	antarctica = 'antarctica'
+	arctica = 'arctica'
+	asia = 'asia'
+	asiamerica = 'asiamerica'
+	atlantica = 'atlantica'
+	atlantis = 'atlantis'
+	australia = 'australia'
+	avalonia = 'avalonia'
+	azania = 'azania'
+	baltica = 'baltica'
+	cimmeria = 'cimmeria'
+	columbia = 'columbia'
+	congocraton = 'congocraton'
+	euramerica = 'euramerica'
+	europe = 'europe'
+	gondwana = 'gondwana'
+	kalaharia = 'kalaharia'
+	kazakhstania = 'kazakhstania'
+	kernorland = 'kernorland'
+	kumarikandam = 'kumarikandam'
+	laurasia = 'laurasia'
+	laurentia = 'laurentia'
+	lemuria = 'lemuria'
+	mu = 'mu'
+	nena = 'nena'
+	northAmerica = 'northAmerica'
+	novoPangaea = 'novoPangaea'
+	nuna = 'nuna'
+	pangaea = 'pangaea'
+	pangaeaUltima = 'pangaeaUltima'
+	pannotia = 'pannotia'
+	rodinia = 'rodinia'
+	siberia = 'siberia'
+	southAmerica = 'southAmerica'
+	terraAustralis = 'terraAustralis'
+	ur = 'ur'
+	vaalbara = 'vaalbara'
+	vendian = 'vendian'
+	zealandia = 'zealandia'
+
+	def name(self) -> str:
+		return f'Continent: {self.value}'
 
 
 class MapModel:
@@ -1266,9 +1287,12 @@ class MapModel:
 	def continent(self, identifier: int) -> Continent:
 		return next((continent for continent in self.continents if continent.identifier == identifier), None)
 
-	def continentAt(self, location: HexPoint) -> Continent:
+	def continentAt(self, location: HexPoint) -> Optional[Continent]:
 		tile = self.tileAt(location)
 		return next((continent for continent in self.continents if continent.identifier == tile.continentIdentifier), None)
+
+	def continentBy(self, continentType: ContinentType) -> Optional[Continent]:
+		return next((continent for continent in self.continents if continent.continentType == continentType), None)
 
 	def setContinent(self, continent: Continent, location: HexPoint):
 		tile = self.tileAt(location)
