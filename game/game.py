@@ -22,7 +22,8 @@ from map import constants
 from map.base import HexPoint, Size
 from map.improvements import ImprovementType
 from map.map import MapModel, Tile, ContinentType, Continent
-from map.path_finding.finder import AStarPathfinder, MoveTypeIgnoreUnitsOptions, MoveTypeIgnoreUnitsPathfinderDataSource
+from map.path_finding.finder import AStarPathfinder, MoveTypeIgnoreUnitsOptions, \
+	MoveTypeIgnoreUnitsPathfinderDataSource, InfluencePathfinderDataSource
 from map.path_finding.path import HexPath
 from map.types import FeatureType, Tutorials, MapSize
 
@@ -721,3 +722,16 @@ class GameModel:
 
 	def markContinentDiscovered(self, continentType: ContinentType):
 		self.discoveredContinents.append(continentType)
+
+	def calculateInfluenceDistance(self, cityLocation: HexPoint, targetDestination: HexPoint, limit: int) -> int:
+		if cityLocation == targetDestination:
+			return 0
+
+		influencePathfinderDataSource = InfluencePathfinderDataSource(self._map, cityLocation)
+		influencePathfinder = AStarPathfinder(influencePathfinderDataSource)
+
+		path = influencePathfinder.shortestPath(cityLocation, targetDestination)
+		if path is not None:
+			return int(path.cost())
+
+		return 0

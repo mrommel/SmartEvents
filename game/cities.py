@@ -1,4 +1,5 @@
 import random
+import sys
 from typing import Optional
 
 from game.ai.cities import CityStrategyAI, CitySpecializationType, BuildableItem, BuildableType
@@ -653,7 +654,23 @@ class CityCitizens:
 		return self._avoidGrowthValue
 
 	def doVerifyWorkingPlots(self, simulation):
-		pass
+		"""Check all Plots by this City to see if we can actually be working them (if we are)"""
+		for workingPlot in self._workingPlots:
+			self.doVerifyWorkingPlot(workingPlot, simulation)
+
+		return
+
+	def doVerifyWorkingPlot(self, workingPlot, simulation):
+		"""If we're working this plot make sure we're allowed, and if we're not then correct the situation"""
+		if workingPlot is None:
+			return
+
+		if workingPlot.worked:
+			if not self.canWorkAt(workingPlot.location, simulation):
+				self.setWorkedAt(workingPlot.location, worked=False)
+				self.doAddBestCitizenFromUnassigned(simulation)
+
+		return
 
 	def setNoAutoAssignSpecialists(self, param, simulation):
 		pass
@@ -1362,6 +1379,8 @@ class City:
 		self.previousLeaderValue = None
 
 		self._isFeatureSurroundedValue = False
+		self._cheapestPlotInfluenceValue = 0
+
 		self.threatVal = 0
 		self._garrisonedUnitValue = None
 		self._numberOfAttacksMade = 0
@@ -1593,7 +1612,35 @@ class City:
 				1.5))
 
 	def doUpdateCheapestPlotInfluence(self, simulation):
-		pass
+		"""What is the cheapest plot we can get"""
+		lowestCost = sys.maxsize
+
+		for loopPoint in self.location.areaWithRadius(City.workRadius):
+			loopPlot = simulation.tileAt(loopPoint)
+
+			if loopPlot is None:
+				continue
+
+			# If the plot's not owned by us, it doesn't matter
+			if loopPlot.hasOwner():
+				continue
+
+			# we can use the faster, but slightly inaccurate pathfinder here -
+			# after all we are using a rand in the equation
+			influenceCost = simulation.calculateInfluenceDistance(self.location, loopPoint, limit=City.workRadius)
+
+			if influenceCost > 0:
+				# Are we the cheapest yet?
+				if influenceCost < lowestCost:
+					lowestCost = influenceCost
+
+		self.setCheapestPlotInfluence(lowestCost)
+
+	def setCheapestPlotInfluence(self, value: int):
+		self._cheapestPlotInfluenceValue = value
+
+	def cheapestPlotInfluence(self) -> int:
+		return self._cheapestPlotInfluenceValue
 
 	def doAcquirePlot(self, point: HexPoint, simulation):
 		"""Acquire the plot and set its owner to us"""

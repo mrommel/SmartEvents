@@ -4,7 +4,7 @@ from map.base import HexPoint
 from map.map import MapModel
 from map.path_finding.base import AStar
 from map.path_finding.path import HexPath
-from map.types import UnitMovementType, TerrainType
+from map.types import UnitMovementType, TerrainType, FeatureType
 
 
 class AStarDataSource:
@@ -24,7 +24,7 @@ class MoveTypeIgnoreUnitsOptions:
 		self.ignore_sight = ignore_sight
 		self.can_embark = can_embark
 		self.can_enter_ocean = can_enter_ocean
-	# self.wrapX = wrapX
+# self.wrapX = wrapX
 
 
 class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
@@ -79,6 +79,53 @@ class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
 		to_tile = self.grid.tileAt(to_adjacent_tile_coord)
 
 		return to_tile.movementCost(self.movement_type, from_tile)
+
+
+class InfluencePathfinderDataSource(AStarDataSource):
+	def __init__(self, grid: MapModel, cityLocation: HexPoint):
+		super().__init__(grid, UnitMovementType.walk)
+		self.cityLocation = cityLocation
+
+	def walkableAdjacentTilesCoords(self, tile_coord: HexPoint) -> [HexPoint]:
+		neighbors: [HexPoint] = []
+
+		for neighbor in tile_coord.neighbors():
+			# if mapModel.wrapX
+			# 	neighbor = mapModel.wrap(point: neighbor)
+
+			if self.grid.valid(neighbor):
+				neighbors.append(neighbor)
+
+		return neighbors
+
+	def costToMove(self, from_tile_coord: HexPoint, to_adjacent_tile_coord: HexPoint) -> float:
+		"""Influence pathfinder - compute cost of a path"""
+		cost = 0
+
+		cityTile = self.grid.tileAt(self.cityLocation)
+		toTile = self.grid.tileAt(to_adjacent_tile_coord)
+		fromTile = self.grid.tileAt(from_tile_coord)
+
+		if from_tile_coord != self.cityLocation:
+			if cityTile.hasOwner() and toTile.hasOwner() and cityTile.owner().leader != toTile.owner().leader:
+				cost += 15
+
+		if fromTile.isRiverToCrossTowards(toTile):
+			cost += 1  # INFLUENCE_RIVER_COST
+
+		if toTile.isHills():
+			# Hill cost
+			cost += 2  # INFLUENCE_HILL_COST
+		elif toTile.hasFeature(FeatureType.mountains):
+			# Mountain Cost
+			cost += 3  # INFLUENCE_MOUNTAIN_COST
+		else:
+			# Not a hill or mountain - use the terrain cost
+			cost += 1  # GC.getTerrainInfo(pToPlot->getTerrainType())->getInfluenceCost();
+			cost += 0 if not toTile.hasAnyFeature() else 1  # GC.getFeatureInfo(pToPlot->getFeatureType())->getInfluenceCost()
+
+		cost = max(1, cost)
+		return float(cost)
 
 
 class AStarPathfinder(AStar):
