@@ -1,6 +1,6 @@
 from game.envoys import EnvoyEffectLevel
-from utils.base import ExtendedEnum, InvalidEnumError
-from utils.theming import Color
+from core.base import ExtendedEnum, InvalidEnumError
+from core.theming import Color
 from utils.translation import gettext_lazy as _
 
 

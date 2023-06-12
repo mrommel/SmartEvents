@@ -1,14 +1,14 @@
 from typing import Optional
 
 from map.base import HexPoint
-from map.map import MapModel
+# from map.map import MapModel
 from map.path_finding.base import AStar
 from map.path_finding.path import HexPath
 from map.types import UnitMovementType, TerrainType, FeatureType
 
 
 class AStarDataSource:
-	def __init__(self, grid: MapModel, movement_type: UnitMovementType):
+	def __init__(self, grid, movement_type: UnitMovementType):
 		self.grid = grid
 		self.movement_type = movement_type
 
@@ -29,7 +29,7 @@ class MoveTypeIgnoreUnitsOptions:
 
 class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
 
-	def __init__(self, grid: MapModel, movement_type: UnitMovementType, player, options: MoveTypeIgnoreUnitsOptions):
+	def __init__(self, grid, movement_type: UnitMovementType, player, options: MoveTypeIgnoreUnitsOptions):
 		super().__init__(grid, movement_type)
 		self.player = player
 		self.options = options
@@ -82,7 +82,7 @@ class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
 
 
 class InfluencePathfinderDataSource(AStarDataSource):
-	def __init__(self, grid: MapModel, cityLocation: HexPoint):
+	def __init__(self, grid, cityLocation: HexPoint):
 		super().__init__(grid, UnitMovementType.walk)
 		self.cityLocation = cityLocation
 

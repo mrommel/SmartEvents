@@ -2,7 +2,7 @@ from typing import Optional
 
 from game.flavors import Flavor, FlavorType
 from game.types import CivicType, EraType
-from utils.base import ExtendedEnum, InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 
 
 class PolicyCardSlotData:
@@ -178,7 +178,7 @@ class PolicyCardType(ExtendedEnum):
 	# martialLaw
 	# gunboatDiplomacy
 	fiveYearPlan = 'fiveYearPlan'
-	# collectivization
+	collectivization = 'collectivization'
 	# patrioticWar
 	# defenseOfTheMotherland
 
@@ -1069,7 +1069,17 @@ class PolicyCardType(ExtendedEnum):
 				replace=[PolicyCardType.craftsmen, PolicyCardType.naturalPhilosophy],
 				flavors=[]
 			)
-		# collectivization
+		elif self == PolicyCardType.collectivization:
+			# https://civilization.fandom.com/wiki/Collectivization_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_COLLECTIVIZATION_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_COLLECTIVIZATION_BONUS",
+				slot=PolicyCardSlot.economic,
+				requiredCivic=CivicType.classStruggle,
+				obsoleteCivic=None,
+				replace=[],
+				flavors=[]
+			)
 		# patrioticWar
 		# defenseOfTheMotherland
 

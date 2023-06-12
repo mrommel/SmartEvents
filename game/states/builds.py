@@ -4,14 +4,15 @@ from typing import Optional
 from game.types import TechType, EraType
 from map.improvements import ImprovementType
 from map.types import FeatureType, RouteType
-from utils.base import ExtendedEnum
+from core.base import ExtendedEnum
 
 
 class BuildTypeData:
 	# noinspection PyShadowingNames
-	def __init__(self, name: str, repair: bool = False, requiredTech: Optional[TechType] = None, era: EraType = None,
-	             improvement: Optional[ImprovementType] = None, route: RouteType = None, removeRoad: bool = False,
-	             duration: int = 0, isWater: bool = True):
+	def __init__(self, name: str, repair: bool = False, requiredTech: Optional[TechType] = None,
+	             era: Optional[EraType] = None, improvement: Optional[ImprovementType] = None,
+	             route: Optional[RouteType] = None, removeRoad: bool = False, duration: int = 0,
+	             isWater: bool = True):
 		"""
 
 		:type requiredTech: object

@@ -21,7 +21,7 @@ from map.base import HexPoint
 from map.map import WeightedBuildList
 from map.types import YieldType, TerrainType
 from tests.testBasics import UserInterfaceMock, MapModelMock
-from utils.base import WeightedStringList
+from core.base import WeightedStringList
 
 
 class TestWeightedList(unittest.TestCase):

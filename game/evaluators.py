@@ -2,7 +2,7 @@ import sys
 
 from map.base import HexPoint, HexArea
 from map.map import MapModel
-from utils.base import ExtendedEnum
+from core.base import ExtendedEnum
 
 
 class BaseSiteEvaluator:

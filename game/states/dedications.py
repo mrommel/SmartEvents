@@ -1,5 +1,5 @@
 from game.types import EraType
-from utils.base import ExtendedEnum, InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 
 
 class DedicationTypeData:

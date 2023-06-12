@@ -1,8 +1,8 @@
 from typing import Optional
 
+from core.base import ExtendedEnum
 from game.flavors import Flavor, FlavorType
 from game.types import TechType
-from utils.base import ExtendedEnum
 
 
 class PlayerStateAllWars(ExtendedEnum):

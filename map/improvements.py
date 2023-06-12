@@ -4,7 +4,7 @@ from game.civilizations import CivilizationType
 from game.flavors import Flavor
 from game.types import TechType, CivicType
 from map.types import Yields, TerrainType, FeatureType, ResourceType
-from utils.base import ExtendedEnum, InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 
 
 class ImprovementTypeData:

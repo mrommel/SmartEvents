@@ -1,5 +1,5 @@
 from game.flavors import FlavorType, Flavor
-from utils.base import ExtendedEnum, InvalidEnumError, WeightedBaseList
+from core.base import ExtendedEnum, InvalidEnumError, WeightedBaseList
 
 
 class TraitType(ExtendedEnum):
@@ -21,6 +21,7 @@ class CivilizationAbility(ExtendedEnum):
 	platosRepublic = 'platosRepublic'
 	grandTour = 'grandTour'
 	iteru = 'iteru'
+	satrapies = 'satrapies'
 
 	def name(self) -> str:
 		return 'ability'

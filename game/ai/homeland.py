@@ -10,7 +10,7 @@ from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.types import UnitDomainType
-from utils.base import ExtendedEnum, InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 
 
 class HomelandMoveTypeData:

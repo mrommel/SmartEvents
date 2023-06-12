@@ -2,9 +2,10 @@ from builtins import float
 from enum import Enum
 from typing import Optional
 
+from core.types import EraType
 from game.types import TechType, CivicType
 from map.base import ExtendedEnum, Size
-from utils.base import InvalidEnumError, WeightedBaseList
+from core.base import InvalidEnumError, WeightedBaseList
 from utils.translation import gettext_lazy as _
 
 
@@ -1665,6 +1666,13 @@ class AppealLevel(ExtendedEnum):
 			return AppealLevel.disgusting
 
 
+class RouteTypeData:
+	def __init__(self, name: str, era: EraType, movementCost: float):
+		self.name = name
+		self.era = era
+		self.movementCost = movementCost
+
+
 class RouteType(ExtendedEnum):
 	none = 'none'
 	ancientRoad = 'ancientRoad'
@@ -1672,21 +1680,50 @@ class RouteType(ExtendedEnum):
 	industrialRoad = 'industrialRoad'
 	modernRoad = 'modernRoad'
 
-	def movementCost(self):
+	def name(self) -> str:
+		return self._data().name
+
+	def movementCost(self) -> float:
+		return self._data().movementCost
+
+	def era(self) -> EraType:
+		return self._data().era
+
+	def _data(self):
 		if self == RouteType.none:
-			return 200
+			return RouteTypeData(
+				name='KEY_TXT_ROUTE_NONE_NAME',
+				era=EraType.none,
+				movementCost=200
+			)
 		elif self == RouteType.ancientRoad:
 			# Starting road, well-packed dirt. Most terrain costs 1 MP; crossing rivers still costs 3 MP.
-			return 1
+			return RouteTypeData(
+				name='KEY_TXT_ROUTE_ANCIENT_NAME',
+				era=EraType.ancient,
+				movementCost=1
+			)
 		elif self == RouteType.classicalRoad:
 			# Adds bridges over rivers; crossing costs reduced to only 1 MP.
-			return 1
+			return RouteTypeData(
+				name='KEY_TXT_ROUTE_CLASSICAL_NAME',
+				era=EraType.classical,
+				movementCost=1
+			)
 		elif self == RouteType.industrialRoad:
 			# Paved roads are developed; 0.75 MP per tile.
-			return 0.75
+			return RouteTypeData(
+				name='KEY_TXT_ROUTE_INDUSTRIAL_NAME',
+				era=EraType.industrial,
+				movementCost=0.75
+			)
 		elif self == RouteType.modernRoad:
 			# Asphalted roads are developed; 0.50 MP per tile.
-			return 0.5
+			return RouteTypeData(
+				name='KEY_TXT_ROUTE_MODERN_NAME',
+				era=EraType.modern,
+				movementCost=0.5
+			)
 
 
 class Tutorials(Enum):

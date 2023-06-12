@@ -1,5 +1,5 @@
 from game.states.accessLevels import AccessLevel
-from utils.base import ExtendedEnum
+from core.base import ExtendedEnum
 from utils.translation import gettext_lazy as _
 
 

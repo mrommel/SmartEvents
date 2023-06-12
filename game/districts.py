@@ -4,7 +4,7 @@ from game.flavors import Flavor, FlavorType
 from game.types import CivicType, TechType
 from map.base import HexPoint
 from map.types import Yields, TerrainType, FeatureType
-from utils.base import ExtendedEnum, InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 
 
 class DistrictTypeData:
@@ -73,6 +73,9 @@ class DistrictType(ExtendedEnum):
 
 	def yields(self) -> Yields:
 		return Yields(food=0, production=0, gold=0)
+
+	def domesticTradeYields(self)-> Yields:
+		return self._data().domesticTradeYields
 
 	def _data(self) -> DistrictTypeData:
 		if self == DistrictType.none:

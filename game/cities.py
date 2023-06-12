@@ -32,8 +32,8 @@ from game.wonders import WonderType
 from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
-from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType, Yields
-from utils.base import ExtendedEnum, WeightedBaseList
+from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType, Yields, RouteType
+from core.base import ExtendedEnum, WeightedBaseList
 
 
 class CityDistrictItem:
@@ -1265,14 +1265,13 @@ class CityTradingPosts:
 	def buildTradingPost(self, leader: LeaderType):
 		pass
 
+	def hasTradingPostOf(self, leader: LeaderType) -> bool:
+		return False
+
 
 class CityTourism:
 	def __init__(self, city):
 		self.city = city
-
-
-class RouteType(ExtendedEnum):
-	ancientRoad = 'ancientRoad'
 
 
 class YieldValues:
@@ -1390,7 +1389,7 @@ class City:
 
 		self._luxuries = []
 
-		self.productionAutomatedValue = False
+		self.productionAutomatedValue: bool = False
 		self.baseYieldRateFromSpecialists = YieldList()
 		self.extraSpecialistYield = YieldList()
 		self.numPlotsAcquiredList = LeaderWeightList()
@@ -1398,6 +1397,8 @@ class City:
 		self._featureProductionValue = 0.0
 		self._productionLastTurnValue = 0.0
 		self._buildQueue = BuildQueue()
+		self._routeToCapitalConnectedLastTurn: bool = False
+		self._routeToCapitalConnectedThisTurn: bool = False
 
 		# ai
 		self.cityStrategyAI = CityStrategyAI(self)
@@ -2300,6 +2301,8 @@ class City:
 			#                 }
 			#             }*/
 			self._routeToCapitalConnectedLastTurn = self._routeToCapitalConnectedThisTurn
+
+		return
 
 	def isCapital(self) -> bool:
 		return self.capitalValue
@@ -4229,3 +4232,17 @@ class City:
 
 	def setEverCapitalTo(self, value):
 		self.everCapitalValue = value
+
+	def canContinueProductionItem(self, buildItem: BuildableItem, simulation) -> bool:
+		if buildItem.buildableType == BuildableType.unit:
+			return self.canTrainUnit(buildItem.unitType, simulation)
+		elif buildItem.buildableType == BuildableType.building:
+			return self.canBuildBuilding(buildItem.buildingType, simulation)
+		elif buildItem.buildableType == BuildableType.wonder:
+			return self.canBuildWonder(buildItem.wonderType, buildItem.location, simulation)
+		elif buildItem.buildableType == BuildableType.district:
+			return self.canBuildDistrict(buildItem.districtType, buildItem.location, simulation)
+		elif buildItem.buildableType == BuildableType.project:
+			return self.canBuildProject(buildItem.projectType)
+
+		return False

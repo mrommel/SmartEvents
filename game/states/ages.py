@@ -1,4 +1,4 @@
-from utils.base import ExtendedEnum, InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 
 
 class AgeTypeData:

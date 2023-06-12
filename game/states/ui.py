@@ -1,4 +1,4 @@
-from utils.base import ExtendedEnum
+from core.base import ExtendedEnum
 
 
 class Interface:
@@ -23,7 +23,16 @@ class Interface:
 	def hideUnit(self, unit, location):
 		pass
 
+	def showUnit(self, unit, location):
+		pass
+
 	def animateUnit(self, unit, animation):
+		pass
+
+	def selectTech(self, tech):
+		pass
+
+	def selectCivic(self, civic):
 		pass
 
 

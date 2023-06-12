@@ -4,7 +4,7 @@ from game.cityStates import CityStateType
 from game.civilizations import LeaderType
 from game.moments import MomentType
 from map.base import HexPoint
-from utils.base import ExtendedEnum, InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 
 
 class NotificationTypeData:

@@ -4,7 +4,7 @@ from game.civilizations import CivilizationType
 from game.states.dedications import DedicationType
 from game.types import EraType
 from map.types import FeatureType
-from utils.base import ExtendedEnum, InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 
 
 class MomentCategory(ExtendedEnum):

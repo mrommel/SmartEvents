@@ -1,10 +1,11 @@
 from map import constants
-from utils.base import ExtendedEnum
+from core.base import ExtendedEnum
 
 
 class GovernorType(ExtendedEnum):
 	liang = 'liang'
 	reyna = 'reyna'
+	magnus = 'magnus'
 
 
 class GovernorTitle(ExtendedEnum):
@@ -18,6 +19,7 @@ class GovernorTitle(ExtendedEnum):
 	redoubt = 'redoubt'
 	zoningCommissioner = 'zoningCommissioner'
 	layingOnOfHands = 'layingOnOfHands'
+	surplusLogistics = 'surplusLogistics'
 
 
 class Governor:

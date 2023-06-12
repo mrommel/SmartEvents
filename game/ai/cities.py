@@ -12,7 +12,7 @@ from game.wonders import WonderType
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.types import YieldType, FeatureType
-from utils.base import ExtendedEnum, InvalidEnumError, WeightedBaseList
+from core.base import ExtendedEnum, InvalidEnumError, WeightedBaseList
 
 
 class CitySpecializationType(ExtendedEnum):

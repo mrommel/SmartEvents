@@ -2,7 +2,7 @@ from enum import Enum
 
 from game.types import TechType, CivicType
 from game.units import UnitType
-from utils.base import InvalidEnumError
+from core.base import InvalidEnumError
 from utils.translation import gettext_lazy as _
 
 

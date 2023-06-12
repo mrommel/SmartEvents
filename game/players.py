@@ -12,7 +12,7 @@ from game.cityConnections import CityConnections
 from game.civilizations import LeaderType, CivilizationType, CivilizationAbility
 from game.districts import DistrictType
 from game.flavors import Flavors, FlavorType
-from game.governments import PlayerGovernment
+from game.governments import PlayerGovernment, GovernmentType
 from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import Notifications, NotificationType, Notification
@@ -25,14 +25,15 @@ from game.states.builds import BuildType
 from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
 from game.states.ui import ScreenType
-from game.tradeRoutes import TradeRoutes
+from game.tradeRoutes import TradeRoutes, TradeRoute, TradeRoutePathfinderDataSource
 from game.types import EraType, TechType, CivicType
 from game.unitTypes import UnitMissionType, UnitTaskType, UnitMapType, UnitType
 from game.wonders import WonderType
 from map import constants
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
-from map.types import Tutorials, Yields, TerrainType, FeatureType, UnitMovementType
+from map.path_finding.finder import AStarPathfinder
+from map.types import Tutorials, Yields, TerrainType, FeatureType, UnitMovementType, RouteType
 
 
 class Player:
@@ -50,20 +51,48 @@ class DiplomaticAI:
 		return False
 
 
-class TradeRoute:
-	pass
-
-
 class PlayerTradeRoutes:
 	def __init__(self, player):
 		self.player = player
+		self._routes: [TradeRoute] = []
 
 	def tradeRoutesStartingAt(self, city) -> [TradeRoute]:
-		return []
+		cityLocation = city.location
+		return list(filter(lambda route: route.start == cityLocation, self._routes))
 
 	def yields(self, simulation) -> Yields:
-		return Yields(0, 0, 0)
+		yields: Yields = Yields(food=0.0, production=0.0, gold=0.0)
 
+		for route in self._routes:
+			yields += route.yields(simulation)
+
+		return yields
+
+	def establishTradeRoute(self, originCity, targetCity, trader, simulation):
+		originCityLocation = originCity.location
+		targetCityLocation = targetCity.location
+
+		tradeRouteFinderDataSource = TradeRoutePathfinderDataSource(
+			self.player,
+			originCityLocation,
+			targetCityLocation,
+			simulation
+		)
+		tradeRouteFinder = AStarPathfinder(tradeRouteFinderDataSource)
+
+		tradeRoutePath = tradeRouteFinder.shortestPath(originCityLocation, targetCityLocation)
+		if tradeRoutePath is not None:
+			tradeRoutePath.prepend(originCityLocation, 0)
+
+			if tradeRoutePath.points()[-1] != targetCityLocation:
+				tradeRoutePath.append(targetCityLocation, 0)
+
+			tradeRoute = TradeRoute(tradeRoutePath)
+			trader.start(tradeRoute, simulation)
+			self._routes.append(tradeRoute)
+			return True
+
+		return False
 
 class PlayerGreatPeople:
 	def __init__(self, player):
@@ -305,6 +334,7 @@ class Player:
 		self._citiesFoundValue: int = 0
 		self._totalImprovementsBuilt: int = 0
 		self._trainedSettlersValue: int = 0
+		self._tradingCapacityValue: int = 0
 		self._discoveredNaturalWonders: [FeatureType] = []
 		self._area = HexArea([])
 
@@ -916,7 +946,51 @@ class Player:
 		return False
 
 	def doUpdateTradeRouteCapacity(self, simulation):
-		pass
+		numberOfTradingCapacity = 0
+
+		# The Foreign Trade Civic(one of the earliest of the Ancient Era) grants a Trading Capacity of one,
+		# meaning that your empire can have one Trade Route at a time.
+		if self.civics.hasCivic(CivicType.foreignTrade):
+			numberOfTradingCapacity += 1
+
+		if self.leader.civilization().ability() == CivilizationAbility.satrapies and \
+			self.civics.hasCivic(CivicType.politicalPhilosophy):
+			# Gains + 1 Trade Route capacity with Political Philosophy.
+			numberOfTradingCapacity += 1
+
+		for loopCity in simulation.citiesOf(self):
+
+			# Each city with a Commercial Hub or a Harbor ( or, from Rise and Fall onwards, a Market or a Lighthouse)
+			# increases a civilization's Trading Capacity by one. These bonuses are not cumulative: a city with both
+			# a Commercial Hub/Market and a Harbor/Lighthouse adds only one Trading Capacity, not two.
+			if loopCity.hasDistrict(DistrictType.harbor) or \
+				loopCity.hasDistrict(DistrictType.commercialHub) or \
+				loopCity.hasBuilding(BuildingType.market) or \
+				loopCity.hasBuilding(BuildingType.lighthouse):
+
+				numberOfTradingCapacity += 1
+
+			# The effects of the Colossus and Great Zimbabwe wonders increase Trading Capacity by one.
+			if loopCity.hasWonder(WonderType.colossus) or loopCity.hasWonder(WonderType.greatZimbabwe):
+				# +1 Trade Route capacity
+				numberOfTradingCapacity += 1
+
+
+		if self.government.currentGovernment() == GovernmentType.merchantRepublic:
+			numberOfTradingCapacity += 2
+
+		if self.hasRetired(GreatPersonType.zhangQian):
+			# Increases Trade Route capacity by 1.
+			numberOfTradingCapacity += 1
+
+		if self._tradingCapacityValue != numberOfTradingCapacity:
+			if self._tradingCapacityValue < numberOfTradingCapacity:
+				if self.isHuman():
+					self.notifications.addNotification(NotificationType.tradeRouteCapacityIncreased)
+
+			self._tradingCapacityValue = numberOfTradingCapacity
+
+		return
 
 	def envoyEffects(self, simulation):
 		return []
@@ -1367,3 +1441,83 @@ class Player:
 
 	def originalCapitalLocation(self) -> HexPoint:
 		return self.originalCapitalLocationValue
+
+	def canEstablishTradeRoute(self) -> bool:
+		tradingCapacity = self._tradingCapacityValue
+		numberOfTradeRoutes = self.numberOfTradeRoutes()
+
+		if numberOfTradeRoutes >= tradingCapacity:
+			return False
+
+		return True
+
+	def doEstablishTradeRoute(self, originCity, targetCity, trader, simulation) -> bool:
+
+		targetLeader = targetCity.player.leader
+
+		if targetLeader != self.leader:
+			if not self.hasEverEstablishedTradingPostWith(targetLeader):
+				self.markEstablishedTradingPostWith(targetLeader)
+
+				self.addMoment(
+					MomentType.tradingPostEstablishedInNewCivilization,
+					civilization=targetLeader.civilization(),
+					simulation=simulation
+				)
+
+				# possibleTradingPosts = (simulation.players.filter {$0.isAlive()}.count - 1)
+				# if self.numEverEstablishedTradingPosts( in: gameModel) == possibleTradingPosts
+				# 	if gameModel.anyHasMoment(of: .firstTradingPostsInAllCivilizations) {
+				# 		self.addMoment(of:.tradingPostsInAllCivilizations, in: gameModel)
+				# 	else:
+				# 		self.addMoment(of:.firstTradingPostsInAllCivilizations, in: gameModel)
+
+			# update access level
+			if not self.isEqualTo(targetCity.player):
+		        # if this is the first trade route with this player, incrase the access level
+				if not self.tradeRoutes.hasTradeRouteWith(targetCity.player, simulation):
+					self.diplomacyAI.increaseAccessLevelTowards(targetCity.player)
+
+		if not self.techs.eurekaTriggeredFor(TechType.currency):
+			self.techs.triggerEurekaFor(TechType.currency, simulation)
+
+		# check quests
+		# for quest in self.ownQuests( in: gameModel):
+		# 	if case.cityState(type: let cityStateType) = targetLeader
+		# 		if quest.type ==.sendTradeRoute & & cityStateType == quest.cityState & & quest.leader == self.leader
+		# 			targetCity.player?.fulfillQuest(by: self.leader, in: gameModel)
+
+		# no check ?
+
+		return self.tradeRoutes.establishTradeRoute(originCity, targetCity, trader, simulation)
+
+	def bestRouteAt(self, tile) -> RouteType:
+		for buildType in list(BuildType):
+			routeType = buildType.route()
+			if routeType is not None:
+				if self.canBuildAt(buildType, tile):
+					return routeType
+
+		return RouteType.none
+
+	def canBuildAt(self, buildType, tile) -> bool:
+		if tile is not None:
+			if not tile.canBuild(buildType, self):
+				return False
+
+		requiredTech = buildType.required()
+		if requiredTech is not None:
+			if not self.hasTech(requiredTech):
+				return False
+
+		requiredEra = buildType.route().era()
+		if requiredEra is not None:
+			if self.currentEra() != requiredEra:
+				return False
+
+		# FIXME: check cost
+
+		return True
+
+	def currentEra(self) -> EraType:
+		return self._currentEraValue

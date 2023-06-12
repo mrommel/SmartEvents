@@ -2,7 +2,7 @@ import abc
 
 from game.ai.baseTypes import MilitaryStrategyType
 from game.flavors import Flavor, FlavorType, Flavors
-from utils.base import ExtendedEnum, InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 from game.ai.grandStrategies import GrandStrategyAIType
 from game.ai.militaryStrategies import ReconStateType
 from game.unitTypes import OperationType, UnitTaskType

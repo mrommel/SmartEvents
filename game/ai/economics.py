@@ -1,6 +1,6 @@
 from typing import Optional
 
-from utils.base import InvalidEnumError
+from core.base import InvalidEnumError
 from game.ai.economicStrategies import EconomicStrategyType
 from game.ai.militaryStrategies import ReconStateType
 

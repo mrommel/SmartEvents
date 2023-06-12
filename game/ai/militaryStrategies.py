@@ -1,4 +1,4 @@
-from utils.base import ExtendedEnum
+from core.base import ExtendedEnum
 
 
 class ReconStateType(ExtendedEnum):

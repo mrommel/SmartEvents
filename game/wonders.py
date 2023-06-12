@@ -9,7 +9,7 @@ from game.types import CivicType, TechType, EraType
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.types import Yields, FeatureType, TerrainType, ResourceType
-from utils.base import ExtendedEnum, InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 
 
 class WonderTypeData:

@@ -13,7 +13,7 @@ from map.base import HexPoint, HexDirection, Size, Array2D, HexArea
 from map.improvements import ImprovementType
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
 	Tutorials, Yields, AppealLevel, UnitDomainType
-from utils.base import WeightedBaseList, ExtendedEnum
+from core.base import WeightedBaseList, ExtendedEnum
 
 
 class Tile:
@@ -1066,7 +1066,7 @@ class MapModel:
 		else:
 			raise AttributeError(f'Map.modifyTerrainAt with wrong attributes: {x_or_hex} / {y_or_terrain} / {terrain}')
 
-	def isHillsAtt(self, x_or_hex, y=None):
+	def isHillsAt(self, x_or_hex, y=None):
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
 			return self.tiles.values[hex_point.y][hex_point.x].ishills()
@@ -1099,18 +1099,31 @@ class MapModel:
 		else:
 			raise AttributeError(f'Map.featureAt with wrong attributes: {x_or_hex} / {y}')
 
-	def modifyFeatureAt(self, x_or_hex, y_or_terrain, feature=None):
-		if isinstance(x_or_hex, HexPoint) and isinstance(y_or_terrain, FeatureType) and feature is None:
+	def modifyFeatureAt(self, x_or_hex, y_or_feature, feature=None):
+		if isinstance(x_or_hex, HexPoint) and isinstance(y_or_feature, FeatureType) and feature is None:
 			hex_point = x_or_hex
-			feature_type = y_or_terrain
+			feature_type = y_or_feature
 			self.tiles.values[hex_point.y][hex_point.x].setFeature(feature_type)
-		elif isinstance(x_or_hex, int) and isinstance(y_or_terrain, int) and isinstance(feature, TerrainType):
+		elif isinstance(x_or_hex, int) and isinstance(y_or_feature, int) and isinstance(feature, FeatureType):
 			x = x_or_hex
-			y = y_or_terrain
+			y = y_or_feature
 			feature_type = feature
 			self.tiles.values[y][x].setFeature(feature_type)
 		else:
 			raise AttributeError(f'Map.modifyTerrainAt with wrong attributes: {x_or_hex} / {y_or_terrain} / {feature}')
+
+	def modifyResourceAt(self, x_or_hex, y_or_resource, resource=None):
+		if isinstance(x_or_hex, HexPoint) and isinstance(y_or_resource, ResourceType) and resource is None:
+			hex_point = x_or_hex
+			resource_type = y_or_resource
+			self.tiles.values[hex_point.y][hex_point.x].setResource(resource_type)
+		elif isinstance(x_or_hex, int) and isinstance(y_or_resource, int) and isinstance(resource, TerrainType):
+			x = x_or_hex
+			y = y_or_resource
+			resource_type = resource
+			self.tiles.values[y][x].setResource(resource_type)
+		else:
+			raise AttributeError(f'Map.modifyResourceAt with wrong attributes: {x_or_hex} / {y_or_resource} / {resource}')
 
 	def riverAt(self, x_or_hex, y=None) -> bool:
 		"""@return True, if this tile has a river - False otherwise"""

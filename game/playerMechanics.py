@@ -16,7 +16,7 @@ from game.states.gossips import GossipType
 from game.states.ui import PopupType
 from game.types import TechType, CivicType, EraType
 from map.types import FeatureType
-from utils.base import WeightedBaseList, ExtendedEnum, InvalidEnumError
+from core.base import WeightedBaseList, ExtendedEnum, InvalidEnumError
 
 
 class WeightedTechList(WeightedBaseList):

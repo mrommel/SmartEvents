@@ -723,7 +723,7 @@ class GameModel:
 	def markContinentDiscovered(self, continentType: ContinentType):
 		self.discoveredContinents.append(continentType)
 
-	def calculateInfluenceDistance(self, cityLocation: HexPoint, targetDestination: HexPoint, limit: int) -> int:
+	def calculateInfluenceDistance  (self, cityLocation: HexPoint, targetDestination: HexPoint, limit: int) -> int:
 		if cityLocation == targetDestination:
 			return 0
 

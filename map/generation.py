@@ -13,7 +13,7 @@ from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, MoveTypeIgnoreUn
 from map.perlin_noise.perlinNoise import PerlinNoise
 from map.types import TerrainType, MapType, MapAge, MapSize, ResourceType, ClimateZone, FeatureType, ResourceUsage, \
     UnitMovementType
-from utils.base import WeightedStringList
+from core.base import WeightedStringList
 from utils.translation import gettext_lazy as _
 
 

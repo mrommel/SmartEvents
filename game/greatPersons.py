@@ -1,7 +1,8 @@
-from utils.base import ExtendedEnum
+from core.base import ExtendedEnum
 
 
 class GreatPersonType(ExtendedEnum):
+	zhangQian = 'zhangQian'
 	hypatia = 'hypatia'
 	themistocles = 'themistocles'
 	boudica = 'boudica'

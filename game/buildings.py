@@ -7,7 +7,7 @@ from game.greatworks import GreatWorkSlotType
 from game.specialists import SpecialistSlots, SpecialistType
 from game.types import TechType, EraType, CivicType
 from map.types import Yields
-from utils.base import ExtendedEnum
+from core.base import ExtendedEnum
 
 
 class BuildingCategoryType(ExtendedEnum):

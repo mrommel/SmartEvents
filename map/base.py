@@ -2,7 +2,7 @@ import math
 import uuid
 from typing import Optional, Union
 
-from utils.base import ExtendedEnum
+from core.base import ExtendedEnum
 
 
 class Size:

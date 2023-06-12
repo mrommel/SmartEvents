@@ -6,8 +6,7 @@ from game.flavors import Flavor, FlavorType
 from game.states.builds import BuildType
 from game.types import EraType, TechType, CivicType
 from map.types import UnitMovementType, ResourceType, UnitDomainType
-from utils.base import ExtendedEnum
-from utils.base import InvalidEnumError
+from core.base import ExtendedEnum, InvalidEnumError
 from utils.translation import gettext_lazy as _
 
 

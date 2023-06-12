@@ -45,3 +45,5 @@ class UserInterfaceMock(Interface):
 
 	def showPopup(self, popup: PopupType, tech: Optional[TechType]):
 		pass
+
+

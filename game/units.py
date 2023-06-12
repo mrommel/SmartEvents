@@ -12,15 +12,16 @@ from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.states.dedications import DedicationType
+# from game.tradeRoutes import TradeRoute
 from game.types import EraType, TechType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOptions, UnitMissionType, UnitActivityType, \
-	UnitMapType
+	UnitMapType, UnitAbilityType
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
 from map.path_finding.path import HexPath
 from map.types import UnitDomainType, YieldType, ResourceType, RouteType
-from utils.base import ExtendedEnum
+from core.base import ExtendedEnum
 
 
 class UnitAutomationType(ExtendedEnum):
@@ -39,12 +40,100 @@ class UnitAnimationType:
 	unfortify = 'unfortify'
 
 
+class UnitTradeRouteDirection(ExtendedEnum):
+	forward = 'forward'
+	start = 'start'
+	backward = 'backward'
+
+
+class UnitTradeRouteState(ExtendedEnum):
+	active = 'active'
+	expired = 'expired'
+
+
+class UnitTradeRouteData:
+	def __init__(self, tradeRoute, turn: int):
+		self.tradeRoute = tradeRoute
+		self.direction = UnitTradeRouteDirection.start
+		self.establishedInTurn = turn
+		self.state = UnitTradeRouteState.active
+
+	def nextPathFor(self, unit, simulation) -> Optional[HexPath]:
+		current: HexPoint = unit.location
+
+		# move to start location (without building a road)
+		if self.direction == UnitTradeRouteDirection.start:
+			# check if unit directly at start city
+			if current == self.tradeRoute.start():
+				self.direction = UnitTradeRouteDirection.forward
+				return self.nextPathFor(unit, simulation)
+
+			# otherwise go to the start city
+			path = unit.pathTowards(self.tradeRoute.start(), options=None, simulation=simulation)
+			if path is not None:
+				return path
+
+		# go towards target city
+		if self.direction == UnitTradeRouteDirection.forward:
+			# check if unit directly at one of the points
+			if current == self.tradeRoute.start():
+				return self.tradeRoute.path()
+
+			if current == self.tradeRoute.end():
+				self.direction = UnitTradeRouteDirection.backward
+
+			return self.nextPathFor(unit, simulation)
+
+		# come back to start city
+		if self.direction == UnitTradeRouteDirection.backward:
+			if current == self.tradeRoute.end():
+				return self.tradeRoute.path().reversed()
+
+			if current == self.tradeRoute.start():
+				# if route is expired, stop here
+				self.checkExpirationFor(unit, simulation)
+				if self.state == UnitTradeRouteState.expired:
+					unit.endTrading(simulation)
+					return None  # this should stop the route, user can select next route
+
+				self.direction = UnitTradeRouteDirection.forward
+				return self.nextPathFor(unit, simulation)
+
+		return None
+
+	def checkExpirationFor(self, unit, simulation):
+		if self.expiresInTurnsFor(unit, simulation) < 0:
+			self.state = UnitTradeRouteState.expired
+			
+		return
+
+	def expiresInTurnsFor(self, unit, simulation):
+		playerEra = unit.player.currentEra()
+		return self.establishedInTurn + self.tradeRouteDurationIn(playerEra) - simulation.currentTurn
+
+	def tradeRouteDurationIn(self, era: EraType) -> int:
+		"""https://civilization.fandom.com/wiki/Trade_Route_(Civ6)#Duration"""
+		baseDuration = 21
+
+		if era == EraType.ancient or era == EraType.classical:
+			return baseDuration + 0
+		elif era == EraType.medieval or era == EraType.renaissance:
+			return baseDuration + 10
+		elif era == EraType.industrial or era == EraType.modern or era == EraType.atomic:
+			return baseDuration + 20
+		elif era == EraType.information or era == EraType.future:
+			return baseDuration + 30
+
+		return baseDuration
+
+
 class Unit:
 	maxHealth = 100.0
 
 	def __init__(self, location: HexPoint, unitType: UnitType, player):
 		self._name = unitType.name()
 		self.location = location
+		self._originLocation = location
 		self.unitType = unitType
 		self.player = player
 		self.taskValue = unitType.defaultTask()
@@ -65,6 +154,7 @@ class Unit:
 		self._fortifyValue = 0
 
 		self._garrisonedValue: bool = False
+		self._tradeRouteDataValue: Optional[UnitTradeRouteData] = None
 
 	def name(self) -> str:
 		return self._name
@@ -657,7 +747,7 @@ class Unit:
 		return attack
 
 	def isTrading(self) -> bool:
-		return False
+		return self._tradeRouteDataValue is not None
 
 	def doMoveOnPathTowards(self, target: HexPoint, previousETA: int, buildingRoute: bool, simulation):
 		"""
@@ -931,7 +1021,7 @@ class Unit:
 		return self.player.isHuman()
 
 	def canBuild(self, buildType: BuildType, location: HexPoint, testVisible: Optional[bool] = False,
-	             testGold: Optional[bool] = True, simulation = None):
+				 testGold: Optional[bool] = True, simulation = None):
 		if simulation is None:
 			raise Exception('Simulation must not be None')
 
@@ -955,7 +1045,7 @@ class Unit:
 
 		validBuildPlot = self.domain() == tile.terrain().domain()  # self.isNativeDomain(at: point, in: gameModel)
 		validBuildPlot = validBuildPlot or (buildType.isWater() and self.domain() == UnitDomainType.land and
-		                                    tile.isWater() and (self.canEmbark(simulation) or self.isEmbarked()))
+											tile.isWater() and (self.canEmbark(simulation) or self.isEmbarked()))
 
 		if not validBuildPlot:
 			return False
@@ -1000,7 +1090,7 @@ class Unit:
 	def doBuild(self, buildType: BuildType, simulation) -> bool:
 		"""
 		Returns true if build finished...
-        bool CvUnit::build(BuildTypes eBuild)
+		bool CvUnit::build(BuildTypes eBuild)
 
 		@param buildType:
 		@param simulation:
@@ -1220,3 +1310,52 @@ class Unit:
 
 	def canMoveAllTerrain(self):
 		return False
+
+	def doEstablishTradeRouteTo(self, targetCity, gameModel):
+		# can reach the target?
+		originCity = gameModel.cityAt(self._originLocation)
+
+		# origin city does not exist anymore ?
+		if originCity is None:
+			return False
+
+		if not self.canEstablishTradeRouteTo(targetCity, gameModel):
+			return False
+
+		return self.player.doEstablishTradeRoute(originCity, targetCity, self, gameModel)
+
+	def defaultTask(self) -> UnitTaskType:
+		return self.unitType.defaultTask()
+
+	def canEstablishTradeRouteTo(self, targetCity, gameModel) -> bool:
+		if not UnitAbilityType.canEstablishTradeRoute in self.unitType.abilities():
+			return False
+
+		# can reach the target?
+		originCity = gameModel.cityAt(self._originLocation)
+
+		# origin city does not exist anymore ?
+		if originCity is None:
+			return False
+
+		if not self.player.canEstablishTradeRoute():
+			return False
+
+		if targetCity is None:
+			return True
+
+		# FIXME: check trade route paths
+
+		return True
+
+	def start(self, tradeRoute, simulation):
+		self._tradeRouteDataValue = UnitTradeRouteData(tradeRoute, simulation.currentTurn)
+		self.continueTrading(simulation)
+
+	def continueTrading(self, simulation):
+		nextPath = self._tradeRouteDataValue.nextPathFor(self, simulation)
+		if nextPath is not None:
+			mission = UnitMission(UnitMissionType.followPath, path=nextPath.pathWithoutFirst())
+			self.pushMission(mission, simulation)
+
+		return
