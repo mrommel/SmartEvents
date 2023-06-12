@@ -51,7 +51,7 @@ class CityDistricts:
 		newItem = CityDistrictItem(district=district, location=location)
 
 		if len(list(filter(lambda item: item.district == district and item.location == location, self._items))) > 0:
-			raise Exception(f'District {district} already built at {district}')
+			raise Exception(f'District {district} already built at {location}')
 
 		self._items.append(newItem)
 
@@ -2064,8 +2064,52 @@ class City:
 
 		return goldValue
 
-	def _goldFromGovernmentType(self):
-		return 0.0
+	def _goldFromGovernmentType(self) -> YieldValues:
+		goldFromGovernmentValue: YieldValues = YieldValues(value=0.0, percentage=0.0)
+
+		# yields from government
+		government = self.player.government
+
+		# https://civilization.fandom.com/wiki/Autocracy_(Civ6)
+		# +1 to all yields for each government building and Palace in a city.
+		if government.currentGovernment() == GovernmentType.autocracy:
+			goldFromGovernmentValue += float(self.buildings.numberOfBuildingsOf(BuildingCategoryType.government))
+
+		# godKing
+		if government.hasCard(PolicyCardType.godKing) and self.capitalValue == True:
+			goldFromGovernmentValue += 1.0
+
+		# thirdAlternative - +2 Culture and +4 Gold from each Research Lab, Military Academy, Coal Power Plant,
+		# Oil Power Plant, and Nuclear Power Plant.
+		if government.hasCard(PolicyCardType.thirdAlternative):
+			if self.buildings.hasBuilding(BuildingType.researchLab):
+				goldFromGovernmentValue += 4
+
+			if self.buildings.hasBuilding(BuildingType.militaryAcademy):
+				goldFromGovernmentValue += 4
+
+			if self.buildings.hasBuilding(BuildingType.coalPowerPlant):
+				goldFromGovernmentValue += 4
+
+			if self.buildings.hasBuilding(BuildingType.oilPowerPlant):
+				goldFromGovernmentValue += 4
+
+			if self.buildings.hasBuilding(BuildingType.nuclearPowerPlant):
+				goldFromGovernmentValue += 4
+
+
+		# - Decentralization Cities with 6 or less population receive +4 Loyalty per turn.
+		# BUT: Cities with more than 6 Citizen population receive -15 % Gold.
+		if government.hasCard(PolicyCardType.decentralization) and self.population() > 6:
+			goldFromGovernmentValue += YieldValues(value=0.0, percentage=-0.15)
+
+		# yields from governors
+		if self.governor() is not None:
+			# Reyna + taxCollector - +2 Gold per turn for each Citizen in the city.
+			if self.governor().type() == GovernorType.reyna and self.governor().hasTitle(GovernorTitle.taxCollector):
+				goldFromGovernmentValue += 2.0 * float(self.population())
+
+		return goldFromGovernmentValue
 
 	def _goldFromDistricts(self, simulation):
 		return 0.0
@@ -2810,7 +2854,7 @@ class City:
 		# for now there can only be one
 		if self.hasDistrict(DistrictType.neighborhood):
 			# A district in your city that provides Housing based on the Appeal of the tile.
-			neighborhoodLocation = self.locationOf(DistrictType.neighborhood)
+			neighborhoodLocation = self.locationOfDistrict(DistrictType.neighborhood)
 			neighborhoodTile = simulation.tileAt(neighborhoodLocation)
 			appeal = neighborhoodTile.appealLevel(simulation)
 			housingFromDistricts += float(appeal.housing())
@@ -2823,7 +2867,7 @@ class City:
 
 		if self.hasDistrict(DistrictType.holySite):
 			# riverGoddess - +2 Amenities and +2 Housing to cities if they have a Holy Site district adjacent to a River.
-			holySiteLocation = self.locationOf(DistrictType.holySite)
+			holySiteLocation = self.locationOfDistrict(DistrictType.holySite)
 			isHolySiteAdjacentToRiver = False
 
 			for neighbor in holySiteLocation.neighbors():

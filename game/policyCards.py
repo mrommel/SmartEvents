@@ -41,8 +41,8 @@ class PolicyCardType:
 
 class PolicyCardTypeData:
 	def __init__(self, name: str, bonus: str, slot: PolicyCardSlot, requiredCivic: Optional[CivicType] = None,
-	             obsoleteCivic: Optional[CivicType] = None, startEra: Optional[EraType] = [],
-	             endEra: Optional[EraType] = [], replace: [PolicyCardType] = [], flavors: [Flavor] = [],
+	             obsoleteCivic: Optional[CivicType] = None, startEra: Optional[EraType] = None,
+	             endEra: Optional[EraType] = None, replace: [PolicyCardType] = [], flavors: [Flavor] = [],
 	             requiresDarkAge: bool = False):
 		"""
 		@param name: name of this policy card
@@ -217,7 +217,7 @@ class PolicyCardType(ExtendedEnum):
 	automatedWorkforce = 'automatedWorkforce'
 	collectivism = 'collectivism'
 	# cyberWarfare
-	# decentralization
+	decentralization = 'decentralization'
 	despoticPaternalism = 'despoticPaternalism'
 	# disinformationCampaign
 	eliteForces = 'eliteForces'
@@ -1145,7 +1145,20 @@ class PolicyCardType(ExtendedEnum):
 				requiresDarkAge=True
 			)
 		# cyberWarfare
-		# decentralization
+		elif self == PolicyCardType.decentralization:
+			# https://civilization.fandom.com/wiki/Decentralization_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_DECENTRALIZATION_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_DECENTRALIZATION_BONUS",
+				slot=PolicyCardSlot.wildcard,
+				requiredCivic=None,
+				obsoleteCivic=None,
+				startEra=EraType.classical,
+				endEra=EraType.renaissance,
+				replace=[],
+				flavors=[],
+				requiresDarkAge=True
+			)
 		elif self == PolicyCardType.despoticPaternalism:
 			# https://civilization.fandom.com/wiki/Despotic_Paternalism_(Civ6)
 			return PolicyCardTypeData(

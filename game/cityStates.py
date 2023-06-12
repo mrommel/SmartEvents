@@ -173,12 +173,18 @@ class CityStateType(ExtendedEnum):
 
 	def _data(self) -> CityStateTypeData:
 		# akkad
-		# amsterdam
+		if self == CityStateType.amsterdam:
+			# https://civilization.fandom.com/wiki/Amsterdam_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_AMSTERDAM_NAME"),
+				category=CityStateCategory.trade,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_AMSTERDAM_SUZARIN")
+			)
 		# anshan
 		# antananarivo
 		# antioch
 		# armagh
-		if self == CityStateType.auckland:
+		elif self == CityStateType.auckland:
 			# https://civilization.fandom.com/wiki/Auckland_(Civ6)
 			return CityStateTypeData(
 				name=_("TXT_KEY_CITY_STATE_AUCKLAND_NAME"),
@@ -186,18 +192,36 @@ class CityStateType(ExtendedEnum):
 				suzarinBonus=_("TXT_KEY_CITY_STATE_AUCKLAND_SUZARIN")
 			)
 		# ayutthaya
-		# babylon
+		elif self == CityStateType.babylon:
+			# https://civilization.fandom.com/wiki/Babylon_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_BABYLON_NAME"),
+				category=CityStateCategory.scientific,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_BABYLON_SUZARIN")
+			)
 		# bandarBrunei
-		# bologna
+		elif self == CityStateType.bologna:
+			# https://civilization.fandom.com/wiki/Bologna_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_BOLOGNA_NAME"),
+				category=CityStateCategory.scientific,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_BOLOGNA_SUZARIN")
+			)
 		# brussels
 		# buenosAires
 		# caguana
 		# cahokia
 		# cardiff
-		# carthage
+		elif self == CityStateType.carthage:
+			# https://civilization.fandom.com/wiki/Carthage_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_CARTHAGE_NAME"),
+				category=CityStateCategory.militaristic,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_CARTHAGE_SUZARIN")
+			)
 		# chinguetti
 		# fez
-		if self == CityStateType.geneva:
+		elif self == CityStateType.geneva:
 			# https://civilization.fandom.com/wiki/Geneva_(Civ6)
 			return CityStateTypeData(
 				name=_("TXT_KEY_CITY_STATE_GENEVA_NAME"),
@@ -236,7 +260,13 @@ class CityStateType(ExtendedEnum):
 		# Preslav
 		# Rapa Nui
 		# samarkand
-		# seoul
+		elif self == CityStateType.seoul:
+			# https://civilization.fandom.com/wiki/Seoul_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_SEOUL_NAME"),
+				category=CityStateCategory.scientific,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_SEOUL_SUZARIN")
+			)
 		elif self == CityStateType.singapore:
 			# https://civilization.fandom.com/wiki/Singapore_(Civ6)
 			return CityStateTypeData(
@@ -244,13 +274,45 @@ class CityStateType(ExtendedEnum):
 				category=CityStateCategory.industrial,
 				suzarinBonus=_("TXT_KEY_CITY_STATE_SINGAPORE_SUZARIN")
 			)
-		# stockholm
+		elif self == CityStateType.stockholm:
+			# https://civilization.fandom.com/wiki/Stockholm_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_STOCKHOLM_NAME"),
+				category=CityStateCategory.scientific,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_STOCKHOLM_SUZARIN")
+			)
 		# taruga
-		# toronto
-		# valletta
+		elif self == CityStateType.toronto:
+			# https://civilization.fandom.com/wiki/Toronto_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_TORONTO_NAME"),
+				category=CityStateCategory.industrial,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_TORONTO_SUZARIN")
+			)
+		elif self == CityStateType.valletta:
+			# https://civilization.fandom.com/wiki/Valletta_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_VALLETTA_NAME"),
+				category=CityStateCategory.militaristic,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_VALLETTA_SUZARIN")
+			)
 		# vaticanCity
-		# venice
-		# vilnius
+		elif self == CityStateType.venice:
+			# https://civilization.fandom.com/wiki/Venice_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_VENICE_NAME"),
+				category=CityStateCategory.trade,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_VENICE_SUZARIN")
+			)
+		elif self == CityStateType.vilnius:
+			# https://civilization.fandom.com/wiki/Vilnius_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_VILNIUS_NAME"),
+				category=CityStateCategory.cultural,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_VILNIUS_SUZARIN")
+			)
 		# wolin
 		# yerevan
 		# zanzibar
+
+		raise InvalidEnumError(self)

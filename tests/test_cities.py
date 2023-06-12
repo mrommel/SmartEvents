@@ -87,6 +87,37 @@ class TestCityDistricts(unittest.TestCase):
 		self.assertEqual(city.districts.hasDistrict(DistrictType.theaterSquare), False)
 		self.assertEqual(city.districts.numberOfSpecialtyDistricts(), 1)
 
+	def test_district_location(self):
+		# GIVEN
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# players
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
+		city.initialize(simulation)
+
+		# WHEN
+		city.districts.build(DistrictType.campus, HexPoint(5, 5))
+
+		# THEN
+		self.assertEqual(city.districts.hasDistrict(DistrictType.campus), True)
+		self.assertEqual(city.districts.locationOfDistrict(DistrictType.campus), HexPoint(5, 5))
+		self.assertEqual(city.districts.locationOfDistrict(DistrictType.theaterSquare), None)
+
 
 class TestCityBuildings(unittest.TestCase):
 	def test_housing(self):

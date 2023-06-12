@@ -272,7 +272,7 @@ class TestCity(unittest.TestCase):
 		# THEN
 		self.assertEqual(foodYield, 7.0)
 		self.assertEqual(productionYield, 4.0)
-		self.assertEqual(goldYield, 5.0)
+		self.assertEqual(goldYield, 6.0)
 
 	def test_city_worked_yields(self):
 		"""Test the worked city yields"""
@@ -289,7 +289,7 @@ class TestCity(unittest.TestCase):
 		# THEN
 		self.assertEqual(foodYield, 8.0)
 		self.assertEqual(productionYield, 4.0)
-		self.assertEqual(goldYield, 5.0)
+		self.assertEqual(goldYield, 6.0)
 
 	def test_city_no_growth(self):
 		# GIVEN
