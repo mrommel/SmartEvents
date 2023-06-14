@@ -364,7 +364,7 @@ class UnitMission:
 				pass
 
 			if done:
-				# Was unit.IsBusy(), but its ok to clear the mission if the unit is just completing a move visualization
+				# Was unit.IsBusy(), but it's ok to clear the mission if the unit is just completing a move visualization
 				if self.unit.missionTimer() == 0:
 					self.unit.publishQueuedVisualizationMoves(simulation)
 					self.unit.popMission()

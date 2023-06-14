@@ -12,7 +12,6 @@ from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.states.dedications import DedicationType
-# from game.tradeRoutes import TradeRoute
 from game.types import EraType, TechType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOptions, UnitMissionType, UnitActivityType, \
@@ -20,7 +19,7 @@ from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOption
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
 from map.path_finding.path import HexPath
-from map.types import UnitDomainType, YieldType, ResourceType, RouteType
+from map.types import UnitDomainType, YieldType, ResourceType, RouteType, FeatureType
 from core.base import ExtendedEnum
 
 
@@ -126,8 +125,28 @@ class UnitTradeRouteData:
 
 		return baseDuration
 
+	def doTurn(self, trader, simulation):
+		isFollowingMission = False
+		mission = trader.peekMission()
+		if mission is not None:
+			if mission.missionType == UnitMissionType.followPath:
+				isFollowingMission = True
+
+		if not isFollowingMission:
+			path = self.nextPathFor(trader, simulation)
+			if path is not None:
+				mission = UnitMission(UnitMissionType.followPath, path=path)
+				trader.pushMission(mission, simulation)
+
+		return
+
+
 
 class Unit:
+	"""
+		unit
+		https://github.com/Gedemon/Civ5-DLL/blob/aa29e80751f541ae04858b6d2a2c7dcca454201e/CvGameCoreDLL/CvUnit.cpp
+	"""
 	maxHealth = 100.0
 
 	def __init__(self, location: HexPoint, unitType: UnitType, player):
@@ -463,6 +482,30 @@ class Unit:
 
 	def damage(self) -> int:
 		return max(0, int(Unit.maxHealth) - int(self._healthPointsValue))
+
+	def changeDamage(self, newDamage, player, simulation):
+		oldValue = self.damage()
+		self._healthPointsValue -= newDamage
+
+		if oldValue != self.damage():
+			if self.isGarrisoned():
+				# fixme: update garrison city strength
+				pass
+
+			simulation.userInterface.refreshUnit(self)
+
+			# fixme: show damage popup
+
+		if self.isDead():
+			self.doKill(True, player)
+
+			# fixme log kill in ai log
+		
+			if player is not None:
+				player.doUnitKilledCombat(self.player, self.unitType)
+
+	def isDead(self):
+		return int(self._healthPointsValue) <= 0
 
 	def healthPoints(self) -> int:
 		return int(self._healthPointsValue)
@@ -1359,3 +1402,50 @@ class Unit:
 			self.pushMission(mission, simulation)
 
 		return
+
+	def doTurn(self, simulation):
+		# Wake unit if skipped last turn
+		currentActivityType = self.activityType()
+
+		holdCheck = (currentActivityType == UnitActivityType.hold) and (self.isHuman() or self.fortifyTurns() > 0)
+		healCheck = (currentActivityType == UnitActivityType.heal) and (not self.isHuman() or self.isAutomated() or not self.isHurt())
+		sentryCheck = (currentActivityType == UnitActivityType.sentry)  # and sentryAlert()
+		interceptCheck = currentActivityType == UnitActivityType.intercept and not self.isHuman()
+
+		if holdCheck or healCheck or sentryCheck or interceptCheck:
+			self.setActivityType(UnitActivityType.awake, simulation)
+
+		# testPromotionReady();
+
+		# damage from features? FeatureTypes
+		feature = simulation.tileAt(self.location).feature()
+		if feature != FeatureType.none:
+			if feature.getTurnDamage() > 0:
+				self.changeDamage(feature.getTurnDamage(), None, simulation)
+
+		# Only increase our Fortification level if we've actually been told to Fortify
+		if self.isFortifiedThisTurn():
+			self.changeFortifyTurnsBy(1, simulation)
+
+		# trader
+		if self.isTrading():
+			self._tradeRouteDataValue.doTurn(self, simulation)
+
+		# Recon unit? If so, he sees what's around him
+		# if self.isRecon():
+		#	self.setReconPlot(plot());
+
+		# If we're not busy doing anything with the turn cycle, make the Unit's Flag bright again
+		if currentActivityType == UnitActivityType.awake:
+			# auto_ptr < ICvUnit1 > pDllUnit(new
+			# CvDllUnit(this));
+			# gDLL->GameplayUnitShouldDimFlag(pDllUnit.get(), / * bDim * / false);
+			pass
+
+		# If we told our Unit to sleep last turn and it can now Fortify switch states
+		if currentActivityType == UnitActivityType.sleep:
+			if self.canFortifyAt(self.location, simulation):
+				# self.push(mission: UnitMission(type:.fortify), in: gameModel)
+				self.setFortifiedThisTurn(True, simulation)
+
+		self.doDelayedDeath(simulation)

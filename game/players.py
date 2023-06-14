@@ -28,12 +28,13 @@ from game.states.ui import ScreenType
 from game.tradeRoutes import TradeRoutes, TradeRoute, TradeRoutePathfinderDataSource
 from game.types import EraType, TechType, CivicType
 from game.unitTypes import UnitMissionType, UnitTaskType, UnitMapType, UnitType
+from game.units import Army
 from game.wonders import WonderType
 from map import constants
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
 from map.path_finding.finder import AStarPathfinder
-from map.types import Tutorials, Yields, TerrainType, FeatureType, UnitMovementType, RouteType
+from map.types import Tutorials, Yields, TerrainType, FeatureType, UnitMovementType, RouteType, UnitDomainType
 
 
 class Player:
@@ -69,8 +70,8 @@ class PlayerTradeRoutes:
 		return yields
 
 	def establishTradeRoute(self, originCity, targetCity, trader, simulation):
-		originCityLocation = originCity.location
-		targetCityLocation = targetCity.location
+		originCityLocation: HexPoint = originCity.location
+		targetCityLocation: HexPoint = targetCity.location
 
 		tradeRouteFinderDataSource = TradeRoutePathfinderDataSource(
 			self.player,
@@ -82,7 +83,7 @@ class PlayerTradeRoutes:
 
 		tradeRoutePath = tradeRouteFinder.shortestPath(originCityLocation, targetCityLocation)
 		if tradeRoutePath is not None:
-			tradeRoutePath.prepend(originCityLocation, 0)
+			# tradeRoutePath.prepend(originCityLocation, 0) - not needed anymore?
 
 			if tradeRoutePath.points()[-1] != targetCityLocation:
 				tradeRoutePath.append(targetCityLocation, 0)
@@ -93,6 +94,7 @@ class PlayerTradeRoutes:
 			return True
 
 		return False
+
 
 class PlayerGreatPeople:
 	def __init__(self, player):
@@ -275,6 +277,34 @@ class DangerPlotsAI:
 		return 0.0
 
 
+class PlayerOperations:
+	def __init__(self, player):
+		self.player = player
+
+	def doDelayedDeath(self, simulation):
+		pass
+
+	def doTurn(self, simulation):
+		pass
+
+
+class PlayerArmies:
+	def __init__(self, player):
+		self.player = player
+		self._armies = []
+
+	def doDelayedDeath(self):
+		for army in self._armies:
+			army.doDelayedDeath()
+
+	def doTurn(self, simulation):
+		for army in self._armies:
+			army.doTurn(simulation)
+
+	def removeArmy(self, army: Army):
+		self._armies = list(filter(lambda armyIt: armyIt != self._armies, self._armies))
+
+
 class Player:
 	def __init__(self, leader: LeaderType, cityState: Optional[CityStateType]=None, human: bool=False):
 		self.leader = leader
@@ -325,6 +355,8 @@ class Player:
 		self.treasury = PlayerTreasury(player=self)
 		self.tourism = PlayerTourism(player=self)
 		self.governors = PlayerGovernors(player=self)
+		self.operations = PlayerOperations(player=self)
+		self.armies = PlayerArmies(player=self)
 
 		self._currentEraValue: EraType = EraType.ancient
 		self._currentAgeValue: AgeType = AgeType.normal
@@ -434,7 +466,50 @@ class Player:
 		return False
 
 	def doTurnUnits(self, simulation):
-		pass
+		# Start: OPERATIONAL AI UNIT PROCESSING
+		self.operations.doDelayedDeath(simulation)
+		self.armies.doDelayedDeath()
+
+		for unit in simulation.unitsOf(self):
+			unit.doDelayedDeath(simulation)
+
+		self.operations.doTurn(simulation)
+		self.operations.doDelayedDeath(simulation)
+
+		self.armies.doTurn(simulation)
+
+		# Homeland AI
+		# self.homelandAI?.doTurn( in: gameModel) is empty
+
+		# Start: old unit AI processing
+		for passValue in range(4):
+			for loopUnit in simulation.unitsOf(self):
+
+				if loopUnit.domain() == UnitDomainType.air:
+					if passValue == 1:
+						loopUnit.doTurn(simulation)
+				elif loopUnit.domain() == UnitDomainType.sea:
+					if passValue == 2:
+						loopUnit.doTurn(simulation)
+				elif loopUnit.domain() == UnitDomainType.land:
+					if passValue == 3:
+						loopUnit.doTurn(simulation)
+				elif loopUnit.domain() == UnitDomainType.immobile:
+					if passValue == 0:
+						loopUnit.doTurn(simulation)
+				elif loopUnit.domain() == UnitDomainType.none:
+					raise Exception("Unit with no Domain")
+
+		self.doTurnUnitsPost(simulation)  # AI_doTurnUnitsPost();
+
+	def doTurnUnitsPost(self, simulation):
+		if self.isHuman():
+			return
+
+		for loopUnit in simulation.unitsOf(self):
+			loopUnit.doPromotion(simulation)
+
+		return
 
 	def name(self) -> str:
 		return self.leader.name()
@@ -550,7 +625,7 @@ class Player:
 	def isBarbarian(self) -> bool:
 		return self.leader == LeaderType.barbar
 
-	def hasMetWith(self, otherPlayer: Player) -> bool:
+	def hasMetWith(self, otherPlayer) -> bool:
 		if self.isBarbarian() or otherPlayer.isBarbarian():
 			return False
 
@@ -1188,7 +1263,7 @@ class Player:
 			city.cityStrategy.turn(simulation)
 
 			if self.isActive():
-				self.notifications.addNotification(NotificationType.productionNeeded, city=city.name, location=city.location)
+				self.notifications.addNotification(NotificationType.productionNeeded, cityName=city.name, location=city.location)
 
 			city.doFoundMessage()
 
@@ -1201,7 +1276,7 @@ class Player:
 				self.notifications.addNotification(NotificationType.civicNeeded)
 
 			if isCapital:
-				self.notifications().addNotification(NotificationType.policyNeeded)
+				self.notifications.addNotification(NotificationType.policiesNeeded)
 		else:
 			city.doFoundMessage()
 
@@ -1360,7 +1435,7 @@ class Player:
 					if buildType.keepsFeature(feature):
 						continue
 
-					if not buildType.canRemoveFeature(feature):
+					if not buildType.canRemove(feature):
 						return False
 
 					removeTech = buildType.requiredRemoveTechFor(feature)
