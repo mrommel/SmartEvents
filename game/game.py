@@ -232,9 +232,9 @@ class GameModel:
 		return numActive
 
 	def doTurn(self):
-		print()
-		print(f"::: TURN {self.currentTurn + 1} starts now :::")
-		print()
+		print('', flush=True)
+		print(f"::: TURN {self.currentTurn + 1} starts now :::", flush=True)
+		print('', flush=True)
 
 		self.humanPlayer().resetFinishTurnButtonPressed()
 

@@ -41,17 +41,6 @@ class Player:
 	pass
 
 
-class DiplomaticAI:
-	def __init__(self, player):
-		self.player = player
-
-	def update(self, simulation):
-		pass
-
-	def hasMetWith(self, player):
-		return False
-
-
 class PlayerTradeRoutes:
 	def __init__(self, player):
 		self.player = player

@@ -319,6 +319,9 @@ class Unit:
 	def hasPromotion(self, promotion: UnitPromotionType) -> bool:
 		return False
 
+	def doPromotion(self, simulation):
+		pass
+
 	def canMoveInto(self, point, options, simulation):
 		return True
 

@@ -100,12 +100,15 @@ class TestTradeRoutes(unittest.TestCase):
 		self.hasExpired = False
 
 		while turnCounter < 35 and not self.hasExpired:
+			print(f':-:-:-: iteration {turnCounter} :-:-:-:-:', flush=True)
 			while not(humanPlayer.hasProcessedAutoMoves() and humanPlayer.turnFinished()):
 				gameModel.update()
 
 				if humanPlayer.isTurnActive():
 					humanPlayer.setProcessedAutoMovesTo(True)
 					humanPlayer.finishTurn()
+					# humanPlayer.finishTurn()
+					# humanPlayer.setAutoMovesTo(True)
 
 			if not traderUnit.isTrading():
 				self.hasExpired = True
