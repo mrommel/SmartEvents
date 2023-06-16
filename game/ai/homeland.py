@@ -9,6 +9,7 @@ from game.units import Unit, UnitAutomationType, UnitMission
 from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
+from map.path_finding.finder import AStarPathfinder
 from map.types import UnitDomainType
 from core.base import ExtendedEnum, InvalidEnumError
 

@@ -555,30 +555,24 @@ class Player:
 				self.citySpecializationAI.setSpecializationsDirty()
 
 		# roman roads
-		# if self.leader.civilization().ability() == .allRoadsLeadToRome {
-		#
-		#             if !isCapital {
-		#                 guard let capital = gameModel.capital(of: self) else {
-		#                     fatalError("cant get capital")
-		#                 }
-		#
-		#                 let pathFinderDataSource = gameModel.ignoreUnitsPathfinderDataSource(
-		#                     for: .walk,
-		#                     for: self,
-		#                     unitMapType: .combat,
-		#                     canEmbark: false,
-		#                     canEnterOcean: self.canEnterOcean()
-		#                 )
-		#                 let pathFinder = AStarPathfinder(with: pathFinderDataSource)
-		#
-		#                 if let path = pathFinder.shortestPath(fromTileCoord: location, toTileCoord: capital.location) {
-		#                     // If within TradeRoute6 Trade Route range of the Capital6 Capital, a road to it.
-		#                     if path.count <= TradeRoutes.landRange {
-		#
-		#                         for pathLocation in path {
-		#
-		#                             if let pathTile = gameModel.tile(at: pathLocation) {
-		#                                 pathTile.set(route: self.bestRoute())
+		if self.leader.civilization().ability() == CivilizationAbility.allRoadsLeadToRome:
+
+			if not isCapital:
+				capital = simulation.capitalOf(self)
+
+				pathFinderDataSource = simulation.ignoreUnitsPathfinderDataSource(
+					UnitMovementType.walk, self, UnitMapType.combat,
+					canEmbark=False, canEnterOcean=False)
+				pathFinder = AStarPathfinder(pathFinderDataSource)
+
+				path = pathFinder.shortestPath(capital.location, location)
+
+				if path is not None:
+					#  If within Trade Route range of the Capital, add a road to it.
+					if len(path.points()) <= TradeRoutes.landRange:
+						for pathLocation in path.points():
+							pathTile = simulation.tileAt(pathLocation)
+							pathTile.setRoute(self.bestRouteAt(pathTile))
 
 		# send gossip
 		simulation.sendGossip(GossipType.cityFounded, cityName=cityName, player=self)
@@ -1538,7 +1532,7 @@ class Player:
 
 			# update access level
 			if not self.isEqualTo(targetCity.player):
-		        # if this is the first trade route with this player, incrase the access level
+				# if this is the first trade route with this player, incrase the access level
 				if not self.tradeRoutes.hasTradeRouteWith(targetCity.player, simulation):
 					self.diplomacyAI.increaseAccessLevelTowards(targetCity.player)
 
