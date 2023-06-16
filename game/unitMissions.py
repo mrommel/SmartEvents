@@ -371,7 +371,7 @@ class UnitMission:
 
 				# trader has reached a target but has moves left
 				if self.unit.isTrading() and self.unit.movesLeft() > 0:
-					# unit.continueTrading( in: gameModel)
+					self.unit.continueTrading(simulation)
 					self.unit.finishMoves()
 			else:
 				# if we can still act, process the mission again

@@ -11,6 +11,24 @@ class HexPath:
 		self._points = points
 		self._costs = costs
 
+	def __repr__(self):
+		strValue = 'HexPath('
+
+		for pt in self._points:
+			strValue += f'({pt.x}, {pt.y}), '
+
+		strValue += ')'
+		return strValue
+
+	def __str__(self):
+		strValue = 'HexPath('
+
+		for pt in self._points:
+			strValue += f'({pt.x}, {pt.y}), '
+
+		strValue += ')'
+		return strValue
+
 	def points(self) -> [HexPoint]:
 		return self._points
 

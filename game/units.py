@@ -174,6 +174,9 @@ class Unit:
 		self._garrisonedValue: bool = False
 		self._tradeRouteDataValue: Optional[UnitTradeRouteData] = None
 
+	def __repr__(self):
+		return f'Unit({self.location}, {self.unitType}, {self.player.name()}, {self.experienceLevel()} exp)'
+
 	def name(self) -> str:
 		return self._name
 
@@ -652,6 +655,10 @@ class Unit:
 				self.setFortifiedThisTurn(False, simulation)
 
 		return
+
+	def changeFortifyTurnsBy(self, delta: int, simulation):
+		newValue = self.fortifyTurns() + delta
+		self.setFortifyTurns(newValue, simulation)
 
 	def setFortifiedThisTurn(self, fortifiedThisTurn: bool, simulation):
 		if not self.isEverFortifyable() and fortifiedThisTurn:
@@ -1488,8 +1495,7 @@ class Unit:
 
 		# If we're not busy doing anything with the turn cycle, make the Unit's Flag bright again
 		if currentActivityType == UnitActivityType.awake:
-			# auto_ptr < ICvUnit1 > pDllUnit(new
-			# CvDllUnit(this));
+			# auto_ptr < ICvUnit1 > pDllUnit(new CvDllUnit(this));
 			# gDLL->GameplayUnitShouldDimFlag(pDllUnit.get(), / * bDim * / false);
 			pass
 
