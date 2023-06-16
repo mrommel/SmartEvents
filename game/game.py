@@ -1,9 +1,9 @@
-from enum import Enum
 from typing import Optional
 
 from game.ai.barbarians import BarbarianAI
 from game.ai.religions import Religions
 from game.baseTypes import HandicapType, GameState
+from game.buildings import BuildingType
 from game.cities import City
 from game.civilizations import LeaderType, CivilizationType
 from game.evaluators import CitySiteEvaluator
@@ -15,7 +15,7 @@ from game.states.gossips import GossipType
 from game.states.ui import ScreenType
 from game.states.victories import VictoryType
 from game.types import TechType, EraType, CivicType
-from game.unitTypes import UnitMapType, UnitAbilityType, UnitPromotionType, MoveOptions
+from game.unitTypes import UnitMapType, UnitAbilityType, UnitPromotionType, MoveOption
 from game.units import Unit
 from game.wonders import WonderType
 from map import constants
@@ -175,7 +175,7 @@ class GameModel:
 				continue
 
 			neighborTile = self.tileAt(pt)
-		# self.userInterface.refreshTile(neighborTile)
+			self.userInterface.refreshTile(neighborTile)
 
 		# update eureka
 		if not city.player.techs.eurekaTriggeredFor(TechType.sailing):
@@ -500,6 +500,7 @@ class GameModel:
 		return next((player for player in self.players if player.isAlive() and player.isActive()), None)
 
 	def updateTacticalAnalysisMap(self, player):
+		# fixme
 		pass
 
 	def sightAt(self, location: HexPoint, sight: int, unit=None, player=None):
@@ -614,7 +615,7 @@ class GameModel:
 		return numPlayerCities >= (numNextBestPlayersCities + 3)
 
 	def sendGossip(self, gossipType: GossipType, cityName: Optional[str] = None, tech: Optional[TechType] = None,
-	               player=None, leader: Optional[LeaderType] = None):
+	               player=None, leader: Optional[LeaderType] = None, building: Optional[BuildingType] = None):
 		print('send gossip is not implemented')  # fixme
 		pass
 
@@ -638,7 +639,7 @@ class GameModel:
 		)
 		return MoveTypeIgnoreUnitsPathfinderDataSource(self._map, unit.movementType(), unit.player, datasourceOptions)
 
-	def pathTowards(self, target: HexPoint, options: MoveOptions, unit) -> HexPath:
+	def pathTowards(self, target: HexPoint, options: [MoveOption], unit) -> HexPath:
 		datasource = self.unitAwarePathfinderDataSource(unit)
 		pathFinder = AStarPathfinder(datasource)
 

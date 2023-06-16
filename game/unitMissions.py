@@ -3,7 +3,7 @@ from typing import Optional
 from game.combat import Combat, CombatResultType
 from game.states.builds import BuildType
 from game.states.ui import PopupType
-from game.unitTypes import UnitMissionType, MoveOptions, UnitActivityType, UnitTaskType, UnitMapType
+from game.unitTypes import UnitMissionType, MoveOption, UnitActivityType, UnitTaskType, UnitMapType
 from map.base import HexPoint
 from map.path_finding.path import HexPath
 from map.types import UnitDomainType
@@ -12,7 +12,7 @@ from map.types import UnitDomainType
 class UnitMission:
 	def __init__(self, missionType: UnitMissionType, buildType: Optional[BuildType] = None,
 				 target: Optional[HexPoint] = None, path: Optional[HexPath] = None,
-				 options: Optional[MoveOptions] = None):
+				 options: [MoveOption] = []):
 		self.missionType = missionType
 		self.buildType = buildType
 		self.target = target
@@ -170,7 +170,7 @@ class UnitMission:
 
 						if self.unit.player.isHuman() and badAttackInterrupt:
 
-							if self.unit.canMoveInto(self.target, MoveOptions.attack, simulation) and \
+							if self.unit.canMoveInto(self.target, [MoveOption.attack], simulation) and \
 								tile.isDiscoveredBy(self.unit.player):
 
 								if tile.isCity():

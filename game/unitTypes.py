@@ -198,7 +198,7 @@ class UnitType(ExtendedEnum):
 	def name(self):
 		return self._data().name
 
-	def unitClass(self):
+	def unitClass(self) -> UnitClassType:
 		return self._data().targetType
 
 	def civilization(self):
@@ -1418,9 +1418,11 @@ class UnitType(ExtendedEnum):
 		raise AttributeError(f'cant get data for unit {self}')
 
 
-class MoveOptions(Enum):
-	attack = 'attack'
+class MoveOption(Enum):
 	none = 'none'
+
+	attack = 'attack'
+	declareWar = 'declareWar'
 
 
 class UnitMissionTypeData:

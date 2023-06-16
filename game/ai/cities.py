@@ -22,16 +22,19 @@ class CitySpecializationType(ExtendedEnum):
 	generalEconomic = 'generalEconomic'
 
 
-
 class CityStrategyTypeData:
 	def __init__(self, name: str, requiredTech: Optional[TechType], obsoleteTech: Optional[TechType],
-				 weightThreshold: int, flavorModifiers: [Flavor], flavorThresholdModifiers: [Flavor]):
+				 weightThreshold: int, flavorModifiers: [Flavor], flavorThresholdModifiers: [Flavor],
+	             permanent: bool, checkEachTurns: int, minimumAdoptionTurns: int):
 		self.name = name
 		self.requiredTech = requiredTech
 		self.obsoleteTech = obsoleteTech
 		self.weightThreshold = weightThreshold
 		self.flavorModifiers = flavorModifiers
 		self.flavorThresholdModifiers = flavorThresholdModifiers
+		self.permanent = permanent
+		self.checkEachTurns = checkEachTurns
+		self.minimumAdoptionTurns = minimumAdoptionTurns
 
 
 class CityStrategyType(ExtendedEnum):
@@ -71,6 +74,15 @@ class CityStrategyType(ExtendedEnum):
 
 	def obsoleteTech(self) -> Optional[TechType]:
 		return self._data().obsoleteTech
+
+	def permanent(self) -> bool:
+		return self._data().permanent
+
+	def checkEachTurns(self) -> int:
+		return self._data().checkEachTurns
+
+	def minimumAdoptionTurns(self) -> int:
+		return self._data().minimumAdoptionTurns
 
 	def flavorModifiers(self) -> [Flavor]:
 		return self._data().flavorModifiers
@@ -159,7 +171,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=10000,
+				minimumAdoptionTurns=0
 			)
 
 		elif self == CityStrategyType.tinyCity:
@@ -169,7 +184,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=5,
+				minimumAdoptionTurns=5
 			)
 		elif self == CityStrategyType.smallCity:
 			return CityStrategyTypeData(
@@ -178,7 +196,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=5,
+				minimumAdoptionTurns=5
 			)
 		elif self == CityStrategyType.mediumCity:
 			return CityStrategyTypeData(
@@ -187,7 +208,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=5,
+				minimumAdoptionTurns=5
 			)
 		elif self == CityStrategyType.largeCity:
 			return CityStrategyTypeData(
@@ -196,7 +220,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=5,
+				minimumAdoptionTurns=5
 			)
 		elif self == CityStrategyType.landLocked:
 			return CityStrategyTypeData(
@@ -205,7 +232,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=True,
+				checkEachTurns=-1,
+				minimumAdoptionTurns=-1
 			)
 
 		elif self == CityStrategyType.needTileImprovers:
@@ -215,7 +245,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.wantTileImprovers:
 			return CityStrategyTypeData(
@@ -224,7 +257,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.enoughTileImprovers:
 			return CityStrategyTypeData(
@@ -233,7 +269,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=5,
+				minimumAdoptionTurns=10
 			)
 		elif self == CityStrategyType.needNavalGrowth:
 			return CityStrategyTypeData(
@@ -242,7 +281,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=5,
+				minimumAdoptionTurns=10
 			)
 		elif self == CityStrategyType.needNavalTileImprovement:
 			return CityStrategyTypeData(
@@ -251,7 +293,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=1,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.enoughNavalTileImprovement:
 			return CityStrategyTypeData(
@@ -260,7 +305,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=1,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.needImprovementFood:
 			return CityStrategyTypeData(
@@ -269,7 +317,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.needImprovementProduction:
 			return CityStrategyTypeData(
@@ -278,7 +329,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.haveTrainingFacility:
 			return CityStrategyTypeData(
@@ -287,7 +341,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=True,
+				checkEachTurns=-1,
+				minimumAdoptionTurns=-1
 			)
 		elif self == CityStrategyType.capitalNeedSettler:
 			return CityStrategyTypeData(
@@ -296,7 +353,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=2,
+				minimumAdoptionTurns=4
 			)
 		elif self == CityStrategyType.capitalUnderThreat:
 			return CityStrategyTypeData(
@@ -305,7 +365,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.underBlockade:
 			return CityStrategyTypeData(
@@ -314,7 +377,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 
 		elif self == CityStrategyType.coastCity:
@@ -324,7 +390,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=True,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.riverCity:
 			return CityStrategyTypeData(
@@ -333,7 +402,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=True,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.mountainCity:
 			return CityStrategyTypeData(
@@ -342,7 +414,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=True,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.hillCity:
 			return CityStrategyTypeData(
@@ -351,7 +426,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=True,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.forestCity:
 			return CityStrategyTypeData(
@@ -360,7 +438,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 		elif self == CityStrategyType.jungleCity:
 			return CityStrategyTypeData(
@@ -369,7 +450,10 @@ class CityStrategyType(ExtendedEnum):
 				obsoleteTech=None,
 				weightThreshold=0,
 				flavorModifiers=[],
-				flavorThresholdModifiers=[]
+				flavorThresholdModifiers=[],
+				permanent=False,
+				checkEachTurns=2,
+				minimumAdoptionTurns=2
 			)
 
 		raise InvalidEnumError(self)
@@ -963,7 +1047,7 @@ class BuildableItem:
 				 location: Optional[HexPoint] = None):
 		if isinstance(item, DistrictType):
 			self.buildableType = BuildableType.district
-			self.districtType = item
+			self.districtType: DistrictType = item
 			self.buildingType = None
 			self.unitType = None
 			self.wonderType = None
@@ -973,7 +1057,7 @@ class BuildableItem:
 		elif isinstance(item, BuildingType):
 			self.buildableType = BuildableType.building
 			self.districtType = None
-			self.buildingType = item
+			self.buildingType: BuildingType = item
 			self.unitType = None
 			self.wonderType = None
 			self.projectType = None
@@ -983,7 +1067,7 @@ class BuildableItem:
 			self.buildableType = BuildableType.unit
 			self.districtType = None
 			self.buildingType = None
-			self.unitType = item
+			self.unitType: UnitType = item
 			self.wonderType = None
 			self.projectType = None
 			self.location = None  # units don't need a location
@@ -993,7 +1077,7 @@ class BuildableItem:
 			self.districtType = None
 			self.buildingType = None
 			self.unitType = None
-			self.wonderType = item
+			self.wonderType: WonderType = item
 			self.projectType = None
 			self.location = location
 			self.production = 0.0
@@ -1003,7 +1087,7 @@ class BuildableItem:
 			self.buildingType = None
 			self.unitType = None
 			self.wonderType = None
-			self.projectType = item
+			self.projectType: ProjectType = item
 			self.location = location
 			self.production = 0.0
 		else:

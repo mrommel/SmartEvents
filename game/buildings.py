@@ -179,6 +179,9 @@ class BuildingType(ExtendedEnum):
 
 		return self._data().specialSlots.specialistType
 
+	def slotsForGreatWork(self) -> [GreatWorkSlotType]:
+		return self._data().slots
+
 	def _flavors(self) -> [Flavor]:
 		return self._data().flavors
 

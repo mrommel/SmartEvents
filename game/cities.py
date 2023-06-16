@@ -15,6 +15,7 @@ from game.envoys import EnvoyEffectLevel
 from game.governments import GovernmentType
 from game.governors import GovernorType, GovernorTitle, Governor
 from game.greatPersons import GreatPersonType
+from game.greatworks import GreatWorkSlotType
 from game.loyalties import LoyaltyState
 from game.moments import MomentType
 from game.notifications import NotificationType
@@ -32,7 +33,8 @@ from game.wonders import WonderType
 from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
-from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType, Yields, RouteType
+from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType, Yields, RouteType, \
+	UnitDomainType, Tutorials
 from core.base import ExtendedEnum, WeightedBaseList
 
 
@@ -523,7 +525,7 @@ class CityCitizens:
 		numberOfCitizensToRemove = self.numberOfCitizensWorkingPlots()
 		for _ in range(numberOfCitizensToRemove):
 			self.doRemoveWorstCitizen(removeForcedStatus=False, dontChangeSpecialist=SpecialistType.none,
-									  simulation=simulation)
+			                          simulation=simulation)
 
 		# Remove Non-Forced Specialists in Buildings
 		for buildingType in list(BuildingType):
@@ -679,9 +681,9 @@ class CityCitizens:
 		return 0
 
 	def doRemoveWorstCitizen(self,
-							 removeForcedStatus: bool = False,
-							 dontChangeSpecialist: SpecialistType = SpecialistType.none,
-							 simulation=None) -> bool:
+	                         removeForcedStatus: bool = False,
+	                         dontChangeSpecialist: SpecialistType = SpecialistType.none,
+	                         simulation=None) -> bool:
 		"""Pick the worst Plot to stop working"""
 		# Are all of our guys already not working Plots?
 		if self.numberOfUnassignedCitizens() == self.city.population():
@@ -723,7 +725,8 @@ class CityCitizens:
 	def numberOfDefaultSpecialists(self) -> int:
 		return self.numberOfDefaultSpecialistsValue
 
-	def doRemoveWorstSpecialist(self, dontChangeSpecialist: SpecialistType = SpecialistType.none, dontRemoveFromBuilding: BuildingType = BuildingType.none, simulation = None) -> bool:
+	def doRemoveWorstSpecialist(self, dontChangeSpecialist: SpecialistType = SpecialistType.none,
+	                            dontRemoveFromBuilding: BuildingType = BuildingType.none, simulation=None) -> bool:
 		"""Find the worst Specialist and remove him from duty"""
 		if simulation is None:
 			raise Exception('simulation must not be None')
@@ -1006,13 +1009,13 @@ class CityCitizens:
 						if buildingType.specialistType().yields().value(YieldType.science) > 0:
 							weight *= 3
 
-					# FIXME
-					# if (GetPlayer()->getSpecialistExtraYield(YIELD_SCIENCE) > 0)
-					# iWeight *= 3;
+			# FIXME
+			# if (GetPlayer()->getSpecialistExtraYield(YIELD_SCIENCE) > 0)
+			# iWeight *= 3;
 
-					# FIXME
-					# if (GetPlayer()->GetPlayerTraits()->GetSpecialistYieldChange(eSpecialist, YIELD_SCIENCE) > 0)
-					# iWeight *= 3;
+			# FIXME
+			# if (GetPlayer()->GetPlayerTraits()->GetSpecialistYieldChange(eSpecialist, YIELD_SCIENCE) > 0)
+			# iWeight *= 3;
 
 		elif focusTypeValue == CityFocusType.production:
 			# Loop through all Buildings
@@ -1028,13 +1031,13 @@ class CityCitizens:
 							weight *= 150
 							weight /= 100
 
-					# FIXME
-					# if (GetPlayer()->getSpecialistExtraYield(YIELD_PRODUCTION) > 0)
-					# iWeight *= 2;
+			# FIXME
+			# if (GetPlayer()->getSpecialistExtraYield(YIELD_PRODUCTION) > 0)
+			# iWeight *= 2;
 
-					# FIXME
-					# if (GetPlayer()->GetPlayerTraits()->GetSpecialistYieldChange(eSpecialist, YIELD_PRODUCTION) > 0)
-					#   iWeight *= 2;
+			# FIXME
+			# if (GetPlayer()->GetPlayerTraits()->GetSpecialistYieldChange(eSpecialist, YIELD_PRODUCTION) > 0)
+			#   iWeight *= 2;
 
 		elif focusTypeValue == CityFocusType.gold:
 
@@ -1086,13 +1089,13 @@ class CityCitizens:
 							weight *= 150
 							weight /= 100
 
-					# FIXME
-					# if (GetPlayer()->getSpecialistExtraYield(YIELD_GOLD) > 0):
-					# iWeight *= 2;
+			# FIXME
+			# if (GetPlayer()->getSpecialistExtraYield(YIELD_GOLD) > 0):
+			# iWeight *= 2;
 
-					# FIXME
-					# if (GetPlayer()->GetPlayerTraits()->GetSpecialistYieldChange(eSpecialist, YIELD_GOLD) > 0):
-					#  iWeight *= 2;
+			# FIXME
+			# if (GetPlayer()->GetPlayerTraits()->GetSpecialistYieldChange(eSpecialist, YIELD_GOLD) > 0):
+			#  iWeight *= 2;
 
 		# Does the AI want it enough?
 		if weight >= 150:
@@ -1205,7 +1208,8 @@ class CityCitizens:
 
 			# If we don't already have an Unassigned Citizen to turn into a Specialist, find one from somewhere
 			if self.numberOfUnassignedCitizens() == 0:
-				self.doRemoveWorstCitizen(removeForcedStatus=True, dontChangeSpecialist=specialistType, simulation=simulation)
+				self.doRemoveWorstCitizen(removeForcedStatus=True, dontChangeSpecialist=specialistType,
+				                          simulation=simulation)
 
 				if self.numberOfUnassignedCitizens() == 0:
 					# Still nobody, all the citizens may be assigned to the eSpecialist we are looking for, try again
@@ -1228,7 +1232,8 @@ class CityCitizens:
 
 	def increaseNumberOfSpecialists(self, buildingType: BuildingType):
 		# update
-		specialistsTuple = next(filter(lambda spec: spec.buildingType == buildingType, self.numberOfSpecialistsInBuilding), None)
+		specialistsTuple = next(
+			filter(lambda spec: spec.buildingType == buildingType, self.numberOfSpecialistsInBuilding), None)
 		if specialistsTuple is not None:
 			specialistsTuple.specialists += 1
 			return
@@ -1248,9 +1253,22 @@ class CityCitizens:
 		self.numberOfForcedSpecialistsInBuilding.append(SpecialistBuilding(buildingType, 1))
 
 
+class GreatWorkPlaceInBuilding:
+	def __init__(self, building: BuildingType, slot: GreatWorkSlotType, used: bool = False):
+		self.building = building
+		self.slot = slot
+		self.used = used
+
+
 class CityGreatWorks:
 	def __init__(self, city):
 		self.city = city
+
+		self._placesInBuildings = []
+
+	def addPlacesFor(self, building: BuildingType):
+		for slot in building.slotsForGreatWork():
+			self._placesInBuildings.append(GreatWorkPlaceInBuilding(building, slot))
 
 
 class CityReligion:
@@ -1313,8 +1331,8 @@ class BuildQueue:
 
 	def buildingOf(self, buildingType: BuildingType) -> Optional[BuildableItem]:
 		item = next(filter(lambda
-							   itemIterator: itemIterator.buildableType == BuildableType.building and itemIterator.buildingType == buildingType,
-						   self._items), None)
+			                   itemIterator: itemIterator.buildableType == BuildableType.building and itemIterator.buildingType == buildingType,
+		                   self._items), None)
 		if item is not None:
 			return item
 
@@ -1336,25 +1354,29 @@ class BuildQueue:
 		if district is None:
 			return len(list(filter(lambda it: it.buildableType == BuildableType.district, self._items))) > 0
 		else:
-			return len(list(filter(lambda it: it.buildableType == BuildableType.district and it.district == district, self._items))) > 0
+			return len(list(filter(lambda it: it.buildableType == BuildableType.district and it.district == district,
+			                       self._items))) > 0
 
 	def isCurrentlyBuildingBuilding(self, building: Optional[BuildingType] = None) -> bool:
 		if building is None:
 			return len(list(filter(lambda it: it.buildableType == BuildableType.building, self._items))) > 0
 		else:
-			return len(list(filter(lambda it: it.buildableType == BuildableType.building and it.building == building, self._items))) > 0
+			return len(list(filter(lambda it: it.buildableType == BuildableType.building and it.building == building,
+			                       self._items))) > 0
 
 	def isCurrentlyBuildingWonder(self, wonder: Optional[WonderType] = None) -> bool:
 		if wonder is None:
 			return len(list(filter(lambda it: it.buildableType == BuildableType.wonder, self._items))) > 0
 		else:
-			return len(list(filter(lambda it: it.buildableType == BuildableType.wonder and it.wonder == wonder, self._items))) > 0
+			return len(list(
+				filter(lambda it: it.buildableType == BuildableType.wonder and it.wonder == wonder, self._items))) > 0
 
 	def isCurrentlyTrainingUnit(self, unit: Optional[UnitType] = None) -> bool:
 		if unit is None:
 			return len(list(filter(lambda it: it.buildableType == BuildableType.unit, self._items))) > 0
 		else:
-			return len(list(filter(lambda it: it.buildableType == BuildableType.unit and it.unit == unit, self._items))) > 0
+			return len(
+				list(filter(lambda it: it.buildableType == BuildableType.unit and it.unit == unit, self._items))) > 0
 
 
 class City:
@@ -1610,7 +1632,7 @@ class City:
 	def power(self, simulation) -> int:
 		return int(
 			pow(float(self.defensiveStrengthAgainst(unit=None, tile=None, ranged=False, simulation=simulation)) / 100.0,
-				1.5))
+			    1.5))
 
 	def doUpdateCheapestPlotInfluence(self, simulation):
 		"""What is the cheapest plot we can get"""
@@ -1809,7 +1831,7 @@ class City:
 
 				# etemenanki - +2 Science and +1 Production to all Marsh tiles in your empire.
 				if workedTile.hasFeature(FeatureType.marsh) and self.player.hasWonder(WonderType.etemenanki,
-																					  simulation):
+				                                                                      simulation):
 					productionValue += 1.0
 
 				# etemenanki - +1 Science and +1 Production on all Floodplains tiles in this city.
@@ -1823,7 +1845,7 @@ class City:
 
 				# ladyOfTheReedsAndMarshes - +2 Production from Marsh, Oasis, and Desert Floodplains.
 				if (workedTile.hasFeature(FeatureType.marsh) or workedTile.hasFeature(FeatureType.oasis) or
-					workedTile.hasFeature(FeatureType.floodplains)) and \
+				    workedTile.hasFeature(FeatureType.floodplains)) and \
 					self.player.religion.pantheon() == PantheonType.ladyOfTheReedsAndMarshes:
 					productionValue += 1.0
 
@@ -2145,7 +2167,6 @@ class City:
 			if self.buildings.hasBuilding(BuildingType.nuclearPowerPlant):
 				goldFromGovernmentValue += 4
 
-
 		# - Decentralization Cities with 6 or less population receive +4 Loyalty per turn.
 		# BUT: Cities with more than 6 Citizen population receive -15 % Gold.
 		if government.hasCard(PolicyCardType.decentralization) and self.population() > 6:
@@ -2355,7 +2376,7 @@ class City:
 
 		if not self.isProduction() and self.player.isHuman() and not self.isProductionAutomated():
 			self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name,
-													  location=self.location)
+			                                          location=self.location)
 			return okay
 
 		# ...
@@ -2409,54 +2430,54 @@ class City:
 						# @fixme self.player.notifications()?.add(notification:.cityGrowth(cityName: self.name, population: self.population(), location: self.location)
 						pass
 
-			# check for improving city tutorial
-			# if simulation.tutorialInfos() == TutorialType.improvingCity and self.player.isHuman():
-			# 	if int(self._populationValue) >= Tutorials.ImprovingCityTutorial.citizenInCityNeeded and
-			# 		buildings.has(building: .granary) and buildings.has(building:.monument):
-			#
-			# 		gameModel.userInterface?.finish(tutorial:.improvingCity)
-			# 		gameModel.enable(tutorial:.none)
+		# check for improving city tutorial
+		# if simulation.tutorialInfos() == TutorialType.improvingCity and self.player.isHuman():
+		# 	if int(self._populationValue) >= Tutorials.ImprovingCityTutorial.citizenInCityNeeded and
+		# 		buildings.has(building: .granary) and buildings.has(building:.monument):
+		#
+		# 		gameModel.userInterface?.finish(tutorial:.improvingCity)
+		# 		gameModel.enable(tutorial:.none)
 
-			# moments
-			# if self._populationValue > 10:
-			# 	if not self.player.hasMoment(of:.firstBustlingCity(cityName: self.name)) and
-			# 		not player.hasMoment(of:.worldsFirstBustlingCity(cityName: self.name)):
-			#
-			#         # check if someone else already had a bustling city
-			# 		if gameModel.anyHasMoment(of: .worldsFirstBustlingCity(cityName: self.name)):
-			# 			player.addMoment(of:.firstBustlingCity(cityName: self.name),simulation)
-			# 		else:
-			# 			player.addMoment(of:.worldsFirstBustlingCity(cityName: self.name),simulation)
+		# moments
+		# if self._populationValue > 10:
+		# 	if not self.player.hasMoment(of:.firstBustlingCity(cityName: self.name)) and
+		# 		not player.hasMoment(of:.worldsFirstBustlingCity(cityName: self.name)):
+		#
+		#         # check if someone else already had a bustling city
+		# 		if gameModel.anyHasMoment(of: .worldsFirstBustlingCity(cityName: self.name)):
+		# 			player.addMoment(of:.firstBustlingCity(cityName: self.name),simulation)
+		# 		else:
+		# 			player.addMoment(of:.worldsFirstBustlingCity(cityName: self.name),simulation)
 
-			# if self._populationValue > 15:
-			# 	if not player.hasMoment(of: .firstLargeCity(cityName: self.name)) and
-			# 		not player.hasMoment(of:.worldsFirstLargeCity(cityName: self.name)):
-			#
-			#         #  check if someone else already had a bustling city
-			# 		if gameModel.anyHasMoment(of: .worldsFirstLargeCity(cityName: self.name)):
-			# 			player.addMoment(of:.firstLargeCity(cityName: self.name),simulation)
-			# 		else:
-			# 			player.addMoment(of:.worldsFirstLargeCity(cityName: self.name),simulation)
+		# if self._populationValue > 15:
+		# 	if not player.hasMoment(of: .firstLargeCity(cityName: self.name)) and
+		# 		not player.hasMoment(of:.worldsFirstLargeCity(cityName: self.name)):
+		#
+		#         #  check if someone else already had a bustling city
+		# 		if gameModel.anyHasMoment(of: .worldsFirstLargeCity(cityName: self.name)):
+		# 			player.addMoment(of:.firstLargeCity(cityName: self.name),simulation)
+		# 		else:
+		# 			player.addMoment(of:.worldsFirstLargeCity(cityName: self.name),simulation)
 
-			# if self.populationValue > 20:
-			# 	if not self.player.hasMoment(of: .firstEnormousCity(cityName: self.name)) and
-			# 		not self.player.hasMoment(of:.worldsFirstEnormousCity(cityName: self.name)):
-			#
-			#         # check if someone else already had a bustling city
-			# 		if simulation.anyHasMoment(of: .worldsFirstEnormousCity(cityName: self.name)) {
-			# 			player.addMoment(of:.firstEnormousCity(cityName: self.name),simulation)
-			# 		else:
-			# 			player.addMoment(of:.worldsFirstEnormousCity(cityName: self.name),simulation)
+		# if self.populationValue > 20:
+		# 	if not self.player.hasMoment(of: .firstEnormousCity(cityName: self.name)) and
+		# 		not self.player.hasMoment(of:.worldsFirstEnormousCity(cityName: self.name)):
+		#
+		#         # check if someone else already had a bustling city
+		# 		if simulation.anyHasMoment(of: .worldsFirstEnormousCity(cityName: self.name)) {
+		# 			player.addMoment(of:.firstEnormousCity(cityName: self.name),simulation)
+		# 		else:
+		# 			player.addMoment(of:.worldsFirstEnormousCity(cityName: self.name),simulation)
 
-			# if self._populationValue > 25:
-			# 	if not self.player.hasMoment(of: .firstGiganticCity(cityName: self.name)) and
-			# 		not player.hasMoment(of:.worldsFirstGiganticCity(cityName: self.name)):
-			#
-			#         # check if someone else already had a bustling city
-			# 		if gameModel.anyHasMoment(of: .worldsFirstGiganticCity(cityName: self.name)):
-			# 			player.addMoment(of:.firstGiganticCity(cityName: self.name),simulation)
-			# 		else:
-			# 			player.addMoment(of:.worldsFirstGiganticCity(cityName: self.name),simulation)
+		# if self._populationValue > 25:
+		# 	if not self.player.hasMoment(of: .firstGiganticCity(cityName: self.name)) and
+		# 		not player.hasMoment(of:.worldsFirstGiganticCity(cityName: self.name)):
+		#
+		#         # check if someone else already had a bustling city
+		# 		if gameModel.anyHasMoment(of: .worldsFirstGiganticCity(cityName: self.name)):
+		# 			player.addMoment(of:.firstGiganticCity(cityName: self.name),simulation)
+		# 		else:
+		# 			player.addMoment(of:.worldsFirstGiganticCity(cityName: self.name),simulation)
 
 		elif self.foodBasket() < 0:
 			self.setFoodBasket(0)
@@ -2618,8 +2639,8 @@ class City:
 				unitType = self.productionUnitType()
 				if unitType is not None:
 					if (unitType.unitClass() == UnitClassType.melee or unitType.unitClass() == UnitClassType.ranged or \
-						unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or \
-																				unitType.era() == EraType.classical):
+					    unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or \
+					                                                            unitType.era() == EraType.classical):
 						modifierPercentage += 0.50
 
 			# veterancy - +30 % Production toward Encampment and Harbor districts and buildings for those districts.
@@ -2639,9 +2660,9 @@ class City:
 				unitType = self.productionUnitType()
 				if unitType is not None:
 					if (unitType.unitClass() == UnitClassType.melee or unitType.unitClass() == UnitClassType.ranged or
-						unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or
-																				unitType.era() == EraType.classical or unitType.era() == EraType.medieval or
-																				unitType.era() == EraType.renaissance):
+					    unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or
+					                                                            unitType.era() == EraType.classical or unitType.era() == EraType.medieval or
+					                                                            unitType.era() == EraType.renaissance):
 						modifierPercentage += 0.50
 
 			# chivalry - +50%  Production toward Industrial era and earlier heavy and light cavalry units.
@@ -3320,7 +3341,7 @@ class City:
 
 				# etemenanki - +2 Science and +1 Production to all Marsh tiles in your empire.
 				if adjacentTile.hasFeature(FeatureType.marsh) and self.player.hasWonder(WonderType.etemenanki,
-																						simulation):
+				                                                                        simulation):
 					scienceFromTiles += 2.0
 
 				# etemenanki - +1 Science and +1 Production on all Floodplains tiles in this city.
@@ -3702,11 +3723,11 @@ class City:
 			# +2 Culture in every Art Museum and Archaeological Museum building.
 			if effect.isEqual(category=CityStateCategory.cultural, at=EnvoyEffectLevel.sixth):
 				raise Exception("not handled")
-			# if self.has(building: .museum)
-			# 	cultureFromEnvoys += 2.0
-			#
-			# if self.has(building: .arch)
-			# 	cultureFromEnvoys += 2.0
+		# if self.has(building: .museum)
+		# 	cultureFromEnvoys += 2.0
+		#
+		# if self.has(building: .arch)
+		# 	cultureFromEnvoys += 2.0
 
 		return cultureFromEnvoys
 
@@ -3720,7 +3741,7 @@ class City:
 		# for this Era, so when you station such a unit in a city, its CS will increase accordingly;
 		if self.garrisonedUnit() is not None:
 			unitStrength = self.garrisonedUnit().attackStrengthAgainst(unit=None, city=None, tile=None,
-																	   simulation=simulation)
+			                                                           simulation=simulation)
 			warriorStrength = UnitType.warrior.meleeStrength() - 10
 			strengthValue = max(warriorStrength, unitStrength)
 		else:
@@ -3815,19 +3836,19 @@ class City:
 
 			if simulation.getLogging() and simulation.getAILogging():
 				print('bla bla bla')
-			# CvString playerName;
-			# FILogFile * pLog;
-			# CvString strBaseString;
-			# CvString strOutBuf;
-			# m_pCityStrategyAI->LogCityProduction(buildable, false);
-			# playerName = kOwner.getCivilizationShortDescription();
-			# pLog = LOGFILEMGR.GetLog(kOwner.GetCitySpecializationAI()->GetLogFileName(playerName), FILogFile::kDontTimeStamp);
-			# strBaseString.Format("%03d, ", GC.getGame().getElapsedGameTurns());
-			# strBaseString += playerName + ", ";
-			# strOutBuf.Format("%s, WONDER - Started %s, Turns: %d", getName().GetCString(),
-			# GC.getBuildingInfo((BuildingTypes)buildable.m_iIndex)->GetDescription(), buildable.m_iTurnsToConstruct);
-			# strBaseString += strOutBuf;
-			# pLog->Msg(strBaseString);
+		# CvString playerName;
+		# FILogFile * pLog;
+		# CvString strBaseString;
+		# CvString strOutBuf;
+		# m_pCityStrategyAI->LogCityProduction(buildable, false);
+		# playerName = kOwner.getCivilizationShortDescription();
+		# pLog = LOGFILEMGR.GetLog(kOwner.GetCitySpecializationAI()->GetLogFileName(playerName), FILogFile::kDontTimeStamp);
+		# strBaseString.Format("%03d, ", GC.getGame().getElapsedGameTurns());
+		# strBaseString += playerName + ", ";
+		# strOutBuf.Format("%s, WONDER - Started %s, Turns: %d", getName().GetCString(),
+		# GC.getBuildingInfo((BuildingTypes)buildable.m_iIndex)->GetDescription(), buildable.m_iTurnsToConstruct);
+		# strBaseString += strOutBuf;
+		# pLog->Msg(strBaseString);
 		else:
 			self.cityStrategy.chooseProduction(simulation)
 			simulation.userInterface.updateCity(self)
@@ -4125,20 +4146,20 @@ class City:
 				self._buildQueue.pop()
 
 				if currentBuilding.buildableType == BuildableType.unit:
-					unitType = currentBuilding.unitType
+					unitType: UnitType = currentBuilding.unitType
 					self.trainUnit(unitType, simulation)
 
 				elif currentBuilding.buildableType == BuildableType.building:
-					buildingType = currentBuilding.buildingType
+					buildingType: BuildingType = currentBuilding.buildingType
 					self.buildBuilding(buildingType, simulation)
 
 				elif currentBuilding.buildableType == BuildableType.wonder:
-					wonderType = currentBuilding.wonderType,
+					wonderType: WonderType = currentBuilding.wonderType,
 					wonderLocation = currentBuilding.location
 					self.buildWonder(wonderType, wonderLocation, simulation)
 
 				elif currentBuilding.buildableType == BuildableType.district:
-					districtType = currentBuilding.districtType,
+					districtType: DistrictType = currentBuilding.districtType,
 					districtLocation = currentBuilding.location
 					self.buildDistrict(districtType, districtLocation, simulation)
 
@@ -4149,15 +4170,13 @@ class City:
 				self.player.doUpdateTradeRouteCapacity(simulation)
 
 				if self.player.isHuman():
-					self.player.notifications().addNotification(NotificationType.productionNeeded, cityName=self.name,
-																location=self.location)
+					self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name, location=self.location)
 				else:
 					self.cityStrategy.chooseProduction(simulation)
 
 		else:
 			if self.player.isHuman():
-				self.player.notifications().addNotification(NotificationType.productionNeeded, cityName=self.name,
-															location=self.location)
+				self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name, location=self.location)
 			else:
 				self.cityStrategy.chooseProduction(simulation)
 
@@ -4246,3 +4265,178 @@ class City:
 			return self.canBuildProject(buildItem.projectType)
 
 		return False
+
+	def trainUnit(self, unitType: UnitType, simulation):
+		unitLocation = self.location
+
+		if unitType.domain() == UnitDomainType.sea:
+			if not self.isCoastal(simulation) and self.districts.hasDistrict(DistrictType.harbor):
+				harborLocation = self.districts.locationOfDistrict(DistrictType.harbor)
+				unitLocation = harborLocation
+
+		unit = Unit(unitLocation, unitType, self.player)
+		secondUnit: Optional[Unit] = None
+
+		if self.hasWonder(WonderType.venetianArsenal) and unitType.domain() == UnitDomainType.sea:
+			# Receive a second naval unit each time you train a naval unit.
+			secondUnit = Unit(unitLocation, unitType, self.player)
+
+		if unitType == UnitType.settler:
+			self.player.changeTrainedSettlersBy(1)
+
+			if self.population() <= 1:
+				print("cannot train settler if only 1 people left")
+				return
+
+			settlerWillReducePopulation: bool = True
+
+			governor = self.governor()
+			if governor is not None:
+				# magnus - provision - Settlers trained in the city do not consume a Citizen Population.
+				if governor.type == GovernorType.magnus and governor.hasTitle(GovernorTitle.provision):
+					settlerWillReducePopulation = False
+
+			if settlerWillReducePopulation:
+				self.setPopulation(self.population() - 1, True, simulation)
+
+		elif unitType == UnitType.builder:
+			governor = self.governor()
+			if governor is not None:
+				# Guildmaster - All Builders trained in city get +1 build charge.
+				if governor.hasTitle(GovernorTitle.guildmaster):
+					unit.changeBuildChargesBy(1)
+
+			# serfdom - Newly trained Builders gain 2 extra build actions.
+			if self.player.government.hasCard(PolicyCardType.serfdom):
+				unit.changeBuildChargesBy(2)
+
+		experienceModifier: float = 0.0
+
+		# +25 % combat experience for all melee, ranged and anti - cavalry land units trained in this city.
+		if self.buildings.hasBuilding(BuildingType.barracks) and \
+			(unitType.unitClass() == UnitClassType.melee or unitType.unitClass() == UnitClassType.ranged or
+			 unitType.unitClass() == UnitClassType.antiCavalry):
+			experienceModifier += 0.25
+
+		# +25 % combat experience for all cavalry and siege class units trained in this city.
+		if self.buildings.hasBuilding(BuildingType.stable) and \
+			(unitType.unitClass() == UnitClassType.lightCavalry or unitType.unitClass() == UnitClassType.heavyCavalry or
+			 unitType.unitClass() == UnitClassType.siege):
+			experienceModifier += 0.25
+
+		# +25% combat experience for all naval units trained in this city.
+		if self.buildings.hasBuilding(BuildingType.barracks) and \
+			(unitType.unitClass() == UnitClassType.navalMelee or unitType.unitClass() == UnitClassType.navalRaider or
+			 unitType.unitClass() == UnitClassType.navalRaider or unitType.unitClass() == UnitClassType.navalCarrier):
+			experienceModifier += 0.25
+
+		# +25 % combat experience for all military land units trained in this city
+		if self.buildings.hasBuilding(BuildingType.armory):
+			experienceModifier += 0.25
+
+		# +25 % combat experience for all naval units trained in this city.
+		if self.buildings.hasBuilding(BuildingType.shipyard):
+			experienceModifier += 0.25
+
+		# consume strategic resource
+		resource = unitType.requiredResource()
+		if resource is not None:
+			cost = 1.0
+
+			governor: Governor = self.governor()
+			if governor is not None:
+				# blackMarketeer - Strategic resources for units are discounted 80%.
+				if governor.hasTitle(GovernorTitle.blackMarketeer):
+					cost -= 0.8
+
+			self.player.changeNumberOfItemsInStockpileOf(resource, -cost)
+
+		unit.setExperienceModifier(experienceModifier)
+		if secondUnit is not None:
+			secondUnit.setExperienceModifier(experienceModifier)
+
+		# Victor - embrasure - Military units trained in this city start with a free promotion that do not already
+		# start with a free promotion.
+		governor = self.governor()
+		if governor is not None:
+			if governor.type == GovernorType.victor and governor.hasTitle(GovernorTitle.embrasure):
+				if len(unit.gainedPromotions()) == 0:
+					unit.changeExperienceUntilPromotion(simulation)
+
+				if secondUnit is not None:
+					if len(secondUnit.gainedPromotions()) == 0:
+						secondUnit.changeExperienceUntilPromotion(simulation)
+
+		simulation.addUnit(unit)
+		simulation.userInterface.showUnit(unit, unitLocation)
+
+		if secondUnit is not None:
+			simulation.addUnit(secondUnit)
+			simulation.userInterface.showUnit(secondUnit, unitLocation)
+
+		# send gossip
+		if unitType == UnitType.settler:
+			simulation.sendGossip(GossipType.settlerTrained, cityName=self.name, player=self.player)
+
+		self.updateEurekas(simulation)
+
+		# check quests
+		# for quest in self.player.ownQuests(simulation):
+		# 	if quest.type == QuestType.trainUnit(type: unitType) & & quest.leader == player.leader
+		# 	cityStatePlayer = gameModel?.cityStatePlayer(for: quest.cityState)
+		# 	cityStatePlayer?.fulfillQuest(by: player.leader, in: gameModel)
+
+		return
+
+	def buildBuilding(self, buildingType: BuildingType, simulation):
+		self.buildings.build(buildingType)
+		self.updateEurekas(simulation)
+
+		# penBrushAndVoice + normal - construct a building with a Great Work slot.
+		if self.player.currentAge() == AgeType.normal and self.player.hasDedication(DedicationType.penBrushAndVoice):
+			if len(buildingType.slotsForGreatWork()) != 0:
+				self.player.addMoment(MomentType.dedicationTriggered, dedication=DedicationType.penBrushAndVoice,
+				                      simulation=simulation)
+
+		# freeInquiry + normal - constructing a building which provides Science
+		if self.player.currentAge() == AgeType.normal and self.player.hasDedication(DedicationType.freeInquiry):
+			if buildingType.yields().science > 0:
+				self.player.addMoment(MomentType.dedicationTriggered, dedication=DedicationType.freeInquiry,
+				                      simulation=simulation)
+
+		if buildingType == BuildingType.warlordsThrone or buildingType == BuildingType.audienceChamber or \
+			buildingType == BuildingType.ancestralHall or buildingType == BuildingType.foreignMinistry or \
+			buildingType == BuildingType.grandMastersChapel or buildingType == BuildingType.intelligenceAgency:
+			# Awards + 1 Governor Title.
+			self.player.addGovernorTitle()
+
+		self.greatWorks.addPlacesFor(buildingType)
+
+		# send gossip
+		simulation.sendGossip(GossipType.buildingConstructed, building=buildingType, player=self.player)
+
+		# update district tile
+		cityCitizens = self.cityCitizens
+
+		for loopPoint in cityCitizens._workingPlots:
+			loopTile = simulation.tileAt(loopPoint.location)
+
+			if loopTile.district() == buildingType.district():
+				simulation.userInterface.refreshTile(loopTile)
+
+		# update city tile
+		if buildingType.district() == DistrictType.cityCenter:
+			cityTile = simulation.tileAt(self.location)
+			simulation.userInterface.refreshTile(cityTile)
+
+		# check for improving city tutorial
+		if simulation.tutorial() == Tutorials.improvingCity and self.player.isHuman():
+			if int(self._populationValue) >= Tutorials.citizenInCityNeeded() and \
+				self.buildings.hasBuilding(BuildingType.granary) and self.buildings.hasBuilding(BuildingType.monument):
+				simulation.userInterface.finishTutorial(Tutorials.improvingCity)
+				simulation.enableTutorial(Tutorials.none)
+
+		return
+
+	def isCoastal(self, simulation) -> bool:
+		return simulation.isCoastalAt(self.location)

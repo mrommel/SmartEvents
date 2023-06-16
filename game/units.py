@@ -14,12 +14,12 @@ from game.states.builds import BuildType
 from game.states.dedications import DedicationType
 from game.types import EraType, TechType
 from game.unitMissions import UnitMission
-from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, MoveOptions, UnitMissionType, UnitActivityType, \
-	UnitMapType, UnitAbilityType
+from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, UnitMissionType, UnitActivityType, \
+	UnitMapType, UnitAbilityType, MoveOption, UnitClassType
 from map.base import HexPoint, HexArea
 from map.improvements import ImprovementType
 from map.path_finding.path import HexPath
-from map.types import UnitDomainType, YieldType, ResourceType, RouteType, FeatureType
+from map.types import UnitDomainType, YieldType, ResourceType, RouteType, FeatureType, TerrainType
 from core.base import ExtendedEnum
 
 
@@ -141,7 +141,6 @@ class UnitTradeRouteData:
 		return
 
 
-
 class Unit:
 	"""
 		unit
@@ -197,7 +196,7 @@ class Unit:
 			loopTile = simulation.tileAt(loopPoint)
 
 			if loopTile.isValidDomainFor(self):
-				if self.canMoveInto(loopPoint, MoveOptions.none, simulation):
+				if self.canMoveInto(loopPoint, [], simulation):
 					if simulation.unitAt(loopPoint, self.unitMapType()) is None:
 						if not loopTile.hasOwner() or self.player == loopTile.owner():
 							if loopTile.isDiscoveredBy(self.player):
@@ -230,6 +229,7 @@ class Unit:
 
 	def resetMoves(self, simulation):
 		self._movesValue = self.maxMoves(simulation)
+		print(f'* resetMoves of unit: {self.unitType} of {self.player.name()} => {self._movesValue}')
 
 	def maxMoves(self, simulation) -> int:
 		moveVal = self.baseMovesInto(UnitDomainType.none, simulation)
@@ -317,12 +317,56 @@ class Unit:
 		return max(0, self.moves())
 
 	def hasPromotion(self, promotion: UnitPromotionType) -> bool:
+		# fixme
 		return False
 
+	def gainedPromotions(self) -> [UnitPromotionType]:
+		# fixme
+		return []
+
 	def doPromotion(self, simulation):
+		# fixme
 		pass
 
-	def canMoveInto(self, point, options, simulation):
+	def canMoveInto(self, point: HexPoint, options: [MoveOption], simulation):
+		if self.location == point:
+			return True
+
+		tile = simulation.tileAt(point)
+
+		# Barbarians have special restrictions early in the game
+		if self.isBarbarian() and simulation.areBarbariansReleased() and tile.hasOwner():
+			return False
+
+		if MoveOption.attack in options:
+			if self.isOutOfAttacks(simulation):
+				return False
+
+		if self.isImpassableTile(tile):
+			return False
+
+		if simulation.isEnemyVisibleAt(point, self.player):
+			return False
+
+		# other unit of same type
+		if simulation.unitAt(point, self.unitMapType()) is not None:
+			return False
+
+		# settler and builder cannot enter barbarian camps
+		if tile.hasImprovement(ImprovementType.barbarianCamp) and self.unitType.unitClass() == UnitClassType.civilian:
+			return False
+
+		owner = tile.owner()
+		if not self.canEnterTerritory(owner, ignoreRightOfPassage=False, isDeclareWarMove=MoveOption.declareWar in options):
+			if not self.player.canDeclareWarTowards(owner):
+				return False
+
+			if self.player.isHuman():
+				if not MoveOption.declareWar in options:
+					return False
+			else:
+				return False
+
 		return True
 
 	def setLocation(self, location, simulation):
@@ -332,6 +376,7 @@ class Unit:
 		pass
 
 	def experienceLevel(self) -> int:
+		# fixme
 		return 1
 
 	def activityType(self) -> UnitActivityType:
@@ -794,6 +839,9 @@ class Unit:
 
 	def isTrading(self) -> bool:
 		return self._tradeRouteDataValue is not None
+
+	def canCancelOrder(self) -> bool:
+		return not len(self._missions) == 0 or self.isTrading()
 
 	def doMoveOnPathTowards(self, target: HexPoint, previousETA: int, buildingRoute: bool, simulation):
 		"""
@@ -1445,10 +1493,55 @@ class Unit:
 			# gDLL->GameplayUnitShouldDimFlag(pDllUnit.get(), / * bDim * / false);
 			pass
 
-		# If we told our Unit to sleep last turn and it can now Fortify switch states
+		# If we told our Unit to sleep last turn, and it can now Fortify switch states
 		if currentActivityType == UnitActivityType.sleep:
 			if self.canFortifyAt(self.location, simulation):
 				# self.push(mission: UnitMission(type:.fortify), in: gameModel)
 				self.setFortifiedThisTurn(True, simulation)
 
 		self.doDelayedDeath(simulation)
+
+	def canEmbark(self, simulation):
+		# fixme
+		pass
+
+	def isImpassableTile(self, tile) -> bool:
+		terrain = tile.terrain()
+		return self.isImpassableTerrain(terrain)
+
+	def isImpassableTerrain(self, terrain: TerrainType) -> bool:
+		if terrain == TerrainType.ocean and UnitAbilityType.oceanImpassable in self.unitType.abilities():
+			return True
+
+		if self.domain() == UnitDomainType.land and terrain.isWater():
+			return True
+
+		if self.domain() == UnitDomainType.sea and terrain.isLand():
+			return True
+
+		return False
+
+	def canEnterTerritory(self, otherPlayer, ignoreRightOfPassage: bool = False, isDeclareWarMove: bool = False) -> bool:
+		diplomacyAI = self.player.diplomacyAI
+
+		# we can enter unowned territory
+		if otherPlayer is None:
+			return True
+
+		if self.isTrading():
+			return True
+
+		if self.player.isEqualTo(otherPlayer):
+			return True
+
+		if diplomacyAI.isAtWarWith(otherPlayer):
+			return True
+
+		if self.unitType.canMoveInRivalTerritory():
+			return True
+
+		if not ignoreRightOfPassage:
+			if diplomacyAI.isOpenBorderAgreementActiveBy(otherPlayer):
+				return True
+
+		return False

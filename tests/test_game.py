@@ -552,6 +552,8 @@ class TestSimulation(unittest.TestCase):
 		simulation.players.append(playerAlexander)
 		simulation.players.append(playerTrajan)
 
+		simulation.userInterface = UserInterfaceMock()
+
 		capitalBefore = simulation.capitalOf(playerTrajan)
 		totalCitiesFoundedBefore = playerTrajan.numberOfCitiesFounded()
 

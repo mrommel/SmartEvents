@@ -1730,11 +1730,16 @@ class Tutorials(Enum):
 	none = 'none'
 	foundFirstCity = 'foundFirstCity'
 	movementAndExploration = 'movementAndExploration'
+	improvingCity = 'improvingCity'
 
 	@classmethod
-	def tilesToDiscover(cls):
+	def tilesToDiscover(cls) -> int:
 		return 60  # ???
 
 	@classmethod
-	def citiesToFound(cls):
+	def citiesToFound(cls) -> int:
+		return 2  # ???
+
+	@classmethod
+	def citizenInCityNeeded(cls) -> int:
 		return 2  # ???
