@@ -229,6 +229,7 @@ class Unit:
 
 	def finishMoves(self):
 		self._movesValue = 0
+		print('* finishesMoves')
 
 	def resetMoves(self, simulation):
 		self._movesValue = self.maxMoves(simulation)
@@ -394,7 +395,8 @@ class Unit:
 	def updateMission(self, simulation):
 		if self._activityTypeValue == UnitActivityType.mission:
 			if len(self._missions) > 0:
-				self._missions[-1].continueMission(steps=0, simulation=simulation)
+				lastMission = self._missions[-1]
+				lastMission.continueMission(steps=0, simulation=simulation)
 
 		return
 
@@ -994,10 +996,8 @@ class Unit:
 					shouldDeductCost = False
 
 		if shouldDeductCost:
-			self._movesValue -= int(moveCost)
-
-			if self._movesValue < 0:
-				self._movesValue = 0
+			self._movesValue = max(0, self._movesValue - int(moveCost))
+			print(f'* moves reduced by {int(moveCost)}')
 
 		self.setLocation(target, simulation=simulation)
 
@@ -1394,7 +1394,7 @@ class Unit:
 				self._movesValue -= movesCost
 
 				if self._movesValue < 0:
-					self._movesValue = 0
+					self.finishMoves()
 
 				tile.setImprovementPillaged(True)
 
