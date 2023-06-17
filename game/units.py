@@ -103,7 +103,7 @@ class UnitTradeRouteData:
 	def checkExpirationFor(self, unit, simulation):
 		if self.expiresInTurnsFor(unit, simulation) < 0:
 			self.state = UnitTradeRouteState.expired
-			
+
 		return
 
 	def expiresInTurnsFor(self, unit, simulation):
@@ -170,6 +170,7 @@ class Unit:
 		self._fortifyTurnsValue = 0
 		self._fortifiedThisTurnValue = False
 		self._fortifyValue = 0
+		self._isEmbarkedValue = False
 
 		self._garrisonedValue: bool = False
 		self._tradeRouteDataValue: Optional[UnitTradeRouteData] = None
@@ -219,7 +220,8 @@ class Unit:
 			self.setLocation(bestTile.point, simulation)
 			self.publishQueuedVisualizationMoves(simulation)
 		else:
-			print(f'Can\'t find a valid plot within range. for {self.unitType}, at X: {self.location.x}, Y: {self.location.y}')
+			print(
+				f'Can\'t find a valid plot within range. for {self.unitType}, at X: {self.location.x}, Y: {self.location.y}')
 			return False
 
 		return True
@@ -242,7 +244,8 @@ class Unit:
 			self.domain() == UnitDomainType.land:
 
 			boudicaNear = simulation.isGreatGeneral(GreatPersonType.boudica, self.player, self.location, range=2)
-			hannibalBarcaNear = simulation.isGreatGeneral(GreatPersonType.hannibalBarca, self.player, self.location, range=2)
+			hannibalBarcaNear = simulation.isGreatGeneral(GreatPersonType.hannibalBarca, self.player, self.location,
+			                                              range=2)
 			sunTzuNear = simulation.isGreatGeneral(GreatPersonType.sunTzu, self.player, self.location, range=2)
 
 			if boudicaNear or hannibalBarcaNear or sunTzuNear:
@@ -255,7 +258,8 @@ class Unit:
 				moveVal += 2
 
 		# exodusOfTheEvangelists + golden - +2 Movement for Missionaries, Apostles and Inquisitors
-		if self.player.currentAge() == AgeType.golden and self.player.hasDedication(DedicationType.exodusOfTheEvangelists):
+		if self.player.currentAge() == AgeType.golden and self.player.hasDedication(
+			DedicationType.exodusOfTheEvangelists):
 			if self.unitType == UnitType.missionary or self.unitType == UnitType.apostle or self.unitType == UnitType.inquisitor:
 				moveVal += 2
 
@@ -361,7 +365,8 @@ class Unit:
 			return False
 
 		owner = tile.owner()
-		if not self.canEnterTerritory(owner, ignoreRightOfPassage=False, isDeclareWarMove=MoveOption.declareWar in options):
+		if not self.canEnterTerritory(owner, ignoreRightOfPassage=False,
+		                              isDeclareWarMove=MoveOption.declareWar in options):
 			if not self.player.canDeclareWarTowards(owner):
 				return False
 
@@ -483,9 +488,9 @@ class Unit:
 				return True
 		elif mission.missionType == UnitMissionType.sleep:
 			pass
-			# FIXME
-			# if self.canSleep()
-			# return True
+		# FIXME
+		# if self.canSleep()
+		# return True
 		elif mission.missionType == UnitMissionType.fortify:
 			if self.canFortifyAt(self.location, simulation):
 				return True
@@ -494,7 +499,7 @@ class Unit:
 				return True
 		elif mission.missionType == UnitMissionType.airPatrol:
 			pass
-			# FIXME
+		# FIXME
 		elif mission.missionType == UnitMissionType.heal:
 			if self.canHeal(simulation):
 				return True
@@ -511,7 +516,8 @@ class Unit:
 			if self.canBuild(buildType=mission.buildType, location=mission.unit.location, simulation=simulation):
 				return True
 		elif mission.missionType == UnitMissionType.routeTo:
-			if simulation.valid(mission.target) and mission.unit.pathTowards(mission.target, options=None, simulation=simulation) is not None:
+			if simulation.valid(mission.target) and mission.unit.pathTowards(mission.target, options=None,
+			                                                                 simulation=simulation) is not None:
 				return True
 		elif mission.missionType == UnitMissionType.followPath:
 			if mission.path is not None:
@@ -522,7 +528,7 @@ class Unit:
 		return False
 
 	def isEmbarked(self) -> bool:
-		return False
+		return self._isEmbarkedValue
 
 	def setMadeAttackTo(self, value):
 		pass
@@ -547,13 +553,13 @@ class Unit:
 
 			simulation.userInterface.refreshUnit(self)
 
-			# fixme: show damage popup
+		# fixme: show damage popup
 
 		if self.isDead():
 			self.doKill(True, player)
 
 			# fixme log kill in ai log
-		
+
 			if player is not None:
 				player.doUnitKilledCombat(self.player, self.unitType)
 
@@ -624,7 +630,6 @@ class Unit:
 			if activityType == UnitActivityType.awake:
 				self.setFortifyTurns(0, simulation)
 
-
 			simulation.userInterface.refreshUnit(self)
 
 		return
@@ -689,7 +694,8 @@ class Unit:
 	def isEverFortifyable(self):
 		"""Can this Unit EVER fortify? (maybe redundant with some other stuff)"""
 		# /*|| noDefensiveBonus()*/
-		if not self.isCombatUnit() or (self.domain() != UnitDomainType.land and self.domain() != UnitDomainType.immobile):
+		if not self.isCombatUnit() or (
+			self.domain() != UnitDomainType.land and self.domain() != UnitDomainType.immobile):
 			return False
 
 		return True
@@ -822,7 +828,7 @@ class Unit:
 							attack = True
 							Combat.doMeleeAttack(self, city, simulation)
 
-			else: # Normal unit combat
+			else:  # Normal unit combat
 				# if there are no defenders, do not attack
 				defenderUnit = simulation.unitAt(destination, UnitMapType.combat)
 				if defenderUnit is None:
@@ -977,10 +983,10 @@ class Unit:
 			if oldPlot.terrain().isWater():
 				if self.isEmbarked():
 					# moving from water to the land
-					#/ * if self.moveLocations.count > 0 {
+					# / * if self.moveLocations.count > 0 {
 					# If we have some queued moves, execute them now, so that the disembark is done at the proper location visually
-					#self.publishQueuedVisualizationMoves( in: gameModel)
-					#} * /
+					# self.publishQueuedVisualizationMoves( in: gameModel)
+					# } * /
 
 					self.doDisembark(simulation)
 
@@ -1122,7 +1128,7 @@ class Unit:
 		return self.player.isHuman()
 
 	def canBuild(self, buildType: BuildType, location: HexPoint, testVisible: Optional[bool] = False,
-				 testGold: Optional[bool] = True, simulation = None):
+	             testGold: Optional[bool] = True, simulation=None):
 		if simulation is None:
 			raise Exception('Simulation must not be None')
 
@@ -1146,7 +1152,7 @@ class Unit:
 
 		validBuildPlot = self.domain() == tile.terrain().domain()  # self.isNativeDomain(at: point, in: gameModel)
 		validBuildPlot = validBuildPlot or (buildType.isWater() and self.domain() == UnitDomainType.land and
-											tile.isWater() and (self.canEmbark(simulation) or self.isEmbarked()))
+		                                    tile.isWater() and (self.canEmbark(simulation) or self.isEmbarked()))
 
 		if not validBuildPlot:
 			return False
@@ -1223,7 +1229,7 @@ class Unit:
 				if tile.improvement() != ImprovementType.none:
 					tile.setImprovement(ImprovementType.none)
 
-				# FIXME wipe out all build progress also
+			# FIXME wipe out all build progress also
 
 		rate = self.unitType.workRate()
 		finished = tile.changeBuildProgressOf(buildType, change=rate, player=self.player, simulation=simulation)
@@ -1235,7 +1241,7 @@ class Unit:
 			if buildType.isKill():
 				if self.isGreatPerson():
 					raise Exception("niy")
-					# player.doGreatPersonExpended(of: self.type)
+				# player.doGreatPersonExpended(of: self.type)
 
 				self.doKill(delayed=True, player=None, simulation=simulation)
 
@@ -1308,7 +1314,7 @@ class Unit:
 		totalHeal = 0
 
 		if simulation.cityAt(location) is not None:
-			totalHeal += 10 # CITY_HEAL_RATE
+			totalHeal += 10  # CITY_HEAL_RATE
 
 		# Heal from religion
 		# next to a city or in the city - check for beliefs
@@ -1466,7 +1472,8 @@ class Unit:
 		currentActivityType = self.activityType()
 
 		holdCheck = (currentActivityType == UnitActivityType.hold) and (self.isHuman() or self.fortifyTurns() > 0)
-		healCheck = (currentActivityType == UnitActivityType.heal) and (not self.isHuman() or self.isAutomated() or not self.isHurt())
+		healCheck = (currentActivityType == UnitActivityType.heal) and (
+				not self.isHuman() or self.isAutomated() or not self.isHurt())
 		sentryCheck = (currentActivityType == UnitActivityType.sentry)  # and sentryAlert()
 		interceptCheck = currentActivityType == UnitActivityType.intercept and not self.isHuman()
 
@@ -1527,7 +1534,8 @@ class Unit:
 
 		return False
 
-	def canEnterTerritory(self, otherPlayer, ignoreRightOfPassage: bool = False, isDeclareWarMove: bool = False) -> bool:
+	def canEnterTerritory(self, otherPlayer, ignoreRightOfPassage: bool = False,
+	                      isDeclareWarMove: bool = False) -> bool:
 		diplomacyAI = self.player.diplomacyAI
 
 		# we can enter unowned territory
@@ -1551,3 +1559,68 @@ class Unit:
 				return True
 
 		return False
+
+	def doEmbark(self, point: Optional[HexPoint] = None, simulation=None) -> bool:
+		if simulation is None:
+			raise Exception("simulation not provided")
+
+		if not self.canEmbarkInto(point, simulation):
+			raise Exception("cannot embark")
+
+		self._isEmbarkedValue = True
+
+		return True
+
+	def canEmbarkInto(self, point: Optional[HexPoint] = None, simulation=None) -> bool:
+		if simulation is None:
+			raise Exception("simulation not provided")
+
+		if not self.canEverEmbark():
+			return False
+
+		if self.isEmbarked():
+			return False
+
+		if self.movesLeft() <= 0:
+			return False
+
+		if not simulation.isCoastal(self.location):
+			return False
+
+		# check target
+		if point is not None:
+			if not simulation.valid(point):
+				return False
+
+			targetTile = simulation.tileAt(point)
+
+			if targetTile.terrain().isLand():
+				return False
+
+		return True
+
+	def isRanged(self) -> bool:
+		return self.unitType.range() > 0
+
+	def doKill(self, delayed: bool, otherPlayer, simulation):
+		if self.player.isBarbarian():
+			if otherPlayer is not None:
+				otherPlayerTech = otherPlayer.techs
+				# Bronze Working eureka: Kill 3 Barbarians
+				otherPlayerTech.changeEurekaValueFor(TechType.bronzeWorking, 1)
+
+				if otherPlayerTech.eurekaValueFor(TechType.bronzeWorking) >= 3:
+					otherPlayerTech.triggerEurekaFor(TechType.bronzeWorking, simulation)
+
+		if delayed:
+			self.startDelayedDeath()
+			return
+
+		if otherPlayer is not None:
+			# FIXME - add die visualization
+			pass
+
+		simulation.conceal(self.location, self.sight(), self, self.player)
+
+		simulation.userInterface.hideUnit(self, self.location)
+		simulation.removeUnit(self)
