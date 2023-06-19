@@ -18,6 +18,26 @@ from tests.testBasics import MapModelMock, UserInterfaceMock
 
 
 class TestTradeRoutes(unittest.TestCase):
+
+	def setUp(self) -> None:
+		self.sourceLocation = HexPoint(3, 5)
+		self.targetLocation = HexPoint(8, 5)
+
+		self.hasVisited = False
+		self.targetVisited = 0
+		self.sourceVisited = 0
+		self.hasExpired = False
+
+	def moveCallback(self, location: HexPoint):
+		if location == self.targetLocation:
+			self.hasVisited = True
+			self.targetVisited += 1
+
+		if location == self.sourceLocation:
+			self.sourceVisited += 1
+
+		print(f'moveCallback({location})')
+
 	def test_both_cities_homeland(self):
 		# GIVEN
 		barbarianPlayer = Player(LeaderType.barbar, human=False)
@@ -64,8 +84,7 @@ class TestTradeRoutes(unittest.TestCase):
 		# humanPlayer.government.set(policyCardSet: PolicyCardSet(cards: [.godKing, .discipline]))
 
 		# AI units
-		warriorUnit = Unit(HexPoint(25, 5), UnitType.warrior, aiPlayer)
-		gameModel.addUnit(warriorUnit)
+		aiPlayer.foundCity(HexPoint(25, 5), "AI Capital", gameModel)
 
 		# Human - city 1
 		humanPlayer.foundCity(HexPoint(3, 5), "Human Capital", gameModel)
@@ -85,7 +104,7 @@ class TestTradeRoutes(unittest.TestCase):
 
 		mapModel.discover(humanPlayer, gameModel)
 
-		traderUnit.unitMoved = self
+		traderUnit.unitMoved = self.moveCallback
 
 		# WHEN
 		traderUnit.doEstablishTradeRouteTo(humanCity, gameModel)

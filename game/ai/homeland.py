@@ -384,7 +384,7 @@ class HomelandAI:
 					# ... possible sentry point? (must be empty or only have friendly units)
 
 					# Must be at least adjacent to our land
-					if tile.owner().leader == self.player.leader or tile.owner() is None:
+					if tile.owner() is None or tile.owner().leader == self.player.leader:
 						# FIXME
 						pass
 
@@ -827,5 +827,53 @@ class HomelandAI:
 			print(f"<< HomelandAI ### Unassigned {currentTurnUnit.name()} at {currentTurnUnit.location} ### >>")
 
 	def findAutomatedUnits(self, simulation):
-		pass
+		"""Mark all the units that will be under tactical AI control this turn"""
+		self.currentTurnUnits = []
 
+		# Loop through our units
+		for loopUnit in simulation.unitsOf(self.player):
+			if loopUnit.isAutomated() and not loopUnit.processedInTurn() and loopUnit.task() != UnitTaskType.unknown \
+				and loopUnit.canMove():
+				self.currentTurnUnits.append(loopUnit)
+
+	def executeWorkerMoves(self, simulation):
+		"""Moves units to explore the map"""
+		dangerPlotsAI = self.player.dangerPlotsAI
+
+		for currentMoveUnit in self.currentMoveUnits:
+			unit = currentMoveUnit.unit
+
+			if unit is not None:
+				danger = dangerPlotsAI.dangerAt(unit.location)
+				if danger > 0.0:
+					if self.moveCivilianToSafety(unit, simulation):
+						print(f"{self.player.leader} moves {unit.name()} in turn {simulation.currentTurn} to 1st Safety,")
+						unit.finishMoves()
+						self.unitProcessed(unit)
+						continue
+
+				actionPerformed = self.executeWorkerMove(unit, simulation)
+				if actionPerformed:
+					continue
+
+				# if there's nothing else to do, move to the safest spot nearby
+				if self.moveCivilianToSafety(unit, ignoreUnits=True, simulation=simulation):
+					print(f"{self.player.leader} moves {unit.name()} in turn {simulation.currentTurn} to 2nd Safety,")
+
+					unit.pushMission(UnitMission(UnitMissionType.skip), simulation)
+
+					if not self.player.isHuman():
+						unit.finishMoves()
+
+					self.unitProcessed(unit)
+					continue
+
+				# slewis - this was removed because a unit would eat all its moves.
+				# So if it didn't do anything this turn, it wouldn't be able to work
+				unit.pushMission(UnitMission(UnitMissionType.skip), simulation)
+
+				if not self.player.isHuman():
+					unit.finishMoves()
+
+				self.unitProcessed(unit)
+		return

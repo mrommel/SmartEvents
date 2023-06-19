@@ -1,6 +1,7 @@
 import sys
 from typing import Optional
 
+from game.ai.tactics import TacticalMoveType
 from game.buildings import BuildingType
 from game.combat import Combat
 from game.governors import GovernorTitle
@@ -179,8 +180,13 @@ class Unit:
 		self._fortifyValue = 0
 		self._isEmbarkedValue = False
 
+		self._experienceModifierValue = 0.0
+		self._tacticalMoveValue = TacticalMoveType.none
+
 		self._garrisonedValue: bool = False
 		self._tradeRouteDataValue: Optional[UnitTradeRouteData] = None
+
+		self.unitMoved = None
 
 	def __repr__(self):
 		return f'Unit({self.location}, {self.unitType}, {self.player.name()}, {self.experienceLevel()} exp)'
@@ -303,7 +309,7 @@ class Unit:
 		return moveVal
 
 	def baseMovesInto(self, domain: UnitDomainType, simulation) -> int:
-		if (domain == UnitDomainType.sea and self.canEmbark(simulation)) or \
+		if (domain == UnitDomainType.sea and self.canEmbarkInto(None, simulation)) or \
 			(domain == UnitDomainType.none and self.isEmbarked()):
 			return 2  # EMBARKED_UNIT_MOVEMENT
 
@@ -510,6 +516,8 @@ class Unit:
 		oldCity = simulation.cityAt(oldPlot.point)
 
 		self.location = newLocation
+		if self.unitMoved is not None:
+			self.unitMoved(newLocation)
 
 		# update facing direction
 		self._facingDirection = oldPlot.point.directionTowards(newLocation)
@@ -1442,7 +1450,7 @@ class Unit:
 
 		validBuildPlot = self.domain() == tile.terrain().domain()  # self.isNativeDomain(at: point, in: gameModel)
 		validBuildPlot = validBuildPlot or (buildType.isWater() and self.domain() == UnitDomainType.land and
-											tile.isWater() and (self.canEmbark(simulation) or self.isEmbarked()))
+											tile.isWater() and (self.canEmbarkInto(None, simulation) or self.isEmbarked()))
 
 		if not validBuildPlot:
 			return False
@@ -1804,10 +1812,6 @@ class Unit:
 
 		self.doDelayedDeath(simulation)
 
-	def canEmbark(self, simulation):
-		# fixme
-		pass
-
 	def isImpassableTile(self, tile) -> bool:
 		terrain = tile.terrain()
 		return self.isImpassableTerrain(terrain)
@@ -1975,3 +1979,18 @@ class Unit:
 	def hasCargo(self):
 		# fixme
 		return False
+
+	def endTrading(self, simulation):
+		self.player.doFinishTradeRoute(self._tradeRouteDataValue.tradeRoute, simulation)
+
+		self._tradeRouteDataValue = None
+
+	def experienceModifier(self) -> float:
+		return self._experienceModifierValue
+
+	def setExperienceModifier(self, value: float):
+		self._experienceModifierValue = value
+
+	def isUnderTacticalControl(self) -> bool:
+		return self._tacticalMoveValue != TacticalMoveType.none
+
