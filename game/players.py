@@ -1,6 +1,7 @@
 import math
 from typing import Optional
 
+from game.ai.builderTasking import BuilderTaskingAI
 from game.ai.homeland import HomelandAI
 from game.baseTypes import GameState
 from game.ai.economics import EconomicAI
@@ -16,7 +17,7 @@ from game.governments import PlayerGovernment, GovernmentType
 from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import Notifications, NotificationType, Notification
-from game.playerMechanics import PlayerTechs, PlayerCivics, BuilderTaskingAI, TacticalAI, DiplomacyAI, \
+from game.playerMechanics import PlayerTechs, PlayerCivics, TacticalAI, DiplomacyAI, \
 	DiplomacyRequests, PlayerMoments
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType, ReligionType
@@ -84,6 +85,9 @@ class PlayerTradeRoutes:
 
 		return False
 
+	def finishTradeRoute(self, tradeRoute):
+		self._routes = list(filter(lambda tr: tr.start != tradeRoute.start and tr.end != tradeRoute.end, self._routes))
+		return
 
 class PlayerGreatPeople:
 	def __init__(self, player):
@@ -1548,6 +1552,19 @@ class Player:
 		# no check ?
 
 		return self.tradeRoutes.establishTradeRoute(originCity, targetCity, trader, simulation)
+
+	def doFinishTradeRoute(self, tradeRoute, simulation):
+		targetCity = simulation.cityAt(tradeRoute.end())
+
+		self.tradeRoutes.finishTradeRoute(tradeRoute)
+
+		# update access level
+		if not self.isEqualTo(targetCity.player):
+			# if this was the last trade route with this player, decrease the access level
+			if not self.tradeRoutes.hasTradeRouteWith(targetCity.player, simulation):
+				self.diplomacyAI.decreaseAccessLevelTowards(targetCity.player)
+		
+		return
 
 	def bestRouteAt(self, tile) -> RouteType:
 		for buildType in list(BuildType):

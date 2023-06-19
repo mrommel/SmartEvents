@@ -134,6 +134,8 @@ class UnitTradeRouteData:
 		if mission is not None:
 			if mission.missionType == UnitMissionType.followPath:
 				isFollowingMission = True
+			if trader.activityType() != UnitActivityType.mission:
+				trader.setActivityType(UnitActivityType.mission, simulation)
 
 		if not isFollowingMission:
 			path = self.nextPathFor(trader, simulation)
@@ -504,7 +506,7 @@ class Unit:
 		if oldPlot.isCity():
 			# if pNewPlot is a valid pointer, we are leaving the city and need to visible
 			# if pNewPlot is NULL than we are "dead" (e.g.a settler) and need to blend out
-			if newPlot.isVisible(simulation.humanPlayer()):
+			if newPlot.isVisibleTo(simulation.humanPlayer()):
 				simulation.userInterface.leaveCity(self, newPlot.point)
 
 		if self.isGarrisoned():

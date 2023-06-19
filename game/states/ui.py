@@ -42,6 +42,9 @@ class Interface:
 	def enterCity(self, unit, point):
 		pass
 
+	def leaveCity(self, unit, point):
+		pass
+
 
 class ScreenType(ExtendedEnum):
 	diplomatic = 'diplomatic'

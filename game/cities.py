@@ -26,7 +26,7 @@ from game.specialists import SpecialistType
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
-from game.types import EraType, TechType, CivicType
+from game.types import EraType, TechType, CivicType, CityFocusType
 from game.unitTypes import UnitType, UnitClassType
 from game.units import Unit
 from game.wonders import WonderType
@@ -203,18 +203,6 @@ class WorkingPlot:
 	def __repr__(self):
 		return f'WorkingPlot({self.location}, {self.worked} / {self.workedForced})'
 
-
-class CityFocusType(ExtendedEnum):
-	none = 'none'  # NO_CITY_AI_FOCUS_TYPE
-	food = 'food'  # CITY_AI_FOCUS_TYPE_FOOD,
-	production = 'production'  # CITY_AI_FOCUS_TYPE_PRODUCTION,
-	gold = 'gold'  # CITY_AI_FOCUS_TYPE_GOLD,
-	greatPeople = 'greatPeople'  # CITY_AI_FOCUS_TYPE_GREAT_PEOPLE,
-	science = 'science'  # CITY_AI_FOCUS_TYPE_SCIENCE,
-	culture = 'culture'  # CITY_AI_FOCUS_TYPE_CULTURE,
-	productionGrowth = 'productionGrowth'  # CITY_AI_FOCUS_TYPE_PROD_GROWTH, // default
-	goldGrowth = 'goldGrowth'  # CITY_AI_FOCUS_TYPE_GOLD_GROWTH,
-	faith = 'faith'  # CITY_AI_FOCUS_TYPE_FAITH,
 
 
 class SpecialistCountList(WeightedBaseList):

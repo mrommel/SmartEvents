@@ -117,24 +117,18 @@ class TestTradeRoutes(unittest.TestCase):
 		self.sourceVisited = 0
 		self.hasExpired = False
 
-		iteration = 0
-		while gameModel.currentTurn < 35 and not self.hasExpired and iteration < 35:
-			# print(f'human player: hasProcessedAutoMoves={humanPlayer.hasProcessedAutoMoves()}, turnFinished={humanPlayer.turnFinished()}')
+		while gameModel.currentTurn < 35 and not self.hasExpired:
 			gameModel.update()
 
 			while not(humanPlayer.hasProcessedAutoMoves() and humanPlayer.turnFinished()):
 				gameModel.update()
 
 				if humanPlayer.isTurnActive():
-					# humanPlayer.setProcessedAutoMovesTo(True)
+					humanPlayer.setProcessedAutoMovesTo(True)
 					humanPlayer.finishTurn()
-					# humanPlayer.setAutoMovesTo(True)
-					# humanPlayer.finishTurn()  # <= just button pressed = true
 
 			if not traderUnit.isTrading():
 				self.hasExpired = True
-
-			iteration += 1
 
 		# THEN
 		self.assertEqual(self.hasVisited, True, "not visited trade city within first 30 turns")

@@ -5,6 +5,7 @@ from game.greatPersons import GreatPersonType
 from game.policyCards import PolicyCardType
 from game.wonders import WonderType
 from map.base import HexPoint
+from map.path_finding.path import HexPath
 # from map.path_finding.finder import AStarDataSource
 from map.types import UnitMovementType, Yields
 
@@ -23,7 +24,7 @@ class TradeRoute:
 	def last(self) -> HexPoint:
 		return self._path.points()[-1]
 
-	def path(self):
+	def path(self) -> HexPath:
 		return self._path
 
 	def startCity(self, simulation):
@@ -148,6 +149,10 @@ class TradeRoute:
 
 	def isInternational(self, simulation) -> bool:
 		return not self.isDomestic(simulation)
+
+	def end(self) -> HexPoint:
+		lastPoint: HexPoint = self._path.points()[-1]
+		return lastPoint
 
 
 class TradeRoutePathfinderDataSource: # (AStarDataSource):

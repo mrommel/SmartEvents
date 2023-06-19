@@ -477,14 +477,6 @@ class PlayerCivics:
 		return self._inspirations.triggerCountFor(civic)
 
 
-class BuilderTaskingAI:
-	def __init__(self, player):
-		self.player = player
-
-	def update(self, simulation):
-		pass
-
-
 class TacticalAI:
 	def __init__(self, player):
 		self.player = player

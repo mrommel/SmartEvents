@@ -4,6 +4,10 @@ from map.base import HexPoint
 
 
 class HexPath:
+	pass
+
+
+class HexPath:
 	def __init__(self, points: [HexPoint], costs=None):
 		if costs is None:
 			costs = []
@@ -71,3 +75,6 @@ class HexPath:
 
 	def pathWithoutFirst(self):
 		return HexPath(self._points[1:], self._costs[1:])
+
+	def reversed(self) -> HexPath:
+		return HexPath(list(reversed(self._points)), list(reversed(self._costs)))

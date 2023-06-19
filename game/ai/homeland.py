@@ -1,6 +1,7 @@
 import sys
 from typing import Optional
 
+from game.ai.builderTasking import BuilderDirectiveType
 from game.cities import City
 from game.flavors import FlavorType
 from game.states.builds import BuildType
@@ -877,3 +878,46 @@ class HomelandAI:
 
 				self.unitProcessed(unit)
 		return
+
+	def executeWorkerMove(self, unit, simulation) -> bool:
+		# evaluator
+		directive = self.player.builderTaskingAI.evaluateBuilder(unit, simulation)
+
+		if directive is not None:
+			if directive.buildType == BuilderDirectiveType.buildImprovementOnResource or \
+				directive.buildType == BuilderDirectiveType.buildImprovement or \
+				directive.buildType == BuilderDirectiveType.repair or \
+				directive.buildType == BuilderDirectiveType.buildRoute or \
+				directive.buildType == BuilderDirectiveType.chop or \
+				directive.buildType == BuilderDirectiveType.removeRoad:
+
+				# are we already there?
+				if directive.target == unit.location:
+					# check to see if we already have this mission as the unit's head mission
+					pushMission = True
+					missionData: UnitMission = unit.peekMission()
+					if missionData is not None:
+						if missionData.missionType == UnitMissionType.build and missionData.buildType == directive.build:
+							pushMission = False
+
+					if pushMission:
+						unitMission = UnitMission(UnitMissionType.build)
+						unitMission.buildType = directive.build
+						unit.pushMission(unitMission, simulation)
+
+					if unit.readyToMove():
+						unit.finishMoves()
+
+					self.unitProcessed(unit)
+
+				else:
+					unit.pushMission(UnitMission(UnitMissionType.moveTo, directive.target), simulation)
+					unit.finishMoves()
+					self.unitProcessed(unit)
+
+				return True
+		else:
+			print("builder has no directive")
+			unit.doCancelOrder(simulation)
+
+		return False

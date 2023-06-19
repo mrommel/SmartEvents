@@ -4,6 +4,19 @@ from game.flavors import Flavor, FlavorType
 from gettext import gettext as _
 
 
+class CityFocusType(ExtendedEnum):
+	none = 'none'  # NO_CITY_AI_FOCUS_TYPE
+	food = 'food'  # CITY_AI_FOCUS_TYPE_FOOD,
+	production = 'production'  # CITY_AI_FOCUS_TYPE_PRODUCTION,
+	gold = 'gold'  # CITY_AI_FOCUS_TYPE_GOLD,
+	greatPeople = 'greatPeople'  # CITY_AI_FOCUS_TYPE_GREAT_PEOPLE,
+	science = 'science'  # CITY_AI_FOCUS_TYPE_SCIENCE,
+	culture = 'culture'  # CITY_AI_FOCUS_TYPE_CULTURE,
+	productionGrowth = 'productionGrowth'  # CITY_AI_FOCUS_TYPE_PROD_GROWTH, // default
+	goldGrowth = 'goldGrowth'  # CITY_AI_FOCUS_TYPE_GOLD_GROWTH,
+	faith = 'faith'  # CITY_AI_FOCUS_TYPE_FAITH,
+
+
 class TechType:
 	pass
 

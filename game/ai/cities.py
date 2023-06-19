@@ -6,20 +6,234 @@ from game.buildings import BuildingType
 from game.districts import DistrictType
 from game.flavors import Flavors, FlavorType, Flavor
 from game.projects import ProjectType
-from game.types import TechType
+from game.types import TechType, CityFocusType
 from game.unitTypes import UnitTaskType, UnitType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.improvements import ImprovementType
-from map.types import YieldType, FeatureType
+from map.types import YieldType, FeatureType, YieldList
 from core.base import ExtendedEnum, InvalidEnumError, WeightedBaseList
+
+
+class CitySpecializationTypeData:
+	def __init__(self, name: str, yieldType: Optional[YieldType], isDefault: bool, isWonder: bool,
+	             isOperationUnitProvider: bool, mustBeCoastal: bool, flavors: [Flavor]):
+		self.name = name
+		self.yieldType = yieldType
+		self.isDefault = isDefault
+		self.isWonder = isWonder
+		self.isOperationUnitProvider = isOperationUnitProvider
+		self.mustBeCoastal = mustBeCoastal
+		self.flavors = flavors
 
 
 class CitySpecializationType(ExtendedEnum):
 	none = 'none'
 
-	productionWonder = 'productionWonder'
-	generalEconomic = 'generalEconomic'
+	settlerPump = 'settlerPump'  # CITYSPECIALIZATION_SETTLER_PUMP
+	militaryTraining = 'militaryTraining'  # CITYSPECIALIZATION_MILITARY_TRAINING
+	emergencyUnits = 'emergencyUnits'  # CITYSPECIALIZATION_EMERGENCY_UNITS
+	militaryNaval = 'militaryNaval'  # CITYSPECIALIZATION_MILITARY_NAVAL
+	productionWonder = 'productionWonder'  # CITYSPECIALIZATION_PRODUCTION_WONDER
+	# CITYSPECIALIZATION_PRODUCTION_SPACESHIP
+	commerce = 'commerce'  # CITYSPECIALIZATION_COMMERCE
+	science = 'science'  # CITYSPECIALIZATION_SCIENCE
+	generalEconomic = 'generalEconomic'  # CITYSPECIALIZATION_GENERAL_ECONOMIC
+
+	def name(self) -> str:
+		return self._data().name
+
+	def _data(self) -> CitySpecializationTypeData:
+		if self == CitySpecializationType.none:
+			return CitySpecializationTypeData(
+				name="None",
+				yieldType=None, 
+				isDefault=False, 
+				isWonder=False, 
+				isOperationUnitProvider=False, 
+				mustBeCoastal=False, 
+				flavors=[]
+			)
+		elif self == CitySpecializationType.settlerPump:
+			return CitySpecializationTypeData(
+				name="settlerPump",
+				yieldType=YieldType.food, 
+				isDefault=False, 
+				isWonder=False, 
+				isOperationUnitProvider=False, 
+				mustBeCoastal=False, 
+				flavors=[
+					Flavor(FlavorType.expansion, value=30),
+					Flavor(FlavorType.production, value=-4),
+					Flavor(FlavorType.gold, value=-4),
+					Flavor(FlavorType.science, value=-4),
+					Flavor(FlavorType.mobile, value=-2),
+					Flavor(FlavorType.navalGrowth, value=-5),
+					Flavor(FlavorType.waterConnection, value=-5),
+					Flavor(FlavorType.culture, value=-4),
+					Flavor(FlavorType.wonder, value=-6),
+					Flavor(FlavorType.offense, value=-4),
+					Flavor(FlavorType.defense, value=-4),
+					Flavor(FlavorType.ranged, value=-4),
+					Flavor(FlavorType.naval, value=-4),
+					Flavor(FlavorType.militaryTraining, value=-6)
+				]
+			)
+		elif self == CitySpecializationType.militaryTraining:
+			return CitySpecializationTypeData(
+				name="militaryTraining",
+				yieldType=YieldType.production, 
+				isDefault=False, 
+				isWonder=False, 
+				isOperationUnitProvider=True, 
+				mustBeCoastal=False, 
+				flavors=[
+					Flavor(FlavorType.expansion, value=-4),
+					Flavor(FlavorType.growth, value=-4),
+					Flavor(FlavorType.production, value=-4),
+					Flavor(FlavorType.gold, value=-4),
+					Flavor(FlavorType.science, value=-4),
+					Flavor(FlavorType.offense, value=20),
+					Flavor(FlavorType.defense, value=20),
+					Flavor(FlavorType.ranged, value=10),
+					Flavor(FlavorType.militaryTraining, value=20),
+					Flavor(FlavorType.naval, value=-4)
+				]
+			)
+		elif self == CitySpecializationType.emergencyUnits:
+			return CitySpecializationTypeData(
+				name="emergencyUnits",
+				yieldType=YieldType.production, 
+				isDefault=False, 
+				isWonder=False, 
+				isOperationUnitProvider=True, 
+				mustBeCoastal=False, 
+				flavors=[
+					Flavor(FlavorType.expansion, value=-4),
+					Flavor(FlavorType.growth, value=-4),
+					Flavor(FlavorType.production, value=-4),
+					Flavor(FlavorType.gold, value=-4),
+					Flavor(FlavorType.science, value=-4),
+					Flavor(FlavorType.defense, value=200),
+					Flavor(FlavorType.ranged, value=100),
+					Flavor(FlavorType.militaryTraining, value=-4),
+					Flavor(FlavorType.naval, value=-25),
+					Flavor(FlavorType.recon, value=-25)
+				]
+			)
+		elif self == CitySpecializationType.militaryNaval:
+			return CitySpecializationTypeData(
+				name="militaryNaval",
+				yieldType=YieldType.production, 
+				isDefault=False, 
+				isWonder=False, 
+				isOperationUnitProvider=False, 
+				mustBeCoastal=True,
+				flavors=[
+					Flavor(FlavorType.expansion, value=-4),
+					Flavor(FlavorType.growth, value=-4),
+					Flavor(FlavorType.production, value=-4),
+					Flavor(FlavorType.gold, value=-4),
+					Flavor(FlavorType.science, value=-4),
+					Flavor(FlavorType.naval, value=200),
+					Flavor(FlavorType.navalRecon, value=100),
+					Flavor(FlavorType.offense, value=-25),
+					Flavor(FlavorType.defense, value=-25),
+					Flavor(FlavorType.ranged, value=-25)
+				]
+			)
+		elif self == CitySpecializationType.productionWonder:
+			return CitySpecializationTypeData(
+				name="productionWonder",
+				yieldType=YieldType.production, 
+				isDefault=False, 
+				isWonder=True,
+				isOperationUnitProvider=False, 
+				mustBeCoastal=False, 
+				flavors=[
+					Flavor(FlavorType.expansion, value=-4),
+					Flavor(FlavorType.growth, value=-4),
+					Flavor(FlavorType.production, value=-4),
+					Flavor(FlavorType.gold, value=-4),
+					Flavor(FlavorType.science, value=-4),
+					Flavor(FlavorType.wonder, value=30),
+					Flavor(FlavorType.offense, value=-4),
+					Flavor(FlavorType.defense, value=-4),
+					Flavor(FlavorType.ranged, value=-4),
+					Flavor(FlavorType.naval, value=-4)
+				]
+			)
+		elif self == CitySpecializationType.commerce:
+			return CitySpecializationTypeData(
+				name="commerce",
+				yieldType=YieldType.gold, 
+				isDefault=False, 
+				isWonder=False, 
+				isOperationUnitProvider=False, 
+				mustBeCoastal=False, 
+				flavors=[
+					Flavor(FlavorType.expansion, value=-4),
+					Flavor(FlavorType.culture, value=10),
+					Flavor(FlavorType.production, value=10),
+					Flavor(FlavorType.gold, value=30),
+					Flavor(FlavorType.science, value=10),
+					Flavor(FlavorType.amenities, value=10),
+					Flavor(FlavorType.greatPeople, value=5),
+					Flavor(FlavorType.offense, value=-4),
+					Flavor(FlavorType.defense, value=-4),
+					Flavor(FlavorType.ranged, value=-4),
+					Flavor(FlavorType.naval, value=-4),
+					Flavor(FlavorType.waterConnection, value=20)
+				]
+			)
+		elif self == CitySpecializationType.science:
+			return CitySpecializationTypeData(
+				name="science",
+				yieldType=YieldType.science, 
+				isDefault=False, 
+				isWonder=False, 
+				isOperationUnitProvider=False, 
+				mustBeCoastal=False, 
+				flavors=[
+					Flavor(FlavorType.expansion, value=-4),
+					Flavor(FlavorType.culture, value=10),
+					Flavor(FlavorType.production, value=10),
+					Flavor(FlavorType.gold, value=10),
+					Flavor(FlavorType.science, value=30),
+					Flavor(FlavorType.amenities, value=10),
+					Flavor(FlavorType.greatPeople, value=5),
+					Flavor(FlavorType.offense, value=-4),
+					Flavor(FlavorType.defense, value=-4),
+					Flavor(FlavorType.ranged, value=-4),
+					Flavor(FlavorType.naval, value=-4)
+				]
+			)
+
+		elif self == CitySpecializationType.generalEconomic:
+			return CitySpecializationTypeData(
+				name="generalEconomic",
+				yieldType=YieldType.production, 
+				isDefault=True, 
+				isWonder=False, 
+				isOperationUnitProvider=False, 
+				mustBeCoastal=False, 
+				flavors=[
+					Flavor(FlavorType.expansion, value=-4),
+					Flavor(FlavorType.culture, value=30),
+					Flavor(FlavorType.production, value=20),
+					Flavor(FlavorType.gold, value=20),
+					Flavor(FlavorType.science, value=20),
+					Flavor(FlavorType.amenities, value=20),
+					Flavor(FlavorType.greatPeople, value=10),
+					Flavor(FlavorType.offense, value=-4),
+					Flavor(FlavorType.defense, value=-4),
+					Flavor(FlavorType.ranged, value=-4),
+					Flavor(FlavorType.naval, value=-4)
+				]
+			)
+			
+		raise InvalidEnumError(self)
+
 
 
 class CityStrategyTypeData:
@@ -1136,6 +1350,16 @@ class BuildableItem:
 		return self.productionLeft(player) <= 0
 
 
+class YieldValue:
+	def __init__(self, location: HexPoint, value: float):
+		self.location = location
+		self.value = value
+
+	def __lt__(self, other):
+		if isinstance(other, YieldValue):
+			return self.value > other.value
+
+
 class CityStrategyAI:
 	"""
 		++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1398,3 +1622,71 @@ class CityStrategyAI:
 	def isDeficientFor(self, yieldType: YieldType, simulation) -> bool:
 		# Fixme
 		return False
+
+	def updateBestYields(self, simulation):
+		self.focusYield = YieldType.none
+
+		self.resetBestYields()
+
+		populationToEvaluate = self.city.population() + 2
+
+		bestFoodYields: [YieldValue] = []
+		bestProductionYields: [YieldValue] = []
+		bestGoldYields: [YieldValue] = []
+
+		for workingTileLocation in self.city.cityCitizens.workingTileLocations():
+			workingTile = simulation.tileAt(workingTileLocation)
+			if workingTile is not None:
+				continue
+
+			if workingTile.workingCity() is not None and workingTile.workingCity().location != self.city.location:
+				continue
+
+			yields = workingTile.yieldsFor(self.city.player, ignoreFeature=False)
+			bestFoodYields.append(YieldValue(location=workingTileLocation, value=yields.food))
+			bestProductionYields.append(YieldValue(location=workingTileLocation, value=yields.production))
+			bestGoldYields.append(YieldValue(location=workingTileLocation, value=yields.gold))
+
+		bestFoodYields.sort()
+		bestProductionYields.sort()
+		bestGoldYields.sort()
+
+		slotsToEvaluate = min(len(bestFoodYields), populationToEvaluate)
+		if slotsToEvaluate <= 0:
+			return
+
+		# add in additional food from the city plot and the city buildings that provide food
+		buildingFood = sum(map(lambda building: building.yields().food if self.city.buildings.hasBuilding(building) else 0.0, list(BuildingType)))
+		avgValue = (sum(map(lambda bfy: bfy.value, bestFoodYields)) + buildingFood) / float(slotsToEvaluate)
+		self.bestYieldAverage.setWeight(avgValue, YieldType.food)
+		avgValue = (sum(map(lambda bfy: bfy.value, bestProductionYields)))
+		self.bestYieldAverage.setWeight(avgValue, YieldType.production)
+		avgValue = (sum(map(lambda bfy: bfy.value, bestGoldYields)))
+		self.bestYieldAverage.setWeight(avgValue, YieldType.gold)
+
+		citySpecialization: CitySpecializationType = self.city.cityStrategy.specialization()
+		if citySpecialization == CitySpecializationType.none:
+			if self.city.player.isHuman():
+				# find a specialization type according to the citizen focus type
+				focusType = self.city.cityCitizens.focusType()
+
+				if focusType == CityFocusType.food:
+					citySpecialization = CitySpecializationType.settlerPump
+				elif focusType == CityFocusType.gold:
+					citySpecialization = CitySpecializationType.commerce
+
+				# if the human did not have a city ai specialization
+				if citySpecialization == CitySpecializationType.none:
+					citySpecialization = CitySpecializationType.generalEconomic
+
+		self.yieldDeltaValue.setWeight(self.bestYieldAverage.weight(YieldType.food), YieldType.food)
+		self.yieldDeltaValue.setWeight(self.bestYieldAverage.weight(YieldType.production), YieldType.production)
+		self.yieldDeltaValue.setWeight(self.bestYieldAverage.weight(YieldType.gold), YieldType.gold)
+
+		self.focusYield = citySpecialization.yieldType() or CityFocusType.none
+
+		return
+
+	def resetBestYields(self):
+		self.bestYieldAverage = YieldList()
+		self.yieldDeltaValue = YieldList()
