@@ -1,3 +1,4 @@
+import random
 import sys
 from typing import Optional
 
@@ -11,7 +12,7 @@ from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.path_finding.finder import AStarPathfinder
-from map.types import UnitDomainType
+from map.types import UnitDomainType, UnitMovementType
 from core.base import ExtendedEnum, InvalidEnumError
 
 
@@ -921,3 +922,165 @@ class HomelandAI:
 			unit.doCancelOrder(simulation)
 
 		return False
+
+	def executeExplorerMoves(self, land: bool, simulation):
+		"""Moves units to explore the map"""
+		self.player.economicAI.updatePlots(simulation)
+		foundNearbyExplorePlot = False
+
+		pathfinderDataSource = simulation.ignoreUnitsPathfinderDataSource(
+			UnitMovementType.walk if land else UnitMovementType.swimShallow,
+			self.player,
+			UnitMapType.combat,
+			self.player.canEmbark(),
+			canEnterOcean=self.player.canEnterOcean()
+		)
+		pathfinder = AStarPathfinder(pathfinderDataSource)
+
+		for homelandUnit in self.currentMoveUnits:
+			if homelandUnit.unit is None:
+				continue
+
+			unit = homelandUnit.unit
+			if unit.processedInTurn():
+				continue
+
+			unitPlayer = unit.player
+			if unitPlayer is None:
+				continue
+
+			goodyPlot = self.player.economicAI.unitTargetGoodyPlot(unit, simulation)
+			if goodyPlot is not None:
+				print(f"Unit {unit.name()} at {unit.location} has goody target at {goodyPlot.point}")
+
+				if (goodyPlot.hasImprovement(ImprovementType.goodyHut) or \
+					goodyPlot.hasImprovement(ImprovementType.barbarianCamp)) and \
+					simulation.visibleEnemy(goodyPlot.point, self.player) is None:
+
+					path = pathfinder.shortestPath(unit.location, goodyPlot.point)
+					if path is not None:
+						firstStep = path.firstSegmentFor(unit.moves())
+						if firstStep is not None:
+							stepPoint = firstStep.points()[-1]
+							print(f"Unit {unit.name()} Moving to goody hut, from {unit.location}")
+
+							unit.pushMission(UnitMission(UnitMissionType.moveTo, stepPoint), simulation)
+							unit.finishMoves()
+							self.unitProcessed(unit)
+						else:
+							print(f"Unit {unit.name()} no end turn plot to goody from {unit.location}")
+
+						continue
+					else:
+						print(f"Unit {unit.name()} can't find path to goody from {unit.location}")
+
+			bestPlot = None
+			bestPlotScore = 0
+
+			sightRange = unit.sight()
+			movementRange = unit.movesLeft()  # / GC.getMOVE_DENOMINATOR();
+			for evalPoint in unit.location.areaWithRadius(movementRange):
+				evalPlot = simulation.tileAt(evalPoint)
+
+				if evalPlot is None:
+					continue
+
+				if not self.isValidExplorerEndTurnPlot(unit, evalPlot, simulation):
+					continue
+
+				path = pathfinder.shortestPath(unit.location, evalPoint)
+
+				if path is None:
+					continue
+
+				distance = len(path.points())
+				if distance > 1:
+					continue
+
+				domain = unit.domain()
+				score = self.player.economicAI.scoreExplore(evalPoint, self.player, sightRange, domain, simulation)
+				if score > 0:
+					if domain == UnitDomainType.land and evalPlot.hasHills():
+						score += 50
+					elif domain == UnitDomainType.sea and simulation.adjacentToLand(evalPoint):
+						score += 200
+					elif domain == UnitDomainType.land and unit.isEmbarkAllWater() and not evalPlot.isShallowWater():
+						score += 200
+
+				if score > bestPlotScore:
+					bestPlot = evalPlot
+					bestPlotScore = score
+					foundNearbyExplorePlot = True
+
+			if bestPlot is not None and movementRange > 0:
+				explorationPlots = self.player.economicAI.explorationPlots()
+				if len(explorationPlots) > 0:
+					bestPlotScore = 0
+
+					for explorationPlot in explorationPlots:
+						evalPlot = simulation.tileAt(explorationPlot.location)
+						if evalPlot is None:
+							continue
+
+						plotScore = 0
+
+						if not self.isValidExplorerEndTurnPlot(unit, evalPlot, simulation):
+							continue
+
+						rating = explorationPlot.rating
+
+						# hitting the pathfinder, may not be the best idea...
+						path = pathfinder.shortestPath(unit.location, explorationPlot.location)
+						if path is None:
+							continue
+
+						distance = path.cost() + random.uniform(0.0, 5.0)
+						if distance == 0:
+							plotScore = 1000 * rating
+						else:
+							plotScore = (1000 * rating) / int(distance)
+
+						if plotScore > bestPlotScore:
+							endTurnPoint = path.points()[-1]
+							endTurnPlot = simulation.tileAt(endTurnPoint)
+
+							if endTurnPoint == unit.location:
+								bestPlot = None
+								bestPlotScore = plotScore
+							elif self.isValidExplorerEndTurnPlot(unit, endTurnPlot, simulation):
+								bestPlot = endTurnPlot
+								bestPlotScore = plotScore
+							else:
+								# not a valid destination
+								continue
+
+			if bestPlot is not None:
+				unitMission = UnitMission(UnitMissionType.moveTo, buildType=None, target=bestPlot.point, options=[])
+				unit.pushMission(unitMission, simulation)
+
+				# Only mark as done if out of movement
+				if unit.moves() <= 0:
+					self.unitProcessed(unit)
+			else:
+				if unitPlayer.isHuman():
+					unit.automate(UnitAutomationType.none, simulation)
+					self.unitProcessed(unit)
+				else:
+					# If this is a land explorer and there is no ignore unit path to a friendly city, then disband him
+					if unit.task() == UnitTaskType.explore:
+						foundPath = False
+
+						for city in simulation.citiesOf(self.player):
+							if pathfinder.doesPathExist(unit.location, city.location):
+								foundPath = True
+								break
+
+							if not foundPath:
+								self.unitProcessed(unit)
+								unit.doKill(delayed=False, otherPlayer=None, simulation=simulation)
+								self.player.economicAI.incrementExplorersDisbanded()
+					elif unit.task() == UnitTaskType.exploreSea:
+						# NOOP
+						pass
+
+		return
