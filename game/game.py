@@ -578,6 +578,9 @@ class GameModel:
 		for loopPoint in location.areaWithRadius(sight):
 			loopTile = self.tileAt(loopPoint)
 
+			if loopTile is None:
+				continue
+
 			if not loopTile.canSeeTile(currentTile, player, sight, hasSentry=hasSentry, simulation=self):
 				continue
 

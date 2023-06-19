@@ -12,11 +12,13 @@ from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.states.dedications import DedicationType
+from game.states.gossips import GossipType
+from game.states.ui import TooltipType
 from game.types import EraType, TechType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, UnitMissionType, UnitActivityType, \
 	UnitMapType, UnitAbilityType, MoveOption, UnitClassType
-from map.base import HexPoint, HexArea
+from map.base import HexPoint, HexArea, HexDirection
 from map.improvements import ImprovementType
 from map.path_finding.path import HexPath
 from map.types import UnitDomainType, YieldType, ResourceType, RouteType, FeatureType, TerrainType
@@ -141,6 +143,10 @@ class UnitTradeRouteData:
 		return
 
 
+class UnitCaptureDefinition:
+	pass
+
+
 class Unit:
 	"""
 		unit
@@ -152,6 +158,7 @@ class Unit:
 		self._name = unitType.name()
 		self.location = location
 		self._originLocation = location
+		self._facingDirection = HexDirection.south
 		self.unitType = unitType
 		self.player = player
 		self.taskValue = unitType.defaultTask()
@@ -217,7 +224,7 @@ class Unit:
 			fromString = f'(x: {self.location.x}, y: {self.location.y})'
 			toString = f'(x: {bestTile.point.x}, y: {bestTile.point.y})'
 			print(f'Jump to nearest valid plot within range by {self.unitType}, from: {fromString} to: {toString}')
-			self.setLocation(bestTile.point, simulation)
+			self.setLocation(bestTile.point, simulation=simulation)
 			self.publishQueuedVisualizationMoves(simulation)
 		else:
 			print(
@@ -244,8 +251,9 @@ class Unit:
 			self.domain() == UnitDomainType.land:
 
 			boudicaNear = simulation.isGreatGeneral(GreatPersonType.boudica, self.player, self.location, range=2)
-			hannibalBarcaNear = simulation.isGreatGeneral(GreatPersonType.hannibalBarca, self.player, self.location,
-			                                              range=2)
+			hannibalBarcaNear = simulation.isGreatGeneral(
+				GreatPersonType.hannibalBarca, self.player, self.location, range=2
+			)
 			sunTzuNear = simulation.isGreatGeneral(GreatPersonType.sunTzu, self.player, self.location, range=2)
 
 			if boudicaNear or hannibalBarcaNear or sunTzuNear:
@@ -366,7 +374,7 @@ class Unit:
 
 		owner = tile.owner()
 		if not self.canEnterTerritory(owner, ignoreRightOfPassage=False,
-		                              isDeclareWarMove=MoveOption.declareWar in options):
+									  isDeclareWarMove=MoveOption.declareWar in options):
 			if not self.player.canDeclareWarTowards(owner):
 				return False
 
@@ -378,8 +386,290 @@ class Unit:
 
 		return True
 
-	def setLocation(self, location, simulation):
-		self.location = location
+	def setLocation(self, newLocation: HexPoint, group: bool = False, update: bool = False,
+		show: bool = False, checkPlotVisible: bool = False, noMove: bool = False, simulation = None):
+		if simulation is None:
+			raise Exception("simulation must not be None")
+
+		diplomacyAI = self.player.diplomacyAI
+
+		unitCaptureDefinition: Optional[UnitCaptureDefinition] = None
+		ownerIsActivePlayer = self.player.isEqualTo(simulation.activePlayer())
+
+		# Delay any popups that might be caused by our movement(goody huts, natural wonders, etc.) so the unit
+		# movement event gets sent before the popup event.
+		if ownerIsActivePlayer:
+			# DLLUI->SetDontShowPopups(true);
+			pass
+
+		oldActivityType = self.activityType()
+
+		if self.isSetUpForRangedAttack():
+			self.setUpForRangedAttackTo(False)
+
+		if not group or self.isCargo():
+			show = False
+
+		oldPlot = simulation.tileAt(self.location)
+		newPlot = simulation.tileAt(newLocation)
+
+		if not noMove:
+			# if let transportUnit = self.transportUnit():
+			#	if (!(pTransportUnit->atPlot( * pNewPlot)))
+			#		setTransportUnit(NULL);
+
+			if self.isCombatUnit():
+				loopUnit = simulation.unitAt(newLocation, UnitMapType.combat)
+				if loopUnit is not None:
+					loopPlayer = loopUnit.player
+
+					if not loopUnit.isDelayedDeath():
+						if diplomacyAI.isAtWarWith(loopPlayer):
+
+							if loopUnit.unitType.captureType() is None and loopUnit.canDefend():
+								# Unit somehow ended up on top of an enemy combat unit
+								if not newPlot.isCity():
+									if not loopUnit.jumpToNearestValidPlotWithinRange(1, simulation):
+										loopUnit.doKill(delayed=False, player=self.player, simulation=simulation)
+								else:
+									# kPlayer.DoYieldsFromKill(this, pLoopUnit);
+									loopUnit.doKill(delayed=False, player=self.player, simulation=simulation)
+							else:
+								# Ran into a noncombat unit
+								doCapture = False
+
+								# Some units can't capture civilians. Embarked units are also not captured, they're
+								# simply killed. And some aren't a type that gets captured.
+								if self.unitType.hasAbility(UnitAbilityType.canCapture) and not loopUnit.isEmbarked() \
+									and loopUnit.unitType.captureType() is not None:
+									doCapture = True
+
+									# if isBarbarian():
+									#	strMessage = "TXT_KEY_UNIT_CAPTURED_BARBS_DETAILED"
+									#   strMessage << pLoopUnit->getUnitInfo().GetTextKey();
+									#   strSummary = "TXT_KEY_UNIT_CAPTURED_BARBS"
+									# else:
+									#   strMessage = "TXT_KEY_UNIT_CAPTURED_DETAILED"
+									#   strMessage << pLoopUnit->getUnitInfo().GetTextKey() << GET_PLAYER(getOwner()).getNameKey();
+									# strSummary = "TXT_KEY_UNIT_CAPTURED"
+
+									# gameModel.userInterface?.showTooltip()
+
+								else:
+									# Unit was killed instead
+									if loopUnit.isEmbarked():
+										self.changeExperienceBy(1, simulation)
+
+									simulation.userInterface.showTooltipAt(
+										self.location,
+										TooltipType.unitDestroyedEnemyUnit,
+										attackerName=self.name(),
+										attackerDamage=0,
+										defenderName=loopUnit.name(),
+										delay=3
+									)
+
+									self.player.reportCultureFromKills(
+										newLocation,
+										culture=loopUnit.baseCombatStrength(ignoreEmbarked=True),
+										wasBarbarian=loopPlayer.isBarbarian(),
+										simulation=simulation
+									)
+									self.player.reportGoldFromKills(
+										newLocation,
+										gold=loopUnit.baseCombatStrength(ignoreEmbarked=True),
+										simulation=simulation
+									)
+
+								loopUnit.player.notifications.addNotification(NotificationType.unitDied, location=loopUnit.location)
+
+								if loopUnit.isEmbarked():
+									self.setMadeAttackTo(True)
+
+								# If we're capturing the unit, we want to delay the capture, else as the unit is
+								# converted to our side, it will be the first unit on our
+								# side in the plot and can end up taking over a city, rather than the advancing unit
+								if doCapture:
+									unitCaptureDefinition = self.captureDefinitionBy(self.player)
+
+								loopUnit.doKill(delayed=False, otherPlayer=self.player, simulation=simulation)
+
+		# if leaving a city, reveal the unit
+		if oldPlot.isCity():
+			# if pNewPlot is a valid pointer, we are leaving the city and need to visible
+			# if pNewPlot is NULL than we are "dead" (e.g.a settler) and need to blend out
+			if newPlot.isVisible(simulation.humanPlayer()):
+				simulation.userInterface.leaveCity(self, newPlot.point)
+
+		if self.isGarrisoned():
+			self.unGarrison(simulation)
+
+		simulation.concealAt(oldPlot.point, sight=self.sight(), unit=self, player=self.player)
+		# oldPlot->area()->changeUnitsPerPlayer(getOwner(), -1);
+		# self.set(lastMoveTurn: gameModel.turnSlice())
+		oldCity = simulation.cityAt(oldPlot.point)
+
+		self.location = newLocation
+
+		# update facing direction
+		self._facingDirection = oldPlot.point.directionTowards(newLocation)
+
+		# update cargo mission animations
+		if self.isCargo():
+			if oldActivityType != UnitActivityType.mission:
+				self.setActivityType(oldActivityType, simulation)
+
+		self.doMobilize(simulation)  # unfortify
+
+		# needs to be here so that the square is considered visible when we move into it...
+		simulation.sightAt(newLocation, sight=self.sight(), unit=self, player=self.player)
+		# newPlot->area()->changeUnitsPerPlayer(getOwner(), 1);
+		newCity = simulation.cityAt(newPlot.point)
+
+		# Moving into a City(friend or foe)
+		if newCity is not None:
+			newCity.updateStrengthValue(simulation)
+
+			if diplomacyAI.isAtWarWith(newCity.player):
+				self.player.acquireCity(newCity, conquest=True, gift=False, simulation=simulation)
+				newCity = None
+				# TODO liberation city for ally
+
+		if oldCity is not None:
+			oldCity.updateStrengthValue(simulation)
+
+		# carrier ?
+		# if shouldLoadOnMove(pNewPlot)
+		#	load();
+
+		# Can someone see the plot we moved our Unit into?
+		for loopPlayer in simulation.players:
+			if self.player.isEqualTo(loopPlayer):
+				continue
+
+			if not loopPlayer.isAlive():
+				continue
+
+			if newPlot.isVisibleTo(loopPlayer):
+				# check if we have met this guy already
+				if not self.player.hasMet(loopPlayer):
+					# do the hello,
+					loopPlayer.doFirstContactWith(self.player, simulation)
+					self.player.doFirstContactWith(loopPlayer, simulation)
+
+		if self.domain() == UnitDomainType.sea:
+			# player.GetPlayerTraits()->CheckForBarbarianConversion(pNewPlot);
+			pass
+
+		# override show, if check plot visible
+		if checkPlotVisible and newPlot.isVisibleTo(simulation.humanPlayer()) or \
+			oldPlot.isVisibleTo(simulation.humanPlayer()):
+			show = True
+
+		if show:
+			self.queueMoveForVisualization(oldPlot.point, newPlot.point, simulation)
+		else:
+			# teleport
+			# SetPosition(pNewPlot);
+			pass
+
+		# if entering a city, hide the unit
+		if newPlot.isCity():
+			simulation.userInterface.enterCity(self, oldPlot.point)
+
+		if self.hasCargo():
+			raise Exception("not implemented")
+			# pUnitNode = pldPlot.headUnitNode()
+			#
+			# while (pUnitNode != NULL)
+			# {
+			# 	pLoopUnit =::getUnit(*pUnitNode);
+			# pUnitNode = pOldPlot->nextUnitNode(pUnitNode);
+			#
+			# if (pLoopUnit & & pLoopUnit->getTransportUnit() == this)
+			# {
+			# pLoopUnit->setXY(iX, iY, bGroup, bUpdate);
+			#
+			# # Reset to head node since we just moved some cargo around, and the unit storage in the plot is going to be different now
+			# pUnitNode = pOldPlot->headUnitNode();
+
+
+		if not noMove:
+
+			if newPlot.hasImprovement(ImprovementType.goodyHut):
+				self.player.doGoodyHut(newPlot, self, simulation)
+
+				if self.unitType.hasAbility(UnitAbilityType.experienceFromTribal):
+					# Gains XP when activating Tribal Villages(+5 XP) and discovering Natural Wonders(+10 XP)
+					self.changeExperienceBy(5, simulation)
+
+			if newPlot.hasImprovement(ImprovementType.barbarianCamp):
+				self.player.doClearBarbarianCampAt(newPlot, simulation)
+
+				# send gossip
+				simulation.sendGossip(GossipType.barbarianCampCleared, unit=self.unitType, player=self.player)
+
+		# New plot location is owned by someone
+		plotOwner = newPlot.owner()
+		if plotOwner is not None:
+			# If we're in friendly territory, and we can embark, give the promotion for free
+			if newPlot.isFriendlyTerritoryFor(self.player, simulation):
+
+				if self.player.canEmbark():
+					if not self.hasPromotion(UnitPromotionType.embarkation):
+
+						givePromotion = False
+
+						# Civilians get it for free
+						if self.domain() == UnitDomainType.land:
+							if not self.isCombatUnit():
+								givePromotion = True
+
+						# Can the unit get this? (handles water units and such)
+						if not givePromotion and self.domain() == UnitDomainType.land:
+							givePromotion = True
+
+						# Some case that gives us the promotion?
+						if givePromotion:
+							self.earnPromotion(UnitPromotionType.embarkation)
+
+
+			# is unit in enemy territory? If so, give notification to owner of this plot
+			if diplomacyAI.isAtWarWith(plotOwner):
+				if plotOwner.isEqualTo(simulation.humanPlayer()):
+					workingCity = newPlot.workingCity()
+					cityName = workingCity.name if workingCity is not None else "-"
+					plotOwner.notifications.addNotification(NotificationType.enemyInTerritory, location=newLocation, cityName=cityName)
+
+		# Create any units we captured, now that we own the destination
+		if unitCaptureDefinition is not None:
+			self.createCaptureUnitFrom(unitCaptureDefinition)
+
+		# / * if self.isSelected()
+		# {
+		# 	gDLL->GameplayMinimapUnitSelect(iX, iY);
+		# } * /
+
+		# setInfoBarDirty(true)
+
+		   # if there is an enemy city nearby, alert any scripts to this
+		# / * int
+		# iAttackRange = GC.getCITY_ATTACK_RANGE();
+		# for (int iDX = -iAttackRange; iDX <= iAttackRange; iDX++)
+		#   for (int iDY = -iAttackRange; iDY <= iAttackRange; iDY++)
+		#     CvPlot * pTargetPlot = plotXYWithRangeCheck(getX(), getY(), iDX, iDY, iAttackRange);
+		#     if (pTargetPlot & & pTargetPlot->isCity())
+		#       if (isEnemy(pTargetPlot->getTeam()))
+		#         // do it
+		#         CvCity * pkPlotCity = pTargetPlot->getPlotCity();
+		#         auto_ptr < ICvCity1 > pPlotCity = GC.WrapCityPointer(pkPlotCity);
+		#         DLLUI->SetSpecificCityInfoDirty(pPlotCity.get(), CITY_UPDATE_TYPE_ENEMY_IN_RANGE);
+
+		if ownerIsActivePlayer:
+			# DLLUI->SetDontShowPopups(false);
+			pass
+
+		return
 
 	def publishQueuedVisualizationMoves(self, simulation):
 		pass
@@ -517,7 +807,7 @@ class Unit:
 				return True
 		elif mission.missionType == UnitMissionType.routeTo:
 			if simulation.valid(mission.target) and mission.unit.pathTowards(mission.target, options=None,
-			                                                                 simulation=simulation) is not None:
+																			 simulation=simulation) is not None:
 				return True
 		elif mission.missionType == UnitMissionType.followPath:
 			if mission.path is not None:
@@ -626,7 +916,7 @@ class Unit:
 		if oldActivity != activityType:
 			self._activityTypeValue = activityType
 
-			# If we're waking up a Unit then remove it's fortification bonus
+			# If we're waking up a Unit then remove its fortification bonus
 			if activityType == UnitActivityType.awake:
 				self.setFortifyTurns(0, simulation)
 
@@ -1128,7 +1418,7 @@ class Unit:
 		return self.player.isHuman()
 
 	def canBuild(self, buildType: BuildType, location: HexPoint, testVisible: Optional[bool] = False,
-	             testGold: Optional[bool] = True, simulation=None):
+				 testGold: Optional[bool] = True, simulation=None):
 		if simulation is None:
 			raise Exception('Simulation must not be None')
 
@@ -1152,7 +1442,7 @@ class Unit:
 
 		validBuildPlot = self.domain() == tile.terrain().domain()  # self.isNativeDomain(at: point, in: gameModel)
 		validBuildPlot = validBuildPlot or (buildType.isWater() and self.domain() == UnitDomainType.land and
-		                                    tile.isWater() and (self.canEmbark(simulation) or self.isEmbarked()))
+											tile.isWater() and (self.canEmbark(simulation) or self.isEmbarked()))
 
 		if not validBuildPlot:
 			return False
@@ -1243,14 +1533,14 @@ class Unit:
 					raise Exception("niy")
 				# player.doGreatPersonExpended(of: self.type)
 
-				self.doKill(delayed=True, player=None, simulation=simulation)
+				self.doKill(delayed=True, otherPlayer=None, simulation=simulation)
 
 			if self.unitType == UnitType.builder:
 				self.changeBuildChargesBy(-1)
 
 				# handle builder expended
 				if not self.hasBuildCharges():
-					self.doKill(delayed=True, player=None, simulation=simulation)
+					self.doKill(delayed=True, otherPlayer=None, simulation=simulation)
 
 			# Add to player's Improvement count, which will increase cost of future Improvements
 			if buildType.improvement() is not None or buildType.route() is not None:
@@ -1535,7 +1825,7 @@ class Unit:
 		return False
 
 	def canEnterTerritory(self, otherPlayer, ignoreRightOfPassage: bool = False,
-	                      isDeclareWarMove: bool = False) -> bool:
+						  isDeclareWarMove: bool = False) -> bool:
 		diplomacyAI = self.player.diplomacyAI
 
 		# we can enter unowned territory
@@ -1620,7 +1910,68 @@ class Unit:
 			# FIXME - add die visualization
 			pass
 
-		simulation.conceal(self.location, self.sight(), self, self.player)
+		simulation.concealAt(self.location, self.sight(), self, self.player)
 
 		simulation.userInterface.hideUnit(self, self.location)
 		simulation.removeUnit(self)
+
+	def isGreatPerson(self) -> bool:
+		return self.unitType in UnitType.greatPersons()
+
+	def canSentry(self, simulation) -> bool:
+		tile = simulation.tileAt(self.location)
+
+		# you're not allowed to sentry in a city
+		if tile.isCity():
+			return False
+
+		if not self.canDefend():
+			return False
+
+		if self.isWaiting():
+			return False
+
+		return True
+
+	def canDefend(self) -> bool:
+		"""Unit able to fight back when attacked?"""
+		# This will catch both embarked units and noncombatants
+		if self.baseCombatStrength() == 0:
+			return False
+
+		return True
+
+	def baseCombatStrength(self, ignoreEmbarked: bool = True) -> int:
+		if self.isEmbarked() and not ignoreEmbarked:
+			if self.unitType.unitClass() == UnitClassType.civilian:
+				return 0
+			else:
+				return 500  # FIXME
+
+		return self.unitType.meleeStrength()
+
+	def isOutOfAttacks(self, simulation) -> bool:
+		# Units with blitz don't run out of attacks!
+		# if self.isBlitz()
+		# return false
+
+		return self.numberOfAttacksMade >= self.numberOfAttacksPerTurn(simulation)
+
+	def queueMoveForVisualization(self, point, point1, simulation):
+		pass
+
+	def isSetUpForRangedAttack(self) -> bool:
+		# fixme
+		return False
+
+	def isCargo(self) -> bool:
+		# fixme
+		return False
+
+	def doMobilize(self, simulation):
+		# todo: notify UI
+		self.setFortifiedThisTurn(False, simulation)
+
+	def hasCargo(self):
+		# fixme
+		return False

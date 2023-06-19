@@ -22,6 +22,9 @@ class TestUnitMissions(unittest.TestCase):
         aiPlayer = Player(LeaderType.victoria, human=False)
         aiPlayer.initialize()
 
+        playerVictoria = Player(leader=LeaderType.victoria, cityState=None, human=True)
+        playerVictoria.initialize()
+
         mapModel = MapModelMock(MapSize.small, TerrainType.grass)
 
         mapOptions = MapOptions(MapSize.duel, MapType.continents, LeaderType.alexander, [LeaderType.victoria])
@@ -35,7 +38,7 @@ class TestUnitMissions(unittest.TestCase):
             victoryTypes=[VictoryType.domination],
             handicap=HandicapType.king,
             turnsElapsed=0,
-            players=[aiPlayer],
+            players=[aiPlayer, playerVictoria],
             map=mapModel
         )
 

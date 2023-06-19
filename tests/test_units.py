@@ -31,6 +31,10 @@ class TestUnitMissions(unittest.TestCase):
 		self.playerTrajan.initialize()
 		self.simulation.players.append(self.playerTrajan)
 
+		playerVictoria = Player(leader=LeaderType.victoria, cityState=None, human=True)
+		playerVictoria.initialize()
+		self.simulation.players.append(playerVictoria)
+
 		# add UI
 		self.simulation.userInterface = UserInterfaceMock()
 

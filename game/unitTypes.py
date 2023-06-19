@@ -19,6 +19,7 @@ class UnitPromotionType(ExtendedEnum):
 	sentry = 'sentry'
 	rutter = 'rutter'
 	depredation = 'depredation'
+	embarkation = 'embarkation'
 
 
 class UnitMapType(ExtendedEnum):
@@ -194,6 +195,10 @@ class UnitType(ExtendedEnum):
 
 	barbarianWarrior = 'barbarianWarrior'
 	barbarianArcher = 'barbarianArcher'
+
+	@classmethod
+	def greatPersons(cls) -> [UnitType]:
+		return [UnitType.general, UnitType.missionary, UnitType.apostle, UnitType.inquisitor]
 
 	def name(self):
 		return self._data().name

@@ -1,6 +1,10 @@
 from core.base import ExtendedEnum
 
 
+class TooltipType(ExtendedEnum):
+	unitDestroyedEnemyUnit = 'unitDestroyedEnemyUnit'
+
+
 class Interface:
 	def __init__(self):
 		pass
@@ -33,6 +37,9 @@ class Interface:
 		pass
 
 	def selectCivic(self, civic):
+		pass
+
+	def enterCity(self, unit, point):
 		pass
 
 
