@@ -222,17 +222,17 @@ class BuilderTaskingAI:
 		"""Adds a directive if the unit can construct a road in the plot"""
 		unitPlayer = unit.player
 
-		bestRouteType: RouteType = self.player.bestRoute()
+		bestRouteType: RouteType = self.player.bestRouteAt(None)
 
 		# if the player can't build a route, bail out!
 		if bestRouteType == RouteType.none:
 			return BuilderDirectiveWeightedList()
 
-		if pPlot.hasRoute(bestRouteType) and not tile.isRoutePillaged():
+		if tile.hasRoute(bestRouteType) and not tile.isRoutePillaged():
 			return BuilderDirectiveWeightedList()
 
 		# the plot was not flagged this turn, so ignore
-		if pPlot.builderAIScratchPad().turn != simulation.currentTurn or tile.builderAIScratchPad().leader != unitPlayer.leader:
+		if tile.builderAIScratchPad().turn != simulation.currentTurn or tile.builderAIScratchPad().leader != unitPlayer.leader:
 			return BuilderDirectiveWeightedList()
 
 		# find the route build
@@ -260,11 +260,11 @@ class BuilderTaskingAI:
 			builderDirectiveType = BuilderDirectiveType.repair
 
 		turnsAway = self.findTurnsAway(unit, tile, simulation)
-		buildtime = min(1, routeBuild.buildTime(tile))
+		buildTime = min(1, routeBuild.buildTime(tile))
 
 		weight = weight / (turnsAway + 1)
 		weight *= weight
-		weight += 100 / buildtime  # GetBuildTimeWeight(pUnit, pPlot, eRouteBuild, false, iMoveTurnsAway);
+		weight += 100 / buildTime  # GetBuildTimeWeight(pUnit, pPlot, eRouteBuild, false, iMoveTurnsAway);
 		weight *= tile.builderAIScratchPad().value
 		# FIXME weight = CorrectWeight(iWeight);
 

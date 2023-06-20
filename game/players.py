@@ -1293,7 +1293,7 @@ class Player:
 
 					for pathLocation in path:
 						pathTile = simulation.tileAt(pathLocation)
-						pathTile.setRoute(self.bestRoute())
+						pathTile.setRoute(self.bestRouteAt(None))
 
 		# send gossip
 		simulation.sendGossip(GossipType.cityFounded, cityName=cityName, player=self)
@@ -1569,7 +1569,7 @@ class Player:
 		
 		return
 
-	def bestRouteAt(self, tile) -> RouteType:
+	def bestRouteAt(self, tile=None) -> RouteType:
 		for buildType in list(BuildType):
 			routeType = buildType.route()
 			if routeType is not None:

@@ -152,7 +152,16 @@ class AStarPathfinder(AStar):
 		pts_or_none = self.astar(from_point, to_point, False)
 
 		if pts_or_none is not None:
-			return HexPath(list(pts_or_none))
+			points = []
+			costs = []
+			for pt, cost in pts_or_none:
+				points.append(pt)
+				if cost > 0.0:
+					costs.append(cost)
+				else:
+					costs.append(0.0)
+
+			return HexPath(points, costs)
 
 		return None
 

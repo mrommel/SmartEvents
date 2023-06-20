@@ -19,7 +19,7 @@ class AStar(ABC, Generic[T]):
 	class SearchNode:
 		"""Representation of a search node"""
 
-		__slots__ = ("data", "gscore", "fscore", "closed", "came_from", "out_openset")
+		__slots__ = ("data", "gscore", "fscore", "rscore", "closed", "came_from", "out_openset")
 
 		def __init__(
 			self, data: T, gscore: float = Infinite, fscore: float = Infinite
@@ -27,6 +27,7 @@ class AStar(ABC, Generic[T]):
 			self.data = data
 			self.gscore = gscore
 			self.fscore = fscore
+			self.rscore = -1.0
 			self.closed = False
 			self.out_openset = True
 			self.came_from = None
@@ -78,7 +79,7 @@ class AStar(ABC, Generic[T]):
 		def _gen():
 			current = last
 			while current:
-				yield current.data
+				yield current.data, current.rscore
 				current = current.came_from
 
 		if reverse_path:
@@ -99,21 +100,23 @@ class AStar(ABC, Generic[T]):
 			current = heappop(open_set)
 			if self.is_goal_reached(current.data, goal):
 				return self.reconstruct_path(current, reverse_path)
+
 			current.out_openset = True
 			current.closed = True
 			for neighbor in map(lambda n: search_nodes[n], self.neighbors(current.data)):
 				if neighbor.closed:
 					continue
-				tentative_gscore = current.gscore + self.distance_between(
-					current.data, neighbor.data
-				)
+
+				# Compute the cost from the current step to that step
+				rscore = self.distance_between(current.data, neighbor.data)
+				tentative_gscore = current.gscore + rscore
 				if tentative_gscore >= neighbor.gscore:
 					continue
 				neighbor.came_from = current
 				neighbor.gscore = tentative_gscore
-				neighbor.fscore = tentative_gscore + self.heuristic_cost_estimate(
-					neighbor.data, goal
-				)
+				neighbor.fscore = tentative_gscore + self.heuristic_cost_estimate(neighbor.data, goal)
+				neighbor.rscore = rscore
+
 				if neighbor.out_openset:
 					neighbor.out_openset = False
 					heappush(open_set, neighbor)

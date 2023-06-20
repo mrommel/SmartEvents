@@ -8,6 +8,8 @@ from game.players import Player
 from game.states.builds import BuildType
 from game.states.victories import VictoryType
 from game.types import TechType, CivicType
+from game.unitTypes import UnitType
+from game.units import Unit
 from map.base import Array2D, HexPoint, HexCube, HexDirection, Size, BoundingBox, HexArea
 from map.generation import MapOptions, MapGenerator, HeightMap
 from map.improvements import ImprovementType
@@ -994,6 +996,37 @@ class TestPathfinding(unittest.TestCase):
 		self.assertEqual(len(path.points()), 5)
 		for i, n in enumerate(target_path):
 			self.assertEqual(n, path.points()[i])
+
+	def test_turnsToReachTarget(self):
+		# GIVEN
+		mapModel = MapModelMock(10, 10, TerrainType.grass)
+		mapModel.modifyFeatureAt(HexPoint(1, 2), FeatureType.mountains)  # put a mountain into the path
+
+		player = Player(leader=LeaderType.trajan, human=True)
+		player.initialize()
+
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[player],
+			map=mapModel
+		)
+
+		playerScout = Unit(HexPoint(5, 5), UnitType.scout, player)
+		simulation.addUnit(playerScout)
+
+		datasource_options = MoveTypeIgnoreUnitsOptions(ignore_sight=True, can_embark=False, can_enter_ocean=False)
+		datasource = MoveTypeIgnoreUnitsPathfinderDataSource(mapModel, UnitMovementType.walk, player, datasource_options)
+		finder = AStarPathfinder(datasource)
+
+		# WHEN
+		turn = finder.turnsToReachTarget(playerScout, HexPoint(2, 3), simulation)
+		exist = finder.doesPathExist(HexPoint(5, 5), HexPoint(2, 3))
+
+		# THEN
+		self.assertAlmostEqual(turn, 1.3333333333333333)
+		self.assertEqual(exist, True)
 
 
 if __name__ == '__main__':
