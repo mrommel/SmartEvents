@@ -882,7 +882,7 @@ class HomelandAI:
 
 	def executeWorkerMove(self, unit, simulation) -> bool:
 		# evaluator
-		directive = self.player.builderTaskingAI.evaluateBuilder(unit, simulation)
+		directive = self.player.builderTaskingAI.evaluateBuilder(unit, simulation=simulation)
 
 		if directive is not None:
 			if directive.buildType == BuilderDirectiveType.buildImprovementOnResource or \
