@@ -1,7 +1,8 @@
 from core.base import ExtendedEnum, WeightedBaseList
 from game.states.builds import BuildType
+from game.unitTypes import UnitMapType
 from map.base import HexPoint
-from map.types import ResourceType
+from map.types import ResourceType, UnitMovementType, UnitDomainType
 
 
 class BuilderDirectiveType(ExtendedEnum):
@@ -74,7 +75,7 @@ class BuilderTaskingAI:
 				if self.player.isEqualTo(tile.owner()):
 					tiles.append(tile)
 		else:
-			for point in self.player.area:
+			for point in self.player.area():
 				tile = simulation.tileAt(point)
 				if tile is not None:
 					if self.player.isEqualTo(tile.owner()):
@@ -86,7 +87,6 @@ class BuilderTaskingAI:
 		for tile in tiles:
 			if not self.shouldBuilderConsiderPlot(tile, unit, simulation):
 				continue
-
 
 			# distance weight
 			# find how many turns the plot is away
@@ -129,3 +129,56 @@ class BuilderTaskingAI:
 		self._nonTerritoryPlots = []
 
 		return
+
+	def shouldBuilderConsiderPlot(self, tile, unit, simulation) -> bool:
+		"""Evaluates all the circumstances to determine if the builder can and should evaluate the given plot"""
+		dangerPlotsAI = self.player.dangerPlotsAI
+
+		# if plot is impassable, bail!
+		if tile.isImpassable(UnitMovementType.walk):
+			return False
+
+		# can't build on plots others own (unless inside a minor)
+		if not self.player.isEqualTo(tile.owner()):
+			return False
+
+		# workers should not be able to work in plots that do not match their default domain
+		if unit.domain() == UnitDomainType.land:
+			if tile.terrain().isWater():
+				return False
+
+		elif unit.domain() == UnitDomainType.sea:
+			if not tile.terrain().isWater():
+				return False
+
+		# need more planning for amphibious units
+		# we should include here the ability for work boats to cross to other areas with cities
+		targetTile = simulation.tileAt(unit.location)
+
+		if not tile.sameContinentAs(targetTile):
+			canCrossToNewArea = False
+
+			if unit.domain() == UnitDomainType.sea:
+				# if (pPlot->isAdjacentToArea(pUnit->area()))
+				# canCrossToNewArea = true
+				pass
+			else:
+				if unit.canEverEmbark():
+					canCrossToNewArea = True
+
+			if not canCrossToNewArea:
+				return False
+
+		# check to see if someone already has a mission here
+		# if (pUnit->GetMissionAIPlot() != pPlot):
+		# 	if (m_pPlayer->AI_plotTargetMissionAIs(pPlot, MISSIONAI_BUILD) > 0):
+		# 		return False
+
+		if dangerPlotsAI.dangerAt(tile.point) > 0:
+			return False
+
+		# other unit at target
+		if unit.location != tile.point and simulation.unitAt(tile.point, UnitMapType.civilian) is not None:
+			return False
+
+		return True

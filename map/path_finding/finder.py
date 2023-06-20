@@ -155,3 +155,6 @@ class AStarPathfinder(AStar):
 			return HexPath(list(pts_or_none))
 
 		return None
+
+	def doesPathExist(self, from_point, to_point) -> bool:
+		return self.shortestPath(from_point, to_point) is not None

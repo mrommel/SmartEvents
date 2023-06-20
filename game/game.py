@@ -450,15 +450,11 @@ class GameModel:
 			if player.isAlive() and player.isActive():
 				# For some reason, AI players don't set EndTurn, why not?
 				if player.turnFinished() or (not player.isHuman() and not player.hasActiveDiplomacyRequests()):
-					# debug
-					if player.isHuman():
-						print(f'auto moves: {player.hasProcessedAutoMoves()}')
-					# debug
 					if player.hasProcessedAutoMoves():
 						autoMovesComplete = False
 						if not player.hasBusyUnitOrCity():
 							autoMovesComplete = True
-						# print("+++ GameModel - CheckPlayerTurnDeactivate() : auto-moves complete for \(player.leader.name())")
+							# print("+++ GameModel - CheckPlayerTurnDeactivate() : auto-moves complete for \(player.leader.name())")
 
 						if autoMovesComplete:
 							# Activate the next player

@@ -414,6 +414,9 @@ class Player:
 		else:
 			self.doTurnPostDiplomacy(simulation)
 
+	def area(self) -> HexArea:
+		return self._area
+
 	def doTurnPostDiplomacy(self, simulation):
 		if self.isAlive():
 			if not self.isBarbarian() and not self.isFreeCity():

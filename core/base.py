@@ -85,3 +85,20 @@ class WeightedBaseList(dict):
 
 class WeightedStringList(WeightedBaseList):
 	pass
+
+
+def contains(filter, list) -> bool:
+	"""
+		checks if there is one element in the list that matches the lambda condition
+
+		@see https://stackoverflow.com/a/598407
+		´´´
+		if contains(lambda x: x.n == 3, myList):  # True if any element has .n==3
+            # do stuff
+        ´´´
+	"""
+	for x in list:
+		if filter(x):
+			return True
+
+	return False

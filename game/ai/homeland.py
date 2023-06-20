@@ -1,19 +1,22 @@
+import copy
 import random
 import sys
 from typing import Optional
 
 from game.ai.builderTasking import BuilderDirectiveType
+from game.ai.militaryStrategies import ReconStateType
 from game.cities import City
 from game.flavors import FlavorType
 from game.states.builds import BuildType
+from game.tradeRoutes import TradeRoute
 from game.unitTypes import UnitTaskType, UnitMapType, UnitMissionType
 from game.units import Unit, UnitAutomationType, UnitMission
 from map import constants
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.path_finding.finder import AStarPathfinder
-from map.types import UnitDomainType, UnitMovementType
-from core.base import ExtendedEnum, InvalidEnumError
+from map.types import UnitDomainType, UnitMovementType, Yields
+from core.base import ExtendedEnum, InvalidEnumError, contains
 
 
 class HomelandMoveTypeData:
@@ -42,7 +45,7 @@ class HomelandMoveType(ExtendedEnum):
 	# writer = ''  # AI_HOMELAND_MOVE_WRITER,
 	# artistGoldenAge = ''  # AI_HOMELAND_MOVE_ARTIST_GOLDEN_AGE,
 	# musician = ''  # AI_HOMELAND_MOVE_MUSICIAN,
-	# scientiestFreeTech = ''  # AI_HOMELAND_MOVE_SCIENTIST_FREE_TECH,
+	# scientistFreeTech = ''  # AI_HOMELAND_MOVE_SCIENTIST_FREE_TECH,
 	# none = ''  # AI_HOMELAND_MOVE_MERCHANT_TRADE,
 	# none = ''  # AI_HOMELAND_MOVE_ENGINEER_HURRY,
 	# none = ''  # AI_HOMELAND_MOVE_GENERAL_GARRISON,
@@ -577,7 +580,7 @@ class HomelandAI:
 		return
 
 	def executeFirstTurnSettlerMoves(self, simulation):
-		"""Creates cities for AI civs on first turn"""
+		"""Creates cities for AI civilizations on first turn"""
 		for currentMoveUnit in self.currentMoveUnits:
 			if currentMoveUnit.unit is not None:
 				currentMoveUnit.unit.pushMission(UnitMission(UnitMissionType.found), simulation)
@@ -670,7 +673,7 @@ class HomelandAI:
 				elif currentTurnUnit.healthPoints() < currentTurnUnit.maxHealthPoints():
 					# Also may be true if a damaged combat unit
 					if currentTurnUnit.isBarbarian():
-						# Barbarian combat units - only naval units flee (but they flee if have taken ANY damage)
+						# Barbarian combat units - only naval units flee (but they flee if they have taken ANY damage)
 						if currentTurnUnit.domain() == UnitDomainType.sea:
 							addUnit = True
 					elif currentTurnUnit.isUnderEnemyRangedAttack() or \
@@ -953,7 +956,7 @@ class HomelandAI:
 			if goodyPlot is not None:
 				print(f"Unit {unit.name()} at {unit.location} has goody target at {goodyPlot.point}")
 
-				if (goodyPlot.hasImprovement(ImprovementType.goodyHut) or \
+				if (goodyPlot.hasImprovement(ImprovementType.goodyHut) or
 					goodyPlot.hasImprovement(ImprovementType.barbarianCamp)) and \
 					simulation.visibleEnemy(goodyPlot.point, self.player) is None:
 
@@ -1084,3 +1087,171 @@ class HomelandAI:
 						pass
 
 		return
+
+	def executeTradeUnitMoves(self, simulation):
+		"""Get a trade unit and send it to a city!"""
+		goldFlavor: float = float(self.player.leader.flavor(FlavorType.gold))
+		foodFlavor: float = float(self.player.leader.flavor(FlavorType.growth))
+		scienceFlavor: float = float(self.player.leader.flavor(FlavorType.science))
+
+		for currentMoveUnit in self.currentMoveUnits:
+			unit = currentMoveUnit.unit
+
+			originCity = simulation.cityAt(unit.origin)
+			if originCity is not None:
+
+				bestTradeRoute: Optional[TradeRoute] = None
+				bestTradeRouteValue: float = -1.0
+
+				possibleTradeRoutes: [TradeRoute] = self.player.possibleTradeRoutes(originCity, simulation)
+
+				for possibleTradeRoute in possibleTradeRoutes:
+					# skip, if already has trade route between these cities
+					if self.player.hasTradeRoute(originCity.location, possibleTradeRoute.end()):
+						continue
+
+					tradeRouteYields: Yields = possibleTradeRoute.yields(simulation)
+					value: float = 0.0
+					value += tradeRouteYields.gold * goldFlavor
+					value += tradeRouteYields.food * foodFlavor
+					value += tradeRouteYields.science * scienceFlavor
+
+					if value > bestTradeRouteValue:
+						bestTradeRoute = possibleTradeRoute
+						bestTradeRouteValue = value
+
+				if bestTradeRoute is not None:
+					targetCity = simulation.cityAt(bestTradeRoute.end())
+
+					unit.doEstablishTradeRouteTo(targetCity, simulation)
+					self.unitProcessed(unit)
+					# unit.finishMoves()
+					if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
+						print(f"Trade unit founded trade route between {originCity.name} and {targetCity.name}")
+				else:
+					if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
+						print("Trade unit idling")
+
+					self.unitProcessed(unit)
+
+					unit.pushMission(UnitMission(UnitMissionType.skip), simulation)
+					unit.finishMoves()
+			else:
+				# try to relocate trader to random city
+				randomCity = random.choice(simulation.citiesOf(self.player))
+				if randomCity is not None:
+					unit.doRebaseTo(randomCity.location)
+
+					if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
+						print(f"Trade unit rebased to {randomCity.name}")
+				else:
+					if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
+						print("Trade unit idling")
+
+					self.unitProcessed(unit)
+
+					unit.pushMission(UnitMission(UnitMissionType.skip), simulation)
+					unit.finishMoves()
+
+		return
+
+	def findUnitsForMove(self, moveType: HomelandMoveType, firstTime: bool, simulation) -> bool:
+		"""Finds both high and normal priority units we can use for this homeland move
+		(returns true if at least 1 unit found)"""
+		rtnValue: bool = False
+
+		if firstTime:
+			self.currentMoveUnits = []
+			self.currentMoveHighPriorityUnits = []
+
+			# Loop through all units available to homeland AI this turn
+			for loopUnit in self.currentTurnUnits:
+				loopUnitPlayer = loopUnit.player
+				economicAI = self.player.economicAI
+
+				if not loopUnitPlayer.isHuman():
+					# Civilians aren't useful for any of these moves
+					if not loopUnit.isCombatUnit():
+						continue
+
+					# Scouts aren't useful unless recon is entirely shut off
+					if loopUnit.task() == UnitTaskType.explore and economicAI.reconState() != ReconStateType.enough:
+						continue
+
+					suitableUnit = False
+					highPriority = False
+
+					if moveType == HomelandMoveType.garrison:
+						# Want to put ranged units in cities to give them a ranged attack
+						if loopUnit.isRanged() and not loopUnit.hasTask(UnitTaskType.cityBombard):
+							suitableUnit = True
+							highPriority = True
+
+						elif loopUnit.canAttack():  # Don't use non-combatants
+							# Don't put units with a combat strength boosted from promotions in cities, these boosts are ignored
+							if loopUnit.defenseModifierAgainst(unit=None, city=None, tile=None, ranged=False, simulation=simulation) == 0 \
+								and loopUnit.attackModifierAgainst(unit=None, city=None, tile=None, simulation=simulation) == 0:
+								suitableUnit = True
+
+					elif moveType == HomelandMoveType.sentry:
+						# No ranged units as sentries
+						if not loopUnit.isRanged():  # and !loopUnit->noDefensiveBonus()
+							suitableUnit = True
+
+							# Units with extra sight are especially valuable
+							if loopUnit.sight() > 2:
+								highPriority = True
+
+						elif loopUnit.sight() > 2:  # and loopUnit->noDefensiveBonus()
+							suitableUnit = True
+							highPriority = True
+
+					elif moveType == HomelandMoveType.mobileReserve:
+						# Ranged units are excellent in the mobile reserve as are fast movers
+						if loopUnit.isRanged() or loopUnit.hasTask(UnitTaskType.fastAttack):
+							suitableUnit = True
+							highPriority = True
+						elif loopUnit.canAttack():
+							suitableUnit = True
+
+					elif moveType == HomelandMoveType.ancientRuins:
+						# Fast movers are top priority
+						if loopUnit.hasTask(UnitTaskType.fastAttack):
+							suitableUnit = True
+							highPriority = True
+						elif loopUnit.canAttack():
+							suitableUnit = True
+
+					else:
+						# NOOP
+						pass
+
+					# If unit was suitable, add it to the proper list
+					if suitableUnit:
+						unit = HomelandUnit(loopUnit)
+						if highPriority:
+							self.currentMoveHighPriorityUnits.append(unit)
+						else:
+							self.currentMoveUnits.append(unit)
+						rtnValue = True
+
+		else:  # not first time
+			# Normal priority units
+			tempList = copy.deepcopy(self.currentMoveUnits)
+			self.currentMoveUnits = []
+
+			for it in tempList:
+				if contains(lambda u: u.location == it.unit.location, self.currentTurnUnits):
+					self.currentMoveUnits.append(it)
+					rtnValue = True
+
+			# High priority units
+			tempList = copy.deepcopy(self.currentMoveHighPriorityUnits)
+			self.currentMoveHighPriorityUnits = []
+
+			for it in tempList:
+				if contains(lambda u: u.location == it.unit.location, self.currentTurnUnits):
+					self.currentMoveHighPriorityUnits.append(it)
+					rtnValue = True
+
+		return rtnValue

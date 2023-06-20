@@ -134,7 +134,7 @@ class EconomicAI:
                         print(f'Player {self.player.leader} has abandoned {economicStrategyType} in {simulation.currentTurn}')
                         self.updateFlavors()
 
-    def reconState(self):
+    def reconState(self) -> ReconStateType:
         return self.reconStateValue
 
     def updateFlavors(self):

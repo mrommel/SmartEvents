@@ -36,7 +36,7 @@ class TestTradeRoutes(unittest.TestCase):
 		if location == self.sourceLocation:
 			self.sourceVisited += 1
 
-		print(f'moveCallback({location})')
+		# print(f'moveCallback({location})')
 
 	def test_both_cities_homeland(self):
 		# GIVEN

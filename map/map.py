@@ -887,6 +887,12 @@ class Tile:
 
 		return False
 
+	def sameContinentAs(self, otherTile) -> bool:
+		if isinstance(otherTile, Tile):
+			return otherTile.continentIdentifier == self.continentIdentifier and self.continentIdentifier is not None
+
+		return False
+
 
 class TileStatistics:
 	def __init__(self):
