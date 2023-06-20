@@ -25,7 +25,7 @@ from map.map import MapModel, Tile, ContinentType, Continent
 from map.path_finding.finder import AStarPathfinder, MoveTypeIgnoreUnitsOptions, \
 	MoveTypeIgnoreUnitsPathfinderDataSource, InfluencePathfinderDataSource
 from map.path_finding.path import HexPath
-from map.types import FeatureType, Tutorials, MapSize
+from map.types import FeatureType, Tutorials, MapSize, UnitMovementType
 
 
 class GameModel:
@@ -637,6 +637,15 @@ class GameModel:
 			can_enter_ocean=unit.player.canEnterOcean()
 		)
 		return MoveTypeIgnoreUnitsPathfinderDataSource(self._map, unit.movementType(), unit.player, datasourceOptions)
+
+	def ignoreUnitsPathfinderDataSource(self, movementType: UnitMovementType, player, unitMapType: UnitMapType,
+	                                    canEmbark: bool, canEnterOcean: bool) -> MoveTypeIgnoreUnitsPathfinderDataSource:
+		datasourceOptions = MoveTypeIgnoreUnitsOptions(
+			ignore_sight=True,
+			can_embark=canEmbark,
+			can_enter_ocean=canEnterOcean
+		)
+		return MoveTypeIgnoreUnitsPathfinderDataSource(self._map, movementType, player, datasourceOptions)
 
 	def pathTowards(self, target: HexPoint, options: [MoveOption], unit) -> HexPath:
 		datasource = self.unitAwarePathfinderDataSource(unit)

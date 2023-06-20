@@ -13,6 +13,7 @@ from map.generation import MapOptions, MapGenerator, HeightMap
 from map.improvements import ImprovementType
 from map.map import Tile, MapModel, FlowDirection, River, Continent
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, AStarPathfinder, MoveTypeIgnoreUnitsPathfinderDataSource
+from map.path_finding.path import HexPath
 from map.types import FeatureType, TerrainType, UnitMovementType, MapSize, MapType, AppealLevel, ResourceType
 from tests.testBasics import UserInterfaceMock, MapModelMock
 
@@ -645,6 +646,22 @@ class TestTile(unittest.TestCase):
 
 		# Rifling - To Boost: Build a Niter Mine
 
+	def test_continent(self):
+		tile0 = Tile(HexPoint(1, 1), TerrainType.grass)
+		tile0.continentIdentifier = 'abc'
+
+		tile1 = Tile(HexPoint(1, 2), TerrainType.desert)
+		tile1.continentIdentifier = 'abc'
+
+		tile2 = Tile(HexPoint(1, 3), TerrainType.ocean)
+		tile2.continentIdentifier = 'def'
+
+		self.assertEqual(tile0.sameContinentAs(tile1), True)
+		self.assertEqual(tile0.continentIdentifier, tile1.continentIdentifier)
+
+		self.assertEqual(tile0.sameContinentAs(tile2), False)
+		self.assertNotEqual(tile0.continentIdentifier, tile2.continentIdentifier)
+
 
 class TestBoundingBox(unittest.TestCase):
 	def test_constructor(self):
@@ -869,6 +886,57 @@ class TestMap(unittest.TestCase):
 		self.assertIsNone(continentBefore)
 		self.assertEqual(continentAfter, continent)
 
+	def test_tile(self):
+		# GIVEN
+		mapModel = MapModelMock(10, 10, TerrainType.grass)
+
+		tile0terrain = mapModel.tileAt(HexPoint(0, 0)).terrain()
+		tile1terrain = mapModel.tileAt(1, 1).terrain()
+
+		# WHEN
+		mapModel.modifyTerrainAt(HexPoint(0, 0), TerrainType.ocean)
+		mapModel.modifyTerrainAt(1, 1, TerrainType.desert)
+
+		# THEN
+		self.assertEqual(tile0terrain, TerrainType.grass)
+		self.assertEqual(mapModel.tileAt(HexPoint(0, 0)).terrain(), TerrainType.ocean)
+		self.assertEqual(tile1terrain, TerrainType.grass)
+		self.assertEqual(mapModel.tileAt(1, 1).terrain(), TerrainType.desert)
+
+	def test_modifyTerrain(self):
+		# GIVEN
+		mapModel = MapModelMock(10, 10, TerrainType.grass)
+
+		terrain0before = mapModel.terrainAt(HexPoint(0, 0))
+		terrain1before = mapModel.terrainAt(1, 1)
+
+		# WHEN
+		mapModel.modifyTerrainAt(HexPoint(0, 0), TerrainType.ocean)
+		mapModel.modifyTerrainAt(1, 1, TerrainType.desert)
+
+		# THEN
+		self.assertEqual(terrain0before, TerrainType.grass)
+		self.assertEqual(mapModel.terrainAt(HexPoint(0, 0)), TerrainType.ocean)
+		self.assertEqual(terrain1before, TerrainType.grass)
+		self.assertEqual(mapModel.terrainAt(1, 1), TerrainType.desert)
+
+	def test_modifyHills(self):
+		# GIVEN
+		mapModel = MapModelMock(10, 10, TerrainType.grass)
+
+		hills0before = mapModel.isHillsAt(HexPoint(0, 0))
+		hills1before = mapModel.isHillsAt(1, 1)
+
+		# WHEN
+		mapModel.modifyIsHillsAt(HexPoint(0, 0), True)
+		mapModel.modifyIsHillsAt(1, 1, True)
+
+		# THEN
+		self.assertEqual(hills0before, False)
+		self.assertEqual(mapModel.isHillsAt(HexPoint(0, 0)), True)
+		self.assertEqual(hills1before, False)
+		self.assertEqual(mapModel.isHillsAt(1, 1), True)
+
 
 class TestMapGenerator(unittest.TestCase):
 
@@ -893,6 +961,18 @@ class TestMapGenerator(unittest.TestCase):
 
 
 class TestPathfinding(unittest.TestCase):
+	def test_path(self):
+		path = HexPath([HexPoint(1, 1), HexPoint(2, 1), HexPoint(2, 2)])
+		self.assertEqual(path, path)
+		self.assertEqual(path.firstIndexOf(HexPoint(2, 1)), 1)
+
+		reversePath = HexPath([HexPoint(2, 2), HexPoint(2, 1), HexPoint(1, 1)])
+		self.assertEqual(path.reversed(), reversePath)
+
+		path.append(HexPoint(2, 3), 2.0)
+		extendedPath = HexPath([HexPoint(1, 1), HexPoint(2, 1), HexPoint(2, 2), HexPoint(2, 3)])
+		self.assertEqual(path, extendedPath)
+
 	def test_generation_request(self):
 		"""Test astar"""
 		grid = MapModel(10, 10)

@@ -1,8 +1,11 @@
+import sys
+
 from core.base import ExtendedEnum, WeightedBaseList
 from game.states.builds import BuildType
 from game.unitTypes import UnitMapType
 from map.base import HexPoint
-from map.types import ResourceType, UnitMovementType, UnitDomainType
+from map.path_finding.finder import AStarPathfinder
+from map.types import ResourceType, UnitMovementType, UnitDomainType, RouteType
 
 
 class BuilderDirectiveType(ExtendedEnum):
@@ -182,3 +185,98 @@ class BuilderTaskingAI:
 			return False
 
 		return True
+
+	def findTurnsAway(self, unit, tile, simulation) -> int:
+		"""Determines if the builder can get to the plot. Returns -1 if no path can be found,
+		otherwise it returns the # of turns to get there"""
+		targetTile = simulation.tileAt(unit.location)
+		if unit.location == tile.point:
+			return 0
+
+		# If this plot is far away, we'll just use its distance as an estimate of the time to get there
+		# (to avoid hitting the pathfinder)
+		# We'll be sure to check later to make sure we have a real path before we execute this
+		if unit.domain() == UnitDomainType.land and not tile.sameContinentAs(targetTile) and not unit.canEverEmbark():
+			return -1
+
+		plotDistance = unit.location.distance(tile.point)
+		if plotDistance >= 8:  # AI_HOMELAND_ESTIMATE_TURNS_DISTANCE
+			return plotDistance
+		else:
+			pathFinderDataSource = simulation.ignoreUnitsPathfinderDataSource(
+				unit.movementType(),
+				unit.player,
+				UnitMapType.combat,
+				unit.player.canEmbark(),
+				unit.player.canEnterOcean()
+			)
+			pathFinder = AStarPathfinder(pathFinderDataSource)
+
+			result = pathFinder.turnsToReachTarget(unit, tile.point, simulation)
+			if result == sys.maxsize:
+				return -1
+
+			return result
+
+	def addRouteDirectives(self, unit, tile, dist: int, simulation) -> BuilderDirectiveWeightedList:
+		"""Adds a directive if the unit can construct a road in the plot"""
+		unitPlayer = unit.player
+
+		bestRouteType: RouteType = self.player.bestRoute()
+
+		# if the player can't build a route, bail out!
+		if bestRouteType == RouteType.none:
+			return BuilderDirectiveWeightedList()
+
+		if pPlot.hasRoute(bestRouteType) and not tile.isRoutePillaged():
+			return BuilderDirectiveWeightedList()
+
+		# the plot was not flagged this turn, so ignore
+		if pPlot.builderAIScratchPad().turn != simulation.currentTurn or tile.builderAIScratchPad().leader != unitPlayer.leader:
+			return BuilderDirectiveWeightedList()
+
+		# find the route build
+		routeBuild: BuildType = BuildType.none
+		if tile.isRoutePillaged():
+			routeBuild = BuildType.repair
+		else:
+			routeType: RouteType = tile.builderAIScratchPad().routeType
+
+			for buildType in list(BuildType):
+				if buildType.route() == routeType:
+					routeBuild = buildType
+					break
+
+		if routeBuild == BuildType.none:
+			return BuilderDirectiveWeightedList()
+
+		if not unit.canBuild(routeBuild, tile.point, testVisible=False, testGold=True, simulation=simulation):
+			return BuilderDirectiveWeightedList()
+
+		weight = 100  # BUILDER_TASKING_BASELINE_BUILD_ROUTES
+		builderDirectiveType: BuilderDirectiveType = BuilderDirectiveType.buildRoute
+		if routeBuild == BuildType.repair:
+			weight = 200  # BUILDER_TASKING_BASELINE_REPAIR
+			builderDirectiveType = BuilderDirectiveType.repair
+
+		turnsAway = self.findTurnsAway(unit, tile, simulation)
+		buildtime = min(1, routeBuild.buildTime(tile))
+
+		weight = weight / (turnsAway + 1)
+		weight *= weight
+		weight += 100 / buildtime  # GetBuildTimeWeight(pUnit, pPlot, eRouteBuild, false, iMoveTurnsAway);
+		weight *= tile.builderAIScratchPad().value
+		# FIXME weight = CorrectWeight(iWeight);
+
+		items = BuilderDirectiveWeightedList()
+
+		directive = BuilderDirective(
+			directiveType=builderDirectiveType,
+			build=routeBuild,
+			resource=ResourceType.none,
+			target=tile.point,
+			moveTurnsAway=turnsAway
+		)
+
+		items.addWeight(float(weight), directive)
+		return items

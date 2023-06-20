@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from game.cities import City
 from game.districts import DistrictType
@@ -980,16 +980,16 @@ class ContinentType(ExtendedEnum):
 
 
 class MapModel:
-	def __init__(self, width, height=None):
-		if isinstance(width, Size) and height is None:
-			size = width
+	def __init__(self, width_or_size: Union[Size, int], height: Optional[int] = None):
+		if isinstance(width_or_size, Size) and height is None:
+			size = width_or_size
 			self.width = size.width()
 			self.height = size.height()
-		elif isinstance(width, int) and isinstance(height, int):
-			self.width = width
+		elif isinstance(width_or_size, int) and isinstance(height, int):
+			self.width = width_or_size
 			self.height = height
 		else:
-			raise AttributeError(f'Map with wrong attributes: {width} / {height}')
+			raise AttributeError(f'Map with wrong attributes: {width_or_size} / {height}')
 
 		self.tiles = Array2D(self.width, self.height)
 
@@ -1004,7 +1004,7 @@ class MapModel:
 		self.cityStateStartLocations = []
 		self.continents = []
 
-	def valid(self, x_or_hex, y=None):
+	def valid(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> bool:
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
 			return 0 <= hex_point.x < self.width and 0 <= hex_point.y < self.height
@@ -1014,7 +1014,7 @@ class MapModel:
 		else:
 			raise AttributeError(f'Map.valid with wrong attributes: {x_or_hex} / {y}')
 
-	def points(self):
+	def points(self) -> [HexPoint]:
 		point_arr = []
 
 		for x in range(self.width):
@@ -1023,7 +1023,7 @@ class MapModel:
 
 		return point_arr
 
-	def tileAt(self, x_or_hex, y=None) -> Optional[Tile]:
+	def tileAt(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> Optional[Tile]:
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
 
@@ -1041,7 +1041,14 @@ class MapModel:
 		else:
 			raise AttributeError(f'Map.tileAt with wrong attributes: {x_or_hex} / {y}')
 
-	def terrainAt(self, x_or_hex, y=None):
+	def terrainAt(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> Optional[TerrainType]:
+		"""
+			terrain of the tile at the location
+
+			@param x_or_hex: int (x-coordinate) or HexPoint to identify the tile to get the terrain from
+			@param y: int (y-coordinate)
+			@return: terrain of the tile at the location
+		"""
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
 
@@ -1059,7 +1066,7 @@ class MapModel:
 		else:
 			raise AttributeError(f'Map.terrainAt with wrong attributes: {x_or_hex} / {y}')
 
-	def modifyTerrainAt(self, x_or_hex, y_or_terrain, terrain=None):
+	def modifyTerrainAt(self, x_or_hex: Union[int, HexPoint], y_or_terrain: Union[int, TerrainType], terrain: Optional[TerrainType] = None):
 		if isinstance(x_or_hex, HexPoint) and isinstance(y_or_terrain, TerrainType) and terrain is None:
 			hex_point = x_or_hex
 			terrain_type = y_or_terrain
@@ -1072,17 +1079,24 @@ class MapModel:
 		else:
 			raise AttributeError(f'Map.modifyTerrainAt with wrong attributes: {x_or_hex} / {y_or_terrain} / {terrain}')
 
-	def isHillsAt(self, x_or_hex, y=None):
+	def isHillsAt(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> bool:
+		"""
+			get the information if the tile at the location has hills
+
+			@param x_or_hex: int (x-coordinate) or HexPoint to identify the tile to get the hills information from
+			@param y: int (y-coordinate)
+			@return: True if the tile at the location has hills
+		"""
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
-			return self.tiles.values[hex_point.y][hex_point.x].ishills()
+			return self.tiles.values[hex_point.y][hex_point.x].isHills()
 		elif isinstance(x_or_hex, int) and isinstance(y, int):
 			x = x_or_hex
-			return self.tiles.values[y][x].ishills()
+			return self.tiles.values[y][x].isHills()
 		else:
 			raise AttributeError(f'Map.isHillsAtt with wrong attributes: {x_or_hex} / {y}')
 
-	def modifyIsHillsAt(self, x_or_hex, y_or_is_hills, is_hills=None):
+	def modifyIsHillsAt(self, x_or_hex: Union[HexPoint, int], y_or_is_hills: Union[int, bool], is_hills: Optional[bool] = None):
 		if isinstance(x_or_hex, HexPoint) and isinstance(y_or_is_hills, bool) and is_hills is None:
 			hex_point = x_or_hex
 			is_hills = y_or_is_hills
@@ -1095,7 +1109,7 @@ class MapModel:
 			raise AttributeError(
 				f'Map.modifyIsHillsAt with wrong attributes: {x_or_hex} / {y_or_is_hills} / {is_hills}')
 
-	def featureAt(self, x_or_hex, y=None):
+	def featureAt(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> FeatureType:
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
 			return self.tiles.values[hex_point.y][hex_point.x].feature()
@@ -1105,7 +1119,7 @@ class MapModel:
 		else:
 			raise AttributeError(f'Map.featureAt with wrong attributes: {x_or_hex} / {y}')
 
-	def modifyFeatureAt(self, x_or_hex, y_or_feature, feature=None):
+	def modifyFeatureAt(self, x_or_hex: Union[int, HexPoint], y_or_feature: Union[int, FeatureType], feature: Optional[FeatureType] = None):
 		if isinstance(x_or_hex, HexPoint) and isinstance(y_or_feature, FeatureType) and feature is None:
 			hex_point = x_or_hex
 			feature_type = y_or_feature
@@ -1116,9 +1130,9 @@ class MapModel:
 			feature_type = feature
 			self.tiles.values[y][x].setFeature(feature_type)
 		else:
-			raise AttributeError(f'Map.modifyTerrainAt with wrong attributes: {x_or_hex} / {y_or_terrain} / {feature}')
+			raise AttributeError(f'Map.modifyTerrainAt with wrong attributes: {x_or_hex} / {y_or_feature} / {feature}')
 
-	def modifyResourceAt(self, x_or_hex, y_or_resource, resource=None):
+	def modifyResourceAt(self, x_or_hex: Union[int, HexPoint], y_or_resource: Union[int, ResourceType], resource: Optional[ResourceType] = None):
 		if isinstance(x_or_hex, HexPoint) and isinstance(y_or_resource, ResourceType) and resource is None:
 			hex_point = x_or_hex
 			resource_type = y_or_resource
@@ -1131,7 +1145,7 @@ class MapModel:
 		else:
 			raise AttributeError(f'Map.modifyResourceAt with wrong attributes: {x_or_hex} / {y_or_resource} / {resource}')
 
-	def riverAt(self, x_or_hex, y=None) -> bool:
+	def riverAt(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> bool:
 		"""@return True, if this tile has a river - False otherwise"""
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
@@ -1142,7 +1156,7 @@ class MapModel:
 		else:
 			raise AttributeError(f'Map.riverAt with wrong attributes: {x_or_hex} / {y}')
 
-	def isFreshWaterAt(self, x_or_hex, y=None):
+	def isFreshWaterAt(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> bool:
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
 			return self._isFreshWaterAt(hex_point.x, hex_point.y)
@@ -1152,7 +1166,7 @@ class MapModel:
 		else:
 			raise AttributeError(f'Map.riverAt with wrong attributes: {x_or_hex} / {y}')
 
-	def _isFreshWaterAt(self, x, y):
+	def _isFreshWaterAt(self, x: int, y: int) -> bool:
 		tile = self.tileAt(x, y)
 
 		if tile.terrain().isWater() or tile.isImpassable(UnitMovementType.walk):
@@ -1175,7 +1189,7 @@ class MapModel:
 
 		return False
 
-	def capitalOf(self, player: Player) -> City:
+	def capitalOf(self, player: Player) -> Optional[City]:
 		item = next((city for city in self._cities if city.player.leader == player.leader and city.capitalValue), None)
 		return item
 

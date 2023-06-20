@@ -1,3 +1,4 @@
+import sys
 from typing import Optional
 
 from map.base import HexPoint
@@ -28,7 +29,6 @@ class MoveTypeIgnoreUnitsOptions:
 
 
 class MoveTypeIgnoreUnitsPathfinderDataSource(AStarDataSource):
-
 	def __init__(self, grid, movement_type: UnitMovementType, player, options: MoveTypeIgnoreUnitsOptions):
 		super().__init__(grid, movement_type)
 		self.player = player
@@ -158,3 +158,24 @@ class AStarPathfinder(AStar):
 
 	def doesPathExist(self, from_point, to_point) -> bool:
 		return self.shortestPath(from_point, to_point) is not None
+
+	def turnsToReachTarget(self, unit, target: HexPoint, simulation):
+		"""
+		How many turns will it take a unit to get to a target plot (returns MAX_INT if can't reach at all; returns 0 if makes it in 1 turn and has movement left)
+        Should call it with bIgnoreStacking true if want foolproof way to see if can make it in 0 turns (since that way doesn't open
+        open the 2nd layer of the pathfinder)
+
+		@param unit:
+		@param target:
+		@param simulation:
+		@return:
+		"""
+		if unit.maxMoves(simulation) <= 0:
+			return sys.maxsize
+
+		path = self.shortestPath(unit.location, target)
+		if path is not None:
+			cost = path.cost()
+			return int(cost) / unit.maxMoves(simulation)
+
+		return sys.maxsize

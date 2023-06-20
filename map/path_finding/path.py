@@ -33,6 +33,16 @@ class HexPath:
 		strValue += ')'
 		return strValue
 
+	def __eq__(self, other):
+		if isinstance(other, HexPath):
+			for idx, pt in enumerate(self._points):
+				if pt != other.points()[idx]:
+					return False
+
+			return True
+		else:
+			return False
+
 	def points(self) -> [HexPoint]:
 		return self._points
 
