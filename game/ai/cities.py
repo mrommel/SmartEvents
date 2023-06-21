@@ -1642,7 +1642,7 @@ class CityStrategyAI:
 			if workingTile.workingCity() is not None and workingTile.workingCity().location != self.city.location:
 				continue
 
-			yields = workingTile.yieldsFor(self.city.player, ignoreFeature=False)
+			yields = workingTile.yields(self.city.player, ignoreFeature=False)
 			bestFoodYields.append(YieldValue(location=workingTileLocation, value=yields.food))
 			bestProductionYields.append(YieldValue(location=workingTileLocation, value=yields.production))
 			bestGoldYields.append(YieldValue(location=workingTileLocation, value=yields.gold))
@@ -1690,3 +1690,6 @@ class CityStrategyAI:
 	def resetBestYields(self):
 		self.bestYieldAverage = YieldList()
 		self.yieldDeltaValue = YieldList()
+
+	def yieldDeltaFor(self, yieldType: YieldType) -> float:
+		return self.yieldDeltaValue.weight(yieldType)

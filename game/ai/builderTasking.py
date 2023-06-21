@@ -34,6 +34,9 @@ class BuilderDirective:
 			return self.directiveType == other.directiveType and self.build == other.build and \
 				self.target == other.target
 
+	def __hash__(self):
+		return hash((self.directiveType, self.build, self.target))
+
 
 class BuilderDirectiveWeightedList(WeightedBaseList):
 	def __init__(self):
@@ -472,7 +475,7 @@ class BuilderTaskingAI:
 		cityStrategy = city.cityStrategy
 
 		# preparation
-		currentYields = tile.yieldsFor(self.player, ignoreFeature=False)
+		currentYields = tile.yields(self.player, ignoreFeature=False)
 		projectedYields = tile.yieldsWith(buildType, self.player, ignoreFeature=False)
 
 		score = 0.0

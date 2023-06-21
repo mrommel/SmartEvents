@@ -335,6 +335,7 @@ class Player:
 		# cities stats values
 		self.citiesFoundValue = 0
 		self.citiesLostValue = 0
+		self._trainedSettlersValue = 0
 		self.builtCityNames = []
 		self.originalCapitalLocationValue = HexPoint(-1, -1)
 		self.lostCapitalValue = False
@@ -1599,3 +1600,6 @@ class Player:
 
 	def currentEra(self) -> EraType:
 		return self._currentEraValue
+
+	def changeTrainedSettlersBy(self, delta: int):
+		self._trainedSettlersValue += delta

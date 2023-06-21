@@ -176,6 +176,8 @@ class Yields:
 		#	return self.housing
 		# if yieldType == YieldType.appeal:
 		#	return self.appeal
+		if yieldType == YieldType.none:
+			return 0.0
 
 		raise InvalidEnumError(yieldType)
 

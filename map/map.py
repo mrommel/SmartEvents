@@ -514,6 +514,31 @@ class Tile:
 
 		return returnYields
 
+	def yieldsWith(self, buildType: BuildType, player, ignoreFeature: bool) -> Yields:
+		# Will the build remove the feature?
+		if self._featureValue != FeatureType.none:
+			if buildType.canRemove(self._featureValue):
+				ignoreFeature = True
+
+		yields = self.yields(player, ignoreFeature)
+
+		improvementFromBuild = buildType.improvement()
+		if improvementFromBuild is None:
+			# might be repair
+			if not self.isImprovementPillaged() or buildType == BuildType.repair:
+				improvementFromBuild = self.improvement()
+
+		if improvementFromBuild is not None:
+			yields += improvementFromBuild.yieldsFor(player)
+
+		routeFromBuild = buildType.route()
+		if routeFromBuild is None:
+			# might be repair
+			if not self.isRoutePillaged() or buildType == BuildType.repair:
+				routeFromBuild = self._route
+
+		return yields
+
 	def isImprovementPillaged(self) -> bool:
 		return self._improvementPillagedValue
 
@@ -909,6 +934,9 @@ class Tile:
 
 	def builderAIScratchPad(self) -> BuilderAIScratchPad:
 		return self._builderAIScratchPad
+
+	def isRoutePillaged(self) -> bool:
+		return False
 
 
 class TileStatistics:
