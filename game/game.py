@@ -766,3 +766,6 @@ class GameModel:
 				return True
 
 		return False
+
+	def areas(self):
+		return self._map.areas

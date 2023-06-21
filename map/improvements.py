@@ -562,3 +562,14 @@ class ImprovementType(ExtendedEnum):
 
 	def defenseModifier(self) -> int:
 		return self._data().defenseModifier
+
+	def isQuarryPossibleOn(self, tile) -> bool:
+		owner = tile.owner()
+
+		if owner is None:
+			return False
+
+		if not owner.hasTech(TechType.animalHusbandry):
+			return False
+
+		return tile.hasResource(ResourceType.stone, owner) or tile.hasResource(ResourceType.marble, owner) # or tile.has(resource:.gypsum, for: owner) * /

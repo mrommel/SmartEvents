@@ -22,6 +22,7 @@ from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, UnitMissio
 from game.wonders import WonderType
 from map.base import HexPoint, HexArea, HexDirection
 from map.improvements import ImprovementType
+from map.path_finding.finder import AStarPathfinder
 from map.path_finding.path import HexPath
 from map.types import UnitDomainType, YieldType, ResourceType, RouteType, FeatureType, TerrainType
 from core.base import ExtendedEnum
@@ -2148,3 +2149,8 @@ class Unit:
 
 	def canEnterTerrain(self, tile):
 		return not self.isImpassableTile(tile)
+
+	def turnsToReach(self, point: HexPoint, simulation) -> int:
+		pathFinderDataSource = simulation.unitAwarePathfinderDataSource(self)
+		pathFinder = AStarPathfinder(pathFinderDataSource)
+		return pathFinder.turnsToReachTarget(self, point, simulation)

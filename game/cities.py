@@ -546,6 +546,9 @@ class CityCitizens:
 
 	def doRemoveWorstForcedWorkingPlot(self, simulation):
 		"""Remove the Forced status from the worst ForcedWorking plot"""
+		if simulation is None:
+			raise Exception('simulation must not be None')
+
 		worstPlotValue: int = -1
 		worstPlotPoint: Optional[HexPoint] = None
 
@@ -753,6 +756,9 @@ class CityCitizens:
 	def bestCityPlotWithValue(self, wantBest: bool, wantWorked: bool, simulation) -> (Optional[HexPoint], int):
 		"""Find a Plot the City is either working or not, and the best/worst value for it - this function does
 		"double duty" depending on what the user wants to find"""
+		if simulation is None:
+			raise Exception('simulation must not be None')
+
 		bestPlotValue: int = -1
 		bestPlotID: [HexPoint] = None
 
@@ -872,6 +878,9 @@ class CityCitizens:
 		return False
 
 	def workableTiles(self, simulation):
+		if simulation is None:
+			raise Exception('simulation must not be None')
+
 		area = self.city.location.areaWithRadius(radius=City.workRadius)
 		result = []
 
@@ -1606,7 +1615,7 @@ class City:
 			if reassignCitizen and populationChange < 0:
 				# Need to Remove Citizens
 				for _ in range(-populationChange):
-					self.cityCitizens.doRemoveWorstCitizen(simulation)
+					self.cityCitizens.doRemoveWorstCitizen(simulation=simulation)
 
 				# Fixup the unassigned workers
 				unassignedWorkers = self.cityCitizens.numberOfUnassignedCitizens()

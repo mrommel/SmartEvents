@@ -1047,7 +1047,10 @@ class MapModel:
 		self._units = []
 		self.startLocations = []
 		self.cityStateStartLocations = []
+
 		self.continents = []
+		self.oceans = []
+		self.areas = []
 
 	def valid(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> bool:
 		if isinstance(x_or_hex, HexPoint) and y is None:
@@ -1067,6 +1070,30 @@ class MapModel:
 				point_arr.append(HexPoint(x, y))
 
 		return point_arr
+
+	def analyze(self):
+		oceanFinder = OceanFinder(self.size)
+		self.oceans = oceanFinder.execute(self)
+
+		continentFinder = ContinentFinder(self.size)
+		self.continents = continentFinder.execute(self)
+
+		# dummy player
+		player = Player(LeaderType.alexander)
+		player.initialize()
+
+		# map is divided into regions
+		fertilityEvaluator = CitySiteEvaluator(self)
+		finder = RegionFinder(self, fertilityEvaluator, player)
+		self.areas = finder.divideInto(2)
+
+		# set area to tile
+		for area in self.areas:
+			for pt in area:
+				tile = self.tileAt(pt)
+				tile.area = area
+
+		self.updateStatistics()
 
 	def tileAt(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> Optional[Tile]:
 		if isinstance(x_or_hex, HexPoint) and y is None:

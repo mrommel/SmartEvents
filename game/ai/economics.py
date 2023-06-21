@@ -353,3 +353,6 @@ class EconomicAI:
 			resultValue += (range - distance) * adjacencyBonus
 
 		return resultValue
+
+	def minimumSettleFertility(self) -> int:
+		return 5000  # AI_STRATEGY_MINIMUM_SETTLE_FERTILITY

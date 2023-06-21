@@ -154,7 +154,7 @@ class FoundCityStrategy(EconomicStrategy):
         # Don't run this strategy if have 0 cities, in that case we just want to drop down a city wherever we happen
         # to be
         if strategyWeight >= weightThreshold and len(simulation.citiesOf(player)) >= 1:
-            (numAreas, bestArea, _) = player.bestSettleAreasWithFertility(economicAI.minimumSettleFertility(), simulation)
+            (numAreas, bestArea, _) = player.bestSettleAreasWithMinimumSettleFertility(economicAI.minimumSettleFertility(), simulation)
 
             if numAreas == 0:
                 return False

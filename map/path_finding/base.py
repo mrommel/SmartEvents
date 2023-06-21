@@ -89,7 +89,7 @@ class AStar(ABC, Generic[T]):
 
 	def astar(self, start: T, goal: T, reverse_path: bool = False) -> Union[Iterable[T], None]:
 		if self.is_goal_reached(start, goal):
-			return [start]
+			return [(start, 0)]
 		search_nodes = AStar.SearchNodeDict()
 		start_node = search_nodes[start] = AStar.SearchNode(
 			start, gscore=0.0, fscore=self.heuristic_cost_estimate(start, goal)

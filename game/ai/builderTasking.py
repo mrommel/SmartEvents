@@ -1,12 +1,13 @@
 import sys
 
 from core.base import ExtendedEnum, WeightedBaseList
+from game.flavors import FlavorType
 from game.states.builds import BuildType
 from game.unitTypes import UnitMapType
 from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.path_finding.finder import AStarPathfinder
-from map.types import ResourceType, UnitMovementType, UnitDomainType, RouteType, ResourceUsage, YieldType
+from map.types import ResourceType, UnitMovementType, UnitDomainType, RouteType, ResourceUsage, YieldType, FeatureType
 
 
 class BuilderDirectiveType(ExtendedEnum):
@@ -166,7 +167,7 @@ class BuilderTaskingAI:
 			canCrossToNewArea = False
 
 			if unit.domain() == UnitDomainType.sea:
-				# if (pPlot->isAdjacentToArea(pUnit->area()))
+				# if (tile->isAdjacentToArea(pUnit->area()))
 				# canCrossToNewArea = true
 				pass
 			else:
@@ -177,8 +178,8 @@ class BuilderTaskingAI:
 				return False
 
 		# check to see if someone already has a mission here
-		# if (pUnit->GetMissionAIPlot() != pPlot):
-		# 	if (m_pPlayer->AI_plotTargetMissionAIs(pPlot, MISSIONAI_BUILD) > 0):
+		# if (pUnit->GetMissionAIPlot() != tile):
+		# 	if (m_pPlayer->AI_plotTargetMissionAIs(tile, MISSIONAI_BUILD) > 0):
 		# 		return False
 
 		if dangerPlotsAI.dangerAt(tile.point) > 0:
@@ -268,7 +269,7 @@ class BuilderTaskingAI:
 
 		weight = weight / (turnsAway + 1)
 		weight *= weight
-		weight += 100 / buildTime  # GetBuildTimeWeight(pUnit, pPlot, eRouteBuild, false, iMoveTurnsAway);
+		weight += 100 / buildTime  # GetBuildTimeWeight(pUnit, tile, eRouteBuild, false, iMoveTurnsAway);
 		weight *= tile.builderAIScratchPad().value
 		# FIXME weight = CorrectWeight(iWeight);
 
@@ -288,9 +289,9 @@ class BuilderTaskingAI:
 	def addImprovingResourcesDirectives(self, unit, tile, dist: int, simulation) -> BuilderDirectiveWeightedList:
 		"""Evaluating a plot to see if we can build resources there"""
 		# if we have a great improvement in a plot that's not pillaged, DON'T DO NOTHIN'
-		# existingPlotImprovement = pPlot.improvement()
+		# existingPlotImprovement = tile.improvement()
 		# if existingPlotImprovement !=.none and / *GC.getImprovementInfo(
-		#	existingPlotImprovement)->IsCreatedByGreatPerson() & & * / not pPlot.isImprovementPillaged()
+		#	existingPlotImprovement)->IsCreatedByGreatPerson() & & * / not tile.isImprovementPillaged()
 		#	return BuilderDirectiveWeightedList()
 
 		# check to see if a resource is here. If not, bail out!
@@ -389,7 +390,7 @@ class BuilderTaskingAI:
 
 		# if we have a great improvement in a plot that's not pillaged, DON'T DO NOTHIN'
 		#if let existingImprovement = existingImprovement & & existingImprovement !=.none & & GC.getImprovementInfo(
-		#	eExistingImprovement)->IsCreatedByGreatPerson() & & !pPlot->IsImprovementPillaged())
+		#	eExistingImprovement)->IsCreatedByGreatPerson() & & !tile->IsImprovementPillaged())
 		#     return BuilderDirectiveWeightedList()
 
 		# if it's not within a city radius
@@ -435,7 +436,7 @@ class BuilderTaskingAI:
 			if not unit.canBuild(tmpBuildType, tile.point, testVisible=True, testGold=True, simulation=simulation):
 				continue
 
-			# UpdateProjectedPlotYields(pPlot, eBuild);
+			# UpdateProjectedPlotYields(tile, eBuild);
 			score = self.scorePlot(tile, tmpBuildType)
 
 			# if we're going backward, bail out!
@@ -451,7 +452,7 @@ class BuilderTaskingAI:
 				weight = int(100 * improvement.yieldsFor(self.player).culture)  # BUILDER_TASKING_BASELINE_ADDS_CULTURE * /
 				# adjacentCulture = pImprovement->GetCultureAdjacentSameType();
 				# if (iAdjacentCulture > 0)
-				#	iScore *= pPlot->ComputeCultureFromImprovement(*pImprovement, eImprovement);
+				#	iScore *= tile->ComputeCultureFromImprovement(*pImprovement, eImprovement);
 
 			buildTimeWeight = max(1, tmpBuildType.buildTimeOn(tile) + dist)
 			weight += 10 if (unit.location == tile.point) else 0  # bonus for current plot
@@ -510,3 +511,126 @@ class BuilderTaskingAI:
 				score += projectedYields.value(focusYield) * 100
 
 		return int(score)
+
+	def addChopDirectives(self, unit, tile, dist: int, simulation):
+		"""Determines if the builder should "chop" the feature in the tile"""
+		player = unit.player
+
+		# if it's not within a city radius
+		if not simulation.isWithinCityRadius(tile, player):
+			return BuilderDirectiveWeightedList()
+
+		improvement = tile.improvement()
+
+		if improvement == ImprovementType.none:
+			return BuilderDirectiveWeightedList()
+
+		# check to see if a resource is here. If so, bail out!
+		resource = tile.resourceFor(player)
+		if resource != ResourceType.none:
+			return BuilderDirectiveWeightedList()
+
+		city = tile.workingCity()
+
+		if city is None:
+			return BuilderDirectiveWeightedList()
+
+		cityCitizens = city.cityCitizens
+
+		if cityCitizens.isWorkedAt(tile.point):
+			return BuilderDirectiveWeightedList()
+
+		feature = tile.feature()
+		if feature == FeatureType.none:
+			# no feature in this tile, so bail
+			return BuilderDirectiveWeightedList()
+
+		chopBuild: BuildType = BuildType.none
+		for buildType in list(BuildType):
+
+			if buildType.improvement() is None and buildType.canRemoveFeature(feature) and \
+				buildType.productionFromRemovalOf(feature) > 0 and \
+				unit.canBuild(buildType, tile.point, testVisible=True, testGold=True, simulation=simulation):
+
+				chopBuild = buildType
+				break
+
+		if chopBuild == BuildType.none:
+			# we couldn't find a build that removed the feature without a production benefit
+			return BuilderDirectiveWeightedList()
+
+		production = tile.productionFromFeatureRemoval(chopBuild)
+
+		if not self.doesBuildHelpRush(unit, tile, chopBuild):
+			return BuilderDirectiveWeightedList()
+
+		weight = 200  # BUILDER_TASKING_BASELINE_REPAIR
+		turnsAway = self.findTurnsAway(unit, tile, simulation)
+		weight = weight / (turnsAway + 1)
+		# iWeight = GetBuildCostWeight(iWeight, tile, eChopBuild);
+		buildTimeWeight = 100 / chopBuild.buildTimeOn(tile)
+		weight += buildTimeWeight
+		weight *= production  # times the amount that the plot produces from the chopping
+
+		yieldDifferenceWeight = 0.0
+		directiveList: BuilderDirectiveWeightedList = BuilderDirectiveWeightedList()
+
+		for yieldType in list(YieldType):
+			# calculate natural yields
+			previousYield = tile.yieldsWith(chopBuild, player, ignoreFeature=False)
+			newYield = tile.yieldsWith(chopBuild, player, ignoreFeature=True)
+			deltaYield = newYield - previousYield
+
+			if deltaYield.value(yieldType) == 0:
+				continue
+
+			if yieldType == YieldType.food:
+				# BUILDER_TASKING_PLOT_EVAL_MULTIPLIER_FOOD
+				yieldDifferenceWeight += deltaYield.value(yieldType) * \
+				                         float(player.valueOfPersonalityFlavor(FlavorType.growth)) * 2.0
+
+			elif yieldType == YieldType.production:
+				# BUILDER_TASKING_PLOT_EVAL_MULTIPLIER_PRODUCTION
+				yieldDifferenceWeight += deltaYield.value(yieldType) * \
+										 float(player.valueOfPersonalityFlavor(FlavorType.production)) * 2.0
+
+			elif yieldType == YieldType.gold:
+				# BUILDER_TASKING_PLOT_EVAL_MULTIPLIER_GOLD
+				yieldDifferenceWeight += deltaYield.value(yieldType) * \
+				                         float(player.valueOfPersonalityFlavor(FlavorType.gold)) * 1.0
+
+			elif yieldType == YieldType.science:
+				# BUILDER_TASKING_PLOT_EVAL_MULTIPLIER_SCIENCE
+				yieldDifferenceWeight += deltaYield.value(yieldType) * \
+				                         float(player.valueOfPersonalityFlavor(FlavorType.science)) * 1.0
+
+			elif yieldType == YieldType.culture:
+				# BUILDER_TASKING_PLOT_EVAL_MULTIPLIER_CULTURE
+				yieldDifferenceWeight += deltaYield.value(yieldType) * \
+				                         float(player.valueOfPersonalityFlavor(FlavorType.culture)) * 1.0
+
+			elif yieldType == YieldType.faith:
+				# BUILDER_TASKING_PLOT_EVAL_MULTIPLIER_CULTURE
+				yieldDifferenceWeight += deltaYield.value(yieldType) * \
+				                         float(player.valueOfPersonalityFlavor(FlavorType.religion)) * 1.0
+
+			#elif yieldType == YieldType.tourism:
+				# NOOP
+				# pass
+
+			elif yieldType == YieldType.none:
+				# NOOP
+				pass
+
+		# if we are going backwards, bail
+		if yieldDifferenceWeight < 0.0:
+			return BuilderDirectiveWeightedList()
+
+		weight += int(yieldDifferenceWeight)
+		# weight = CorrectWeight(iWeight);
+
+		if weight > 0:
+			directive = BuilderDirective(BuilderDirectiveType.chop, chopBuild, ResourceType.none, tile.point, dist)
+			directiveList.addWeight(float(weight), directive)
+
+		return directiveList

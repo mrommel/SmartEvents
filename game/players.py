@@ -1603,3 +1603,34 @@ class Player:
 
 	def changeTrainedSettlersBy(self, delta: int):
 		self._trainedSettlersValue += delta
+
+	def bestSettleAreasWithMinimumSettleFertility(self, minimumSettleFertility: int, simulation) \
+		-> (int, Optional[HexArea], Optional[HexArea]):
+
+		bestScore: int = -1
+		bestArea: Optional[HexArea] = None
+		secondBestScore: int = -1
+		secondBestArea: Optional[HexArea] = None
+
+		# Find best two scores above minimum
+		for area in simulation.areas():
+			score = int(area.value())
+
+			if score > minimumSettleFertility:
+				if score > bestScore:
+					# Already have a best area?  If so demote to 2nd
+					if bestScore > minimumSettleFertility:
+						secondBestScore = bestScore
+						secondBestArea = bestArea
+
+					bestScore = score
+					bestArea = area
+
+				elif score > secondBestScore:
+					secondBestScore = score
+					secondBestArea = area
+
+		tmp = 1 if secondBestScore != -1 else 0
+		numberOfAreas = 1 if bestScore != -1 else tmp
+
+		return numberOfAreas, bestArea, secondBestArea

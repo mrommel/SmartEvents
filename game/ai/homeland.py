@@ -1321,7 +1321,7 @@ class HomelandAI:
 			city = simulation.cityAt(point)
 
 			if city is not None and city.player.leader == self.player.leader:
-				value += city.defensiveStrengthAgainst(Unit=None, tile=tile, ranged=False, simulation=simulation)
+				value += city.defensiveStrengthAgainst(unit=None, tile=tile, ranged=False, simulation=simulation)
 
 			elif not ignoreUnits:
 				otherUnit = simulation.unitAt(point, UnitMapType.combat)

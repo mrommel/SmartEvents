@@ -838,6 +838,7 @@ class ResourceType(ExtendedEnum):
 	tea = 'tea'
 	whales = 'whales'
 	wine = 'wine'
+	# marble
 
 	# strategic
 	horses = 'horses'
