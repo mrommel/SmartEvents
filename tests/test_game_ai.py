@@ -1,19 +1,23 @@
+import sys
 import unittest
 
 from game.ai.economicStrategies import EconomicStrategyType
 from game.ai.economics import EconomicStrategyAdoptions
-from game.ai.homeland import HomelandUnit
+from game.ai.homeland import HomelandUnit, HomelandAI, HomelandMoveType, HomelandMove
+from game.baseTypes import HandicapType
 from game.civilizations import LeaderType
+from game.game import GameModel
 from game.players import Player
 from game.states.builds import BuildType
+from game.states.victories import VictoryType
 from game.unitTypes import UnitType
-from game.units import Unit
+from game.units import Unit, UnitAutomationType
 from map.base import HexPoint
 from map.types import TerrainType
-from tests.testBasics import MapModelMock
+from tests.testBasics import MapModelMock, UserInterfaceMock
 
 
-class TestHomeland(unittest.TestCase):
+class TestHomelandUnit(unittest.TestCase):
 	def test_homelandUnit_eq(self):
 		# GIVEN
 		player = Player(LeaderType.alexander)
@@ -63,6 +67,193 @@ class TestHomeland(unittest.TestCase):
 		self.assertTrue(homelandUnit0 < homelandUnit2)
 		self.assertTrue(homelandUnit1 < homelandUnit2)
 		self.assertFalse(homelandUnit1 < homelandUnit1)
+
+
+class TestHomelandAI(unittest.TestCase):
+	def test_constructor(self):
+		player = Player(LeaderType.alexander, human=False)
+		player.initialize()
+
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[player],
+			map=mapModel
+		)
+
+		homeland = HomelandAI(player)
+
+		self.assertEqual(homeland.currentTurnUnits, [])
+		self.assertEqual(homeland.currentTurnUnits, [])
+		self.assertEqual(homeland.currentMoveUnits, [])
+		self.assertEqual(homeland.currentMoveHighPriorityUnits, [])
+
+		self.assertEqual(homeland.movePriorityList, [])
+		self.assertEqual(homeland.movePriorityTurn, 0)
+
+		self.assertEqual(homeland.currentBestMoveUnit, None)
+		self.assertEqual(homeland.currentBestMoveUnitTurns, sys.maxsize)
+		self.assertEqual(homeland.currentBestMoveHighPriorityUnit, None)
+		self.assertEqual(homeland.currentBestMoveHighPriorityUnitTurns, sys.maxsize)
+
+		self.assertEqual(homeland.targetedCities, [])
+		self.assertEqual(homeland.targetedSentryPoints, [])
+		self.assertEqual(homeland.targetedForts, [])
+		self.assertEqual(homeland.targetedNavalResources, [])
+		self.assertEqual(homeland.targetedHomelandRoads, [])
+		self.assertEqual(homeland.targetedAncientRuins, [])
+
+	def test_human_units(self):
+		player = Player(LeaderType.alexander, human=True)
+		player.initialize()
+
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[player],
+			map=mapModel
+		)
+
+		simulation.userInterface = UserInterfaceMock()
+
+		scout = Unit(HexPoint(3, 3), UnitType.scout, player)
+		scout.automate(UnitAutomationType.explore, simulation)
+		simulation.addUnit(scout)
+
+		builder = Unit(HexPoint(3, 4), UnitType.builder, player)
+		builder.automate(UnitAutomationType.build, simulation)
+		simulation.addUnit(builder)
+
+		# settler = Unit(HexPoint(4, 3), UnitType.settler, player)
+		# simulation.addUnit(settler)
+
+		warrior = Unit(HexPoint(4, 4), UnitType.warrior, player)
+		warrior.automate(UnitAutomationType.explore, simulation)
+		simulation.addUnit(warrior)
+
+		homeland = HomelandAI(player)
+		homeland.doTurn(simulation)
+
+		priorityList = [
+			HomelandMove(moveType=HomelandMoveType.tradeUnit, priority=103),
+			HomelandMove(moveType=HomelandMoveType.settle, priority=58),
+			HomelandMove(moveType=HomelandMoveType.aircraftToTheFront, priority=51),
+			HomelandMove(moveType=HomelandMoveType.ancientRuins, priority=41),
+			HomelandMove(moveType=HomelandMoveType.explore, priority=36),
+			HomelandMove(moveType=HomelandMoveType.exploreSea, priority=36),
+			HomelandMove(moveType=HomelandMoveType.heal, priority=31),
+			HomelandMove(moveType=HomelandMoveType.toSafety, priority=31),
+			HomelandMove(moveType=HomelandMoveType.worker, priority=30),
+			HomelandMove(moveType=HomelandMoveType.workerSea, priority=30),
+			HomelandMove(moveType=HomelandMoveType.upgrade, priority=30),
+			HomelandMove(moveType=HomelandMoveType.sentry, priority=21),
+			HomelandMove(moveType=HomelandMoveType.mobileReserve, priority=16),
+			HomelandMove(moveType=HomelandMoveType.garrison, priority=11),
+			HomelandMove(moveType=HomelandMoveType.none, priority=0),
+			HomelandMove(moveType=HomelandMoveType.unassigned, priority=0),
+			HomelandMove(moveType=HomelandMoveType.patrol, priority=0)
+		]
+
+		self.assertEqual(homeland.currentTurnUnits, [])
+		self.assertEqual(homeland.currentTurnUnits, [])
+		self.assertEqual(homeland.currentMoveUnits, [])
+		self.assertEqual(homeland.currentMoveHighPriorityUnits, [])
+
+		self.assertEqual(homeland.movePriorityList, priorityList)
+		self.assertEqual(homeland.movePriorityTurn, 0)
+
+		self.assertEqual(homeland.currentBestMoveUnit, None)
+		self.assertEqual(homeland.currentBestMoveUnitTurns, sys.maxsize)
+		self.assertEqual(homeland.currentBestMoveHighPriorityUnit, None)
+		self.assertEqual(homeland.currentBestMoveHighPriorityUnitTurns, sys.maxsize)
+
+		self.assertEqual(homeland.targetedCities, [])
+		self.assertEqual(homeland.targetedSentryPoints, [])
+		self.assertEqual(homeland.targetedForts, [])
+		self.assertEqual(homeland.targetedNavalResources, [])
+		self.assertEqual(homeland.targetedHomelandRoads, [])
+		self.assertEqual(homeland.targetedAncientRuins, [])
+
+	def test_ai_units(self):
+		player = Player(LeaderType.alexander, human=False)
+		player.initialize()
+
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[player],
+			map=mapModel
+		)
+
+		simulation.userInterface = UserInterfaceMock()
+
+		scout = Unit(HexPoint(3, 3), UnitType.scout, player)
+		scout.automate(UnitAutomationType.explore, simulation)
+		simulation.addUnit(scout)
+
+		builder = Unit(HexPoint(3, 4), UnitType.builder, player)
+		builder.automate(UnitAutomationType.build, simulation)
+		simulation.addUnit(builder)
+
+		# settler = Unit(HexPoint(4, 3), UnitType.settler, player)
+		# simulation.addUnit(settler)
+
+		warrior = Unit(HexPoint(4, 4), UnitType.warrior, player)
+		warrior.automate(UnitAutomationType.explore, simulation)
+		simulation.addUnit(warrior)
+
+		homeland = HomelandAI(player)
+		homeland.doTurn(simulation)
+
+		expectedTurnUnits = [
+			Unit(HexPoint(3, 3), UnitType.scout, player),
+			Unit(HexPoint(4, 4), UnitType.warrior, player)
+		]
+
+		priorityList = [
+			HomelandMove(moveType=HomelandMoveType.tradeUnit, priority=103),
+			HomelandMove(moveType=HomelandMoveType.settle, priority=58),
+			HomelandMove(moveType=HomelandMoveType.aircraftToTheFront, priority=51),
+			HomelandMove(moveType=HomelandMoveType.ancientRuins, priority=41),
+			HomelandMove(moveType=HomelandMoveType.explore, priority=36),
+			HomelandMove(moveType=HomelandMoveType.exploreSea, priority=36),
+			HomelandMove(moveType=HomelandMoveType.heal, priority=31),
+			HomelandMove(moveType=HomelandMoveType.toSafety, priority=31),
+			HomelandMove(moveType=HomelandMoveType.worker, priority=30),
+			HomelandMove(moveType=HomelandMoveType.workerSea, priority=30),
+			HomelandMove(moveType=HomelandMoveType.upgrade, priority=30),
+			HomelandMove(moveType=HomelandMoveType.sentry, priority=21),
+			HomelandMove(moveType=HomelandMoveType.mobileReserve, priority=16),
+			HomelandMove(moveType=HomelandMoveType.garrison, priority=11),
+			HomelandMove(moveType=HomelandMoveType.none, priority=0),
+			HomelandMove(moveType=HomelandMoveType.unassigned, priority=0),
+			HomelandMove(moveType=HomelandMoveType.patrol, priority=0)
+		]
+
+		self.assertEqual(homeland.currentTurnUnits, expectedTurnUnits)
+		self.assertEqual(homeland.currentMoveUnits, [])
+		self.assertEqual(homeland.currentMoveHighPriorityUnits, [])
+
+		self.assertEqual(homeland.movePriorityList, priorityList)
+		self.assertEqual(homeland.movePriorityTurn, 0)
+
+		self.assertEqual(homeland.currentBestMoveUnit, None)
+		self.assertEqual(homeland.currentBestMoveUnitTurns, sys.maxsize)
+		self.assertEqual(homeland.currentBestMoveHighPriorityUnit, None)
+		self.assertEqual(homeland.currentBestMoveHighPriorityUnitTurns, sys.maxsize)
+
+		self.assertEqual(homeland.targetedCities, [])
+		self.assertEqual(homeland.targetedSentryPoints, [])
+		self.assertEqual(homeland.targetedForts, [])
+		self.assertEqual(homeland.targetedNavalResources, [])
+		self.assertEqual(homeland.targetedHomelandRoads, [])
+		self.assertEqual(homeland.targetedAncientRuins, [])
 
 
 class TestEconomics(unittest.TestCase):

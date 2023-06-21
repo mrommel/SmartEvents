@@ -1525,3 +1525,4 @@ class UnitActivityType(ExtendedEnum):
 	hold = 'hold'
 	sentry = 'sentry'
 	intercept = 'intercept'
+	explore = 'explore'

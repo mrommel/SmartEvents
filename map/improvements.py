@@ -9,12 +9,14 @@ from core.base import ExtendedEnum, InvalidEnumError
 
 class ImprovementTypeData:
 	def __init__(self, name: str, effects: [str], requiredTech: Optional[TechType],
-				 civilization: Optional[CivilizationType], canBePillaged: bool, flavors: [Flavor]):
+				 civilization: Optional[CivilizationType], canBePillaged: bool, defenseModifier: int,
+				 flavors: [Flavor]):
 		self.name = name
 		self.effects = effects
 		self.requiredTech = requiredTech
 		self.civilization = civilization
 		self.canBePillaged = canBePillaged
+		self.defenseModifier = defenseModifier
 		self.flavors = flavors
 
 
@@ -52,6 +54,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=None,
 				civilization=None,
 				canBePillaged=False,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.barbarianCamp:
@@ -62,6 +65,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=None,
 				civilization=None,
 				canBePillaged=False,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.mine:
@@ -78,6 +82,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=TechType.mining,
 				civilization=None,
 				canBePillaged=True,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.plantation:
@@ -93,6 +98,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=TechType.irrigation,
 				civilization=None,
 				canBePillaged=True,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.farm:
@@ -108,6 +114,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=None,
 				civilization=None,
 				canBePillaged=True,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.quarry:
@@ -125,6 +132,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=TechType.mining,
 				civilization=None,
 				canBePillaged=True,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.camp:
@@ -141,6 +149,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=TechType.animalHusbandry,
 				civilization=None,
 				canBePillaged=True,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.fishingBoats:
@@ -156,6 +165,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=TechType.sailing,
 				civilization=None,
 				canBePillaged=True,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.pasture:
@@ -171,6 +181,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=TechType.animalHusbandry,
 				civilization=None,
 				canBePillaged=True,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.oilWell:
@@ -184,6 +195,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=TechType.steel,
 				civilization=None,
 				canBePillaged=True,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.fort:
@@ -197,6 +209,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=TechType.siegeTactics,
 				civilization=None,
 				canBePillaged=True,
+				defenseModifier=4,
 				flavors=[]
 			)
 		elif self == ImprovementType.goodyHut:
@@ -207,6 +220,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=None,
 				civilization=None,
 				canBePillaged=False,
+				defenseModifier=0,
 				flavors=[]
 			)
 		elif self == ImprovementType.citadelle:
@@ -217,6 +231,7 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=TechType.siegeTactics,
 				civilization=None,
 				canBePillaged=True,
+				defenseModifier=6,
 				flavors=[]
 			)
 		elif self == ImprovementType.ruins:
@@ -227,12 +242,13 @@ class ImprovementType(ExtendedEnum):
 				requiredTech=None,
 				civilization=None,
 				canBePillaged=False,
+				defenseModifier=0,
 				flavors=[]
 			)
 
 		raise InvalidEnumError(self)
 
-	def yieldsFor(self, player):
+	def yieldsFor(self, player) -> Yields:
 		if self == ImprovementType.none:
 			return Yields(food=0, production=0, gold=0, science=0)
 		elif self == ImprovementType.barbarianCamp:
@@ -543,3 +559,6 @@ class ImprovementType(ExtendedEnum):
 			hasSupportedResource = hasSupportedResource or tile.hasResource(requiredResource, owner)
 
 		return hasSupportedResource
+
+	def defenseModifier(self) -> int:
+		return self._data().defenseModifier

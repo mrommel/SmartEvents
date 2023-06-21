@@ -4,8 +4,9 @@ from core.base import ExtendedEnum, WeightedBaseList
 from game.states.builds import BuildType
 from game.unitTypes import UnitMapType
 from map.base import HexPoint
+from map.improvements import ImprovementType
 from map.path_finding.finder import AStarPathfinder
-from map.types import ResourceType, UnitMovementType, UnitDomainType, RouteType
+from map.types import ResourceType, UnitMovementType, UnitDomainType, RouteType, ResourceUsage, YieldType
 
 
 class BuilderDirectiveType(ExtendedEnum):
@@ -260,7 +261,7 @@ class BuilderTaskingAI:
 			builderDirectiveType = BuilderDirectiveType.repair
 
 		turnsAway = self.findTurnsAway(unit, tile, simulation)
-		buildTime = min(1, routeBuild.buildTime(tile))
+		buildTime = min(1, routeBuild.buildTimeOn(tile))
 
 		weight = weight / (turnsAway + 1)
 		weight *= weight
@@ -280,3 +281,229 @@ class BuilderTaskingAI:
 
 		items.addWeight(float(weight), directive)
 		return items
+
+	def addImprovingResourcesDirectives(self, unit, tile, dist: int, simulation) -> BuilderDirectiveWeightedList:
+		"""Evaluating a plot to see if we can build resources there"""
+		# if we have a great improvement in a plot that's not pillaged, DON'T DO NOTHIN'
+		# existingPlotImprovement = pPlot.improvement()
+		# if existingPlotImprovement !=.none and / *GC.getImprovementInfo(
+		#	existingPlotImprovement)->IsCreatedByGreatPerson() & & * / not pPlot.isImprovementPillaged()
+		#	return BuilderDirectiveWeightedList()
+
+		# check to see if a resource is here. If not, bail out!
+		if not tile.hasAnyResourceFor(self.player):
+			return BuilderDirectiveWeightedList()
+
+		resource: ResourceType = ResourceType.none
+		for resourceType in list(ResourceType):
+			if tile.hasResource(resourceType, self.player):
+				resource = resourceType
+
+		# evaluate bonus resources as normal improvements
+		if resource == ResourceType.none or resource.usage() == ResourceUsage.bonus:
+			return BuilderDirectiveWeightedList()
+
+		# loop through the build types to find one that we can use
+		doBuild: BuildType = BuildType.none
+
+		directiveList = BuilderDirectiveWeightedList()
+
+		for buildType in list(BuildType):
+			doBuild = buildType
+
+			improvement = buildType.improvement()
+
+			if improvement is None:
+				continue
+
+			existingPlotImprovement = tile.improvement()
+
+			if improvement == existingPlotImprovement:
+				if tile.isImprovementPillaged():
+					doBuild = BuildType.repair
+				else:
+					# this plot already has the appropriate improvement to use the resource
+					break
+			else:
+				# if the plot has an un-pillaged great person's creation on it, DO NOT DESTROY
+				if existingPlotImprovement != ImprovementType.none:
+					# CvImprovementEntry * pkExistingPlotImprovementInfo = GC.getImprovementInfo(eExistingPlotImprovement);
+					# if (pkExistingPlotImprovementInfo & & pkExistingPlotImprovementInfo->IsCreatedByGreatPerson())
+					# continue
+					pass
+
+			if not unit.canBuild(doBuild, tile.point, testVisible=True, testGold=False, simulation=simulation):
+				break
+
+			directiveType = BuilderDirectiveType.buildImprovementOnResource
+			weight = 10  # BUILDER_TASKING_BASELINE_BUILD_RESOURCE_IMPROVEMENTS
+			if doBuild == BuildType.repair:
+				directiveType = BuildType.repair
+				weight = 200  # BUILDER_TASKING_BASELINE_REPAIR
+
+			# this is to deal with when the plot is already improved with another improvement that doesn't enable the resource
+			investedImprovementTime = 0
+			if existingPlotImprovement != ImprovementType.none:
+				existingBuild: BuildType = BuildType.none
+
+				for buildType in list(BuildType):
+					if buildType.improvement() == existingPlotImprovement:
+						existingBuild = buildType
+						break
+
+				if existingPlotImprovement != ImprovementType.none:
+					investedImprovementTime = existingBuild.buildTimeOn(tile)
+
+			buildtime = min(1, doBuild.buildTimeOn(tile) + investedImprovementTime + dist)
+			buildTimeWeight = 100 / buildtime
+			weight += buildTimeWeight
+			# weight = CorrectWeight(iWeight);
+
+			weight += self.resourceWeightFor(resource, improvement, tile.resourceQuantity())
+			# weight = CorrectWeight(iWeight);
+
+			# UpdateProjectedPlotYields(tile, eBuild);
+			score = self.scorePlot(tile, buildType)
+			if score > 0:
+				weight *= score
+				# weight = CorrectWeight(iWeight);
+
+			production = tile.productionFromFeatureRemoval(buildType)
+			if self.doesBuildHelpRush(unit, tile,buildType):
+				weight += production # a nominal benefit for choosing this production
+
+			if weight <= 0:
+				continue
+
+			directive = BuilderDirective(directiveType, buildType, resource, tile.point, dist)
+			directiveList.addWeight(float(weight), directive)
+
+		return directiveList
+
+	def addImprovingPlotsDirectives(self, unit, tile, dist: int, simulation) -> BuilderDirectiveWeightedList:
+		"""Evaluating a plot to determine what improvement could be best there"""
+		existingImprovement = tile.improvement()
+
+		# if we have a great improvement in a plot that's not pillaged, DON'T DO NOTHIN'
+		#if let existingImprovement = existingImprovement & & existingImprovement !=.none & & GC.getImprovementInfo(
+		#	eExistingImprovement)->IsCreatedByGreatPerson() & & !pPlot->IsImprovementPillaged())
+		#     return BuilderDirectiveWeightedList()
+
+		# if it's not within a city radius
+		if not simulation.isWithinCityRadius(tile, self.player):
+			return BuilderDirectiveWeightedList()
+
+		# check to see if a non - bonus resource is here. if so, bail out!
+		resource = tile.resourceFor(self.player)
+		if resource != ResourceType.none:
+			if resource.usage() != ResourceUsage.bonus:
+				return BuilderDirectiveWeightedList()
+
+		if tile.workingCity() is None:
+			return BuilderDirectiveWeightedList()
+
+		directiveList: BuilderDirectiveWeightedList = BuilderDirectiveWeightedList()
+		tmpBuildType: BuildType = BuildType.none
+
+		for buildType in list(BuildType):
+			tmpBuildType = buildType
+			improvement = tmpBuildType.improvement()
+
+			if improvement is None:
+				continue
+
+			# if this improvement has a defense modifier, ignore it for now
+			if improvement.defenseModifier() > 0:
+				continue
+
+			if improvement == tile.improvement():
+				if tile.isImprovementPillaged():
+					tmpBuildType = BuildType.repair
+				else:
+					continue
+			else:
+				# if the plot has an un-pillaged great person's creation on it, DO NOT DESTROY
+				if existingImprovement != ImprovementType.none:
+					# if improvement.->IsCreatedByGreatPerson() | | GET_PLAYER(pUnit->getOwner()).isOption(PLAYEROPTION_SAFE_AUTOMATION))
+					# continue;
+					pass
+
+			# Only check to make sure our unit can build this after possibly switching this to a repair build in the block of code above
+			if not unit.canBuild(tmpBuildType, tile.point, testVisible=True, testGold=True, simulation=simulation):
+				continue
+
+			# UpdateProjectedPlotYields(pPlot, eBuild);
+			score = self.scorePlot(tile, tmpBuildType)
+
+			# if we're going backward, bail out!
+			if score <= 0:
+				continue
+
+			directiveType = BuilderDirectiveType.buildImprovement
+			weight = 1  # BUILDER_TASKING_BASELINE_BUILD_IMPROVEMENTS
+			if tmpBuildType == BuildType.repair:
+				directiveType = BuildType.repair
+				weight = 200  # BUILDER_TASKING_BASELINE_REPAIR
+			elif improvement.yieldsFor(self.player).culture > 0:
+				weight = int(100 * improvement.yieldsFor(self.player).culture)  # BUILDER_TASKING_BASELINE_ADDS_CULTURE * /
+				# adjacentCulture = pImprovement->GetCultureAdjacentSameType();
+				# if (iAdjacentCulture > 0)
+				#	iScore *= pPlot->ComputeCultureFromImprovement(*pImprovement, eImprovement);
+
+			buildTimeWeight = max(1, tmpBuildType.buildTimeOn(tile) + dist)
+			weight += 10 if (unit.location == tile.point) else 0  # bonus for current plot
+			weight += 100 / buildTimeWeight
+			weight *= score
+			# weight = CorrectWeight(iWeight);
+
+			directive = BuilderDirective(directiveType, tmpBuildType, ResourceType.none, tile.point, dist)
+			directiveList.addWeight(float(weight), directive)
+
+		return directiveList
+
+	def scorePlot(self, tile, buildType: BuildType) -> int:
+		if tile is None:
+			return -1
+
+		city = tile.workingCity()
+		if city is None:
+			return -1
+
+		cityStrategy = city.cityStrategy
+
+		# preparation
+		currentYields = tile.yieldsFor(self.player, ignoreFeature=False)
+		projectedYields = tile.yieldsWith(buildType, self.player, ignoreFeature=False)
+
+		score = 0.0
+		anyNegativeMultiplier = False
+		focusYield: YieldType = cityStrategy.focusYield
+
+		for yieldType in list(YieldType):
+
+			multiplier = cityStrategy.yieldDeltaFor(yieldType)
+			absMultiplier = abs(multiplier)
+			yieldDelta = projectedYields.value(yieldType) - currentYields.value(yieldType)
+
+			# the multiplier being lower than zero means that we need more of this resource
+			if multiplier < 0:
+				anyNegativeMultiplier = True
+				# this would be an improvement to the yield
+				if yieldDelta > 0:
+					score += projectedYields.value(yieldType) * absMultiplier
+				elif yieldDelta < 0:
+					# the yield would go down
+					score += yieldDelta * absMultiplier
+			else:
+				if yieldDelta >= 0:
+					score += projectedYields.value(yieldType)  # provide a nominal score to plots that improve anything
+				elif yieldDelta < 0:
+					score += yieldDelta * absMultiplier
+
+		if not anyNegativeMultiplier and focusYield != YieldType.none:
+
+			yieldDelta = projectedYields.value(focusYield) - currentYields.value(focusYield)
+			if yieldDelta > 0:
+				score += projectedYields.value(focusYield) * 100
+
+		return int(score)

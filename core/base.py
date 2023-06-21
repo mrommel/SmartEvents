@@ -58,6 +58,17 @@ class WeightedBaseList(dict):
 
 		return tmp
 
+	def chooseLargest(self):
+		bestValue = -1
+		bestObject = None
+
+		for key, value in self.items():
+			if value > bestValue:
+				bestValue = value
+				bestObject = key
+
+		return bestObject
+
 	def distributeByWeight(self):
 		"""distributes the keys based on the weight - it will return 100 items"""
 		if len(self.keys()) == 0:

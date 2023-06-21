@@ -127,6 +127,9 @@ class HomelandMove:
 
 		raise Exception('wrong type: HomelandMove expected')
 
+	def __repr__(self):
+		return f'HomelandMove(moveType={self.moveType}, priority={self.priority})'
+
 
 class HomelandUnit:
 	"""Object stored in the list of current move units (m_CurrentMoveUnits)"""
@@ -203,7 +206,7 @@ class HomelandAI:
 
 		self.currentBestMoveUnit: Optional[Unit] = None
 		self.currentBestMoveUnitTurns: int = sys.maxsize
-		self.currentBestMoveHighPriorityUnit: Optional[Unit]
+		self.currentBestMoveHighPriorityUnit: Optional[Unit] = None
 		self.currentBestMoveHighPriorityUnitTurns: int = sys.maxsize
 
 		self.targetedCities: [HomelandTarget] = []
@@ -544,7 +547,6 @@ class HomelandAI:
 			if currentTurnUnit.task() == UnitTaskType.exploreSea or \
 				(currentTurnUnit.isAutomated() and currentTurnUnit.domain() == UnitDomainType.sea and
 				 currentTurnUnit.automateType() == UnitTaskType.explore):
-
 				self.currentMoveUnits.append(HomelandUnit(currentTurnUnit))
 
 		if len(self.currentMoveUnits) > 0:
@@ -615,7 +617,7 @@ class HomelandAI:
 
 						if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
 							print(f"Moving to goody hut (non-explorer), {targetTile.point}")
-							# LogHomelandMessage(strLogString);
+						# LogHomelandMessage(strLogString);
 		return
 
 	def plotUpgradeMoves(self, simulation):
@@ -636,14 +638,15 @@ class HomelandAI:
 					not currentTurnUnit.isEmbarked() and simulation.cityAt(currentTurnUnit.location) is None:
 
 					# If I'm a naval unit I need to be in friendly territory
-					if currentTurnUnit.domain() != UnitDomainType.sea or tile.isFriendlyTerritoryFor(self.player, simulation):
+					if currentTurnUnit.domain() != UnitDomainType.sea or tile.isFriendlyTerritoryFor(self.player,
+					                                                                                 simulation):
 
 						if not currentTurnUnit.isUnderEnemyRangedAttack():
 							self.currentMoveUnits.append(HomelandUnit(currentTurnUnit))
 
 							if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
 								print(f"{currentTurnUnit.unitType} healing at {currentTurnUnit.location}")
-								# LogHomelandMessage(strLogString);
+							# LogHomelandMessage(strLogString);
 
 			if len(self.currentMoveUnits) > 0:
 				self.executeHeals(simulation)
@@ -677,13 +680,15 @@ class HomelandAI:
 						if currentTurnUnit.domain() == UnitDomainType.sea:
 							addUnit = True
 					elif currentTurnUnit.isUnderEnemyRangedAttack() or \
-						currentTurnUnit.attackStrengthAgainst(unit=None, city=None, tile=tile, simulation=simulation) * 2 <= \
+						currentTurnUnit.attackStrengthAgainst(unit=None, city=None, tile=tile,
+						                                      simulation=simulation) * 2 <= \
 						currentTurnUnit.baseCombatStrength(ignoreEmbarked=False):
 						# Everyone else flees at less than or equal to 50% combat strength
 						addUnit = True
 				elif not currentTurnUnit.isBarbarian():
 					# Also flee if danger is really high in current plot (but not if we're barbarian)
-					acceptableDanger = currentTurnUnit.attackStrengthAgainst(unit=None, city=None, tile=tile, simulation=simulation) * 100
+					acceptableDanger = currentTurnUnit.attackStrengthAgainst(unit=None, city=None, tile=tile,
+					                                                         simulation=simulation) * 100
 					if int(dangerLevel) > acceptableDanger:
 						addUnit = True
 
@@ -702,7 +707,8 @@ class HomelandAI:
 
 		# Loop through all recruited units
 		for currentTurnUnit in self.currentTurnUnits:
-			if currentTurnUnit.task() == UnitTaskType.work or (currentTurnUnit.isAutomated() and currentTurnUnit.domain() == UnitDomainType.land and currentTurnUnit.automateType() == UnitAutomationType.build):
+			if currentTurnUnit.task() == UnitTaskType.work or (
+				currentTurnUnit.isAutomated() and currentTurnUnit.domain() == UnitDomainType.land and currentTurnUnit.automateType() == UnitAutomationType.build):
 				homelandUnit = HomelandUnit(currentTurnUnit)
 				self.currentMoveUnits.append(homelandUnit)
 
@@ -718,9 +724,8 @@ class HomelandAI:
 		# Loop through all recruited units
 		for currentTurnUnit in self.currentTurnUnits:
 			if currentTurnUnit.task() == UnitTaskType.workerSea or \
-			(currentTurnUnit.isAutomated() and currentTurnUnit.domain() == UnitDomainType.sea and
-			 currentTurnUnit.automateType() == UnitAutomationType.build):
-
+				(currentTurnUnit.isAutomated() and currentTurnUnit.domain() == UnitDomainType.sea and
+				 currentTurnUnit.automateType() == UnitAutomationType.build):
 				homelandUnit = HomelandUnit(currentTurnUnit)
 				self.currentMoveUnits.append(homelandUnit)
 
@@ -739,7 +744,8 @@ class HomelandAI:
 				build = target.improvement.buildType()
 				targetLocation = target.target
 
-				if not currentMoveUnit.canBuild(build, targetLocation, testVisible=True, testGold=True, simulation=simulation):
+				if not currentMoveUnit.canBuild(build, targetLocation, testVisible=True, testGold=True,
+				                                simulation=simulation):
 					continue
 
 				moves = pathFinder.turnsToReachTarget(unit, targetLocation, simulation)
@@ -807,9 +813,10 @@ class HomelandAI:
 						self.executeMoveToTarget(targetTile, garrisonIfPossible=False, simulation=simulation)
 
 						if simulation.loggingEnabled() and simulation.aiLoggingEnabled():
-							print(f"Moving to sentry point, {targetedSentryPoint.target or constants.invalidHexPoint}), " +
+							print(
+								f"Moving to sentry point, {targetedSentryPoint.target or constants.invalidHexPoint}), " +
 								f"Priority: {targetedSentryPoint.threatValue}")
-							# LogHomelandMessage(strLogString);
+						# LogHomelandMessage(strLogString);
 
 		return
 
@@ -852,7 +859,8 @@ class HomelandAI:
 				danger = dangerPlotsAI.dangerAt(unit.location)
 				if danger > 0.0:
 					if self.moveCivilianToSafety(unit, simulation):
-						print(f"{self.player.leader} moves {unit.name()} in turn {simulation.currentTurn} to 1st Safety,")
+						print(
+							f"{self.player.leader} moves {unit.name()} in turn {simulation.currentTurn} to 1st Safety,")
 						unit.finishMoves()
 						self.unitProcessed(unit)
 						continue
@@ -957,7 +965,7 @@ class HomelandAI:
 				print(f"Unit {unit.name()} at {unit.location} has goody target at {goodyPlot.point}")
 
 				if (goodyPlot.hasImprovement(ImprovementType.goodyHut) or
-					goodyPlot.hasImprovement(ImprovementType.barbarianCamp)) and \
+				    goodyPlot.hasImprovement(ImprovementType.barbarianCamp)) and \
 					simulation.visibleEnemy(goodyPlot.point, self.player) is None:
 
 					path = pathfinder.shortestPath(unit.location, goodyPlot.point)
@@ -1189,8 +1197,10 @@ class HomelandAI:
 
 						elif loopUnit.canAttack():  # Don't use non-combatants
 							# Don't put units with a combat strength boosted from promotions in cities, these boosts are ignored
-							if loopUnit.defenseModifierAgainst(unit=None, city=None, tile=None, ranged=False, simulation=simulation) == 0 \
-								and loopUnit.attackModifierAgainst(unit=None, city=None, tile=None, simulation=simulation) == 0:
+							if loopUnit.defenseModifierAgainst(unit=None, city=None, tile=None, ranged=False,
+							                                   simulation=simulation) == 0 \
+								and loopUnit.attackModifierAgainst(unit=None, city=None, tile=None,
+								                                   simulation=simulation) == 0:
 								suitableUnit = True
 
 					elif moveType == HomelandMoveType.sentry:
@@ -1255,3 +1265,93 @@ class HomelandAI:
 					rtnValue = True
 
 		return rtnValue
+
+	def isValidExplorerEndTurnPlot(self, unit, plot, simulation):
+		if unit.location == plot.point:
+			return False
+
+		if not plot.isDiscoveredBy(unit.player):
+			return False
+
+		# domain = unit.domain()
+		# if plot.sameContinent( as: <  # T##AbstractTile#>) (pPlot->area() != pUnit->area())
+		# 	if (!pUnit->CanEverEmbark())
+		# 		if (!(eDomain == DOMAIN_SEA & & pPlot->isWater()))
+		# 			return false;
+
+		# don't let the auto-explore end it's turn in a city
+		if plot.isCity():
+			return False
+
+		if not unit.canMoveInto(plot.point, options=[], simulation=simulation):
+			return False
+
+		return True
+
+	def moveCivilianToSafety(self, unit, ignoreUnits: bool, simulation) -> bool:
+		"""Fleeing to safety for civilian units"""
+		dangerPlotsAI = self.player.dangerPlotsAI
+		searchRange = unit.searchRange(1, simulation)
+
+		bestValue = -999999
+		bestPlot = None
+
+		for point in unit.location.areaWithRadius(searchRange):
+			tile = simulation.tileAt(point)
+
+			if tile is None:
+				continue
+
+			if not unit.validTarget(point, simulation):
+				continue
+
+			if simulation.isEnemyVisibleAt(point, self.player):
+				continue
+
+			# if we can't get there this turn, skip it
+			turns = unit.turnsToReach(point, simulation)
+			if turns == sys.maxsize or turns > 1:
+				continue
+
+			value = 0
+			if tile.owner() is not None and tile.owner().leader == self.player.leader:
+				# if this is within our territory, provide a minor benefit
+				value += 1
+
+			city = simulation.cityAt(point)
+
+			if city is not None and city.player.leader == self.player.leader:
+				value += city.defensiveStrengthAgainst(Unit=None, tile=tile, ranged=False, simulation=simulation)
+
+			elif not ignoreUnits:
+				otherUnit = simulation.unitAt(point, UnitMapType.combat)
+				if otherUnit is not None:
+					if otherUnit.player.leader == unit.player.leader:
+						if otherUnit.canDefend() and otherUnit.location != unit.location:
+							if otherUnit.isWaiting() or not otherUnit.canMove():
+								value += otherUnit.defensiveStrengthAgainst(unit=None, city=None, tile=tile, ranged=False, simulation=simulation)
+
+			value -= int(dangerPlotsAI.dangerAt(point))
+
+			if value > bestValue:
+				bestValue = value
+				bestPlot = tile
+
+		if bestPlot is not None:
+			if unit.location == bestPlot.point:
+				# print("\(unit.name()) tried to move to safety, but is already at the best spot, \(bestPlot.point)")
+				if unit.canHoldAt(bestPlot.point, simulation):
+					print(f"{unit.name()} tried to move to safety, but is already at the best spot, {bestPlot.point}")
+					unit.pushMission(UnitMission(UnitMissionType.skip), simulation)
+					return True
+				else:
+					print(f"{unit.name()} tried to move to safety, but cannot hold in current location, {bestPlot.point}")
+					unit.automate(UnitAutomationType.none, simulation)
+			else:
+				print(f"{unit.name()} moving to safety, {bestPlot.point}")
+				unit.pushMission(UnitMission(UnitMissionType.moveTo, target=bestPlot.point), simulation)
+				return True
+		else:
+			print(f"{unit.name()} tried to move to a safe point but couldn't find a good place to go")
+
+		return False

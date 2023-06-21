@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 from game.cities import City
+from game.civilizations import LeaderType
 from game.districts import DistrictType
 from game.governors import GovernorType, GovernorTitle
 from game.players import Player
@@ -52,6 +53,14 @@ class River:
 		return self._name
 
 
+class BuilderAIScratchPad:
+	def __init__(self):
+		self.turn: int = -1
+		self.routeType: RouteType = RouteType.none
+		self.leader: LeaderType = LeaderType.none
+		self.value: int = -1
+
+
 class Tile:
 	"""
 		class that holds a single tile of a Map
@@ -91,6 +100,8 @@ class Tile:
 		self._workingCity = None
 		self._buildProgressList = WeightedBuildList()
 		self._area = None
+
+		self._builderAIScratchPad = BuilderAIScratchPad()
 
 	def owner(self) -> Player:
 		return self._owner
@@ -279,8 +290,11 @@ class Tile:
 		return self._riverValue & int(FlowDirection.northEast.value) > 0 or \
 			self._riverValue & int(FlowDirection.southWest.value) > 0
 
-	def hasAnyRoute(self):
+	def hasAnyRoute(self) -> bool:
 		return self._route != RouteType.none
+
+	def hasRoute(self, route: RouteType) -> bool:
+		return self._route == route
 
 	def canHaveResource(self, grid, resource: ResourceType, ignore_latitude: bool = False) -> bool:
 
@@ -893,6 +907,9 @@ class Tile:
 
 		return False
 
+	def builderAIScratchPad(self) -> BuilderAIScratchPad:
+		return self._builderAIScratchPad
+
 
 class TileStatistics:
 	def __init__(self):
@@ -1206,7 +1223,7 @@ class MapModel:
 		self._units.append(unit)
 
 	def removeUnit(self, unit):
-		self._units = list(filter(lambda loopUnit: unit.location == loopUnit.location and unit.unitType == loopUnit.unitType, self._units))
+		self._units = list(filter(lambda loopUnit: unit.location != loopUnit.location or unit.unitType != loopUnit.unitType, self._units))
 
 	def cityAt(self, location: HexPoint) -> Optional[City]:
 		return next(filter(lambda city: city.location == location, self._cities), None)

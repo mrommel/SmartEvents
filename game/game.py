@@ -209,6 +209,7 @@ class GameModel:
 		return self._gameStateValue
 
 	def setGameStateTo(self, gameState: GameState):
+		print(f'ooo Game has be set to {gameState} in turn {self.currentTurn} ooo')
 		self._gameStateValue = gameState
 
 	def turnSlice(self) -> int:
@@ -744,3 +745,24 @@ class GameModel:
 			return int(path.cost())
 
 		return 0
+
+	def isAdjacentDiscovered(self, point: HexPoint, player) -> bool:
+		for neighbor in point.neighbors():
+			tile = self._map.tileAt(neighbor)
+
+			if tile is None:
+				continue
+
+			if tile.isDiscoveredBy(player):
+				return True
+
+		return False
+
+	def isWithinCityRadius(self, tile, player) -> bool:
+		playerCities = self.citiesOf(player)
+
+		for city in playerCities:
+			if tile.point.distance(city.location) < City.workRadius:
+				return True
+
+		return False

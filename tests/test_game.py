@@ -4,7 +4,7 @@ from game.achievements import CivicAchievements, TechAchievements
 from game.ai.baseTypes import MilitaryStrategyType
 from game.ai.economicStrategies import EconomicStrategyType
 from game.ai.homeland import HomelandMoveType
-from game.baseTypes import HandicapType
+from game.baseTypes import HandicapType, GameState
 from game.buildings import BuildingType
 from game.cities import City, CityStateType
 from game.cityStates import CityStateCategory
@@ -26,7 +26,7 @@ from game.states.gossips import GossipType
 from game.states.victories import VictoryType
 from game.types import CivicType, TechType, EraType
 from game.unitTypes import UnitType
-from game.units import Unit, UnitActivityType
+from game.units import Unit, UnitActivityType, UnitAutomationType
 from game.wonders import WonderType
 from map.base import HexPoint
 from map.generation import MapGenerator, MapOptions
@@ -668,7 +668,6 @@ class TestUsecases(unittest.TestCase):
 		iteration = 0
 		while not(playerAlexander.hasProcessedAutoMoves() and playerAlexander.turnFinished()) and iteration < 25:
 			simulation.update()
-			print(f'-- loop -- active player: {simulation.activePlayer()} --', flush=True)
 
 			if playerAlexander.isTurnActive():
 				playerAlexander.setProcessedAutoMovesTo(True)  # units have moved
@@ -686,6 +685,83 @@ class TestUsecases(unittest.TestCase):
 
 		self.assertEqual(playerAugustusWarrior.activityType(), UnitActivityType.none)  # warrior has skipped
 		# XCTAssertEqual(playerAugustusWarrior.peekMission()!.buildType, BuildType.repair)
+
+	def test_first100turns(self):
+		# GIVEN
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
+
+		# players
+		playerBarbar = Player(LeaderType.barbar, human=False)
+		playerBarbar.initialize()
+		simulation.players.append(playerBarbar)
+
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		playerAlexander = Player(LeaderType.alexander, human=True)
+		playerAlexander.initialize()
+		simulation.players.append(playerAlexander)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# trajan units
+		playerTrajanWarrior = Unit(HexPoint(15, 16), UnitType.warrior, playerTrajan)
+		simulation.addUnit(playerTrajanWarrior)
+
+		playerTrajanSettler = Unit(HexPoint(15, 15), UnitType.settler, playerTrajan)
+		simulation.addUnit(playerTrajanSettler)
+
+		# alexander units
+		playerAlexanderScout = Unit(HexPoint(5, 6), UnitType.scout, playerAlexander)
+		playerAlexanderScout.automate(UnitAutomationType.explore, simulation)
+		simulation.addUnit(playerAlexanderScout)
+
+		# barbarian units
+		playerBarbarianWarrior = Unit(HexPoint(10, 10), UnitType.barbarianWarrior, playerBarbar)
+		simulation.addUnit(playerBarbarianWarrior)
+
+		# this is cheating
+		# mapModel.discover(playerAlexander, simulation)
+		mapModel.discover(playerTrajan, simulation)
+		mapModel.discover(playerBarbar, simulation)
+
+		numberOfCitiesBefore = len(simulation.citiesOf(playerTrajan))
+		numberOfUnitsBefore = len(simulation.unitsOf(playerTrajan))
+
+		# WHEN
+		counter = 0
+		while simulation.currentTurn < 50:
+			simulation.update()
+
+			while not (playerAlexander.hasProcessedAutoMoves() and playerAlexander.turnFinished()):
+				simulation.update()
+
+				if playerAlexander.isTurnActive():
+					# playerAlexander.setProcessedAutoMovesTo(True)
+					playerAlexanderScout.finishMoves()
+					playerAlexander.finishTurn()
+
+				counter += 1
+
+		# THEN
+		self.assertEqual(numberOfCitiesBefore, 0)
+		self.assertEqual(numberOfUnitsBefore, 2)
+		numberOfCitiesAfter = len(simulation.citiesOf(playerTrajan))
+		numberOfUnitsAfter = len(simulation.unitsOf(playerTrajan))
+		self.assertGreater(numberOfCitiesAfter, 0)
+		self.assertGreater(numberOfUnitsAfter, 0)
+
+		self.assertEqual(simulation.gameState(), GameState.on)
+		self.assertEqual(simulation.currentTurn, 50)
 
 
 class TestGameGeneration(unittest.TestCase):

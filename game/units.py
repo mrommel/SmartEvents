@@ -19,6 +19,7 @@ from game.types import EraType, TechType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, UnitMissionType, UnitActivityType, \
 	UnitMapType, UnitAbilityType, MoveOption, UnitClassType
+from game.wonders import WonderType
 from map.base import HexPoint, HexArea, HexDirection
 from map.improvements import ImprovementType
 from map.path_finding.path import HexPath
@@ -193,6 +194,12 @@ class Unit:
 	def __repr__(self):
 		return f'Unit({self.location}, {self.unitType}, {self.player.name()}, {self.experienceLevel()} exp)'
 
+	def __eq__(self, other):
+		if isinstance(other, Unit):
+			return self.location == other.location and other.isOfUnitType(self.unitType)
+
+		return False
+
 	def name(self) -> str:
 		return self._name
 
@@ -246,11 +253,11 @@ class Unit:
 
 	def finishMoves(self):
 		self._movesValue = 0
-		print('* finishesMoves')
+		# print('* finishesMoves')
 
 	def resetMoves(self, simulation):
 		self._movesValue = self.maxMoves(simulation)
-		print(f'* resetMoves of unit: {self.unitType} of {self.player.name()} => {self._movesValue}')
+		# print(f'* resetMoves of unit: {self.unitType} of {self.player.name()} => {self._movesValue}')
 
 	def maxMoves(self, simulation) -> int:
 		moveVal = self.baseMovesInto(UnitDomainType.none, simulation)
@@ -751,8 +758,70 @@ class Unit:
 	def isAutomated(self) -> bool:
 		return self._automationType != UnitAutomationType.none
 
+	def automate(self, automationType: UnitAutomationType, simulation):
+
+		if self._automationType != automationType:
+
+			oldAutomationType = self._automationType
+			self._automationType = automationType
+
+			self.clearMissions()
+			self.setActivityType(UnitActivityType.awake, simulation)
+
+			if oldAutomationType == UnitActivityType.explore:
+				# these need to be rebuilt
+				self.player.economicAI.explorationPlotsDirty = True
+
+			# if canceling automation, cancel on cargo as well
+			if automationType == UnitActivityType.none:
+				# /*CvPlot* pPlot = plot();
+				# if(pPlot != NULL) {
+				# 	IDInfo* pUnitNode = pPlot->headUnitNode();
+				# 	while(pUnitNode != NULL):
+				# 		CvUnit* pCargoUnit = ::getUnit(*pUnitNode);
+				# 		pUnitNode = pPlot->nextUnitNode(pUnitNode);
+				#
+				# 		CvUnit* pTransportUnit = pCargoUnit->getTransportUnit();
+				# 		if(pTransportUnit != NULL && pTransportUnit == this):
+				# 			pCargoUnit->SetAutomateType(NO_AUTOMATE);
+				# 			pCargoUnit->SetActivityType(ACTIVITY_AWAKE);
+				pass
+			elif automationType == UnitActivityType.explore:
+				# these need to be rebuilt
+				self.player.economicAI.explorationPlotsDirty = True
+
+		return
+
+	def automateType(self) -> UnitAutomationType:
+		return self._automationType
+
 	def autoMission(self, simulation):
-		pass
+		"""Perform automated mission"""
+		dangerPlotAI = self.player.dangerPlotsAI
+
+		missionNode = self.peekMission()
+		if missionNode is not None:
+			if not self.isBusy() and not self.isDelayedDeath():
+				# Builders which are being escorted shouldn't wake up every turn... this is annoying!
+				escortedBuilder = False
+				if missionNode.missionType == UnitMissionType.build:
+					# if (hUnit->plot()->getNumDefenders(hUnit->getOwner()) > 0):
+					#   escortedBuilder = True
+					pass
+
+				if not escortedBuilder and not self.isCombatUnit() and dangerPlotAI.dangerAt(self.location) > 0.0:  # / * & & !hUnit->IsIgnoringDangerWakeup() * /
+					# self.mission.clearMissionQueue()
+					raise Exception("boing")
+					# hUnit->SetIgnoreDangerWakeup(true);
+				else:
+					if not self.isDelayedDeath():
+						if self.activityType() == UnitActivityType.mission:
+							missionNode.continueMission(steps=0, simulation=simulation)
+						else:
+							missionNode.start(simulation)
+
+		# self.ignoreDestruction(true);
+		self.doDelayedDeath(simulation)
 
 	def peekMission(self) -> Optional[UnitMission]:
 		if len(self._missions) > 0:
@@ -1996,3 +2065,86 @@ class Unit:
 	def isUnderTacticalControl(self) -> bool:
 		return self._tacticalMoveValue != TacticalMoveType.none
 
+	def clearMissions(self):
+		self._missions = []
+
+	def isOfUnitType(self, unitType: UnitType) -> bool:
+		return self.unitType == unitType
+
+	def searchRange(self, range: int, simulation) -> int:
+		if range == 0:
+			return 0
+
+		if self.domain() == UnitDomainType.sea:
+			return range * self.baseMoves(simulation)
+		else:
+			return ((range + 1) * (self.baseMoves(simulation=simulation) + 1))
+
+	def baseMoves(self, domain: UnitDomainType = UnitDomainType.none, simulation=None) -> int:
+		"""
+	    Get the base movement points for the unit.
+
+	    @param domain:     - If NO_DOMAIN, this will use the units current domain.
+		    This can give different results based on whether the unit is currently embarked or not.
+		    Passing in DOMAIN_SEA will return the units baseMoves as if it were already embarked.
+		    Passing in DOMAIN_LAND will return the units baseMoves as if it were on land, even if it is currently embarked.
+
+		@param simulation:
+		@return:
+		"""
+		if simulation is None:
+			raise Exception('simulation must not be None')
+
+		if (domain == UnitDomainType.sea and self.canEmbarkInto(None, simulation)) or (domain == UnitDomainType.none and self.isEmbarked()):
+			return 2  # EMBARKED_UNIT_MOVEMENT
+
+		extraNavalMoves = 0
+		if domain == UnitDomainType.sea:
+			extraNavalMoves = self.extraNavalMoves(simulation)
+
+		extraGoldenAgeMoves = 0
+
+		extraUnitCombatTypeMoves = 0  # ???
+		# / * + self.extraMoves() * /
+		return self.unitType.moves() + extraNavalMoves + extraGoldenAgeMoves + extraUnitCombatTypeMoves
+
+	def extraNavalMoves(self, simulation) -> int:
+		extraNavalMoves: int = 0
+
+		if self.player.hasWonder(WonderType.greatLighthouse, simulation):
+			# +1 Movement for all naval units.
+			extraNavalMoves += 1
+
+		# check promotions here?
+
+		# FIXME
+		# self.promotions?.has(promotion: <  # T##UnitPromotionType#>)
+		return extraNavalMoves
+
+	def validTarget(self, target: HexPoint, simulation) -> bool:
+		tile = simulation.tileAt(self.location)
+		targetTile = simulation.tileAt(target)
+
+		if not self.canEnterTerrain(targetTile):
+			return False
+
+		if self.domain() == UnitDomainType.sea:
+			if targetTile.terrain().isWater() or self.canMoveAllTerrain():
+				return True
+			elif targetTile.isFriendlyCity(self.player, simulation) and simulation.isCoastal(self.location):
+				return True
+
+		elif self.domain() == UnitDomainType.air:
+			return True
+
+		elif self.domain() == UnitDomainType.land:
+			if tile.sameContinentAs(targetTile) or self.canMoveAllTerrain():
+				return True
+
+		elif self.domain() == UnitDomainType.immobile:
+			pass
+
+		return False
+
+	def canEnterTerrain(self, tile):
+		return not self.isImpassableTile(tile)
