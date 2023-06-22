@@ -190,6 +190,8 @@ class Unit:
 		self._garrisonedValue: bool = False
 		self._tradeRouteDataValue: Optional[UnitTradeRouteData] = None
 
+		self._numberOfAttacksMade = 0
+
 		self.unitMoved = None
 
 	def __repr__(self):
@@ -900,8 +902,11 @@ class Unit:
 	def isEmbarked(self) -> bool:
 		return self._isEmbarkedValue
 
-	def setMadeAttackTo(self, value):
-		pass
+	def setMadeAttackTo(self, value: bool):
+		if value:
+			self._numberOfAttacksMade += 1
+		else:
+			self._numberOfAttacksMade = 0
 
 	def army(self) -> Optional[Army]:
 		return None
@@ -1530,7 +1535,7 @@ class Unit:
 		if testVisible:
 			# check for any other units working in this plot
 			for loopUnit in simulation.unitsAt(location):
-				if loopUnit.isEqualTo(self):
+				if self.isEqualTo(loopUnit):
 					continue
 
 				loopMission = loopUnit.peekMission()
@@ -2031,7 +2036,7 @@ class Unit:
 		# if self.isBlitz()
 		# return false
 
-		return self.numberOfAttacksMade >= self.numberOfAttacksPerTurn(simulation)
+		return self._numberOfAttacksMade >= self.numberOfAttacksPerTurn(simulation)
 
 	def queueMoveForVisualization(self, point, point1, simulation):
 		pass
@@ -2154,3 +2159,29 @@ class Unit:
 		pathFinderDataSource = simulation.unitAwarePathfinderDataSource(self)
 		pathFinder = AStarPathfinder(pathFinderDataSource)
 		return pathFinder.turnsToReachTarget(self, point, simulation)
+
+	def numberOfAttacksPerTurn(self, simulation) -> int:
+		numberOfAttacksPerTurnValue: int = 0
+
+		# initially units have 1 attack
+		numberOfAttacksPerTurnValue += 1
+
+		# breakthrough - +1 additional attack per turn if Movement allows.
+		if self.hasPromotion(UnitPromotionType.breakthrough):
+			numberOfAttacksPerTurnValue += 1
+
+		# eliteGuard - +1 additional attack per turn if Movement allows. Can move after attacking.
+		if self.hasPromotion(UnitPromotionType.eliteGuard):
+			numberOfAttacksPerTurnValue += 1
+
+		# expertMarksman - +1 additional attack per turn if unit has not moved.
+		if self.hasPromotion(UnitPromotionType.expertMarksman) and not self.hasMoved(simulation):
+			numberOfAttacksPerTurnValue += 1
+
+		return numberOfAttacksPerTurnValue
+
+	def isEqualTo(self, otherUnit) -> bool:
+		if isinstance(otherUnit, Unit):
+			return self.location == otherUnit.location and self.unitType == otherUnit.unitType
+
+		return False

@@ -10,6 +10,7 @@ from game.types import TechType, CivicType
 from game.unitTypes import UnitMapType
 from game.units import Unit
 from game.wonders import WonderType
+from map.areas import Continent, ContinentType, Ocean
 from map.base import HexPoint, HexDirection, Size, Array2D, HexArea
 from map.improvements import ImprovementType
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
@@ -91,6 +92,7 @@ class Tile:
 		self._improvementValue = ImprovementType.none
 		self._improvementPillagedValue: bool = False
 		self.continentIdentifier = None
+		self.oceanIdentifier = None
 		self.discovered = dict()
 		self.visible = dict()
 		self._cityValue = None
@@ -361,6 +363,9 @@ class Tile:
 					simulation.enableTutorial(Tutorials.none)
 
 	def isVisibleTo(self, player) -> bool:
+		if player is None:
+			return False
+
 		return self.visible.get(str(player.leader), False)
 
 	def isVisibleToAny(self):
@@ -959,71 +964,6 @@ class TileStatistics:
 		self.snow /= factor
 
 
-class Continent:
-	def __init__(self, identifier: int, name: str, grid):
-		self.identifier = identifier
-		self.name = name
-		self.grid = grid
-		self.points = []
-		self.continentType = ContinentType.none
-
-	def add(self, point):
-		self.points.append(point)
-
-	def __str__(self):
-		return f'Content: {self.identifier} {self.name}'
-
-
-class ContinentType(ExtendedEnum):
-	none = 'none'
-
-	africa = 'africa'
-	amasia = 'amasia'
-	america = 'america'
-	antarctica = 'antarctica'
-	arctica = 'arctica'
-	asia = 'asia'
-	asiamerica = 'asiamerica'
-	atlantica = 'atlantica'
-	atlantis = 'atlantis'
-	australia = 'australia'
-	avalonia = 'avalonia'
-	azania = 'azania'
-	baltica = 'baltica'
-	cimmeria = 'cimmeria'
-	columbia = 'columbia'
-	congocraton = 'congocraton'
-	euramerica = 'euramerica'
-	europe = 'europe'
-	gondwana = 'gondwana'
-	kalaharia = 'kalaharia'
-	kazakhstania = 'kazakhstania'
-	kernorland = 'kernorland'
-	kumarikandam = 'kumarikandam'
-	laurasia = 'laurasia'
-	laurentia = 'laurentia'
-	lemuria = 'lemuria'
-	mu = 'mu'
-	nena = 'nena'
-	northAmerica = 'northAmerica'
-	novoPangaea = 'novoPangaea'
-	nuna = 'nuna'
-	pangaea = 'pangaea'
-	pangaeaUltima = 'pangaeaUltima'
-	pannotia = 'pannotia'
-	rodinia = 'rodinia'
-	siberia = 'siberia'
-	southAmerica = 'southAmerica'
-	terraAustralis = 'terraAustralis'
-	ur = 'ur'
-	vaalbara = 'vaalbara'
-	vendian = 'vendian'
-	zealandia = 'zealandia'
-
-	def name(self) -> str:
-		return f'Continent: {self.value}'
-
-
 class MapModel:
 	def __init__(self, width_or_size: Union[Size, int], height: Optional[int] = None):
 		if isinstance(width_or_size, Size) and height is None:
@@ -1052,6 +992,9 @@ class MapModel:
 		self.oceans = []
 		self.areas = []
 
+	def updateStatistics(self):
+		pass
+
 	def valid(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> bool:
 		if isinstance(x_or_hex, HexPoint) and y is None:
 			hex_point = x_or_hex
@@ -1070,30 +1013,6 @@ class MapModel:
 				point_arr.append(HexPoint(x, y))
 
 		return point_arr
-
-	def analyze(self):
-		oceanFinder = OceanFinder(self.size)
-		self.oceans = oceanFinder.execute(self)
-
-		continentFinder = ContinentFinder(self.size)
-		self.continents = continentFinder.execute(self)
-
-		# dummy player
-		player = Player(LeaderType.alexander)
-		player.initialize()
-
-		# map is divided into regions
-		fertilityEvaluator = CitySiteEvaluator(self)
-		finder = RegionFinder(self, fertilityEvaluator, player)
-		self.areas = finder.divideInto(2)
-
-		# set area to tile
-		for area in self.areas:
-			for pt in area:
-				tile = self.tileAt(pt)
-				tile.area = area
-
-		self.updateStatistics()
 
 	def tileAt(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> Optional[Tile]:
 		if isinstance(x_or_hex, HexPoint) and y is None:
@@ -1402,6 +1321,10 @@ class MapModel:
 	def setContinent(self, continent: Continent, location: HexPoint):
 		tile = self.tileAt(location)
 		tile.continentIdentifier = continent.identifier
+
+	def setOcean(self, ocean: Ocean, location: HexPoint):
+		tile = self.tileAt(location)
+		tile.oceanIdentifier = ocean.identifier
 
 	def improvementAt(self, location: HexPoint) -> ImprovementType:
 		tile = self.tileAt(location)

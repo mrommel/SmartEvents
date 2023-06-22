@@ -6,7 +6,6 @@ from game.baseTypes import HandicapType, GameState
 from game.buildings import BuildingType
 from game.cities import City
 from game.civilizations import LeaderType, CivilizationType
-from game.evaluators import CitySiteEvaluator
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.players import Player
@@ -20,6 +19,7 @@ from game.units import Unit
 from game.wonders import WonderType
 from map import constants
 from map.base import HexPoint, Size
+from map.evaluators import CitySiteEvaluator, MapAnalyzer
 from map.improvements import ImprovementType
 from map.map import MapModel, Tile, ContinentType, Continent
 from map.path_finding.finder import AStarPathfinder, MoveTypeIgnoreUnitsOptions, \
@@ -43,6 +43,10 @@ class GameModel:
 		# game ai
 		self.barbarianAI = BarbarianAI()
 		self.religions = Religions()
+
+		# analyze map
+		analyzer = MapAnalyzer(self._map)
+		analyzer.analyze()
 
 		# stats
 		self.discoveredContinents = []

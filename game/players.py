@@ -333,9 +333,10 @@ class Player:
 		self.endTurnValue = False
 		self.lastSliceMovedValue = 0
 		# cities stats values
-		self.citiesFoundValue = 0
-		self.citiesLostValue = 0
+		self._citiesFoundValue = 0
+		self._citiesLostValue = 0
 		self._trainedSettlersValue = 0
+		self._settledContinents = []
 		self.builtCityNames = []
 		self.originalCapitalLocationValue = HexPoint(-1, -1)
 		self.lostCapitalValue = False
@@ -357,7 +358,6 @@ class Player:
 		self._currentDedicationsValue: [DedicationType] = []
 		self._numberOfDarkAgesValue: int = 0
 		self._numberOfGoldenAgesValue: int = 0
-		self._citiesFoundValue: int = 0
 		self._totalImprovementsBuilt: int = 0
 		self._trainedSettlersValue: int = 0
 		self._tradingCapacityValue: int = 0
@@ -585,10 +585,10 @@ class Player:
 		# send gossip
 		simulation.sendGossip(GossipType.cityFounded, cityName=cityName, player=self)
 
-		self.citiesFoundValue += 1
+		self._citiesFoundValue += 1
 
 		if simulation.tutorial() == Tutorials.foundFirstCity and self.isHuman():
-			if self.citiesFoundValue >= Tutorials.citiesToFound():
+			if self._citiesFoundValue >= Tutorials.citiesToFound():
 				simulation.userInterface.finishTutorial(Tutorials.foundFirstCity)
 				simulation.enableTutorial(Tutorials.none)
 
@@ -668,7 +668,7 @@ class Player:
 		return self.turnActive
 
 	def numberOfCitiesFounded(self) -> int:
-		return self.citiesFoundValue
+		return self._citiesFoundValue
 
 	def science(self, simulation) -> float:
 		value: YieldValues = YieldValues(value=0.0, percentage=1.0)
@@ -1206,7 +1206,7 @@ class Player:
 				self.markSettledOnContinent(tileContinent)
 
 				# only from second city (capital == first city is also founded on a 'new' continent)
-				if len(simulation.cities(self)) > 0:
+				if len(simulation.citiesOf(self)) > 0:
 					self.addMoment(MomentType.cityOnNewContinent, cityName=cityName, continentName=tileContinent.name(), simulation=simulation)
 
 		if tile.terrain() == TerrainType.tundra:
@@ -1634,3 +1634,9 @@ class Player:
 		numberOfAreas = 1 if bestScore != -1 else tmp
 
 		return numberOfAreas, bestArea, secondBestArea
+
+	def hasSettledOnContinent(self, continent) -> bool:
+		return continent in self._settledContinents
+
+	def markSettledOnContinent(self, continent):
+		self._settledContinents.append(continent)

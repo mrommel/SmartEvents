@@ -1,8 +1,10 @@
 import sys
 
+from game.civilizations import LeaderType
+from game.players import Player
 from map.base import HexPoint, HexArea
-from map.map import MapModel
 from core.base import ExtendedEnum
+from map.generation import OceanFinder, ContinentFinder, RegionFinder
 
 
 class BaseSiteEvaluator:
@@ -43,7 +45,7 @@ class CitySiteEvaluationType(ExtendedEnum):
 
 
 class TileFertilityEvaluator(BaseSiteEvaluator):
-	def __init__(self, map: MapModel):
+	def __init__(self, map):
 		super().__init__()
 		self.map = map
 
@@ -52,7 +54,7 @@ class CitySiteEvaluator(BaseSiteEvaluator):
 
 	minCityDistance = 2
 
-	def __init__(self, map: MapModel):
+	def __init__(self, map):
 		super().__init__()
 		self.map = map
 		self.tileFertilityEvaluator = TileFertilityEvaluator(map)
@@ -79,3 +81,35 @@ class CitySiteEvaluator(BaseSiteEvaluator):
 				return False
 
 		return True
+
+
+class MapAnalyzer:
+	def __init__(self, map):
+		self.map = map
+
+	def analyze(self):
+		oceanFinder = OceanFinder(self.map.width, self.map.height)
+		oceans = oceanFinder.executeOn(self.map)
+		self.map.oceans = oceans
+
+		continentFinder = ContinentFinder(self.map.width, self.map.height)
+		continents = continentFinder.executeOn(self.map)
+		self.map.continents = continents
+
+		# dummy player
+		player = Player(LeaderType.alexander)
+		player.initialize()
+
+		# map is divided into regions
+		fertilityEvaluator = CitySiteEvaluator(self)
+		finder = RegionFinder(self, fertilityEvaluator, player)
+		areas = finder.divideInto(2)
+		self.map.area = areas
+
+		# set area to tile
+		for area in self.map.areas:
+			for pt in area:
+				tile = self.map.tileAt(pt)
+				tile.area = area
+
+		self.map.updateStatistics()

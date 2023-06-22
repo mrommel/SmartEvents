@@ -20,6 +20,9 @@ class UnitPromotionType(ExtendedEnum):
 	rutter = 'rutter'
 	depredation = 'depredation'
 	embarkation = 'embarkation'
+	breakthrough = 'breakthrough'
+	eliteGuard = 'eliteGuard'
+	expertMarksman = 'expertMarksman'
 
 
 class UnitMapType(ExtendedEnum):
