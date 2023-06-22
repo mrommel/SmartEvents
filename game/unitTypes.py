@@ -10,21 +10,6 @@ from core.base import ExtendedEnum, InvalidEnumError
 from utils.translation import gettext_lazy as _
 
 
-class UnitPromotionType(ExtendedEnum):
-	spyglass = 'spyglass'
-	commando = 'commando'
-	helmsman = 'helmsman'
-	redeploy = 'redeploy'
-	pursuit = 'pursuit'
-	sentry = 'sentry'
-	rutter = 'rutter'
-	depredation = 'depredation'
-	embarkation = 'embarkation'
-	breakthrough = 'breakthrough'
-	eliteGuard = 'eliteGuard'
-	expertMarksman = 'expertMarksman'
-
-
 class UnitMapType(ExtendedEnum):
 	civilian = 'civilian'
 	combat = 'combat'

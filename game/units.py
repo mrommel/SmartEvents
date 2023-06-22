@@ -9,6 +9,7 @@ from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.policyCards import PolicyCardType
+from game.promotions import UnitPromotions
 from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.builds import BuildType
@@ -185,6 +186,7 @@ class Unit:
 		self._isEmbarkedValue = False
 
 		self._experienceModifierValue = 0.0
+		self._promotions = UnitPromotions(self)
 		self._tacticalMoveValue = TacticalMoveType.none
 
 		self._garrisonedValue: bool = False
@@ -351,12 +353,10 @@ class Unit:
 		return max(0, self.moves())
 
 	def hasPromotion(self, promotion: UnitPromotionType) -> bool:
-		# fixme
-		return False
+		return self._promotions.hasPromotion(promotion)
 
 	def gainedPromotions(self) -> [UnitPromotionType]:
-		# fixme
-		return []
+		return self._promotions.gainedPromotions()
 
 	def doPromotion(self, simulation):
 		# fixme
@@ -2185,3 +2185,14 @@ class Unit:
 			return self.location == otherUnit.location and self.unitType == otherUnit.unitType
 
 		return False
+
+	def doPromote(self, promotionType: UnitPromotionType, simulation):
+		if promotionType.tier() == 4:
+			self.player.addMoment(MomentType.unitPromotedWithDistinction, simulation)
+
+		self._promotions.earnPromotion(promotionType)
+
+		# also heal completely
+		self.setHealthPoints(self.maxHealthPoints())
+
+		return

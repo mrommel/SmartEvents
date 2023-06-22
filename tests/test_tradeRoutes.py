@@ -1,5 +1,6 @@
 import unittest
 
+from core.types import EraType
 from game.ai.cities import BuildableItem
 from game.baseTypes import HandicapType
 from game.buildings import BuildingType
@@ -10,7 +11,7 @@ from game.players import Player
 from game.states.victories import VictoryType
 from game.types import TechType, CivicType
 from game.unitTypes import UnitType
-from game.units import Unit
+from game.units import Unit, UnitTradeRouteData
 from map.base import HexPoint
 from map.generation import MapOptions, MapGenerator
 from map.types import MapSize, TerrainType, ResourceType, MapType
@@ -135,3 +136,17 @@ class TestTradeRoutes(unittest.TestCase):
 		self.assertEqual(self.targetVisited, 3)
 		self.assertEqual(self.sourceVisited, 3)
 		self.assertEqual(self.hasExpired, True)
+
+	def test_durations(self):
+		tradeRouteData = UnitTradeRouteData(None, 0)
+
+		self.assertEqual(tradeRouteData.tradeRouteDurationIn(None), 21)
+		self.assertEqual(tradeRouteData.tradeRouteDurationIn(EraType.ancient), 21)
+		self.assertEqual(tradeRouteData.tradeRouteDurationIn(EraType.classical), 21)
+		self.assertEqual(tradeRouteData.tradeRouteDurationIn(EraType.medieval), 31)
+		self.assertEqual(tradeRouteData.tradeRouteDurationIn(EraType.renaissance), 31)
+		self.assertEqual(tradeRouteData.tradeRouteDurationIn(EraType.industrial), 41)
+		self.assertEqual(tradeRouteData.tradeRouteDurationIn(EraType.modern), 41)
+		self.assertEqual(tradeRouteData.tradeRouteDurationIn(EraType.atomic), 41)
+		self.assertEqual(tradeRouteData.tradeRouteDurationIn(EraType.information), 51)
+		self.assertEqual(tradeRouteData.tradeRouteDurationIn(EraType.future), 51)
