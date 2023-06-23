@@ -23,6 +23,22 @@ class PromotionCombatModifierData:
 		self.roughOnly = roughOnly
 
 
+def unitClassesOf(domain) -> [UnitClassType]:
+	if isinstance(domain, UnitDomainType):
+		unitClasses = []
+		for it in list(UnitClassType):
+			if it.domain() == domain:
+				unitClasses.append(it)
+
+		return unitClasses
+	elif isinstance(domain, list):
+		unitClasses = []
+		for it in list(UnitClassType):
+			if it.domain() in domain:
+				unitClasses.append(it)
+
+		return unitClasses
+
 class UnitPromotionType:
 	pass
 
@@ -33,14 +49,14 @@ class UnitPromotionTypeData:
 	https://github.com/LoneGazebo/Community-Patch-DLL/blob/b33ee4a04e91d27356af0bcc421de1b7899ac073/(2)%20Vox%20Populi/Balance%20Changes/Units/PromotionChanges.xml
 	"""
 
-	def __init__(self, name: str, effect: str, tier: int, unitClass: UnitClassType, required: [UnitPromotionType],
+	def __init__(self, name: str, effect: str, tier: int, unitClass: UnitClassType, requiredOr: [UnitPromotionType],
 	             consumable: bool, enemyRoute: bool = False, ignoreZoneOfControl: bool = False,
 	             combatModifier: Optional[PromotionCombatModifierData] = None, flavors: [Flavor] = []):
 		self.name = name
 		self.effect = effect
 		self.tier = tier
 		self.unitClass = unitClass
-		self.required = required
+		self.requiredOr = requiredOr
 		self.consumable = consumable
 		self.enemyRoute = enemyRoute
 		self.ignoreZoneOfControl = ignoreZoneOfControl
@@ -162,8 +178,8 @@ class UnitPromotionType(ExtendedEnum):
 	def unitClass(self) -> UnitClassType:
 		return self._data().unitClass
 
-	def required(self) -> [UnitPromotionType]:
-		return self._data().required
+	def requiredOr(self) -> [UnitPromotionType]:
+		return self._data().requiredOr
 
 	def consumable(self) -> bool:
 		return self._data().consumable
@@ -235,7 +251,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_EMBARKATION_EFFECT",
 				tier=0,
 				unitClass=UnitClassType.melee,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.navalGrowth, value=2)
@@ -251,7 +267,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_HEALTH_BOOST_EFFECT",
 				tier=0,
 				unitClass=UnitClassType.recon,
-				required=[],
+				requiredOr=[],
 				consumable=True,
 				flavors=[
 					Flavor(FlavorType.amenities, value=2)
@@ -263,7 +279,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_HEALTH_BOOST_EFFECT",
 				tier=0,
 				unitClass=UnitClassType.melee,
-				required=[],
+				requiredOr=[],
 				consumable=True,
 				flavors=[
 					Flavor(FlavorType.amenities, value=2)
@@ -280,7 +296,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_RANGER_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.recon,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.recon, value=2),
@@ -294,7 +310,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_ALPINE_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.recon,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.recon, value=1),
@@ -308,7 +324,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_SENTRY_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.recon,
-				required=[UnitPromotionType.ranger, UnitPromotionType.alpine],
+				requiredOr=[UnitPromotionType.ranger, UnitPromotionType.alpine],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.recon, value=2)
@@ -321,7 +337,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_GUERRILLA_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.recon,
-				required=[UnitPromotionType.ranger, UnitPromotionType.alpine],
+				requiredOr=[UnitPromotionType.ranger, UnitPromotionType.alpine],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.offense, value=2),
@@ -335,7 +351,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_SPYGLASS_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.recon,
-				required=[UnitPromotionType.sentry],
+				requiredOr=[UnitPromotionType.sentry],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.recon, value=2),
@@ -349,7 +365,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_AMBUSH_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.recon,
-				required=[UnitPromotionType.guerrilla],
+				requiredOr=[UnitPromotionType.guerrilla],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=20,
@@ -367,7 +383,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_CAMOUFLAGE_EFFECT",
 				tier=4,
 				unitClass=UnitClassType.recon,
-				required=[UnitPromotionType.spyglass, UnitPromotionType.ambush],
+				requiredOr=[UnitPromotionType.spyglass, UnitPromotionType.ambush],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.recon, value=2)
@@ -384,7 +400,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_BATTLECRY_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.melee,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
@@ -404,7 +420,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_TORTOISE_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.melee,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=10,
@@ -423,7 +439,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_COMMANDO_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.melee,
-				required=[UnitPromotionType.battlecry, UnitPromotionType.amphibious],
+				requiredOr=[UnitPromotionType.battlecry, UnitPromotionType.amphibious],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.mobile, value=3)
@@ -436,7 +452,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_AMPHIBIOUS_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.melee,
-				required=[UnitPromotionType.tortoise, UnitPromotionType.commando],
+				requiredOr=[UnitPromotionType.tortoise, UnitPromotionType.commando],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.mobile, value=2),
@@ -450,7 +466,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_ZWEIHANDER_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.melee,
-				required=[UnitPromotionType.tortoise, UnitPromotionType.amphibious],
+				requiredOr=[UnitPromotionType.tortoise, UnitPromotionType.amphibious],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
@@ -468,7 +484,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_URBAN_WARFARE_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.melee,
-				required=[UnitPromotionType.commando, UnitPromotionType.amphibious],
+				requiredOr=[UnitPromotionType.commando, UnitPromotionType.amphibious],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.offense, value=2),
@@ -482,7 +498,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_ELITE_GUARD_EFFECT",
 				tier=4,
 				unitClass=UnitClassType.melee,
-				required=[UnitPromotionType.zweihander, UnitPromotionType.urbanWarfare],
+				requiredOr=[UnitPromotionType.zweihander, UnitPromotionType.urbanWarfare],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.mobile, value=3),
@@ -500,18 +516,17 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_VOLLEY_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.ranged,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=5,
-					unitClasses=UnitDomainType.land.unitClasses(),
+					unitClasses=unitClassesOf(UnitDomainType.land),
 					combatDirection=PromotionCombatModifierDirection.attack
 				),  # only ranged attack!
 				flavors=[
 					Flavor(FlavorType.offense, value=3)
 				]
 			)
-
 		elif self == UnitPromotionType.garrison:
 			# https://civilization.fandom.com/wiki/Garrison_(Civ6)
 			return UnitPromotionTypeData(
@@ -519,7 +534,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_GARRISON_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.ranged,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.cityDefense, value=4)
@@ -532,11 +547,11 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_ARROW_STORM_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.ranged,
-				required=[UnitPromotionType.volley],
+				requiredOr=[UnitPromotionType.volley],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
-					unitClasses=UnitDomainType.land.unitClasses() + UnitDomainType.sea.unitClasses(),
+					unitClasses=unitClassesOf(UnitDomainType.land) + unitClassesOf(UnitDomainType.sea),
 					combatDirection=PromotionCombatModifierDirection.attack
 				),  # only ranged attack!
 				flavors=[
@@ -551,7 +566,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_INCENDIARIES_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.ranged,
-				required=[UnitPromotionType.garrison],
+				requiredOr=[UnitPromotionType.garrison],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.offense, value=4)
@@ -564,7 +579,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_SUPPRESSION_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.ranged,
-				required=[UnitPromotionType.arrowStorm, UnitPromotionType.incendiaries],
+				requiredOr=[UnitPromotionType.arrowStorm, UnitPromotionType.incendiaries],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.defense, value=3)
@@ -577,7 +592,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_EMPLACEMENT_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.ranged,
-				required=[UnitPromotionType.arrowStorm, UnitPromotionType.incendiaries],
+				requiredOr=[UnitPromotionType.arrowStorm, UnitPromotionType.incendiaries],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.cityDefense, value=3),
@@ -591,7 +606,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_EXPERT_MARKSMAN_EFFECT",
 				tier=4,
 				unitClass=UnitClassType.ranged,
-				required=[UnitPromotionType.suppression, UnitPromotionType.emplacement],
+				requiredOr=[UnitPromotionType.suppression, UnitPromotionType.emplacement],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.offense, value=3)
@@ -608,7 +623,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_ECHELON_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.antiCavalry,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=5,
@@ -626,7 +641,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_THRUST_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.antiCavalry,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=10,
@@ -644,7 +659,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_SQUARE_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.antiCavalry,
-				required=[UnitPromotionType.echelon],
+				requiredOr=[UnitPromotionType.echelon],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.defense, value=3),
@@ -658,7 +673,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_SCHILTRON_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.antiCavalry,
-				required=[UnitPromotionType.thrust],
+				requiredOr=[UnitPromotionType.thrust],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=10,
@@ -676,7 +691,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_REDEPLOY_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.antiCavalry,
-				required=[UnitPromotionType.square, UnitPromotionType.schiltron],
+				requiredOr=[UnitPromotionType.square, UnitPromotionType.schiltron],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.mobile, value=3)
@@ -689,7 +704,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_CHOKE_POINTS_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.antiCavalry,
-				required=[UnitPromotionType.square, UnitPromotionType.schiltron],
+				requiredOr=[UnitPromotionType.square, UnitPromotionType.schiltron],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
@@ -707,7 +722,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_HOLD_THE_LINE_EFFECT",
 				tier=4,
 				unitClass=UnitClassType.antiCavalry,
-				required=[UnitPromotionType.redeploy, UnitPromotionType.chokePoints],
+				requiredOr=[UnitPromotionType.redeploy, UnitPromotionType.chokePoints],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.militaryTraining, value=2),
@@ -725,7 +740,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_CAPARISON_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.lightCavalry,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=5,
@@ -743,7 +758,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_COURSERS_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.lightCavalry,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=5,
@@ -761,7 +776,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_DEPREDATION_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.lightCavalry,
-				required=[UnitPromotionType.caparison],
+				requiredOr=[UnitPromotionType.caparison],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.offense, value=3)
@@ -774,7 +789,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_DOUBLE_ENVELOPMENT_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.lightCavalry,
-				required=[UnitPromotionType.coursers],
+				requiredOr=[UnitPromotionType.coursers],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.militaryTraining, value=3),
@@ -788,7 +803,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_SPIKING_THE_GUNS_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.lightCavalry,
-				required=[UnitPromotionType.depredation, UnitPromotionType.doubleEnvelopment],
+				requiredOr=[UnitPromotionType.depredation, UnitPromotionType.doubleEnvelopment],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
@@ -807,7 +822,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_PURSUIT_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.lightCavalry,
-				required=[UnitPromotionType.depredation, UnitPromotionType.doubleEnvelopment],
+				requiredOr=[UnitPromotionType.depredation, UnitPromotionType.doubleEnvelopment],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.mobile, value=3)
@@ -820,7 +835,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_ESCORT_MOBILITY_EFFECT",
 				tier=4,
 				unitClass=UnitClassType.lightCavalry,
-				required=[UnitPromotionType.spikingTheGuns, UnitPromotionType.pursuit],
+				requiredOr=[UnitPromotionType.spikingTheGuns, UnitPromotionType.pursuit],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.mobile, value=3)
@@ -837,7 +852,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_CHARGE_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.heavyCavalry,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=10,
@@ -856,7 +871,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_BARDING_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.heavyCavalry,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
@@ -874,7 +889,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_MARAUDING_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.heavyCavalry,
-				required=[UnitPromotionType.charge, UnitPromotionType.rout],
+				requiredOr=[UnitPromotionType.charge, UnitPromotionType.rout],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.offense, value=3)
@@ -887,7 +902,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_ROUT_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.heavyCavalry,
-				required=[UnitPromotionType.barding, UnitPromotionType.marauding],
+				requiredOr=[UnitPromotionType.barding, UnitPromotionType.marauding],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
@@ -906,7 +921,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_ARMOR_PIERCING_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.heavyCavalry,
-				required=[UnitPromotionType.marauding, UnitPromotionType.rout],
+				requiredOr=[UnitPromotionType.marauding, UnitPromotionType.rout],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
@@ -925,7 +940,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_REACTIVE_ARMOR_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.heavyCavalry,
-				required=[UnitPromotionType.rout],
+				requiredOr=[UnitPromotionType.rout],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
@@ -943,7 +958,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_BREAKTHROUGH_EFFECT",
 				tier=4,
 				unitClass=UnitClassType.heavyCavalry,
-				required=[UnitPromotionType.armorPiercing, UnitPromotionType.reactiveArmor],
+				requiredOr=[UnitPromotionType.armorPiercing, UnitPromotionType.reactiveArmor],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.mobile, value=2),
@@ -961,11 +976,11 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_GRAPE_SHOT_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.siege,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
-					unitClasses=UnitDomainType.land.unitClasses(),
+					unitClasses=unitClassesOf(UnitDomainType.land),
 					combatDirection=PromotionCombatModifierDirection.both
 				),
 				flavors=[
@@ -980,7 +995,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_CREW_WEAPONS_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.siege,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
@@ -998,11 +1013,11 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_SHRAPNEL_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.siege,
-				required=[UnitPromotionType.grapeShot],
+				requiredOr=[UnitPromotionType.grapeShot],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=10,
-					unitClasses=UnitDomainType.land.unitClasses(),
+					unitClasses=unitClassesOf(UnitDomainType.land),
 					combatDirection=PromotionCombatModifierDirection.both
 				),
 				flavors=[
@@ -1017,7 +1032,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_SHELLS_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.siege,
-				required=[UnitPromotionType.crewWeapons],
+				requiredOr=[UnitPromotionType.crewWeapons],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.offense, value=4)
@@ -1030,7 +1045,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_ADVANCED_RANGEFINDING_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.siege,
-				required=[UnitPromotionType.shrapnel, UnitPromotionType.shells],
+				requiredOr=[UnitPromotionType.shrapnel, UnitPromotionType.shells],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=10,
@@ -1048,7 +1063,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_EXPERT_CREW_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.siege,
-				required=[UnitPromotionType.shrapnel, UnitPromotionType.shells],
+				requiredOr=[UnitPromotionType.shrapnel, UnitPromotionType.shells],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.mobile, value=2),
@@ -1062,7 +1077,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_FORWARD_OBSERVERS_EFFECT",
 				tier=4,
 				unitClass=UnitClassType.siege,
-				required=[UnitPromotionType.advancedRangefinding, UnitPromotionType.expertCrew],
+				requiredOr=[UnitPromotionType.advancedRangefinding, UnitPromotionType.expertCrew],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.ranged, value=3),
@@ -1080,7 +1095,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_HELMSMAN_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.navalMelee,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.expansion, value=2),
@@ -1094,11 +1109,11 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_EMBOLON_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.navalMelee,
-				required=[],
+				requiredOr=[],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
-					unitClasses=UnitDomainType.sea.unitClasses(),
+					unitClasses=unitClassesOf(UnitDomainType.sea),
 					combatDirection=PromotionCombatModifierDirection.both
 				),
 				flavors=[
@@ -1112,7 +1127,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_RUTTER_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.navalMelee,
-				required=[UnitPromotionType.helmsman],
+				requiredOr=[UnitPromotionType.helmsman],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.expansion, value=2)
@@ -1125,7 +1140,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_REINFORCED_HULL_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.navalMelee,
-				required=[UnitPromotionType.embolon],
+				requiredOr=[UnitPromotionType.embolon],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=10,
@@ -1143,7 +1158,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_CONVOY_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.navalMelee,
-				required=[UnitPromotionType.rutter, UnitPromotionType.reinforcedHull],
+				requiredOr=[UnitPromotionType.rutter, UnitPromotionType.reinforcedHull],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.offense, value=3)
@@ -1156,7 +1171,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_AUXILIARY_SHIPS_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.navalMelee,
-				required=[UnitPromotionType.rutter, UnitPromotionType.reinforcedHull],
+				requiredOr=[UnitPromotionType.rutter, UnitPromotionType.reinforcedHull],
 				consumable=False,
 				flavors=[
 					Flavor(FlavorType.defense, value=3)
@@ -1169,7 +1184,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_CREEPING_ATTACK_EFFECT",
 				tier=4,
 				unitClass=UnitClassType.navalMelee,
-				required=[UnitPromotionType.convoy, UnitPromotionType.auxiliaryShips],
+				requiredOr=[UnitPromotionType.convoy, UnitPromotionType.auxiliaryShips],
 				consumable=False,
 				combatModifier=PromotionCombatModifierData(
 					amount=14,
@@ -1191,11 +1206,11 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_LINE_OF_BATTLE_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.navalRanged,
-				required=[],
+				requiredOr=[],
 				consumable=True,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
-					unitClasses=UnitDomainType.sea.unitClasses(),
+					unitClasses=unitClassesOf(UnitDomainType.sea),
 					combatDirection=PromotionCombatModifierDirection.both
 				),
 				flavors=[
@@ -1210,7 +1225,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_BOMBARDMENT_EFFECT",
 				tier=1,
 				unitClass=UnitClassType.navalRanged,
-				required=[],
+				requiredOr=[],
 				consumable=True,
 				flavors=[
 					Flavor(FlavorType.naval, value=2),
@@ -1224,11 +1239,11 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_PREPARATORY_FIRE_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.navalRanged,
-				required=[UnitPromotionType.lineOfBattle],
+				requiredOr=[UnitPromotionType.lineOfBattle],
 				consumable=True,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
-					unitClasses=UnitDomainType.land.unitClasses(),
+					unitClasses=unitClassesOf(UnitDomainType.land),
 					combatDirection=PromotionCombatModifierDirection.both
 				),
 				flavors=[
@@ -1243,7 +1258,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_ROLLING_BARRAGE_EFFECT",
 				tier=2,
 				unitClass=UnitClassType.navalRanged,
-				required=[UnitPromotionType.bombardment],
+				requiredOr=[UnitPromotionType.bombardment],
 				consumable=True,
 				flavors=[
 					Flavor(FlavorType.offense, value=4)
@@ -1256,7 +1271,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_SUPPLY_FLEET_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.navalRanged,
-				required=[UnitPromotionType.preparatoryFire, UnitPromotionType.rollingBarrage],
+				requiredOr=[UnitPromotionType.preparatoryFire, UnitPromotionType.rollingBarrage],
 				consumable=True,
 				flavors=[
 					Flavor(FlavorType.defense, value=3)
@@ -1269,11 +1284,11 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_PROXIMITY_FUSES_EFFECT",
 				tier=3,
 				unitClass=UnitClassType.navalRanged,
-				required=[UnitPromotionType.preparatoryFire, UnitPromotionType.rollingBarrage],
+				requiredOr=[UnitPromotionType.preparatoryFire, UnitPromotionType.rollingBarrage],
 				consumable=True,
 				combatModifier=PromotionCombatModifierData(
 					amount=7,
-					unitClasses=UnitDomainType.air.unitClasses(),
+					unitClasses=unitClassesOf(UnitDomainType.air),
 					combatDirection=PromotionCombatModifierDirection.defend
 				),
 				flavors=[
@@ -1287,7 +1302,7 @@ class UnitPromotionType(ExtendedEnum):
 				effect="TXT_KEY_UNIT_PROMOTION_COINCIDENCE_RANGEFINDING_EFFECT",
 				tier=4,
 				unitClass=UnitClassType.navalRanged,
-				required=[UnitPromotionType.supplyFleet, UnitPromotionType.proximityFuses],
+				requiredOr=[UnitPromotionType.supplyFleet, UnitPromotionType.proximityFuses],
 				consumable=True,
 				flavors=[
 					Flavor(FlavorType.ranged, value=3),
@@ -1309,11 +1324,16 @@ class UnitPromotions:
 	def gainedPromotions(self) -> [UnitPromotionType]:
 		return self._promotions
 
-	def earnPromotion(self, promotion: UnitPromotionType):
+	def earnPromotion(self, promotion: UnitPromotionType) -> bool:
 		if self.hasPromotion(promotion):
-			return
+			return False
+
+		if promotion not in self.possiblePromotions():
+			return False
 
 		self._promotions.append(promotion)
+
+		return True
 
 	def possiblePromotions(self) -> [UnitPromotionType]:
 		promotionList: [UnitPromotionType] = []
@@ -1325,10 +1345,13 @@ class UnitPromotions:
 			if self.hasPromotion(promotion):
 				continue
 
-			valid = True
-			for requiredPromotion in promotion.required():
-				if not self.hasPromotion(requiredPromotion):
-					valid = False
+			valid = False
+			for requiredPromotion in promotion.requiredOr():
+				if self.hasPromotion(requiredPromotion):
+					valid = True
+
+			if len(promotion.requiredOr()) == 0:
+				valid = True
 
 			if not valid:
 				continue

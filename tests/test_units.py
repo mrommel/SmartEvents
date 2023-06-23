@@ -5,7 +5,7 @@ from game.cities import City
 from game.civilizations import LeaderType
 from game.game import GameModel
 from game.players import Player
-from game.promotions import UnitPromotionType
+from game.promotions import UnitPromotionType, UnitPromotions
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.states.victories import VictoryType
@@ -14,6 +14,29 @@ from game.units import Unit
 from map.base import HexPoint
 from map.types import TerrainType
 from tests.testBasics import MapModelMock, UserInterfaceMock
+
+
+class TestUnitPromotions(unittest.TestCase):
+	def test_possiblePromotions_melee(self):
+		# GIVEN
+		playerTrajan = Player(leader=LeaderType.trajan, cityState=None, human=False)
+		playerTrajan.initialize()
+		warrior = Unit(HexPoint(5, 5), UnitType.warrior, playerTrajan)
+		promotions = UnitPromotions(warrior)
+
+		# WHEN
+		initialPromotions = promotions.possiblePromotions()
+
+		promotions.earnPromotion(UnitPromotionType.battlecry)
+		promotions.earnPromotion(UnitPromotionType.tortoise)
+		secondPromotions = promotions.possiblePromotions()
+
+		# THEN
+		self.assertEqual(initialPromotions, [UnitPromotionType.embarkation, UnitPromotionType.healthBoostMelee,
+		                                     UnitPromotionType.battlecry, UnitPromotionType.tortoise])
+		self.assertEqual(secondPromotions, [UnitPromotionType.embarkation, UnitPromotionType.healthBoostMelee,
+		                                    UnitPromotionType.commando, UnitPromotionType.amphibious,
+		                                    UnitPromotionType.zweihander])
 
 
 class TestUnit(unittest.TestCase):
@@ -53,6 +76,7 @@ class TestUnit(unittest.TestCase):
 		warrior = Unit(HexPoint(5, 5), UnitType.warrior, self.playerTrajan)
 		builder = Unit(HexPoint(5, 6), UnitType.builder, self.playerTrajan)
 		missionary = Unit(HexPoint(5, 7), UnitType.missionary, self.playerTrajan)
+		cavalry = Unit(HexPoint(5, 8), UnitType.horseman, self.playerTrajan)
 
 		# WHEN
 		maxMovesWarriorNormal = warrior.maxMoves(self.simulation)
@@ -73,8 +97,16 @@ class TestUnit(unittest.TestCase):
 		self.playerTrajan._currentDedicationsValue = []
 
 		# promotion commando
-		warrior.doPromote(UnitPromotionType.commando, self.simulation)
+		self.assertTrue(warrior.doPromote(UnitPromotionType.battlecry, self.simulation))
+		self.assertTrue(warrior.doPromote(UnitPromotionType.commando, self.simulation))
 		maxMovesWarriorCommando = warrior.maxMoves(self.simulation)
+
+		# promotion pursuit
+		cavalry._promotions._promotions = []
+		self.assertTrue(cavalry.doPromote(UnitPromotionType.caparison, self.simulation))
+		self.assertTrue(cavalry.doPromote(UnitPromotionType.depredation, self.simulation))
+		self.assertTrue(cavalry.doPromote(UnitPromotionType.pursuit, self.simulation))
+		maxMovesCavalryPursuit = cavalry.maxMoves(self.simulation)
 
 		# THEN
 		self.assertEqual(maxMovesWarriorNormal, 2)
@@ -83,3 +115,4 @@ class TestUnit(unittest.TestCase):
 		self.assertEqual(maxMovesBuilderGoldenAgeExodusOfTheEvangelists, 5)
 
 		self.assertEqual(maxMovesWarriorCommando, 3)
+		self.assertEqual(maxMovesCavalryPursuit, 5)

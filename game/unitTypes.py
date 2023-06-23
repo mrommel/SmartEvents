@@ -85,6 +85,7 @@ class UnitClassType(ExtendedEnum):
 	airFighter = 'airFighter'
 	airBomber = 'airBomber'
 
+	support = 'support'
 	city = 'city'
 
 	@classmethod

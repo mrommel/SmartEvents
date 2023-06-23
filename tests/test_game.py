@@ -18,6 +18,7 @@ from game.moments import MomentType
 from game.notifications import NotificationType
 from game.players import Player
 from game.policyCards import PolicyCardType
+from game.promotions import UnitPromotionType
 from game.states.accessLevels import AccessLevel
 from game.states.ages import AgeType
 from game.states.builds import BuildType
@@ -25,7 +26,7 @@ from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
 from game.states.victories import VictoryType
 from game.types import CivicType, TechType, EraType
-from game.unitTypes import UnitType
+from game.unitTypes import UnitType, UnitClassType
 from game.units import Unit, UnitActivityType, UnitAutomationType
 from game.wonders import WonderType
 from map.base import HexPoint
@@ -206,6 +207,14 @@ class TestGameAssets(unittest.TestCase):
 	def test_unit_data(self):
 		for unit in list(UnitType):
 			_ = unit.name()
+
+	def test_unit_promotion_data(self):
+		for promotion in list(UnitPromotionType):
+			_ = promotion.name()
+
+	def test_unit_class_data(self):
+		for unitClass in list(UnitClassType):
+			_ = unitClass.name()
 
 	def test_loyalties_data(self):
 		for loyalty in list(LoyaltyState):

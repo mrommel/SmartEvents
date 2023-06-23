@@ -92,7 +92,7 @@ class MomentType(ExtendedEnum):
 	# firstTier4Government(governmentType: GovernmentType)  # 62
 	# firstTier4GovernmentInWorld(governmentType: GovernmentType)  # 63
 	# firstTradingPostsInAllCivilizations  # 64
-	# firstUnitPromotedWithDistinction  # 65
+	firstUnitPromotedWithDistinction = 'firstUnitPromotedWithDistinction'  # 65
 	# firstWaterParkFullyDeveloped 66
 	# freeCityJoins 67
 	# generalDefeatsEnemy  # 68
@@ -188,7 +188,7 @@ class MomentType(ExtendedEnum):
 	# tradingPostEstablishedInNewCivilization(civilization: CivilizationType)  # 231
 	# tribalVillageContacted  # 232
 	tundraCity = 'tundraCity'  # (cityName: String)  # 233
-	# unitPromotedWithDistinction  # 234
+	unitPromotedWithDistinction = 'firstUnitPromotedWithDistinction'  # 234
 	# wonderCompleted(wonder: WonderType)  # 235
 
 	# hidden
@@ -275,7 +275,17 @@ class MomentType(ExtendedEnum):
 			return MomentTypeData(
 				name="First Technology of New Era",
 				summary="You have completed your civilization's first technology from a new era of discovery.",
-				instanceText = None,
+				instanceText=None,
+				category=MomentCategory.major,
+				eraScore=1
+			)
+		# ...
+		elif self == MomentType.firstUnitPromotedWithDistinction:
+			# 65
+			return MomentTypeData(
+				name="First Unit Promoted with Distinction",
+				summary="For the first time, one of your units reaches its fourth level of promotion.",
+				instanceText=None,
 				category=MomentCategory.major,
 				eraScore=1
 			)
@@ -376,7 +386,15 @@ class MomentType(ExtendedEnum):
 				category=MomentCategory.minor,
 				eraScore=1
 			)
-		# unitPromotedWithDistinction  # 234
+		elif self == MomentType.unitPromotedWithDistinction:
+			# 234
+			return MomentTypeData(
+				name="Unit Promoted with Distinction",
+				summary="One of your units reaches its fourth level of promotion.",
+				instanceText=None,
+				category=MomentCategory.minor,
+				eraScore=1
+			)
 		# wonderCompleted(wonder: WonderType)  # 235
 
 		# hidden

@@ -6,6 +6,7 @@ from game.baseTypes import HandicapType, GameState
 from game.buildings import BuildingType
 from game.cities import City
 from game.civilizations import LeaderType, CivilizationType
+from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.players import Player
@@ -774,3 +775,11 @@ class GameModel:
 
 	def areas(self):
 		return self._map.areas
+
+	def isGreatGeneral(self, greatPerson: GreatPersonType, player, location: HexPoint, range: int) -> bool:
+		for unit in self.unitsOf(player):
+			if unit.location.distance(location) <= range:
+				if unit.greatPerson == greatPerson:
+					return True
+
+		return False

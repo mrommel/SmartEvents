@@ -166,6 +166,7 @@ class Unit:
 		self._originLocation = location
 		self._facingDirection = HexDirection.south
 		self.unitType = unitType
+		self.greatPerson: Optional[GreatPersonType] = None
 		self.player = player
 		self.taskValue = unitType.defaultTask()
 
@@ -2186,13 +2187,16 @@ class Unit:
 
 		return False
 
-	def doPromote(self, promotionType: UnitPromotionType, simulation):
+	def doPromote(self, promotionType: UnitPromotionType, simulation) -> bool:
 		if promotionType.tier() == 4:
 			self.player.addMoment(MomentType.unitPromotedWithDistinction, simulation)
 
-		self._promotions.earnPromotion(promotionType)
+		if self._promotions.earnPromotion(promotionType):
+			# also heal completely
+			self.setHealthPoints(self.maxHealthPoints())
+			return True
 
-		# also heal completely
-		self.setHealthPoints(self.maxHealthPoints())
+		return False
 
-		return
+	def isOfUnitClass(self, unitClass: UnitClassType) -> bool:
+		return self.unitType.unitClass() == unitClass

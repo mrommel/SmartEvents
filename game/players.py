@@ -1640,3 +1640,13 @@ class Player:
 
 	def markSettledOnContinent(self, continent):
 		self._settledContinents.append(continent)
+
+	def firstPromotableUnit(self, simulation):
+		for loopUnit in simulation.unitsOf(self):
+			if loopUnit.isPromotionReady() and not loopUnit.isDelayedDeath():
+				return loopUnit
+
+		return None
+
+	def hasPromotableUnit(self, simulation):
+		return self.firstPromotableUnit(simulation) is not None
