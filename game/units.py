@@ -173,6 +173,7 @@ class Unit:
 
 		self._movesValue = unitType.moves()
 		self._healthPointsValue = Unit.maxHealth
+		self.deathDelay: bool = False
 		self._activityTypeValue = UnitActivityType.none
 		self._automationType = UnitAutomationType.none
 		self._processedInTurnValue = False
@@ -765,11 +766,16 @@ class Unit:
 		mission.unit = self
 		mission.start(simulation)
 
-	def doDelayedDeath(self, simulation):
-		pass
+	def doDelayedDeath(self, simulation) -> bool:
+		"""Returns true if killed..."""
+		if self.deathDelay and not self.isFighting() and not self.isBusy():
+			self.doKill(delayed=False, otherPlayer=None, simulation=simulation)
+			return True
+
+		return False
 
 	def isDelayedDeath(self) -> bool:
-		return False
+		return self.deathDelay
 
 	def readyToMove(self) -> bool:
 		if not self.canMove():
@@ -970,7 +976,7 @@ class Unit:
 		# fixme: show damage popup
 
 		if self.isDead():
-			self.doKill(True, player)
+			self.doKill(delayed=True, otherPlayer=player, simulation=simulation)
 
 			# fixme log kill in ai log
 
@@ -1159,30 +1165,9 @@ class Unit:
 			# now purchase the builder
 			newCity.purchaseUnit(UnitType.builder, YieldType.gold, simulation)
 
-		self.doKillDelayed(False, None, simulation)
+		self.doKill(delayed=False, otherPlayer=None, simulation=simulation)
 
 		return True
-
-	def doKillDelayed(self, delayed: bool, otherPlayer, simulation):
-		if self.player.isBarbarian():
-			# Bronze Working eureka: Kill 3 Barbarians
-			otherPlayer.techs.changeEurekaValueFor(TechType.bronzeWorking, change=1)
-
-			if otherPlayer.tech.changeEurekaValueFor(TechType.bronzeWorking) >= 3:
-				otherPlayer.tech.triggerEurekaFor(TechType.bronzeWorking, simulation)
-
-		if delayed:
-			self.startDelayedDeath()
-			return
-
-		if otherPlayer is not None:
-			# FIXME - add die visualization
-			pass
-
-		simulation.concealAt(self.location, sight=self.sight(), unit=self, player=self.player)
-
-		simulation.userInterface.hideUnit(self, self.location)
-		simulation.removeUnit(self)
 
 	def canHoldAt(self, location, simulation):
 		# fixme
@@ -1537,9 +1522,6 @@ class Unit:
 
 	def isBarbarian(self) -> bool:
 		return self.player.isBarbarian()
-
-	def isHuman(self) -> bool:
-		return self.player.isHuman()
 
 	def canBuild(self, buildType: BuildType, location: HexPoint, testVisible: Optional[bool] = False,
 				 testGold: Optional[bool] = True, simulation=None):
@@ -2238,3 +2220,9 @@ class Unit:
 
 	def isOfUnitClass(self, unitClass: UnitClassType) -> bool:
 		return self.unitType.unitClass() == unitClass
+
+	def startDelayedDeath(self):
+		self.deathDelay = True
+
+	def isFighting(self) -> bool:
+		return False

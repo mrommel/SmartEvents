@@ -54,9 +54,9 @@ class TestUnit(unittest.TestCase):
 		self.playerTrajan.initialize()
 		self.simulation.players.append(self.playerTrajan)
 
-		playerVictoria = Player(leader=LeaderType.victoria, cityState=None, human=True)
-		playerVictoria.initialize()
-		self.simulation.players.append(playerVictoria)
+		self.playerVictoria = Player(leader=LeaderType.victoria, cityState=None, human=True)
+		self.playerVictoria.initialize()
+		self.simulation.players.append(self.playerVictoria)
 
 		# add UI
 		self.simulation.userInterface = UserInterfaceMock()
@@ -136,3 +136,54 @@ class TestUnit(unittest.TestCase):
 		# THEN
 		self.assertTrue(readyToMoveNormal)
 		self.assertFalse(readyToMoveGarrisoned)
+
+	def test_isDead(self):
+		# GIVEN
+		warrior = Unit(HexPoint(5, 5), UnitType.warrior, self.playerTrajan)
+
+		# WHEN
+		isDeadNormal = warrior.isDead()
+
+		warrior.changeDamage(101, None, self.simulation)
+		isDeadDamaged = warrior.isDead()
+
+		# THEN
+		self.assertFalse(isDeadNormal)
+		self.assertTrue(isDeadDamaged)
+
+	def test_isPlayer(self):
+		# GIVEN
+		warriorAI = Unit(HexPoint(5, 5), UnitType.warrior, self.playerTrajan)
+		warriorHuman = Unit(HexPoint(5, 6), UnitType.warrior, self.playerVictoria)
+
+		# WHEN
+		# ...
+
+		# THEN
+		self.assertFalse(warriorAI.isHuman())
+		self.assertTrue(warriorHuman.isHuman())
+		self.assertFalse(warriorAI.isBarbarian())
+		self.assertFalse(warriorHuman.isBarbarian())
+
+	def test_sight(self):
+		# GIVEN
+		scout = Unit(HexPoint(5, 5), UnitType.scout, self.playerTrajan)
+		galley = Unit(HexPoint(5, 6), UnitType.galley, self.playerTrajan)
+
+		# WHEN
+		sightScoutNormal = scout.sight()
+		self.assertTrue(scout.doPromote(UnitPromotionType.ranger, self.simulation))
+		self.assertTrue(scout.doPromote(UnitPromotionType.sentry, self.simulation))
+		self.assertTrue(scout.doPromote(UnitPromotionType.spyglass, self.simulation))
+		sightScoutSpyglass = scout.sight()
+
+		sightGalleyNormal = galley.sight()
+		self.assertTrue(galley.doPromote(UnitPromotionType.helmsman, self.simulation))
+		self.assertTrue(galley.doPromote(UnitPromotionType.rutter, self.simulation))
+		sightGalleySpyglass = galley.sight()
+
+		# THEN
+		self.assertEqual(sightScoutNormal, 2)
+		self.assertEqual(sightScoutSpyglass, 3)
+		self.assertEqual(sightGalleyNormal, 2)
+		self.assertEqual(sightGalleySpyglass, 3)

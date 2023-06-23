@@ -80,7 +80,7 @@ class UnitPromotionType(ExtendedEnum):
 	# recon
 	ranger = 'ranger'  # Faster Movement in Woods and Jungle terrain.
 	alpine = 'alpine'  # Faster Movement on Hill terrain.
-	sentry = 'alpine'  # Can see through Woods and Jungle.
+	sentry = 'sentry'  # Can see through Woods and Jungle.
 	guerrilla = 'guerrilla'  # Can move after attacking.
 	spyglass = 'spyglass'  # +1 sight range.
 	ambush = 'ambush'  # +20 Combat Strength in all situations.
