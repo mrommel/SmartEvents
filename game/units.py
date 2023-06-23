@@ -784,7 +784,7 @@ class Unit:
 		if self._activityTypeValue != UnitActivityType.none and self._activityTypeValue != UnitActivityType.awake:
 			return False
 
-		if self._automationType != UnitActivityType.none:
+		if self._automationType != UnitAutomationType.none:
 			return False
 
 		# / * if self.isbusy()
@@ -1417,7 +1417,7 @@ class Unit:
 
 		if shouldDeductCost:
 			self._movesValue = max(0, self._movesValue - int(moveCost))
-			print(f'* moves reduced by {int(moveCost)}')
+			# print(f'* moves reduced by {int(moveCost)}')
 
 		self.setLocation(target, simulation=simulation)
 

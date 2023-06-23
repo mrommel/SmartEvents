@@ -755,8 +755,7 @@ class TestUsecases(unittest.TestCase):
 				simulation.update()
 
 				if playerAlexander.isTurnActive():
-					# playerAlexander.setProcessedAutoMovesTo(True)
-					playerAlexanderScout.finishMoves()
+					playerAlexander.setProcessedAutoMovesTo(True)
 					playerAlexander.finishTurn()
 
 				counter += 1

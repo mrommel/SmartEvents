@@ -421,16 +421,16 @@ class GameModel:
 					# KWG: This code should go into CheckPlayerTurnDeactivate
 					if not player.turnFinished() and player.isHuman():
 						if not player.hasBusyUnitOrCity():
-							player.setEndTurn(True, self)
+							player.setEndTurnTo(True, self)
 
 							if player.isEndTurn():
-								# If the player's turn ended, indicate it in the log.  We only do so when the end turn state has changed to prevent useless log spamming in multiplayer.
-								# NET_MESSAGE_DEBUG_OSTR_ALWAYS("UpdateMoves() : player.setEndTurn(true) called for player " << player.GetID() << " " << player.getName())
+								# If the player's turn ended, indicate it in the log. We only do so when the end turn state has changed to prevent useless log spamming in multiplayer.
+								# NET_MESSAGE_DEBUG_OSTR_ALWAYS("UpdateMoves() : player.setEndTurnTo(true) called for player " << player.GetID() << " " << player.getName())
 								pass
 						else:
 							# if !player.hasBusyUnitUpdatesRemaining() {
 							# NET_MESSAGE_DEBUG_OSTR_ALWAYS("Received turn complete for player " << player.GetID() << " " << player.getName() << " but there is a busy unit. Forcing the turn to advance")
-							player.setEndTurn(True, self)
+							player.setEndTurnTo(True, self)
 
 	def updateTimers(self):
 		activePlayer = self.activePlayer()

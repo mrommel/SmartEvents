@@ -116,3 +116,23 @@ class TestUnit(unittest.TestCase):
 
 		self.assertEqual(maxMovesWarriorCommando, 3)
 		self.assertEqual(maxMovesCavalryPursuit, 5)
+
+		# fixme more conditions
+
+	def test_readyToMove(self):
+		# GIVEN
+		warrior = Unit(HexPoint(5, 5), UnitType.warrior, self.playerTrajan)
+
+		# WHEN
+		readyToMoveNormal = warrior.readyToMove()
+
+		# garrison
+		city = City("Berlin", HexPoint(5, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+		warrior.doGarrison(self.simulation)
+		readyToMoveGarrisoned = warrior.readyToMove()
+
+		# THEN
+		self.assertTrue(readyToMoveNormal)
+		self.assertFalse(readyToMoveGarrisoned)

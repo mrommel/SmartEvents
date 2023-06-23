@@ -1006,7 +1006,7 @@ class Player:
 		self.diplomacyAI.update(simulation)
 
 	def updateNotifications(self, simulation):
-		pass
+		self.notifications.update(simulation)
 
 	def hasActiveDiplomacyRequests(self) -> bool:
 		return False
@@ -1650,3 +1650,13 @@ class Player:
 
 	def hasPromotableUnit(self, simulation):
 		return self.firstPromotableUnit(simulation) is not None
+
+	def doQuests(self, simulation):
+		pass
+
+	def endTurnsForReadyUnits(self, simulation):
+		for loopUnit in simulation.unitsOf(self):
+			if loopUnit.readyToMove() and not loopUnit.isDelayedDeath():
+				loopUnit.finishMoves()
+
+		return
