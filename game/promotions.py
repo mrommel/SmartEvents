@@ -190,6 +190,9 @@ class UnitPromotionType(ExtendedEnum):
 	def ignoreZoneOfControl(self) -> bool:
 		return self._data().ignoreZoneOfControl
 
+	def isInstantHeal(self) -> bool:
+		return True
+
 	def attackStrengthModifierAgainst(self, defender) -> Optional[CombatModifier]:
 		combatModifier = self._data().combatModifier
 

@@ -4,6 +4,7 @@ from typing import Optional
 from game.ai.tactics import TacticalMoveType
 from game.buildings import BuildingType
 from game.combat import Combat
+from game.flavors import FlavorType
 from game.governors import GovernorTitle
 from game.greatPersons import GreatPersonType
 from game.moments import MomentType
@@ -360,8 +361,45 @@ class Unit:
 		return self._promotions.gainedPromotions()
 
 	def doPromotion(self, simulation):
+		"""AI_promote"""
+		if self.isHuman():
+			return
+
+		bestPromotion: Optional[UnitPromotionType] = None
+		bestValue: int = 0
+
+		for promotion in self._promotions.possiblePromotions():
+			value = self._promotionValue(promotion)
+
+			if value > bestValue:
+				bestValue = value
+				bestPromotion = promotion
+
+		if bestPromotion is not None:
+			self.doPromote(bestPromotion, simulation)
+			print(f'Promotion {bestPromotion}, Received by {self.name()}, At: {self.location}, Damage: {self.damage()}')
+
+	def _promotionValue(self, promotion: UnitPromotionType) -> int:
+		value = 0
+
+		# Get flavor info we can use
+		flavorOffense = self.player.valueOfPersonalityIndividualFlavor(FlavorType.offense)
+		flavorDefense = self.player.valueOfPersonalityIndividualFlavor(FlavorType.defense)
+		flavorRanged = self.player.valueOfPersonalityIndividualFlavor(FlavorType.ranged)
+		flavorRecon = self.player.valueOfPersonalityIndividualFlavor(FlavorType.recon)
+		flavorMobile = self.player.valueOfPersonalityIndividualFlavor(FlavorType.mobile)
+		flavorNaval = self.player.valueOfPersonalityIndividualFlavor(FlavorType.naval)
+		flavorAir = self.player.valueOfPersonalityIndividualFlavor(FlavorType.air)
+
+		# If we are damaged, insta heal is the way to go
+		if promotion.isInstantHeal():
+			# Half health or less and I'm not an air unit?
+			if self.damage() >= (self.maxHealth / 2) and self.domain() != UnitDomainType.air:
+				value += 1000  # Enough to lock this one up
+
+		# https://github.com/Gedemon/Civ5-DLL/blob/aa29e80751f541ae04858b6d2a2c7dcca454201e/CvGameCoreDLL/CvUnit.cpp#L16667
 		# fixme
-		pass
+		return value
 
 	def canMoveInto(self, point: HexPoint, options: [MoveOption], simulation):
 		if self.location == point:
