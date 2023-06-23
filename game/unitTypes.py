@@ -56,8 +56,19 @@ class OperationType(ExtendedEnum):
 	found_city = 0
 
 
+class UnitClassType:
+	pass
+
+
+class UnitClassTypeData:
+	def __init__(self, name: str, domain: UnitDomainType):
+		self.name = name
+		self.domain = domain
+
+
 class UnitClassType(ExtendedEnum):
 	civilian = 'civilian'
+
 	recon = 'recon'
 	melee = 'melee'
 	antiCavalry = 'antiCavalry'
@@ -65,10 +76,116 @@ class UnitClassType(ExtendedEnum):
 	heavyCavalry = 'heavyCavalry'
 	ranged = 'ranged'
 	siege = 'siege'
+
 	navalMelee = 'navalMelee'
 	navalRanged = 'navalRanged'
 	navalRaider = 'navalRaider'
 	navalCarrier = 'navalCarrier'
+
+	airFighter = 'airFighter'
+	airBomber = 'airBomber'
+
+	city = 'city'
+
+	@classmethod
+	def combat(cls) -> [UnitClassType]:
+		return [
+			UnitClassType.melee, UnitClassType.recon, UnitClassType.ranged, UnitClassType.antiCavalry,
+			UnitClassType.lightCavalry, UnitClassType.heavyCavalry, UnitClassType.siege,
+			UnitClassType.navalMelee, UnitClassType.navalRanged, UnitClassType.navalRaider, UnitClassType.navalCarrier,
+			UnitClassType.airFighter, UnitClassType.airBomber
+		]
+
+	def name(self) -> str:
+		return self._data().name
+
+	def domain(self) -> UnitDomainType:
+		return self._data().domain
+
+	def _data(self) -> UnitClassTypeData:
+		if self == UnitClassType.civilian:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_CIVILIAN_NAME",
+				domain=UnitDomainType.land
+			)
+		elif self == UnitClassType.melee:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_MELEE_NAME",
+				domain=UnitDomainType.land
+			)
+		elif self == UnitClassType.recon:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_RECON_NAME",
+				domain=UnitDomainType.land
+			)
+		elif self == UnitClassType.ranged:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_RANGED_NAME",
+				domain=UnitDomainType.land
+			)
+		elif self == UnitClassType.antiCavalry:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_ANTI_CAVALRY_NAME",
+				domain=UnitDomainType.land
+			)
+		elif self == UnitClassType.lightCavalry:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_LIGHT_CAVALRY_NAME",
+				domain=UnitDomainType.land
+			)
+		elif self == UnitClassType.heavyCavalry:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_HEAVY_CAVALRY_NAME",
+				domain=UnitDomainType.land
+			)
+		elif self == UnitClassType.siege:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_SIEGE_NAME",
+				domain=UnitDomainType.land
+			)
+		elif self == UnitClassType.navalMelee:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_NAVAL_MELEE_NAME",
+				domain=UnitDomainType.sea
+			)
+		elif self == UnitClassType.navalRanged:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_NAVAL_RANGED_NAME",
+				domain=UnitDomainType.sea
+			)
+		elif self == UnitClassType.navalRaider:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_NAVAL_RAIDER_NAME",
+				domain=UnitDomainType.sea
+			)
+		elif self == UnitClassType.navalCarrier:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_NAVAL_CARRIER_NAME",
+				domain=UnitDomainType.sea
+			)
+		elif self == UnitClassType.airFighter:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_AIR_FIGHTER_NAME",
+				domain=UnitDomainType.air
+			)
+		elif self == UnitClassType.airBomber:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_AIR_BOMBER_NAME",
+				domain=UnitDomainType.air
+			)
+		elif self == UnitClassType.support:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_SUPPORT_NAME",
+				domain=UnitDomainType.land
+			)
+
+		elif self == UnitClassType.city:
+			return UnitClassTypeData(
+				name="TXT_KEY_UNIT_CLASS_CITY_NAME",
+				domain=UnitDomainType.land
+			)
+
+		raise InvalidEnumError(self)
 
 
 class BitArray:

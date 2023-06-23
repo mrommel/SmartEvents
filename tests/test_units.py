@@ -5,15 +5,13 @@ from game.cities import City
 from game.civilizations import LeaderType
 from game.game import GameModel
 from game.players import Player
+from game.promotions import UnitPromotionType
 from game.states.ages import AgeType
-from game.states.builds import BuildType
 from game.states.dedications import DedicationType
 from game.states.victories import VictoryType
-from game.unitMissions import UnitMission
-from game.unitTypes import UnitMissionType, UnitType, UnitActivityType, UnitPromotionType
+from game.unitTypes import UnitType
 from game.units import Unit
 from map.base import HexPoint
-from map.improvements import ImprovementType
 from map.types import TerrainType
 from tests.testBasics import MapModelMock, UserInterfaceMock
 
@@ -54,6 +52,7 @@ class TestUnit(unittest.TestCase):
 		# GIVEN
 		warrior = Unit(HexPoint(5, 5), UnitType.warrior, self.playerTrajan)
 		builder = Unit(HexPoint(5, 6), UnitType.builder, self.playerTrajan)
+		missionary = Unit(HexPoint(5, 7), UnitType.missionary, self.playerTrajan)
 
 		# WHEN
 		maxMovesWarriorNormal = warrior.maxMoves(self.simulation)
@@ -67,7 +66,7 @@ class TestUnit(unittest.TestCase):
 		# golden age + exodusOfTheEvangelists
 		self.playerTrajan._currentAgeValue = AgeType.golden
 		self.playerTrajan._currentDedicationsValue = [DedicationType.exodusOfTheEvangelists]
-		maxMovesBuilderGoldenAgeExodusOfTheEvangelists = builder.maxMoves(self.simulation)
+		maxMovesBuilderGoldenAgeExodusOfTheEvangelists = missionary.maxMoves(self.simulation)
 
 		# reset
 		self.playerTrajan._currentAgeValue = AgeType.normal
@@ -81,4 +80,6 @@ class TestUnit(unittest.TestCase):
 		self.assertEqual(maxMovesWarriorNormal, 2)
 		self.assertEqual(maxMovesBuilderNormal, 2)
 		self.assertEqual(maxMovesBuilderGoldenAgeMonumentality, 4)
-		self.assertEqual(maxMovesBuilderGoldenAgeExodusOfTheEvangelists, 4)
+		self.assertEqual(maxMovesBuilderGoldenAgeExodusOfTheEvangelists, 5)
+
+		self.assertEqual(maxMovesWarriorCommando, 3)

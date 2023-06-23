@@ -9,7 +9,7 @@ from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.policyCards import PolicyCardType
-from game.promotions import UnitPromotions
+from game.promotions import UnitPromotions, UnitPromotionType
 from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.builds import BuildType
@@ -18,7 +18,7 @@ from game.states.gossips import GossipType
 from game.states.ui import TooltipType
 from game.types import EraType, TechType
 from game.unitMissions import UnitMission
-from game.unitTypes import UnitTaskType, UnitType, UnitPromotionType, UnitMissionType, UnitActivityType, \
+from game.unitTypes import UnitTaskType, UnitType, UnitMissionType, UnitActivityType, \
 	UnitMapType, UnitAbilityType, MoveOption, UnitClassType
 from game.wonders import WonderType
 from map.base import HexPoint, HexArea, HexDirection

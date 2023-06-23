@@ -9,12 +9,13 @@ from game.civilizations import LeaderType, CivilizationType
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.players import Player
+from game.promotions import UnitPromotionType
 from game.states.builds import BuildType
 from game.states.gossips import GossipType
 from game.states.ui import ScreenType
 from game.states.victories import VictoryType
 from game.types import TechType, EraType, CivicType
-from game.unitTypes import UnitMapType, UnitAbilityType, UnitPromotionType, MoveOption
+from game.unitTypes import UnitMapType, UnitAbilityType, MoveOption
 from game.units import Unit
 from game.wonders import WonderType
 from map import constants
