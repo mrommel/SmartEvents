@@ -65,8 +65,8 @@ class UnitPromotionTypeData:
 
 
 class CombatModifier:
-	def __init__(self, amount: int, text: str):
-		self.amount = amount
+	def __init__(self, value: int, text: str):
+		self.value = value
 		self.text = text
 
 

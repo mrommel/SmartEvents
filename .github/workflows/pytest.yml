@@ -41,7 +41,7 @@ jobs:
           msgfmt 'locales/en/LC_MESSAGES/base.po' -o 'locales/en/LC_MESSAGES/base.mo'
       - name: Test with pytest
         run: |
-          pytest -q tests/test_basics.py -q tests/test_cities.py -q tests/test_cities_ai.py -q tests/test_game.py -q tests/test_game_ai.py -q tests/test_map.py -q tests/test_moments.py -q tests/test_player.py -q tests/test_tradeRoutes.py -q tests/test_unit_missions.py -q tests/test_units.py --cov
+          pytest -q tests/test_basics.py -q tests/test_cities.py -q tests/test_cities_ai.py -q tests/test_combat.py -q tests/test_game.py -q tests/test_game_ai.py -q tests/test_map.py -q tests/test_moments.py -q tests/test_player.py -q tests/test_tradeRoutes.py -q tests/test_unit_missions.py -q tests/test_units.py --cov
       - name: Creating coverage folder
         run: |
           mkdir -p coverage

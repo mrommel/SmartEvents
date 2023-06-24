@@ -9,8 +9,8 @@ from utils.translation import gettext_lazy as _
 class HandicapTypeData:
 	def __init__(self, name: str, value: int, barbarianCampGold: int, barbarianSpawnMod: int,
 	             freeHumanTechs: [TechType], freeHumanCivics: [CivicType],
-	             freeHumanStartingUnitTypes: [UnitType],
-	             freeAIStartingUnitTypes: [UnitType]):
+	             freeHumanStartingUnitTypes: [UnitType], freeHumanCombatBonus: int,
+	             freeAIStartingUnitTypes: [UnitType], freeAICombatBonus: int):
 		self.name = name
 		self.value = value
 		self.barbarianCampGold = barbarianCampGold
@@ -19,8 +19,10 @@ class HandicapTypeData:
 		self.freeHumanTechs = freeHumanTechs
 		self.freeHumanCivics = freeHumanCivics
 		self.freeHumanStartingUnitTypes = freeHumanStartingUnitTypes
+		self.freeHumanCombatBonus = freeHumanCombatBonus
 		# ai
 		self.freeAIStartingUnitTypes = freeAIStartingUnitTypes
+		self.freeAICombatBonus = freeAICombatBonus
 
 
 class HandicapType(Enum):
@@ -44,6 +46,12 @@ class HandicapType(Enum):
 	def freeHumanStartingUnitTypes(self) -> [UnitType]:
 		return self._data().freeHumanStartingUnitTypes
 
+	def freeHumanCombatBonus(self) -> int:
+		return self._data().freeHumanCombatBonus
+
+	def freeAICombatBonus(self) -> int:
+		return self._data().freeAICombatBonus
+
 	def _data(self) -> HandicapTypeData:
 		if self == HandicapType.settler:
 			#
@@ -56,8 +64,10 @@ class HandicapType(Enum):
 				freeHumanTechs=[TechType.pottery, TechType.animalHusbandry, TechType.mining],
 				freeHumanCivics=[],
 				freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.builder],
+				freeHumanCombatBonus=3,
 				# ai
-				freeAIStartingUnitTypes=[UnitType.settler, UnitType.warrior]
+				freeAIStartingUnitTypes=[UnitType.settler, UnitType.warrior],
+				freeAICombatBonus=-1
 			)
 		elif self == HandicapType.chieftain:
 			#
@@ -70,8 +80,10 @@ class HandicapType(Enum):
 				freeHumanTechs=[TechType.pottery, TechType.animalHusbandry],
 				freeHumanCivics=[],
 				freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior, UnitType.builder],
+				freeHumanCombatBonus=2,
 				# ai
-				freeAIStartingUnitTypes=[UnitType.settler, UnitType.warrior]
+				freeAIStartingUnitTypes=[UnitType.settler, UnitType.warrior],
+				freeAICombatBonus=-1
 			)
 		elif self == HandicapType.warlord:
 			#
@@ -86,8 +98,10 @@ class HandicapType(Enum):
 				freeHumanStartingUnitTypes=[
 					UnitType.settler, UnitType.warrior, UnitType.builder
 				],
+				freeHumanCombatBonus=1,
 				# ai
-				freeAIStartingUnitTypes=[UnitType.settler, UnitType.warrior]
+				freeAIStartingUnitTypes=[UnitType.settler, UnitType.warrior],
+				freeAICombatBonus=-1
 			)
 		elif self == HandicapType.prince:
 			#
@@ -100,8 +114,10 @@ class HandicapType(Enum):
 				freeHumanTechs=[],
 				freeHumanCivics=[],
 				freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior],
+				freeHumanCombatBonus=0,
 				# ai
-				freeAIStartingUnitTypes=[UnitType.settler, UnitType.warrior]
+				freeAIStartingUnitTypes=[UnitType.settler, UnitType.warrior],
+				freeAICombatBonus=0
 			)
 		elif self == HandicapType.king:
 			#
@@ -114,8 +130,10 @@ class HandicapType(Enum):
 				freeHumanTechs=[],
 				freeHumanCivics=[],
 				freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior],
+				freeHumanCombatBonus=0,
 				# ai
-				freeAIStartingUnitTypes=[UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.builder]
+				freeAIStartingUnitTypes=[UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.builder],
+				freeAICombatBonus=1
 			)
 		elif self == HandicapType.emperor:
 			#
@@ -128,9 +146,11 @@ class HandicapType(Enum):
 				freeHumanTechs=[],
 				freeHumanCivics=[],
 				freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior],
+				freeHumanCombatBonus=0,
 				# ai
 				freeAIStartingUnitTypes=[UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.warrior,
-			        UnitType.builder]
+			        UnitType.builder],
+				freeAICombatBonus=2
 			)
 		elif self == HandicapType.immortal:
 			#
@@ -143,9 +163,11 @@ class HandicapType(Enum):
 				freeHumanTechs=[],
 				freeHumanCivics=[],
 				freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior],
+				freeHumanCombatBonus=0,
 				# ai
 				freeAIStartingUnitTypes=[UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior, UnitType.warrior,
-			        UnitType.warrior, UnitType.builder, UnitType.builder]
+			        UnitType.warrior, UnitType.builder, UnitType.builder],
+				freeAICombatBonus=3
 			)
 		elif self == HandicapType.deity:
 			#
@@ -158,9 +180,11 @@ class HandicapType(Enum):
 				freeHumanTechs=[],
 				freeHumanCivics=[],
 				freeHumanStartingUnitTypes=[UnitType.settler, UnitType.warrior],
+				freeHumanCombatBonus=0,
 				# ai
 				freeAIStartingUnitTypes=[UnitType.settler, UnitType.settler, UnitType.settler, UnitType.warrior, UnitType.warrior,
-			        UnitType.warrior, UnitType.warrior, UnitType.warrior, UnitType.builder, UnitType.builder]
+			        UnitType.warrior, UnitType.warrior, UnitType.warrior, UnitType.builder, UnitType.builder],
+				freeAICombatBonus=4
 			)
 
 	def freeAIStartingUnitTypes(self) -> [UnitType]:

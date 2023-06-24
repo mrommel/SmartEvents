@@ -5,19 +5,20 @@ from game.ai.tactics import TacticalMoveType
 from game.buildings import BuildingType
 from game.combat import Combat
 from game.flavors import FlavorType
-from game.governors import GovernorTitle
+from game.governments import GovernmentType
+from game.governors import GovernorTitle, GovernorType
 from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import NotificationType
 from game.policyCards import PolicyCardType
-from game.promotions import UnitPromotions, UnitPromotionType
+from game.promotions import UnitPromotions, UnitPromotionType, CombatModifier
 from game.religions import PantheonType
 from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
 from game.states.ui import TooltipType
-from game.types import EraType, TechType
+from game.types import EraType, TechType, CivicType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitTaskType, UnitType, UnitMissionType, UnitActivityType, \
 	UnitMapType, UnitAbilityType, MoveOption, UnitClassType
@@ -2226,3 +2227,269 @@ class Unit:
 
 	def isFighting(self) -> bool:
 		return False
+
+	def unitClassType(self) -> UnitClassType:
+		return self.unitType.unitClass()
+
+	def attackStrengthAgainst(self, unit, city, tile, simulation) -> int:
+		"""What is the max strength of this Unit when attacking?"""
+		isEmbarkedAttackingLand = self.isEmbarked() and (tile is not None and tile.terrain().isLand())
+
+		if self.isEmbarked() and not isEmbarkedAttackingLand:
+			return 0
+
+		if self.baseCombatStrength(ignoreEmbarked=isEmbarkedAttackingLand) == 0:
+			return 0
+	
+		modifierValue = 0
+		for modifier in self.attackStrengthModifierAgainst(unit, city, tile, simulation):
+			modifierValue += modifier.value
+		
+		return self.baseCombatStrength(ignoreEmbarked=isEmbarkedAttackingLand) + modifierValue
+
+	def attackStrengthModifierAgainst(self, unit, city, tile, simulation) -> [CombatModifier]:
+		government = self.player.government
+		civics = self.player.civics
+
+		result: [CombatModifier] = []
+
+		# Healty
+		healthPenalty = -10 * (int(Unit.maxHealth) - self.healthPoints()) / int(Unit.maxHealth)
+		if healthPenalty != 0:
+			result.append(CombatModifier(int(healthPenalty), "Health penalty"))
+
+		# // // // // // // // // // // //
+		# Government
+		# // // // // // // // // // // //
+
+		if government.currentGovernment() == GovernmentType.oligarchy:
+			# All land melee, anti-cavalry, and naval melee class units gain +4 Combat Strength.
+			if self.unitClassType() == UnitClassType.melee or self.unitClassType() == UnitClassType.antiCavalry or self.unitClassType() == UnitClassType.navalMelee:
+				result.append(CombatModifier(4, "Government Bonus"))
+
+		if government.currentGovernment() == GovernmentType.fascism:
+			# All units gain +5 Combat Strength.
+			result.append(CombatModifier(5, "Government Bonus"))
+
+		# twilightValor - All units +5 Combat Strength for all melee attack units.
+		# BUT: Cannot heal outside your territory.
+		if government.hasCard(PolicyCardType.twilightValor) and self.unitClassType() == UnitClassType.melee:
+			result.append(CombatModifier(5, PolicyCardType.twilightValor.name()))
+
+		# // // // // // // // // // // //
+		# KNOWN DEFENDER UNIT
+		# // // // // // // // // // // //
+
+		if unit is not None:
+			# +5 Combat Strength when fighting Barbarians.
+			if government.hasCard(PolicyCardType.discipline) and unit.isBarbarian():
+				result.append(CombatModifier(5, "Bonus for fighting Barbarians"))
+
+			if self.unitClassType() == UnitClassType.melee and unit.unitClassType() == UnitClassType.antiCavalry:
+				result.append(CombatModifier(10, "Bonus against Anti-Cavalry"))
+
+			if self.unitClassType() == UnitClassType.antiCavalry and \
+				(unit.unitClassType() == UnitClassType.lightCavalry or unit.unitClassType() == UnitClassType.heavyCavalry):
+				result.append(CombatModifier(10, "Bonus against Cavalry"))
+
+			if self.unitClassType() == UnitClassType.ranged and unit.domain() == UnitDomainType.sea:
+				result.append(CombatModifier(-17, "Penalty against Naval"))
+
+			# Siege units versus land units incur a -17 CS modifier.
+			if self.unitClassType() == UnitClassType.siege and unit.domain() == UnitDomainType.land:
+				result.append(CombatModifier(-17, "Penalty against Land units"))
+
+			# // // // // //
+			# promotions
+			# // // // // //
+			for gainedPromotion in self._promotions.gainedPromotions():
+				attackStrengthModifier = gainedPromotion.attackStrengthModifierAgainst(unit)
+				if attackStrengthModifier is not None:
+					result.append(attackStrengthModifier)
+
+		# // // // // // // // // // // //
+		# KNOWN DEFENDER CITY
+		# // // // // // // // // // // //
+		if city is not None:
+			if self.unitClassType() == UnitClassType.ranged:
+				result.append(CombatModifier(-17, "Penalty against City"))
+
+			if not self.isRanged() and self._promotions.hasPromotion(UnitPromotionType.urbanWarfare):
+				# +10 Combat Strength when fighting in a city.
+				result.append(CombatModifier(+10, UnitPromotionType.urbanWarfare.name()))
+
+		# // // // // // // // // // // //
+		# flanking
+		# // // // // // // // // // // //
+		flankingUnitCount: int = 0
+
+		# flanking only works when the target is clear
+		if tile is not None:
+			# only melee units can gain Flanking bonus and unlocked only after researching Military Tradition
+			if self.unitType.unitClass() == UnitClassType.melee and civics.hasCivic(CivicType.militaryTradition):
+
+				for defenderNeighborLocation in tile.point.neighbors():
+					for loopUnit in simulation.unitsAt(defenderNeighborLocation):
+						# The attacker itself does not count for the purpose of Flanking
+						if loopUnit.location == self.location:
+							continue
+
+						# Embarked land units do not provide Flanking.
+						if loopUnit.isEmbarked():
+							continue
+
+						# All non - air military units can provide Flanking
+						if loopUnit.unitClass() == UnitClassType.airFighter or loopUnit.unitClass() == UnitClassType.airBomber:
+							continue
+
+						# Only units that are currently owned by the same player can provide Flanking to one another
+						if loopUnit.player.leader != self.player.leader:
+							continue
+
+						# doubleEnvelopment - Double flanking bonus
+						if loopUnit.hasPromotion(UnitPromotionType.doubleEnvelopment):
+							flankingUnitCount += 1
+
+						flankingUnitCount += 1
+
+		if flankingUnitCount > 0:
+			result.append(CombatModifier(2 * flankingUnitCount, "Flanking Bonus"))
+
+		# // // // // // // // // // // //
+		# difficulty / handicap bonus
+		# // // // // // // // // // // //
+		if self.isHuman():
+			handicapBonus = simulation.handicap.freeHumanCombatBonus()
+			if handicapBonus != 0:
+				result.append(CombatModifier(handicapBonus, "Bonus due to difficulty"))
+		elif not self.isBarbarian():
+			handicapBonus = simulation.handicap.freeAICombatBonus()
+			if handicapBonus != 0:
+				result.append(CombatModifier(handicapBonus, "Bonus due to difficulty"))
+
+		# // // // // // // // // // // // //
+		# great generals
+		# // // // // // // // // // // // //
+		if (self.unitType.era() == EraType.classical or self.unitType.era() == EraType.medieval) and self.domain() == UnitDomainType.land:
+			boudicaNear = simulation.isGreatGeneral(GreatPersonType.boudica, self.player, self.location, 2)
+			hannibalBarcaNear = simulation.isGreatGeneral(GreatPersonType.hannibalBarca, self.player, self.location, 2)
+			sunTzuNear = simulation.isGreatGeneral(GreatPersonType.sunTzu, self.player, self.location, 2)
+
+			if boudicaNear or hannibalBarcaNear or sunTzuNear:
+				# +5 Combat Strength to Classical and Medieval era land units within 2 tiles.
+				result.append(CombatModifier(5, "Combat bonus from Great General"))
+
+		return result
+
+	def defensiveStrengthAgainst(self, unit, city, tile, ranged: bool, simulation) -> int:
+		if self.isEmbarked():
+			if self.unitClassType() == UnitClassType.civilian:
+				return 0
+			else:
+				return 500  # FIXME
+
+		baseStrength = self.baseCombatStrength(ignoreEmbarked=True)
+
+		if baseStrength == 0:
+			return 0
+
+		modifierValue = 0
+		for modifier in self.defensiveStrengthModifierAgainst(unit, city, tile, ranged=ranged, simulation=simulation):
+			modifierValue += modifier.value
+
+		return baseStrength + modifierValue
+
+	def defensiveStrengthModifierAgainst(self, unit, city, tile, ranged, simulation) -> [CombatModifier]:
+		civics = self.player.civics
+		government = self.player.government
+
+		if self.isBarbarian():
+			return []
+
+		result: [CombatModifier] = []
+
+		# twilightValor - All units +5 Combat Strength for all melee attack units.
+		# BUT: Cannot heal outside your territory.
+		if government.hasCard(PolicyCardType.twilightValor) and self.unitClassType() == UnitClassType.melee:
+			result.append(CombatModifier(5, PolicyCardType.twilightValor.name()))
+
+		# // // // // // // // // // // //
+		# tile bonus
+		# // // // // // // // // // // //
+		if tile is not None:
+			if tile.isHills():
+				if tile.hasFeature(FeatureType.forest) or tile.hasFeature(FeatureType.rainforest):
+					result.append(CombatModifier(6, "Ideal terrain"))
+				else:
+					result.append(CombatModifier(3, "Ideal terrain"))
+
+		# // // // // // // // // // // //
+		# difficulty / handicap bonus
+		# // // // // // // // // // // //
+		if self.isHuman():
+			handicapBonus = simulation.handicap.freeHumanCombatBonus()
+			if handicapBonus != 0:
+				result.append(CombatModifier(handicapBonus, "Bonus due to difficulty"))
+		elif not self.isBarbarian():
+			handicapBonus = simulation.handicap.freeAICombatBonus()
+			if handicapBonus != 0:
+				result.append(CombatModifier(handicapBonus, "Bonus due to difficulty"))
+
+		if unit is not None:
+			# // // // // //
+			# promotions
+			# // // // // //
+			for gainedPromotion in self._promotions.gainedPromotions():
+				defenderStrengthModifier = gainedPromotion.defenderStrengthModifierAgainst(unit)
+				if defenderStrengthModifier is not None:
+					result.append(defenderStrengthModifier)
+				elif tile is not None:
+					defenderStrengthModifier = gainedPromotion.defenderStrengthModifierOn(tile)
+					if defenderStrengthModifier is not None:
+						result.append(defenderStrengthModifier)
+
+
+		# city attacks us
+		if city is not None:
+			if self._promotions.hasPromotion(UnitPromotionType.emplacement):
+				# +10 Combat Strength when defending vs. city attacks.
+				result.append(CombatModifier(+10, UnitPromotionType.emplacement.name()))
+
+		# governor effects
+		if tile is not None:
+			workingCity = tile.workingCity()
+			if workingCity is not None:
+				governor = workingCity.governor()
+				if governor is not None:
+					# Victor - garrisonCommander - Units defending within the city's territory get +5 Combat Strength.
+					if governor.type() == GovernorType.victor and governor.hasTitle(GovernorTitle.garrisonCommander):
+						result.append(CombatModifier(5, "Governor Victor"))
+
+		# // // // // //
+		# support
+		# // // // // //
+		supportUnitCount: int = 0
+
+		# only melee units can gain Flanking bonus and unlocked only after researching Military Tradition
+		if self.unitClassType() != UnitClassType.airFighter and self.unitClassType() != UnitClassType.airBomber and civics.hasCivic(CivicType.militaryTradition):
+			for neighborLocation in self.location.neighbors():
+				for loopUnit in simulation.unitsAt(neighborLocation):
+					# All non - air military units can provide Flanking
+					if loopUnit.unitClass() == UnitClassType.airFighter or loopUnit.unitClass() == UnitClassType.airBomber:
+						continue
+
+					# Only units that are currently owned by the same player can provide Flanking to one another
+					if loopUnit.player.leader != self.player.leader:
+						continue
+
+					# square - Double Support bonus
+					if loopUnit.hasPromotion(UnitPromotionType.square):
+						supportUnitCount += 1
+
+					supportUnitCount += 1
+
+			if supportUnitCount > 0:
+				result.append(CombatModifier(2 * supportUnitCount, "Support Bonus"))
+
+		return result
+	
