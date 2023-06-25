@@ -1557,7 +1557,7 @@ class Unit:
 		if testVisible:
 			# check for any other units working in this plot
 			for loopUnit in simulation.unitsAt(location):
-				if self.isEqualTo(loopUnit):
+				if self == loopUnit:
 					continue
 
 				loopMission = loopUnit.peekMission()
@@ -1977,7 +1977,7 @@ class Unit:
 		if self.movesLeft() <= 0:
 			return False
 
-		if not simulation.isCoastal(self.location):
+		if not simulation.isCoastalAt(self.location):
 			return False
 
 		# check target
@@ -2000,9 +2000,9 @@ class Unit:
 			if otherPlayer is not None:
 				otherPlayerTech = otherPlayer.techs
 				# Bronze Working eureka: Kill 3 Barbarians
-				otherPlayerTech.changeEurekaValueFor(TechType.bronzeWorking, 1)
+				otherPlayerTech.changeEurekaValue(TechType.bronzeWorking, 1)
 
-				if otherPlayerTech.eurekaValueFor(TechType.bronzeWorking) >= 3:
+				if otherPlayerTech.eurekaValue(TechType.bronzeWorking) >= 3:
 					otherPlayerTech.triggerEurekaFor(TechType.bronzeWorking, simulation)
 
 		if delayed:
@@ -2202,7 +2202,7 @@ class Unit:
 
 		return numberOfAttacksPerTurnValue
 
-	def isEqualTo(self, otherUnit) -> bool:
+	def __eq__(self, otherUnit) -> bool:
 		if isinstance(otherUnit, Unit):
 			return self.location == otherUnit.location and self.unitType == otherUnit.unitType
 
@@ -2210,7 +2210,7 @@ class Unit:
 
 	def doPromote(self, promotionType: UnitPromotionType, simulation) -> bool:
 		if promotionType.tier() == 4:
-			self.player.addMoment(MomentType.unitPromotedWithDistinction, simulation)
+			self.player.addMoment(MomentType.unitPromotedWithDistinction, simulation=simulation)
 
 		if self._promotions.earnPromotion(promotionType):
 			# also heal completely

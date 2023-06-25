@@ -7,7 +7,7 @@ from game.combat import Combat
 from game.game import GameModel
 from game.players import Player
 from game.policyCards import PolicyCardType
-from game.promotions import CombatModifier
+from game.promotions import CombatModifier, UnitPromotionType
 from game.states.victories import VictoryType
 from game.types import CivicType
 from game.unitTypes import UnitType
@@ -64,6 +64,10 @@ class TestCombatModifier(unittest.TestCase):
 		tile.setHills(True)
 		modifiersHills = warrior.defensiveStrengthModifierAgainst(None, None, tile, ranged=False, simulation=gameModel)
 
+		# promotion
+		warrior.doPromote(UnitPromotionType.battlecry, gameModel)
+		modifiersPromotion = warrior.defensiveStrengthModifierAgainst(barbarianWarrior, None, None, ranged=False, simulation=gameModel)
+
 		# THEN
 		self.assertEqual(modifiersBarbarian, [])  # no modifiers for barbarians
 		self.assertEqual(modifiersNormal, [CombatModifier(-1, "Bonus due to difficulty")])
@@ -74,6 +78,10 @@ class TestCombatModifier(unittest.TestCase):
 		self.assertListEqual(modifiersHills, [
 			CombatModifier(3, "Ideal terrain"),
 			CombatModifier(-1, "Bonus due to difficulty")
+		])
+		self.assertListEqual(modifiersPromotion, [
+			CombatModifier(-1, "Bonus due to difficulty"),
+			CombatModifier(7, "TXT_KEY_UNIT_PROMOTION_BATTLECRY_NAME")
 		])
 
 
