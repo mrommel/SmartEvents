@@ -1252,6 +1252,24 @@ class Unit:
 
 		return attack
 
+	def doRangeAttackAt(self, target: HexPoint, simulation) -> bool:
+		if not self.canRangeStrikeAt(target, needWar=True, noncombatAllowed=True, simulation=simulation):
+			raise Exception("tried to range attack, but it's not allowed")
+
+		targetCity = simulation.cityAt(target)
+		targetUnit = simulation.unitAt(target, UnitMapType.combat)
+
+		if targetCity is not None:
+			Combat.doRangedAttack(self, targetCity, simulation)
+			return True
+
+		elif targetUnit is not None:
+			Combat.doRangedAttack(self, targetUnit, simulation)
+			return True
+
+		else:
+			raise Exception(f"nor city nor combat unit at {target}")
+
 	def isTrading(self) -> bool:
 		return self._tradeRouteDataValue is not None
 

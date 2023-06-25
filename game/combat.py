@@ -128,7 +128,11 @@ class Combat:
 		pass
 
 	@classmethod
-	def doMeleeAttack(cls, self, defenderUnit, simulation):
+	def doMeleeAttack(cls, self, defender, simulation):
+		pass
+
+	@classmethod
+	def doRangedAttack(cls, self, defender, simulation):
 		pass
 
 	@classmethod

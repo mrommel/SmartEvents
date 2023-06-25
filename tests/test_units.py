@@ -1,3 +1,4 @@
+import copy
 import unittest
 
 from game.baseTypes import HandicapType
@@ -339,3 +340,17 @@ class TestUnit(unittest.TestCase):
 		self.assertEqual(canHealBarbarian, False)
 		self.assertEqual(canHealDamaged, True)
 		self.assertEqual(canHealEmbarked, False)
+
+	def test_gainedPromotions(self):
+		# GIVEN
+		warrior = Unit(HexPoint(5, 5), UnitType.warrior, self.playerTrajan)
+
+		# WHEN
+		gainedPromotionsNormal = copy.deepcopy(warrior.gainedPromotions())
+
+		self.assertTrue(warrior._promotions.earnPromotion(UnitPromotionType.battlecry))
+		gainedPromotionsBattlecry = warrior.gainedPromotions()
+
+		# THEN
+		self.assertListEqual(gainedPromotionsNormal, [])
+		self.assertListEqual(gainedPromotionsBattlecry, [UnitPromotionType.battlecry])
