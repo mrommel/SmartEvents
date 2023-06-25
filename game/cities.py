@@ -513,7 +513,7 @@ class CityCitizens:
 		numberOfCitizensToRemove = self.numberOfCitizensWorkingPlots()
 		for _ in range(numberOfCitizensToRemove):
 			self.doRemoveWorstCitizen(removeForcedStatus=False, dontChangeSpecialist=SpecialistType.none,
-			                          simulation=simulation)
+									  simulation=simulation)
 
 		# Remove Non-Forced Specialists in Buildings
 		for buildingType in list(BuildingType):
@@ -672,9 +672,9 @@ class CityCitizens:
 		return 0
 
 	def doRemoveWorstCitizen(self,
-	                         removeForcedStatus: bool = False,
-	                         dontChangeSpecialist: SpecialistType = SpecialistType.none,
-	                         simulation=None) -> bool:
+							 removeForcedStatus: bool = False,
+							 dontChangeSpecialist: SpecialistType = SpecialistType.none,
+							 simulation=None) -> bool:
 		"""Pick the worst Plot to stop working"""
 		# Are all of our guys already not working Plots?
 		if self.numberOfUnassignedCitizens() == self.city.population():
@@ -717,7 +717,7 @@ class CityCitizens:
 		return self.numberOfDefaultSpecialistsValue
 
 	def doRemoveWorstSpecialist(self, dontChangeSpecialist: SpecialistType = SpecialistType.none,
-	                            dontRemoveFromBuilding: BuildingType = BuildingType.none, simulation=None) -> bool:
+								dontRemoveFromBuilding: BuildingType = BuildingType.none, simulation=None) -> bool:
 		"""Find the worst Specialist and remove him from duty"""
 		if simulation is None:
 			raise Exception('simulation must not be None')
@@ -1206,7 +1206,7 @@ class CityCitizens:
 			# If we don't already have an Unassigned Citizen to turn into a Specialist, find one from somewhere
 			if self.numberOfUnassignedCitizens() == 0:
 				self.doRemoveWorstCitizen(removeForcedStatus=True, dontChangeSpecialist=specialistType,
-				                          simulation=simulation)
+										  simulation=simulation)
 
 				if self.numberOfUnassignedCitizens() == 0:
 					# Still nobody, all the citizens may be assigned to the eSpecialist we are looking for, try again
@@ -1328,8 +1328,8 @@ class BuildQueue:
 
 	def buildingOf(self, buildingType: BuildingType) -> Optional[BuildableItem]:
 		item = next(filter(lambda
-			                   itemIterator: itemIterator.buildableType == BuildableType.building and itemIterator.buildingType == buildingType,
-		                   self._items), None)
+							   itemIterator: itemIterator.buildableType == BuildableType.building and itemIterator.buildingType == buildingType,
+						   self._items), None)
 		if item is not None:
 			return item
 
@@ -1352,14 +1352,14 @@ class BuildQueue:
 			return len(list(filter(lambda it: it.buildableType == BuildableType.district, self._items))) > 0
 		else:
 			return len(list(filter(lambda it: it.buildableType == BuildableType.district and it.district == district,
-			                       self._items))) > 0
+								   self._items))) > 0
 
 	def isCurrentlyBuildingBuilding(self, building: Optional[BuildingType] = None) -> bool:
 		if building is None:
 			return len(list(filter(lambda it: it.buildableType == BuildableType.building, self._items))) > 0
 		else:
 			return len(list(filter(lambda it: it.buildableType == BuildableType.building and it.building == building,
-			                       self._items))) > 0
+								   self._items))) > 0
 
 	def isCurrentlyBuildingWonder(self, wonder: Optional[WonderType] = None) -> bool:
 		if wonder is None:
@@ -1629,7 +1629,7 @@ class City:
 	def power(self, simulation) -> int:
 		return int(
 			pow(float(self.defensiveStrengthAgainst(unit=None, tile=None, ranged=False, simulation=simulation)) / 100.0,
-			    1.5))
+				1.5))
 
 	def doUpdateCheapestPlotInfluence(self, simulation):
 		"""What is the cheapest plot we can get"""
@@ -1828,7 +1828,7 @@ class City:
 
 				# etemenanki - +2 Science and +1 Production to all Marsh tiles in your empire.
 				if workedTile.hasFeature(FeatureType.marsh) and self.player.hasWonder(WonderType.etemenanki,
-				                                                                      simulation):
+																					  simulation):
 					productionValue += 1.0
 
 				# etemenanki - +1 Science and +1 Production on all Floodplains tiles in this city.
@@ -1842,7 +1842,7 @@ class City:
 
 				# ladyOfTheReedsAndMarshes - +2 Production from Marsh, Oasis, and Desert Floodplains.
 				if (workedTile.hasFeature(FeatureType.marsh) or workedTile.hasFeature(FeatureType.oasis) or
-				    workedTile.hasFeature(FeatureType.floodplains)) and \
+					workedTile.hasFeature(FeatureType.floodplains)) and \
 					self.player.religion.pantheon() == PantheonType.ladyOfTheReedsAndMarshes:
 					productionValue += 1.0
 
@@ -2373,7 +2373,7 @@ class City:
 
 		if not self.isProduction() and self.player.isHuman() and not self.isProductionAutomated():
 			self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name,
-			                                          location=self.location)
+													  location=self.location)
 			return okay
 
 		# ...
@@ -2636,8 +2636,8 @@ class City:
 				unitType = self.productionUnitType()
 				if unitType is not None:
 					if (unitType.unitClass() == UnitClassType.melee or unitType.unitClass() == UnitClassType.ranged or \
-					    unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or \
-					                                                            unitType.era() == EraType.classical):
+						unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or \
+																				unitType.era() == EraType.classical):
 						modifierPercentage += 0.50
 
 			# veterancy - +30 % Production toward Encampment and Harbor districts and buildings for those districts.
@@ -2657,9 +2657,9 @@ class City:
 				unitType = self.productionUnitType()
 				if unitType is not None:
 					if (unitType.unitClass() == UnitClassType.melee or unitType.unitClass() == UnitClassType.ranged or
-					    unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or
-					                                                            unitType.era() == EraType.classical or unitType.era() == EraType.medieval or
-					                                                            unitType.era() == EraType.renaissance):
+						unitType.unitClass() == UnitClassType.antiCavalry) and (unitType.era() == EraType.ancient or
+																				unitType.era() == EraType.classical or unitType.era() == EraType.medieval or
+																				unitType.era() == EraType.renaissance):
 						modifierPercentage += 0.50
 
 			# chivalry - +50%  Production toward Industrial era and earlier heavy and light cavalry units.
@@ -3338,7 +3338,7 @@ class City:
 
 				# etemenanki - +2 Science and +1 Production to all Marsh tiles in your empire.
 				if adjacentTile.hasFeature(FeatureType.marsh) and self.player.hasWonder(WonderType.etemenanki,
-				                                                                        simulation):
+																						simulation):
 					scienceFromTiles += 2.0
 
 				# etemenanki - +1 Science and +1 Production on all Floodplains tiles in this city.
@@ -3729,8 +3729,6 @@ class City:
 		return cultureFromEnvoys
 
 	def defensiveStrengthAgainst(self, unit, tile, ranged, simulation):
-		strengthValue = 0
-
 		# Base strength, equal to that of the strongest melee unit your civilization
 		# currently possesses minus 10, or to the unit which is garrisoned inside
 		# the city(whichever is greater). Note also that
@@ -3738,7 +3736,7 @@ class City:
 		# for this Era, so when you station such a unit in a city, its CS will increase accordingly;
 		if self.garrisonedUnit() is not None:
 			unitStrength = self.garrisonedUnit().attackStrengthAgainst(unit=None, city=None, tile=None,
-			                                                           simulation=simulation)
+																	   simulation=simulation)
 			warriorStrength = UnitType.warrior.meleeStrength() - 10
 			strengthValue = max(warriorStrength, unitStrength)
 		else:
@@ -4393,13 +4391,13 @@ class City:
 		if self.player.currentAge() == AgeType.normal and self.player.hasDedication(DedicationType.penBrushAndVoice):
 			if len(buildingType.slotsForGreatWork()) != 0:
 				self.player.addMoment(MomentType.dedicationTriggered, dedication=DedicationType.penBrushAndVoice,
-				                      simulation=simulation)
+									  simulation=simulation)
 
 		# freeInquiry + normal - constructing a building which provides Science
 		if self.player.currentAge() == AgeType.normal and self.player.hasDedication(DedicationType.freeInquiry):
 			if buildingType.yields().science > 0:
 				self.player.addMoment(MomentType.dedicationTriggered, dedication=DedicationType.freeInquiry,
-				                      simulation=simulation)
+									  simulation=simulation)
 
 		if buildingType == BuildingType.warlordsThrone or buildingType == BuildingType.audienceChamber or \
 			buildingType == BuildingType.ancestralHall or buildingType == BuildingType.foreignMinistry or \
@@ -4437,3 +4435,41 @@ class City:
 
 	def isCoastal(self, simulation) -> bool:
 		return simulation.isCoastalAt(self.location)
+
+	def healthPoints(self) -> int:
+		return self.healthPointsValue
+
+	def rangedCombatStrengthAgainst(self, unit, tile) -> int:
+		government = self.player.government
+
+		if unit is not None:
+			if not self.canRangeStrikeAt(tile.point):
+				return 0
+
+		rangedStrength = 15  # slinger / no requirement
+
+		# https://civilization.fandom.com/wiki/Archer_(Civ6)
+		if self.player.hasTech(TechType.archery):
+			rangedStrength = 25
+
+		# https://civilization.fandom.com/wiki/Crossbowman_(Civ6)
+		if self.player.hasTech(TechType.machinery):
+			rangedStrength = 40
+
+		# https://civilization.fandom.com/wiki/Field_Cannon_(Civ6)
+		if self.player.hasTech(TechType.ballistics):
+			rangedStrength = 60
+
+		# +5 City Ranged Strength.
+		if government.hasCard(PolicyCardType.bastions):
+			rangedStrength += 5
+
+		# FIXME: ratio?
+
+		return rangedStrength
+
+	def canRangeStrikeAt(self, point: HexPoint) -> bool:
+		return self.location.distance(point) <= self.strikeRange()
+
+	def strikeRange(self) -> int:
+		return 2

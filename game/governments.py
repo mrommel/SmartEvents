@@ -232,10 +232,28 @@ class GovernmentType(ExtendedEnum):
 		raise AttributeError(f'cant get data for government {self}')
 
 
+class PolicyCardSet:
+	def __init__(self):
+		self._cards: [PolicyCardType] = []
+
+	def hasCard(self, policyCard: PolicyCardType) -> bool:
+		return policyCard in self._cards
+
+	def addCard(self, policyCard: PolicyCardType):
+		self._cards.append(policyCard)
+
+	def cards(self) -> [PolicyCardType]:
+		return self._cards
+
+	def removeCard(self, policyCard: PolicyCardType):
+		self._cards = list(filter(lambda card: card != policyCard, self._cards))
+
+
 class PlayerGovernment:
 	def __init__(self, player):
 		self.player = player
 		self._currentGovernmentValue = GovernmentType.chiefdom
+		self._policyCards = PolicyCardSet()
 
 	def setGovernment(self, governmentType: GovernmentType, simulation):
 		self._currentGovernmentValue = governmentType
@@ -244,4 +262,7 @@ class PlayerGovernment:
 		return self._currentGovernmentValue
 
 	def hasCard(self, policyCard: PolicyCardType) -> bool:
-		return False
+		return self._policyCards.hasCard(policyCard)
+
+	def addCard(self, policyCard: PolicyCardType):
+		self._policyCards.addCard(policyCard)

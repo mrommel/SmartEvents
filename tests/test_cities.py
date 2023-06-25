@@ -344,3 +344,35 @@ class TestCity(unittest.TestCase):
 		# THEN
 		self.assertIn(campusLocation, [HexPoint(4, 5), HexPoint(5, 5), HexPoint(4, 4)])
 		self.assertIsNone(harborLocation)
+
+	def test_healthPoints(self):
+		# GIVEN
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# players
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
+		city.initialize(simulation)
+
+		# WHEN
+		healthPointsNormal = city.maxHealthPoints()
+		city.buildings.build(BuildingType.ancientWalls)
+		healthPointsAncientWalls = city.maxHealthPoints()
+
+		# THEN
+		self.assertEqual(healthPointsNormal, 200)
+		self.assertEqual(healthPointsAncientWalls, 300)

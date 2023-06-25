@@ -69,6 +69,15 @@ class CombatModifier:
 		self.value = value
 		self.text = text
 
+	def __repr__(self):
+		return f'CombatModifier({self.value}, {self.text})'
+
+	def __eq__(self, other):
+		if isinstance(other, CombatModifier):
+			return self.value == other.value and self.text == other.text
+		else:
+			return False
+
 
 class UnitPromotionType(ExtendedEnum):
 	embarkation = 'embarkation'

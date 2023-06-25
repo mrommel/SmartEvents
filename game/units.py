@@ -2339,7 +2339,7 @@ class Unit:
 							continue
 
 						# All non - air military units can provide Flanking
-						if loopUnit.unitClass() == UnitClassType.airFighter or loopUnit.unitClass() == UnitClassType.airBomber:
+						if loopUnit.unitClassType() == UnitClassType.airFighter or loopUnit.unitClassType() == UnitClassType.airBomber:
 							continue
 
 						# Only units that are currently owned by the same player can provide Flanking to one another
@@ -2475,7 +2475,7 @@ class Unit:
 			for neighborLocation in self.location.neighbors():
 				for loopUnit in simulation.unitsAt(neighborLocation):
 					# All non - air military units can provide Flanking
-					if loopUnit.unitClass() == UnitClassType.airFighter or loopUnit.unitClass() == UnitClassType.airBomber:
+					if loopUnit.unitClassType() == UnitClassType.airFighter or loopUnit.unitClassType() == UnitClassType.airBomber:
 						continue
 
 					# Only units that are currently owned by the same player can provide Flanking to one another
