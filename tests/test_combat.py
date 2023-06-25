@@ -13,6 +13,7 @@ from game.types import CivicType
 from game.unitTypes import UnitType
 from game.units import Unit
 from map.base import HexPoint
+from map.map import Tile
 from map.types import TerrainType, MapSize
 from tests.testBasics import MapModelMock, UserInterfaceMock
 
@@ -53,14 +54,25 @@ class TestCombatModifier(unittest.TestCase):
 		modifiersBarbarian = barbarianWarrior.defensiveStrengthModifierAgainst(None, None, None, ranged=False, simulation=gameModel)
 		modifiersNormal = warrior.defensiveStrengthModifierAgainst(None, None, None, ranged=False, simulation=gameModel)
 
+		# policy twilightValor
 		playerTrajan.government.addCard(PolicyCardType.twilightValor)
 		modifiersTwilightValor = warrior.defensiveStrengthModifierAgainst(None, None, None, ranged=False, simulation=gameModel)
+		playerTrajan.government.removeCard(PolicyCardType.twilightValor)
+
+		# hills
+		tile = Tile(HexPoint(5, 5), TerrainType.grass)
+		tile.setHills(True)
+		modifiersHills = warrior.defensiveStrengthModifierAgainst(None, None, tile, ranged=False, simulation=gameModel)
 
 		# THEN
 		self.assertEqual(modifiersBarbarian, [])  # no modifiers for barbarians
 		self.assertEqual(modifiersNormal, [CombatModifier(-1, "Bonus due to difficulty")])
 		self.assertListEqual(modifiersTwilightValor, [
 			CombatModifier(5, "TXT_KEY_POLICY_CARD_TWILIGHT_VALOR_TITLE"),
+			CombatModifier(-1, "Bonus due to difficulty")
+		])
+		self.assertListEqual(modifiersHills, [
+			CombatModifier(3, "Ideal terrain"),
 			CombatModifier(-1, "Bonus due to difficulty")
 		])
 

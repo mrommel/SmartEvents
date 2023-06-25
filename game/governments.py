@@ -266,3 +266,6 @@ class PlayerGovernment:
 
 	def addCard(self, policyCard: PolicyCardType):
 		self._policyCards.addCard(policyCard)
+
+	def removeCard(self, policyCard: PolicyCardType):
+		self._policyCards.removeCard(policyCard)
