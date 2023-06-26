@@ -885,7 +885,7 @@ class Unit:
 	def canStartMission(self, mission: UnitMission, simulation):
 		"""Eligible to start a new mission?"""
 		if mission.missionType == UnitMissionType.found:
-			if self.canFoundAt(mission.unit.location, simulation):
+			if self.canFoundAt(self.location, simulation):
 				return True
 		elif mission.missionType == UnitMissionType.moveTo:
 			if simulation.valid(mission.target):
@@ -899,7 +899,7 @@ class Unit:
 			if self.canPillageAt(self.location, simulation):
 				return True
 		elif mission.missionType == UnitMissionType.skip:
-			if self.canHoldAt(mission.unit.location, simulation):
+			if self.canHoldAt(self.location, simulation):
 				return True
 		elif mission.missionType == UnitMissionType.rangedAttack:
 			if self.canRangeStrikeAt(mission.target, needWar=False, noncombatAllowed=False, simulation=simulation):
@@ -1170,9 +1170,13 @@ class Unit:
 
 		return True
 
-	def canHoldAt(self, location, simulation):
-		# fixme
-		return False
+	def canHoldAt(self, location: HexPoint, simulation) -> bool:
+		"""Can the unit skip their turn at the specified plot"""
+		# no hold / skip in cities(need to fortify) for land attack units
+		if simulation.cityAt(location) is not None and self.baseCombatStrength() > 0 and self.domain() != UnitDomainType.sea:
+			return False
+
+		return True
 
 	def popMission(self):
 		if len(self._missions) > 0:

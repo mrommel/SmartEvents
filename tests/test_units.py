@@ -12,7 +12,8 @@ from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.states.victories import VictoryType
 from game.types import TechType
-from game.unitTypes import UnitType
+from game.unitMissions import UnitMission
+from game.unitTypes import UnitType, UnitMissionType
 from game.units import Unit
 from map.base import HexPoint
 from map.improvements import ImprovementType
@@ -83,6 +84,7 @@ class TestUnit(unittest.TestCase):
 		builder = Unit(HexPoint(5, 6), UnitType.builder, self.playerTrajan)
 		missionary = Unit(HexPoint(5, 7), UnitType.missionary, self.playerTrajan)
 		cavalry = Unit(HexPoint(5, 8), UnitType.horseman, self.playerTrajan)
+		swordman = Unit(HexPoint(5, 5), UnitType.swordman, self.playerTrajan)
 
 		# WHEN
 		maxMovesWarriorNormal = warrior.maxMoves(self.simulation)
@@ -106,6 +108,7 @@ class TestUnit(unittest.TestCase):
 		self.assertTrue(warrior.doPromote(UnitPromotionType.battlecry, self.simulation))
 		self.assertTrue(warrior.doPromote(UnitPromotionType.commando, self.simulation))
 		maxMovesWarriorCommando = warrior.maxMoves(self.simulation)
+		warrior._promotions._promotions = []
 
 		# promotion pursuit
 		cavalry._promotions._promotions = []
@@ -113,6 +116,13 @@ class TestUnit(unittest.TestCase):
 		self.assertTrue(cavalry.doPromote(UnitPromotionType.depredation, self.simulation))
 		self.assertTrue(cavalry.doPromote(UnitPromotionType.pursuit, self.simulation))
 		maxMovesCavalryPursuit = cavalry.maxMoves(self.simulation)
+		cavalry._promotions._promotions = []
+
+		# generals
+		generalBoudica = Unit(HexPoint(5, 4), UnitType.general, self.playerTrajan)
+		generalBoudica.greatPerson = GreatPersonType.boudica
+		self.simulation.addUnit(generalBoudica)
+		maxMovesSwordmanGeneral = swordman.maxMoves(self.simulation)
 
 		# THEN
 		self.assertEqual(maxMovesWarriorNormal, 2)
@@ -122,6 +132,7 @@ class TestUnit(unittest.TestCase):
 
 		self.assertEqual(maxMovesWarriorCommando, 3)
 		self.assertEqual(maxMovesCavalryPursuit, 5)
+		self.assertEqual(maxMovesSwordmanGeneral, 3)
 
 		# fixme more conditions
 
@@ -354,3 +365,25 @@ class TestUnit(unittest.TestCase):
 		# THEN
 		self.assertListEqual(gainedPromotionsNormal, [])
 		self.assertListEqual(gainedPromotionsBattlecry, [UnitPromotionType.battlecry])
+
+	def test_canStartMission(self):
+		# GIVEN
+		warriorGarrison = Unit(HexPoint(5, 5), UnitType.warrior, self.playerTrajan)
+		warriorSkip = Unit(HexPoint(5, 6), UnitType.warrior, self.playerTrajan)
+
+		# WHEN
+
+		# garrison
+		canGarrisonOutsideCity = warriorGarrison.canStartMission(UnitMission(UnitMissionType.garrison), self.simulation)
+		city = City("Berlin", HexPoint(5, 5), isCapital=False, player=self.playerTrajan)
+		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+		canGarrisonInCity = warriorGarrison.canStartMission(UnitMission(UnitMissionType.garrison), self.simulation)
+
+		canSkip = warriorSkip.canStartMission(UnitMission(UnitMissionType.skip), self.simulation)
+
+		# THEN
+		self.assertFalse(canGarrisonOutsideCity)
+		self.assertTrue(canGarrisonInCity)
+
+		self.assertTrue(canSkip)
