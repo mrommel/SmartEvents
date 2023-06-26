@@ -410,7 +410,7 @@ class Unit:
 		tile = simulation.tileAt(point)
 
 		# Barbarians have special restrictions early in the game
-		if self.isBarbarian() and simulation.areBarbariansReleased() and tile.hasOwner():
+		if self.isBarbarian() and not simulation.areBarbariansReleased() and tile.hasOwner():
 			return False
 
 		if MoveOption.attack in options:

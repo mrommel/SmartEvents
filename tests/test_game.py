@@ -692,7 +692,7 @@ class TestUsecases(unittest.TestCase):
 		self.assertEqual(numberOfCitiesAfter, 1)
 		self.assertEqual(numberOfUnitsAfter, 1)
 
-		self.assertEqual(playerAugustusWarrior.activityType(), UnitActivityType.none)  # warrior has skipped
+		self.assertEqual(playerAugustusWarrior.activityType(), UnitActivityType.hold)  # warrior has skipped
 		# XCTAssertEqual(playerAugustusWarrior.peekMission()!.buildType, BuildType.repair)
 
 	def test_first100turns(self):

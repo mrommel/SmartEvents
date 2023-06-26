@@ -380,10 +380,36 @@ class TestUnit(unittest.TestCase):
 		self.simulation.addCity(city)
 		canGarrisonInCity = warriorGarrison.canStartMission(UnitMission(UnitMissionType.garrison), self.simulation)
 
-		canSkip = warriorSkip.canStartMission(UnitMission(UnitMissionType.skip), self.simulation)
+		canSkipAtLocation = warriorSkip.canStartMission(UnitMission(UnitMissionType.skip), self.simulation)
+		canSkipAtTarget = warriorSkip.canStartMission(UnitMission(UnitMissionType.skip, target=HexPoint(5, 6)), self.simulation)
 
 		# THEN
 		self.assertFalse(canGarrisonOutsideCity)
 		self.assertTrue(canGarrisonInCity)
 
-		self.assertTrue(canSkip)
+		self.assertTrue(canSkipAtTarget)
+		self.assertTrue(canSkipAtLocation)
+
+	def test_canMoveInto(self):
+		# GIVEN
+		barbarianWarrior = Unit(HexPoint(5, 4), UnitType.barbarianWarrior, self.playerBarbarian)
+		self.simulation.tileAt(HexPoint(5, 3)).setOwner(self.playerTrajan)
+		warrior = Unit(HexPoint(5, 5), UnitType.warrior, self.playerTrajan)
+
+		# WHEN
+		barbarianWarriorCanMoveInto = barbarianWarrior.canMoveInto(HexPoint(5, 3), [], self.simulation)
+		warriorCanMoveInto = warrior.canMoveInto(HexPoint(5, 6), [], self.simulation)
+
+		# if MoveOption.attack in options:
+		#   if self.isOutOfAttacks(simulation):
+		#     return False
+		#
+		# if self.isImpassableTile(tile):
+		#   return False
+		#
+		# if simulation.isEnemyVisibleAt(point, self.player):
+		#   return False
+
+		# THEN
+		self.assertFalse(barbarianWarriorCanMoveInto)
+		self.assertTrue(warriorCanMoveInto)

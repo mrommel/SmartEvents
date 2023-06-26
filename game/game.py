@@ -783,3 +783,9 @@ class GameModel:
 					return True
 
 		return False
+
+	def areBarbariansReleased(self) -> bool:
+		return self.earliestBarbarianReleaseTurn() <= self.currentTurn
+
+	def earliestBarbarianReleaseTurn(self) -> int:
+		return self.handicap.earliestBarbarianReleaseTurn()
