@@ -1593,7 +1593,7 @@ class City:
 
 			# send gossip
 			if district.isSpecialty():
-				simulation.sendGossip(type=GossipType.districtConstructed, meta=district, player=self.player)
+				simulation.sendGossip(GossipType.districtConstructed, district=district, player=self.player)
 
 			tile.buildDistrict(district)
 			if district != DistrictType.cityCenter:

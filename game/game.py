@@ -6,6 +6,7 @@ from game.baseTypes import HandicapType, GameState
 from game.buildings import BuildingType
 from game.cities import City
 from game.civilizations import LeaderType, CivilizationType
+from game.districts import DistrictType
 from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import NotificationType
@@ -621,7 +622,8 @@ class GameModel:
 		return numPlayerCities >= (numNextBestPlayersCities + 3)
 
 	def sendGossip(self, gossipType: GossipType, cityName: Optional[str] = None, tech: Optional[TechType] = None,
-	               player=None, leader: Optional[LeaderType] = None, building: Optional[BuildingType] = None):
+	               player=None, leader: Optional[LeaderType] = None, building: Optional[BuildingType] = None,
+	               district: Optional[DistrictType] = None):
 		print('send gossip is not implemented')  # fixme
 		pass
 

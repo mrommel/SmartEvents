@@ -10,6 +10,7 @@ from game.game import GameModel
 from game.governments import GovernmentType
 from game.players import Player
 from game.states.victories import VictoryType
+from game.types import CivicType
 from game.unitTypes import UnitType
 from map.base import HexPoint
 from map.types import TerrainType, FeatureType
@@ -455,3 +456,27 @@ class TestCity(unittest.TestCase):
 		# THEN
 		self.assertEqual(workedTilesBefore, 5)
 		self.assertEqual(workedTilesAfter, 4)
+
+	def test_updateEurekas(self):
+		# GIVEN
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
+
+		# WHEN
+		# CivicType.stateWorkforce
+		stateWorkforceTriggeredBefore = self.playerTrajan.civics.inspirationTriggeredFor(CivicType.stateWorkforce)
+		city.buildDistrict(DistrictType.campus, HexPoint(4, 4), self.simulation)
+		stateWorkforceTriggeredAfter = self.playerTrajan.civics.inspirationTriggeredFor(CivicType.stateWorkforce)
+
+		# CivicType.militaryTraining
+		militaryTrainingTriggeredBefore = self.playerTrajan.civics.inspirationTriggeredFor(CivicType.militaryTraining)
+		city.buildDistrict(DistrictType.encampment, HexPoint(4, 5), self.simulation)
+		militaryTrainingTriggeredAfter = self.playerTrajan.civics.inspirationTriggeredFor(CivicType.militaryTraining)
+
+		# THEN
+		self.assertFalse(stateWorkforceTriggeredBefore)
+		self.assertTrue(stateWorkforceTriggeredAfter)
+		self.assertFalse(militaryTrainingTriggeredBefore)
+		self.assertTrue(militaryTrainingTriggeredAfter)
