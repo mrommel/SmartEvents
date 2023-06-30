@@ -173,6 +173,7 @@ class Unit:
 		self.taskValue = unitType.defaultTask()
 
 		self._movesValue = unitType.moves()
+		self._canMoveImpassableCount = 0
 		self._healthPointsValue = Unit.maxHealth
 		self.deathDelay: bool = False
 		self._activityTypeValue = UnitActivityType.none
@@ -413,35 +414,69 @@ class Unit:
 		if self.isBarbarian() and not simulation.areBarbariansReleased() and tile.hasOwner():
 			return False
 
+		# other unit of same type - stacking is not allowed
+		if simulation.unitAt(point, self.unitMapType()) is not None:
+			return False
+
 		if MoveOption.attack in options:
 			if self.isOutOfAttacks(simulation):
 				return False
 
-		if self.isImpassableTile(tile):
-			return False
+		# Can't enter an enemy city until it's "defeated"
+		if tile.isCity():
+			city = simulation.cityAt(tile.point)
+			if city is not None:
+				# city still not defeated - only allow moveInto (used for attack) with attack option
+				if city.healthPoints() > 0 and MoveOption.attack not in options:
+					return False
 
-		if simulation.isEnemyVisibleAt(point, self.player):
-			return False
-
-		# other unit of same type
-		if simulation.unitAt(point, self.unitMapType()) is not None:
-			return False
+				if MoveOption.attack in options:
+					if self.domain() != UnitDomainType.land:
+						# Non land units cannot attack cities
+						return False
 
 		# settler and builder cannot enter barbarian camps
 		if tile.hasImprovement(ImprovementType.barbarianCamp) and self.unitType.unitClass() == UnitClassType.civilian:
 			return False
 
-		owner = tile.owner()
-		if not self.canEnterTerritory(owner, ignoreRightOfPassage=False,
-									  isDeclareWarMove=MoveOption.declareWar in options):
-			if not self.player.canDeclareWarTowards(owner):
-				return False
-
-			if self.player.isHuman():
-				if not MoveOption.declareWar in options:
+		if self.domain() == UnitDomainType.air:
+			if MoveOption.attack in options:
+				if not self.canRangeStrikeAt(tile.point):
 					return False
+		else:
+			# attack option is only set, if an actual attack will happen
+			if MoveOption.attack in options:
+				# trying to give an attack order to a unit that can't fight. That doesn't work!
+				if not self.canAttack():
+					return False
+
+				if self.domain() == UnitDomainType.land and tile.isWater():
+					return False
+
+				# if tile.isVisibleTo(self.player):
+				# 	defender = simulation.bestDefenderAt(tile.point, self.player)
+				#
+				# 	if defender is not None:
+				# 		# Check below is not made when capturing civilians
+				# 		if defender.combatStrength
+				#
+				# if simulation.isEnemyVisibleAt(point, self.player) and MoveOption.attack not in options:
+				#   return False
 			else:
-				return False
+				owner = tile.owner()
+				if not self.canEnterTerritory(owner, ignoreRightOfPassage=False, isDeclareWarMove=MoveOption.declareWar in options):
+					if not self.player.canDeclareWarTowards(owner):
+						return False
+
+					if self.player.isHuman():
+						if not MoveOption.declareWar in options:
+							return False
+					else:
+						return False
+
+		# Make sure we can enter the terrain.  Somewhat expensive call, so we do this last.
+		if not self.canEnterTerrain(tile, options):
+			return False
 
 		return True
 
@@ -2196,8 +2231,19 @@ class Unit:
 
 		return False
 
-	def canEnterTerrain(self, tile):
-		return not self.isImpassableTile(tile)
+	def canEnterTerrain(self, tile, options=None) -> bool:
+		if options is None:
+			options = [MoveOption]
+
+		if tile.isImpassable(self.movementType()):
+			if not self._canMoveImpassableCount > 0:
+				return False
+
+		if self.domain() == UnitDomainType.immobile:
+			return False
+
+		# return not self.isImpassableTile(tile)
+		return True
 
 	def turnsToReach(self, point: HexPoint, simulation) -> int:
 		pathFinderDataSource = simulation.unitAwarePathfinderDataSource(self)
@@ -2514,4 +2560,24 @@ class Unit:
 				result.append(CombatModifier(2 * supportUnitCount, "Support Bonus"))
 
 		return result
+
+	def canAttack(self) -> bool:
+		return self.canAttackWithMove() or self.canAttackRanged()
+
+	def canAttackWithMove(self) -> bool:
+		if self.isCombatUnit():
+			return True
+
+		return False
+
+	def canAttackRanged(self) -> bool:
+		""" Does this unit have a ranged attack?"""
+		return self.range() > 0 and self.baseRangedCombatStrength() > 0
+
+	def range(self) -> int:
+		return self.unitType.range()
+
+	def baseRangedCombatStrength(self):
+		return self.unitType.rangedStrength()
+
 	

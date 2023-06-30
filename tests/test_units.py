@@ -13,11 +13,11 @@ from game.states.dedications import DedicationType
 from game.states.victories import VictoryType
 from game.types import TechType
 from game.unitMissions import UnitMission
-from game.unitTypes import UnitType, UnitMissionType
+from game.unitTypes import UnitType, UnitMissionType, MoveOption
 from game.units import Unit
 from map.base import HexPoint
 from map.improvements import ImprovementType
-from map.types import TerrainType
+from map.types import TerrainType, FeatureType
 from tests.testBasics import MapModelMock, UserInterfaceMock
 
 
@@ -395,21 +395,24 @@ class TestUnit(unittest.TestCase):
 		barbarianWarrior = Unit(HexPoint(5, 4), UnitType.barbarianWarrior, self.playerBarbarian)
 		self.simulation.tileAt(HexPoint(5, 3)).setOwner(self.playerTrajan)
 		warrior = Unit(HexPoint(5, 5), UnitType.warrior, self.playerTrajan)
+		self.simulation.tileAt(HexPoint(4, 5)).setFeature(FeatureType.mountKilimanjaro)
 
 		# WHEN
 		barbarianWarriorCanMoveInto = barbarianWarrior.canMoveInto(HexPoint(5, 3), [], self.simulation)
 		warriorCanMoveInto = warrior.canMoveInto(HexPoint(5, 6), [], self.simulation)
 
-		# if MoveOption.attack in options:
-		#   if self.isOutOfAttacks(simulation):
-		#     return False
-		#
-		# if self.isImpassableTile(tile):
-		#   return False
-		#
+		warrior._numberOfAttacksMade = 1  # out of attacks
+		warriorCanMoveIntoOutOfAttacks = warrior.canMoveInto(HexPoint(5, 6), [MoveOption.attack], self.simulation)
+		warrior._numberOfAttacksMade = 0
+
+		# impassable
+		warriorCanMoveIntoImpassable = warrior.canMoveInto(HexPoint(4, 5), [], self.simulation)
+
 		# if simulation.isEnemyVisibleAt(point, self.player):
 		#   return False
 
 		# THEN
 		self.assertFalse(barbarianWarriorCanMoveInto)
 		self.assertTrue(warriorCanMoveInto)
+		self.assertFalse(warriorCanMoveIntoOutOfAttacks)
+		self.assertFalse(warriorCanMoveIntoImpassable)

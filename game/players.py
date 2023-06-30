@@ -1660,3 +1660,6 @@ class Player:
 				loopUnit.finishMoves()
 
 		return
+
+	def addPlotAt(self, point: HexPoint):
+		self._area.addPoint(point)

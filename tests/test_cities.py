@@ -12,7 +12,7 @@ from game.players import Player
 from game.states.victories import VictoryType
 from game.unitTypes import UnitType
 from map.base import HexPoint
-from map.types import TerrainType
+from map.types import TerrainType, FeatureType
 from tests.testBasics import MapModelMock, UserInterfaceMock
 
 
@@ -283,9 +283,7 @@ class TestCityCitizens(unittest.TestCase):
 		# self.assertEqual(city.cityCitizens.isForcedWorkedAt(HexPoint(4, 4)), True)
 		# self.assertEqual(city.cityCitizens.isForcedWorkedAt(HexPoint(4, 6)), False)
 
-
-class TestCity(unittest.TestCase):
-	def test_turn(self):
+	def test_canWorkAt(self):
 		# GIVEN
 		mapModel = MapModelMock(24, 20, TerrainType.grass)
 		simulation = GameModel(
@@ -307,39 +305,117 @@ class TestCity(unittest.TestCase):
 		# city
 		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
 		city.initialize(simulation)
+		simulation.addCity(city)
+
+		otherCity = City('Potsdam', HexPoint(9, 5), isCapital=False, player=playerTrajan)
+		otherCity.initialize(simulation)
+		simulation.addCity(otherCity)
+		otherCity.doAcquirePlot(HexPoint(7, 4), simulation)
+
+		simulation.tileAt(HexPoint(4, 5)).setTerrain(TerrainType.sea)
+		simulation.tileAt(HexPoint(4, 5)).setFeature(FeatureType.ice)
 
 		# WHEN
-		city.doTurn(simulation=simulation)
+		canWorkAtOtherCity = city.cityCitizens.canWorkAt(HexPoint(7, 4), simulation)
+		canWorkAtIce = city.cityCitizens.canWorkAt(HexPoint(4, 5), simulation)
+		canWorkAtValid = city.cityCitizens.canWorkAt(HexPoint(5, 4), simulation)
+
+		# THEN
+		self.assertFalse(canWorkAtOtherCity)
+		self.assertFalse(canWorkAtIce)
+		self.assertTrue(canWorkAtValid)
+
+	def test_forceWorkingPlotAt(self):
+		# GIVEN
+		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[],
+			map=mapModel
+		)
+
+		# add UI
+		simulation.userInterface = UserInterfaceMock()
+
+		# players
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+		simulation.players.append(playerTrajan)
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
+		city.initialize(simulation)
+		city.setPopulation(2, True, simulation)
+		city.cityCitizens.doReallocateCitizens(simulation)
+		simulation.addCity(city)
+
+		simulation.tileAt(HexPoint(5, 3)).setTerrain(TerrainType.tundra)
+
+		# WHEN
+		city.cityCitizens.forceWorkingPlotAt(HexPoint(5, 4), force=True, simulation=simulation)
+		forceWorkingPlotAtValid = city.cityCitizens.isForcedWorkedAt(HexPoint(5, 4))
+
+		city.cityCitizens.forceWorkingPlotAt(HexPoint(5, 4), force=True, simulation=simulation)
+		city.cityCitizens.forceWorkingPlotAt(HexPoint(4, 4), force=True, simulation=simulation)
+		city.cityCitizens.forceWorkingPlotAt(HexPoint(5, 3), force=True, simulation=simulation)
+		forceWorkingPlotAtRemoved = city.cityCitizens.isForcedWorkedAt(HexPoint(5, 3))
+
+		# THEN
+		self.assertTrue(forceWorkingPlotAtValid)
+		self.assertFalse(forceWorkingPlotAtRemoved)
+
+
+class TestCity(unittest.TestCase):
+
+	def setUp(self) -> None:
+		self.mapModel = MapModelMock(24, 20, TerrainType.grass)
+
+		# players
+		playerBarbarian = Player(LeaderType.barbar, human=False)
+		playerBarbarian.initialize()
+
+		self.playerAlexander = Player(LeaderType.alexander, human=False)
+		self.playerAlexander.initialize()
+
+		self.playerTrajan = Player(LeaderType.trajan, human=True)
+		self.playerTrajan.initialize()
+
+		self.simulation = GameModel(
+			victoryTypes=[VictoryType.domination],
+			handicap=HandicapType.chieftain,
+			turnsElapsed=0,
+			players=[playerBarbarian, self.playerAlexander, self.playerTrajan],
+			map=self.mapModel
+		)
+
+		# add UI
+		self.simulation.userInterface = UserInterfaceMock()
+
+	def test_turn(self):
+		# GIVEN
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerAlexander)
+		city.initialize(self.simulation)
+
+		# WHEN
+		city.doTurn(simulation=self.simulation)
 
 		# THEN
 		self.assertNotEqual(city.currentBuildableItem(), None)
 
 	def test_bestLocationForDistrict(self):
 		# GIVEN
-		mapModel = MapModelMock(24, 20, TerrainType.grass)
-		simulation = GameModel(
-			victoryTypes=[VictoryType.domination],
-			handicap=HandicapType.chieftain,
-			turnsElapsed=0,
-			players=[],
-			map=mapModel
-		)
-
-		# add UI
-		simulation.userInterface = UserInterfaceMock()
-
-		# players
-		playerTrajan = Player(LeaderType.trajan, human=False)
-		playerTrajan.initialize()
-		simulation.players.append(playerTrajan)
 
 		# city
-		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
-		city.initialize(simulation)
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
 
 		# WHEN
-		campusLocation = city.bestLocationForDistrict(DistrictType.campus, simulation=simulation)
-		harborLocation = city.bestLocationForDistrict(DistrictType.harbor, simulation=simulation)
+		campusLocation = city.bestLocationForDistrict(DistrictType.campus, simulation=self.simulation)
+		harborLocation = city.bestLocationForDistrict(DistrictType.harbor, simulation=self.simulation)
 
 		# THEN
 		self.assertIn(campusLocation, [HexPoint(4, 5), HexPoint(5, 5), HexPoint(4, 4)])
@@ -347,26 +423,10 @@ class TestCity(unittest.TestCase):
 
 	def test_healthPoints(self):
 		# GIVEN
-		mapModel = MapModelMock(24, 20, TerrainType.grass)
-		simulation = GameModel(
-			victoryTypes=[VictoryType.domination],
-			handicap=HandicapType.chieftain,
-			turnsElapsed=0,
-			players=[],
-			map=mapModel
-		)
-
-		# add UI
-		simulation.userInterface = UserInterfaceMock()
-
-		# players
-		playerTrajan = Player(LeaderType.trajan, human=False)
-		playerTrajan.initialize()
-		simulation.players.append(playerTrajan)
 
 		# city
-		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerTrajan)
-		city.initialize(simulation)
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
 
 		# WHEN
 		healthPointsNormal = city.maxHealthPoints()
@@ -376,3 +436,22 @@ class TestCity(unittest.TestCase):
 		# THEN
 		self.assertEqual(healthPointsNormal, 200)
 		self.assertEqual(healthPointsAncientWalls, 300)
+
+	def test_cityShrink(self):
+		# GIVEN
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
+		city.setPopulation(4, False, self.simulation)
+		city.cityCitizens.doReallocateCitizens(self.simulation)
+
+		# WHEN
+		workedTilesBefore = len(city.cityCitizens.workedTileLocations())
+		city.setPopulation(3, True, self.simulation)
+		city.cityCitizens.doValidateForcedWorkingPlots(self.simulation)
+		workedTilesAfter = len(city.cityCitizens.workedTileLocations())
+
+		# THEN
+		self.assertEqual(workedTilesBefore, 5)
+		self.assertEqual(workedTilesAfter, 4)

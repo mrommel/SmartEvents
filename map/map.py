@@ -179,15 +179,15 @@ class Tile:
 	def setResource(self, resource: ResourceType):
 		self._resourceValue = resource
 
-	def isImpassable(self, movement_ype):
+	def isImpassable(self, movement_type):
 		# start with terrain cost
-		terrain_cost = self._terrainValue.movementCost(movement_ype)
+		terrain_cost = self._terrainValue.movementCost(movement_type)
 
 		if terrain_cost == UnitMovementType.max:
 			return True
 
 		if self._featureValue != FeatureType.none:
-			feature_cost = self._featureValue.movementCost(movement_ype)
+			feature_cost = self._featureValue.movementCost(movement_type)
 
 			if feature_cost == UnitMovementType.max:
 				return True

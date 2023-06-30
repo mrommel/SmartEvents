@@ -1505,6 +1505,8 @@ class City:
 				# FIXME
 				tile.setOwner(player=self.player)
 				tile.setWorkingCity(city=self)
+
+				self.player.addPlotAt(pointToClaim)
 			except Exception as e:
 				raise Exception(f'cant set owner: {e}')
 
