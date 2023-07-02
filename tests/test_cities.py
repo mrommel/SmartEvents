@@ -9,11 +9,13 @@ from game.districts import DistrictType
 from game.game import GameModel
 from game.governments import GovernmentType
 from game.players import Player
+from game.religions import PantheonType
 from game.states.victories import VictoryType
 from game.types import CivicType, TechType
 from game.unitTypes import UnitType
 from game.wonders import WonderType
 from map.base import HexPoint
+from map.improvements import ImprovementType
 from map.types import TerrainType, FeatureType
 from tests.testBasics import MapModelMock, UserInterfaceMock
 
@@ -620,3 +622,100 @@ class TestCity(unittest.TestCase):
 		# THEN
 		self.assertEqual(productionNormal, 3.0)
 		self.assertEqual(productionHueyTeocalli, 4.0)
+
+	def test_productionPerTurn_chichenItza(self):
+		# GIVEN
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+
+		self.simulation.tileAt(HexPoint(5, 5)).setFeature(FeatureType.rainforest)
+		city.cityCitizens.setWorkedAt(HexPoint(5, 5), worked=True)
+
+		# WHEN
+		productionNormal = city.productionPerTurn(self.simulation)
+
+		# chichenItza: +2 Culture and +1 Production to all Rainforest tiles for this city.
+		city.buildWonder(WonderType.chichenItza, HexPoint(6, 5), self.simulation)
+
+		productionChichenItza = city.productionPerTurn(self.simulation)
+
+		# THEN
+		self.assertEqual(productionNormal, 3.0)
+		self.assertEqual(productionChichenItza, 4.0)
+
+	def test_productionPerTurn_etemenanki_in_another_city(self):
+		# GIVEN
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+
+		city2 = City('Potsdam', HexPoint(10, 5), isCapital=False, player=self.playerTrajan)
+		city2.initialize(self.simulation)
+		self.simulation.addCity(city2)
+
+		self.simulation.tileAt(HexPoint(5, 5)).setFeature(FeatureType.marsh)
+		city.cityCitizens.setWorkedAt(HexPoint(5, 5), worked=True)
+
+		# WHEN
+		productionNormal = city.productionPerTurn(self.simulation)
+
+		# player has etemenanki: +2 Science and +1 Production to all Marsh tiles in your empire.
+		city2.buildWonder(WonderType.etemenanki, HexPoint(6, 5), self.simulation)
+
+		productionEtemenanki = city.productionPerTurn(self.simulation)
+
+		# THEN
+		self.assertEqual(productionNormal, 3.0)
+		self.assertEqual(productionEtemenanki, 4.0)
+
+	def test_productionPerTurn_etemenanki(self):
+		# GIVEN
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+
+		self.simulation.tileAt(HexPoint(5, 5)).setFeature(FeatureType.floodplains)
+		city.cityCitizens.setWorkedAt(HexPoint(5, 5), worked=True)
+
+		# WHEN
+		productionNormal = city.productionPerTurn(self.simulation)
+
+		# etemenanki: +1 Science and +1 Production on all Floodplains tiles in this city.
+		city.buildWonder(WonderType.etemenanki, HexPoint(6, 5), self.simulation)
+
+		productionEtemenanki = city.productionPerTurn(self.simulation)
+
+		# THEN
+		self.assertEqual(productionNormal, 3.0)
+		self.assertEqual(productionEtemenanki, 4.0)
+
+	def test_productionPerTurn_godOfTheSea(self):
+		# GIVEN
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+
+		self.simulation.tileAt(HexPoint(5, 5)).setTerrain(TerrainType.shore)
+		self.simulation.tileAt(HexPoint(5, 5)).setImprovement(ImprovementType.fishingBoats)
+		city.cityCitizens.setWorkedAt(HexPoint(5, 5), worked=True)
+
+		# WHEN
+		productionNormal = city.productionPerTurn(self.simulation)
+
+		# godOfTheSea - 1 Production from Fishing Boats.
+		self.playerTrajan.religion.foundPantheon(PantheonType.godOfTheSea, self.simulation)
+
+		productionEtemenanki = city.productionPerTurn(self.simulation)
+
+		# THEN
+		self.assertEqual(productionNormal, 3.0)
+		self.assertEqual(productionEtemenanki, 4.0)

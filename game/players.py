@@ -225,11 +225,45 @@ class PlayerReligion:
 	def __init__(self, player):
 		self.player = player
 
+		self._pantheon: PantheonType = PantheonType.none
+
 	def pantheon(self) -> PantheonType:
-		return PantheonType.none
+		return self._pantheon
 
 	def currentReligion(self) -> ReligionType:
 		return ReligionType.none
+
+	def foundPantheon(self, pantheon: PantheonType, simulation):
+		# moments
+		numPantheonsFounded: int = simulation.numberOfPantheonsFounded()
+		if numPantheonsFounded == 0:
+			self.player.addMoment(MomentType.worldsFirstPantheon, simulation=simulation)
+		else:
+			self.player.addMoment(MomentType.pantheonFounded, pantheon=pantheon, simulation=simulation)
+
+		if not self.player.civics.inspirationTriggeredFor(CivicType.mysticism):
+			self.player.civics.triggerInspirationFor(CivicType.mysticism, simulation)
+
+		if pantheon == PantheonType.fertilityRites:
+			# When chosen receive a Builder in your[Capital] capital.
+			capital = self.player.capitalCity(simulation)
+			if capital is not None:
+				builder = Unit(capital.location, UnitType.builder, self.player)
+				simulation.addUnit(builder)
+				simulation.userInterface.showUnit(builder, capital.location)
+
+		if pantheon == PantheonType.religiousSettlements:
+			# When chosen receive a Settler in your capital.
+			capital = self.player.capitalCity(simulation)
+			if capital is not None:
+				settler = Unit(capital.location, UnitType.settler, self.player)
+				simulation.addUnit(settler)
+				simulation.userInterface.showUnit(settler, capital.location)
+
+		self._pantheon = pantheon
+
+		# inform other players, that a pantheon was founded
+		simulation.sendGossip(GossipType.pantheonCreated, pantheonName=pantheon.name(), player=self.player)
 
 
 class PlayerTourism:

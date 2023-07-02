@@ -141,7 +141,7 @@ class MomentType(ExtendedEnum):
 	# worldsFirstMartianColonyEstablished  # 110
 	# worldsFirstNationalPark  # 111
 	worldsFirstNeighborhood = 'worldsFirstNeighborhood'  # 112
-	# worldsFirstPantheon  # 113
+	worldsFirstPantheon = 'worldsFirstPantheon'  # 113
 	# worldsFirstReligion  # 114
 	# worldsFirstReligionToAdoptAllBeliefs  # 115
 	# worldsFirstSatelliteInOrbit  # 116
@@ -299,6 +299,15 @@ class MomentType(ExtendedEnum):
 				instanceText=None,
 				category=MomentCategory.major,
 				eraScore=3
+			)
+		elif self == MomentType.worldsFirstPantheon:
+			# 113
+			return MomentTypeData(
+				name="World's First Pantheon",
+				summary="Your people are the first in the world to adopt Belief in a Pantheon.",
+				instanceText=None,
+				category=MomentCategory.major,
+				eraScore=2
 			)
 		# ...
 		elif self == MomentType.worldsFirstTechnologyOfNewEra:
@@ -595,6 +604,9 @@ class Moment:
 			return True
 
 		# 113 - worldsFirstPantheon
+		elif self.momentType == MomentType.worldsFirstPantheon and other.momentType == MomentType.worldsFirstPantheon:
+			return True
+
 		# 114 - worldsFirstReligion
 		# 115 - worldsFirstReligionToAdoptAllBeliefs
 		# 116 - worldsFirstSatelliteInOrbit

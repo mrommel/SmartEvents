@@ -12,6 +12,7 @@ from game.moments import MomentType
 from game.notifications import NotificationType
 from game.players import Player
 from game.promotions import UnitPromotionType
+from game.religions import PantheonType
 from game.states.builds import BuildType
 from game.states.gossips import GossipType
 from game.states.ui import ScreenType
@@ -623,7 +624,7 @@ class GameModel:
 
 	def sendGossip(self, gossipType: GossipType, cityName: Optional[str] = None, tech: Optional[TechType] = None,
 	               player=None, leader: Optional[LeaderType] = None, building: Optional[BuildingType] = None,
-	               district: Optional[DistrictType] = None):
+	               district: Optional[DistrictType] = None, pantheonName: Optional[str] = None):
 		print('send gossip is not implemented')  # fixme
 		pass
 
@@ -794,3 +795,11 @@ class GameModel:
 
 	def earliestBarbarianReleaseTurn(self) -> int:
 		return self.handicap.earliestBarbarianReleaseTurn()
+
+	def numberOfPantheonsFounded(self) -> int:
+		numPantheons = 0
+		for player in self.players:
+			if player.religion.pantheon() != PantheonType.none:
+				numPantheons += 1
+
+		return numPantheons

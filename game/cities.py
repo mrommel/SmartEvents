@@ -1976,8 +1976,7 @@ class City:
 					productionValue += 1.0
 
 				# etemenanki - +2 Science and +1 Production to all Marsh tiles in your empire.
-				if workedTile.hasFeature(FeatureType.marsh) and self.player.hasWonder(WonderType.etemenanki,
-																					  simulation):
+				if workedTile.hasFeature(FeatureType.marsh) and self.player.hasWonder(WonderType.etemenanki, simulation):
 					productionValue += 1.0
 
 				# etemenanki - +1 Science and +1 Production on all Floodplains tiles in this city.
