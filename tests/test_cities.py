@@ -547,3 +547,76 @@ class TestCity(unittest.TestCase):
 		# THEN
 		self.assertEqual(productionNormal, 3.0)
 		self.assertEqual(productionPetra, 4.0)
+
+	def test_productionPerTurn_motherRussia(self):
+		# GIVEN
+		playerPeter = Player(LeaderType.peter, cityState=None, human=False)
+		playerPeter.initialize()
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=playerPeter)
+		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+
+		self.simulation.tileAt(HexPoint(5, 5)).setTerrain(TerrainType.tundra)
+
+		# WHEN
+		productionNormal = city.productionPerTurn(self.simulation)
+
+		# motherRussia - Tundra tiles provide + 1 Faith and +1 Production, in addition to their usual yields.
+		city.cityCitizens.setWorkedAt(HexPoint(5, 5), worked=True)
+		productionMotherRussia = city.productionPerTurn(self.simulation)
+
+		# THEN
+		self.assertEqual(productionNormal, 3.0)
+		self.assertEqual(productionMotherRussia, 4.0)
+
+	def test_productionPerTurn_stBasilsCathedral(self):
+		# GIVEN
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+
+		self.simulation.tileAt(HexPoint(5, 5)).setTerrain(TerrainType.tundra)
+		city.cityCitizens.setWorkedAt(HexPoint(5, 5), worked=True)
+
+		# WHEN
+		productionNormal = city.productionPerTurn(self.simulation)
+
+		# stBasilsCathedral - +1 Food, +1 Production, and +1 Culture on all Tundra tiles for this city.
+		city.buildWonder(WonderType.stBasilsCathedral, HexPoint(6, 5), self.simulation)
+
+		productionStBasilsCathedral = city.productionPerTurn(self.simulation)
+
+		# THEN
+		self.assertEqual(productionNormal, 3.0)
+		self.assertEqual(productionStBasilsCathedral, 4.0)
+
+	def test_productionPerTurn_hueyTeocalli_in_another_city(self):
+		# GIVEN
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+
+		city2 = City('Potsdam', HexPoint(10, 5), isCapital=False, player=self.playerTrajan)
+		city2.initialize(self.simulation)
+		self.simulation.addCity(city2)
+
+		self.simulation.tileAt(HexPoint(5, 5)).setFeature(FeatureType.lake)
+		city.cityCitizens.setWorkedAt(HexPoint(5, 5), worked=True)
+
+		# WHEN
+		productionNormal = city.productionPerTurn(self.simulation)
+
+		# player has hueyTeocalli: +1 Food and +1 Production for each Lake tile in your empire.
+		city2.buildWonder(WonderType.hueyTeocalli, HexPoint(9, 5), self.simulation)
+
+		productionHueyTeocalli = city.productionPerTurn(self.simulation)
+
+		# THEN
+		self.assertEqual(productionNormal, 3.0)
+		self.assertEqual(productionHueyTeocalli, 4.0)

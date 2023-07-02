@@ -1740,7 +1740,7 @@ class City:
 		else:
 			humanPlayer = simulation.humanPlayer()
 			# inform human about foreign wonder built
-			if self.player.hasMet(humanPlayer):
+			if self.player.hasMetWith(humanPlayer):
 				# human known this player
 				humanPlayer.notifications.addNotification(NotificationType.wonderBuilt, wonder=wonderType, civilization=self.player.leader.civilization())
 			else:

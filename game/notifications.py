@@ -1,8 +1,9 @@
 from typing import Optional
 
 from game.cityStates import CityStateType
-from game.civilizations import LeaderType
+from game.civilizations import LeaderType, CivilizationType
 from game.moments import MomentType
+from game.wonders import WonderType
 from map.base import HexPoint
 from core.base import ExtendedEnum, InvalidEnumError
 
@@ -270,7 +271,8 @@ class Notification:
 	def __init__(self, notificationType: NotificationType, city=None, player=None,
 	             momentType: Optional[MomentType] = None, cityState: Optional[CityStateType] = None,
 	             first: Optional[bool] = None, location: Optional[HexPoint] = None, cityName: Optional[str] = None,
-	             leader: Optional[LeaderType] = None):
+	             leader: Optional[LeaderType] = None, wonder: Optional[WonderType] = None,
+	             civilization: Optional[CivilizationType] = None):
 		self.notificationType = notificationType
 		self.city = city
 		self.player = player
@@ -280,6 +282,8 @@ class Notification:
 		self.location = location
 		self.cityName = cityName
 		self.leader = leader
+		self.wonder = wonder
+		self.civilization = civilization
 
 
 class Notifications:
@@ -296,7 +300,8 @@ class Notifications:
 	def addNotification(self, notificationType: NotificationType, momentType: Optional[MomentType] = None,
 	                    cityState: Optional[CityStateType] = None, cityName: Optional[str] = None,
 	                    first: Optional[bool] = None, location: Optional[HexPoint] = None,
-	                    leader: Optional[LeaderType] = None):
+	                    leader: Optional[LeaderType] = None, wonder: Optional[WonderType] = None,
+	                    civilization: Optional[CivilizationType] = None):
 		notification = Notification(
 			notificationType=notificationType,
 			momentType=momentType,
@@ -304,7 +309,9 @@ class Notifications:
 			first=first,
 			cityName=cityName,
 			location=location,
-			leader=leader
+			leader=leader,
+			wonder=wonder,
+			civilization=civilization
 		)
 		self.notifications.append(notification)
 

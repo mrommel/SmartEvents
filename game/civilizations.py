@@ -36,6 +36,7 @@ class CivilizationData:
 
 class CivilizationType(ExtendedEnum):
 	none = 'none'
+	unmet = 'unmet'
 	barbarian = 'barbarian'
 	free = 'free'
 	cityState = 'cityState'
@@ -43,6 +44,7 @@ class CivilizationType(ExtendedEnum):
 	greek = 'greek'
 	roman = 'roman'
 	english = 'english'
+	russian = 'russian'
 
 	def name(self) -> str:
 		return self._data().name
@@ -77,6 +79,12 @@ class CivilizationType(ExtendedEnum):
 		elif self == CivilizationType.free:
 			return CivilizationData(
 				name='Free',
+				ability=CivilizationAbility.none,
+				cityNames=[]
+			)
+		elif self == CivilizationType.unmet:
+			return CivilizationData(
+				name='Unmet',
 				ability=CivilizationAbility.none,
 				cityNames=[]
 			)
@@ -183,7 +191,7 @@ class CivilizationType(ExtendedEnum):
 					"TXT_KEY_CITY_NAME_BLACKBURN",
 					"TXT_KEY_CITY_NAME_WOLVERHAMPTON",
 					"TXT_KEY_CITY_NAME_BATH",
-					"TXT_KEY_CITY_NAME_CONVENTRY",
+					"TXT_KEY_CITY_NAME_COVENTRY",
 					"TXT_KEY_CITY_NAME_EXETER",
 					"TXT_KEY_CITY_NAME_LINCOLN",
 					"TXT_KEY_CITY_NAME_CANTERBURY",
@@ -197,6 +205,48 @@ class CivilizationType(ExtendedEnum):
 					"TXT_KEY_CITY_NAME_WARWICK"
 				]
 			)
+		elif self == CivilizationType.russian:
+			# https://civilization.fandom.com/wiki/Russian_(Civ6)
+			# cities taken from here: https://civilization.fandom.com/wiki/Russian_cities_(Civ6)
+			return CivilizationData(
+				name='TXT_KEY_CIVILIZATION_RUSSIAN',
+				ability=CivilizationAbility.motherRussia,
+				cityNames=[
+					"TXT_KEY_CITY_NAME_ST_PETERSBURG",
+					"TXT_KEY_CITY_NAME_MOSCOW",
+					"TXT_KEY_CITY_NAME_NOVGOROD",
+					"TXT_KEY_CITY_NAME_KAZAN",
+					"TXT_KEY_CITY_NAME_ASTRAKHAN",
+					"TXT_KEY_CITY_NAME_YAROSLAVL",
+					"TXT_KEY_CITY_NAME_SMOLENSK",
+					"TXT_KEY_CITY_NAME_VORONEZH",
+					"TXT_KEY_CITY_NAME_TULA",
+					"TXT_KEY_CITY_NAME_SOLIKAMSK",
+					"TXT_KEY_CITY_NAME_TVER",
+					"TXT_KEY_CITY_NAME_NIZHNIY_NOVGOROD",
+					"TXT_KEY_CITY_NAME_ARKHANGELSK",
+					"TXT_KEY_CITY_NAME_VOLOGDA",
+					"TXT_KEY_CITY_NAME_OLONETS",
+					"TXT_KEY_CITY_NAME_SARATOV",
+					"TXT_KEY_CITY_NAME_TAMBOV",
+					"TXT_KEY_CITY_NAME_PSKOV",
+					"TXT_KEY_CITY_NAME_KRASNOYARSK",
+					"TXT_KEY_CITY_NAME_IRKUTSK",
+					"TXT_KEY_CITY_NAME_YEKATERINBURG",
+					"TXT_KEY_CITY_NAME_ROSTOV",
+					"TXT_KEY_CITY_NAME_BRYANSK",
+					"TXT_KEY_CITY_NAME_YAKUTSK",
+					"TXT_KEY_CITY_NAME_STARAYA_RUSSA",
+					"TXT_KEY_CITY_NAME_PERM",
+					"TXT_KEY_CITY_NAME_PETROZAVODSK",
+					"TXT_KEY_CITY_NAME_OKHOTSK",
+					"TXT_KEY_CITY_NAME_KOSTROMA",
+					"TXT_KEY_CITY_NAME_NIZHNEKOLYMSK",
+					"TXT_KEY_CITY_NAME_SERGIYEV_POSAD",
+					"TXT_KEY_CITY_NAME_OMSK"
+				]
+			)
+
 
 		raise InvalidEnumError(self)
 
@@ -213,7 +263,8 @@ class WeightedCivilizationList(WeightedBaseList):
 
 class LeaderAbility(ExtendedEnum):
 	none = 'none'
-	trajansColumn = 'trajansColumn'
+	trajansColumn = 'trajansColumn'  # trajan, roman
+	westernizer = 'westernizer'  # peter, russian
 
 
 class LeaderTypeData:
@@ -234,6 +285,7 @@ class LeaderType(ExtendedEnum):
 	alexander = 'alexander'
 	trajan = 'trajan'
 	victoria = 'victoria'
+	peter = 'peter'
 
 	def name(self) -> str:
 		return self._data().name
@@ -356,6 +408,15 @@ class LeaderType(ExtendedEnum):
 					Flavor(FlavorType.wonder, 5)
 				],
 				traits=[Trait(TraitType.boldness, 4)]
+			)
+		elif self == LeaderType.peter:
+			return LeaderTypeData(
+				name='Peter',
+				civilization=CivilizationType.russian,
+				ability=LeaderAbility.westernizer,
+				flavors=[
+				],
+				traits=[Trait(TraitType.boldness, 6)]
 			)
 
 		elif self == LeaderType.none:
