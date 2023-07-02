@@ -272,7 +272,7 @@ class Notification:
 	             momentType: Optional[MomentType] = None, cityState: Optional[CityStateType] = None,
 	             first: Optional[bool] = None, location: Optional[HexPoint] = None, cityName: Optional[str] = None,
 	             leader: Optional[LeaderType] = None, wonder: Optional[WonderType] = None,
-	             civilization: Optional[CivilizationType] = None):
+	             civilization: Optional[CivilizationType] = None, continentName: Optional[str] = None):
 		self.notificationType = notificationType
 		self.city = city
 		self.player = player
@@ -284,6 +284,7 @@ class Notification:
 		self.leader = leader
 		self.wonder = wonder
 		self.civilization = civilization
+		self.continentName = continentName
 
 
 class Notifications:
@@ -301,7 +302,7 @@ class Notifications:
 	                    cityState: Optional[CityStateType] = None, cityName: Optional[str] = None,
 	                    first: Optional[bool] = None, location: Optional[HexPoint] = None,
 	                    leader: Optional[LeaderType] = None, wonder: Optional[WonderType] = None,
-	                    civilization: Optional[CivilizationType] = None):
+	                    civilization: Optional[CivilizationType] = None, continentName: Optional[str] = None):
 		notification = Notification(
 			notificationType=notificationType,
 			momentType=momentType,
@@ -311,7 +312,8 @@ class Notifications:
 			location=location,
 			leader=leader,
 			wonder=wonder,
-			civilization=civilization
+			civilization=civilization,
+			continentName=continentName
 		)
 		self.notifications.append(notification)
 

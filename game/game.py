@@ -29,7 +29,7 @@ from map.map import MapModel, Tile, ContinentType, Continent
 from map.path_finding.finder import AStarPathfinder, MoveTypeIgnoreUnitsOptions, \
 	MoveTypeIgnoreUnitsPathfinderDataSource, InfluencePathfinderDataSource
 from map.path_finding.path import HexPath
-from map.types import FeatureType, Tutorials, MapSize, UnitMovementType
+from map.types import FeatureType, Tutorials, UnitMovementType
 
 
 class GameModel:
@@ -73,7 +73,7 @@ class GameModel:
 
 		self.players.append(humanPlayer)
 
-	# add ai players
+	# add AI players
 	# for aiLeader in selectedLeaders:
 	#	aiPlayer = Player(aiLeader, human=False, barbarian=False)
 	#	self.players.append(aiPlayer)
@@ -569,7 +569,7 @@ class GameModel:
 			tile.sightBy(player)
 			player.checkWorldCircumnavigated(self)
 			if continent is not None:
-				self.checkDiscoveredContinent(continent, areaPoint, player)
+				self.checkDiscoveredContinent(continent.continentType, areaPoint, player)
 
 			self.userInterface.refreshTile(tile)
 
@@ -728,11 +728,11 @@ class GameModel:
 			if continent is not None:
 				# only trigger discovery of new continent, if player has at least one city
 				# this prevents first city triggering this
-				if continent.points.count > 8 and len(self.citiesOf(player)) > 0:
-					player.addMoment(MomentType.firstDiscoveryOfANewContinent, self)
+				if len(continent.points) > 8 and len(self.citiesOf(player)) > 0:
+					player.addMoment(MomentType.firstDiscoveryOfANewContinent, simulation=self)
 
 					if player.isHuman():
-						player.notifications().addNotification(
+						player.notifications.addNotification(
 							NotificationType.continentDiscovered,
 							location=location,
 							continentName=continentType.name()
@@ -745,7 +745,7 @@ class GameModel:
 	def markContinentDiscovered(self, continentType: ContinentType):
 		self.discoveredContinents.append(continentType)
 
-	def calculateInfluenceDistance  (self, cityLocation: HexPoint, targetDestination: HexPoint, limit: int) -> int:
+	def calculateInfluenceDistance(self, cityLocation: HexPoint, targetDestination: HexPoint, limit: int) -> int:
 		if cityLocation == targetDestination:
 			return 0
 

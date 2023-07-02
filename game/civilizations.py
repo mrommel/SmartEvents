@@ -45,6 +45,7 @@ class CivilizationType(ExtendedEnum):
 	roman = 'roman'
 	english = 'english'
 	russian = 'russian'
+	macedonian = 'macedonian'
 
 	def name(self) -> str:
 		return self._data().name
@@ -246,7 +247,21 @@ class CivilizationType(ExtendedEnum):
 					"TXT_KEY_CITY_NAME_OMSK"
 				]
 			)
-
+		elif self == CivilizationType.macedonian:
+			# https://civilization.fandom.com/wiki/Macedonian_(Civ6)
+			# cities taken from here: https://civilization.fandom.com/wiki/Macedonian_cities_(Civ6)
+			return CivilizationData(
+				name='TXT_KEY_CIVILIZATION_MACEDONIAN',
+				ability=CivilizationAbility.none,
+				cityNames=[
+					"TXT_KEY_CITY_NAME_AIGAI",
+					"TXT_KEY_CITY_NAME_ALEXANDRIA",
+					"TXT_KEY_CITY_NAME_METHONE",
+					"TXT_KEY_CITY_NAME_CHALKIDIKI",
+					"TXT_KEY_CITY_NAME_DION",
+					"TXT_KEY_CITY_NAME_ALEXANDROPOULI"
+				]
+			)
 
 		raise InvalidEnumError(self)
 
@@ -264,7 +279,9 @@ class WeightedCivilizationList(WeightedBaseList):
 class LeaderAbility(ExtendedEnum):
 	none = 'none'
 	trajansColumn = 'trajansColumn'  # trajan, roman
-	westernizer = 'westernizer'  # peter, russian
+	theGrandEmbassy = 'theGrandEmbassy'  # peter, russian
+	paxBritannica = 'paxBritannica'  # victoria, english
+	toTheWorldsEnd = 'toTheWorldsEnd'  # alexander, macedonian
 
 
 class LeaderTypeData:
@@ -322,7 +339,7 @@ class LeaderType(ExtendedEnum):
 		if self == LeaderType.alexander:
 			return LeaderTypeData(
 				name='Alexander',
-				civilization=CivilizationType.greek,
+				civilization=CivilizationType.macedonian,
 				ability=LeaderAbility.none,
 				flavors=[
 					Flavor(FlavorType.cityDefense, 5),
@@ -413,7 +430,7 @@ class LeaderType(ExtendedEnum):
 			return LeaderTypeData(
 				name='Peter',
 				civilization=CivilizationType.russian,
-				ability=LeaderAbility.westernizer,
+				ability=LeaderAbility.theGrandEmbassy,
 				flavors=[
 				],
 				traits=[Trait(TraitType.boldness, 6)]

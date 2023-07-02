@@ -299,7 +299,7 @@ class TestMoments(unittest.TestCase):
 		player.doFirstContactWith(otherPlayer, simulation)
 
 		# THEN
-		self.assertEqual(player.hasMoment(MomentType.metNewCivilization, civilization=CivilizationType.greek), True)
+		self.assertEqual(player.hasMoment(MomentType.metNewCivilization, civilization=CivilizationType.macedonian), True)
 		self.assertEqual(player.hasMoment(MomentType.metNewCivilization, civilization=CivilizationType.english), False)
 
 	# firstTier1Government(governmentType: GovernmentType)  # 56

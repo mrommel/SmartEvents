@@ -55,7 +55,7 @@ class MomentType(ExtendedEnum):
 	# firstCorporationCreated 24
 	# firstCorporationInTheWorld 25
 	# firstDiscoveryOfANaturalWonder  # 26
-	# firstDiscoveryOfANewContinent  # 27
+	firstDiscoveryOfANewContinent = 'firstDiscoveryOfANewContinent'  # 27
 	# firstEncampmentFullyDeveloped  # 28
 	# firstEnormousCity(cityName: String)  # 29
 	# firstEntertainmentComplexFullyDeveloped  # 30
@@ -181,7 +181,7 @@ class MomentType(ExtendedEnum):
 	# oldGreatPersonRecruited  # 223
 	oldWorldWonderCompleted = 'oldWorldWonderCompleted' # 224
 	# operationIvyCompleted 225
-	# pantheonFounded(pantheon: PantheonType)  # 226
+	pantheonFounded = 'pantheonFounded'  # (pantheon: PantheonType)  # 226
 	# riverFloodMitigated  # 227 #
 	# satelliteLaunchedIntoOrbit  # 228
 	snowCity = 'snowCity'  # (cityName: String)  # 229
@@ -250,7 +250,10 @@ class MomentType(ExtendedEnum):
 				category=MomentCategory.major,
 				eraScore=2
 			)
-		# ...
+		# cityStatesFirstSuzerain(cityState: CityStateType)  # 8
+		# cityStateArmyLeviedNearEnemy 9
+		# climateChangePhase 10
+		# darkAgeBegins  # 11
 		elif self == MomentType.discoveryOfANaturalWonder:  # (naturalWonder: FeatureType)
 			# 12
 			return MomentTypeData(
@@ -260,7 +263,47 @@ class MomentType(ExtendedEnum):
 				category=MomentCategory.major,
 				eraScore=1
 			)
-		# ..
+		# emergencyCompletedSuccessfully 13
+		# emergencySuccessfullyDefended 14
+		# enemyCityAdoptsOurReligion  # 15
+		# enemyCityStatePacified 16
+		# enemyFormationDefeated  # 17
+		# enemyVeteranDefeated  # 18
+		# exoplanetExpeditionLaunched  # 19
+		# finalForeignCityTaken  # 20
+		# firstAerodromeFullyDeveloped  # 21
+		# firstBustlingCity(cityName: String)  # 22
+		# firstCivicOfNewEra(eraType: EraType)  # 23
+		# firstCorporationCreated 24
+		# firstCorporationInTheWorld 25
+		# firstDiscoveryOfANaturalWonder  # 26
+		elif self == MomentType.firstDiscoveryOfANewContinent:
+			# 27
+			return MomentTypeData(
+				name="First Discovery of a New Continent",
+				summary="Our civilization's explorers are the first in the world to find this continent.",
+				instanceText=None,
+				category=MomentCategory.major,
+				eraScore=4
+			)
+		# firstEncampmentFullyDeveloped  # 28
+		# firstEnormousCity(cityName: String)  # 29
+		# firstEntertainmentComplexFullyDeveloped  # 30
+		# firstGiganticCity(cityName: String)  # 31
+		# firstGreenImprovement 32
+		# firstGreenImprovementInWorld 33
+		# firstHeroClaimed 34
+		# firstHeroDeparted 35
+		# firstHeroRecalled 36
+		# firstImprovementAfterNaturalDisaster 37
+		# firstIndustryCreated 38
+		# firstIndustryInTheWorld 39
+		# firstLargeCity(cityName: String)  # 40
+		# firstLuxuryResourceMonopoly 41
+		# firstLuxuryResourceMonopolyInTheWorld 42
+		# firstMasterSpyEarned 43
+		# firstMountainTunnel 44
+		# firstMountainTunnelInTheWorld 45
 		if self == MomentType.firstNeighborhoodCompleted:
 			# 46
 			return MomentTypeData(
@@ -381,7 +424,16 @@ class MomentType(ExtendedEnum):
 				eraScore=3
 			)
 		# operationIvyCompleted 225
-		# pantheonFounded(pantheon: PantheonType)  # 226
+		elif self == MomentType.pantheonFounded:  # (pantheon: PantheonType)
+			# 226
+			return MomentTypeData(
+				name="Pantheon Founded",
+				summary="Your people adopt the Belief ##pantheon.name()## in a Pantheon.",
+				instanceText=None,
+				category=MomentCategory.minor,
+				eraScore=1,
+				maxEra=EraType.classical
+			)
 		# riverFloodMitigated  # 227 #
 		# satelliteLaunchedIntoOrbit  # 228 #
 		elif self == MomentType.snowCity:  # (cityName: String)
@@ -506,6 +558,9 @@ class Moment:
 		# 25 - firstCorporationInTheWorld
 		# 26 - firstDiscoveryOfANaturalWonder
 		# 27 - firstDiscoveryOfANewContinent
+		elif self.momentType == MomentType.firstDiscoveryOfANewContinent and other.momentType == MomentType.firstDiscoveryOfANewContinent:
+			return True
+
 		# 28 - firstEncampmentFullyDeveloped
 		# 29 - firstEnormousCity(cityName: String)
 		# 30 - firstEntertainmentComplexFullyDeveloped
@@ -681,7 +736,10 @@ class Moment:
 			return self.cityName == other.cityName and other.cityName is not None
 
 		# 234 - unitPromotedWithDistinction
+
 		# 235 - wonderCompleted(wonder: WonderType)
+		elif self.momentType == MomentType.wonderCompleted and other.momentType == MomentType.wonderCompleted:
+			return self.wonder == other.wonder
 
 		# hidden
 		# 300 - shipSunk

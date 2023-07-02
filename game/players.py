@@ -29,7 +29,7 @@ from game.states.ui import ScreenType
 from game.tradeRoutes import TradeRoutes, TradeRoute, TradeRoutePathfinderDataSource
 from game.types import EraType, TechType, CivicType
 from game.unitTypes import UnitMissionType, UnitTaskType, UnitMapType, UnitType
-from game.units import Army
+from game.units import Army, Unit
 from game.wonders import WonderType
 from map import constants
 from map.base import HexPoint, HexArea

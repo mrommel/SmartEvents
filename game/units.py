@@ -28,7 +28,7 @@ from map.improvements import ImprovementType
 from map.path_finding.finder import AStarPathfinder
 from map.path_finding.path import HexPath
 from map.types import UnitDomainType, YieldType, ResourceType, RouteType, FeatureType, TerrainType
-from core.base import ExtendedEnum
+from core.base import ExtendedEnum, WeightedBaseList
 
 
 class UnitAutomationType(ExtendedEnum):
@@ -190,6 +190,7 @@ class Unit:
 		self._fortifyValue = 0
 		self._isEmbarkedValue = False
 
+		self._experienceValue = 0.0
 		self._experienceModifierValue = 0.0
 		self._promotions = UnitPromotions(self)
 		self._tacticalMoveValue = TacticalMoveType.none
@@ -441,7 +442,7 @@ class Unit:
 
 		if self.domain() == UnitDomainType.air:
 			if MoveOption.attack in options:
-				if not self.canRangeStrikeAt(tile.point):
+				if not self.canRangeStrikeAt(tile.point, needWar=True, simulation=simulation):
 					return False
 		else:
 			# attack option is only set, if an actual attack will happen
@@ -773,6 +774,41 @@ class Unit:
 	def experienceLevel(self) -> int:
 		# fixme
 		return 1
+
+	def changeExperienceBy(self, experienceDelta: int, simulation):
+		government = self.player.government
+		experienceModifier: float = 1.0
+
+		# Doubles experience for recon units.
+		if government.hasCard(PolicyCardType.survey) and self.unitClassType() == UnitClassType.recon:
+			experienceModifier += 1.0
+
+		# +20 % Unit Experience.
+		if government.currentGovernment() == GovernmentType.oligarchy:
+			experienceModifier += 0.2
+
+		# afterActionReports - All units gain +50% combat experience.
+		if government.hasCard(PolicyCardType.afterActionReports):
+			experienceModifier += 0.5
+
+		# eliteForces - +100 % combat experience for all units.
+		# BUT: +2 Gold to maintain each military unit.
+		if government.hasCard(PolicyCardType.eliteForces):
+			experienceModifier += 1.0
+
+		self._experienceValue += int(float(experienceDelta) * experienceModifier)
+
+		level = self.experienceLevel()
+
+		# promotion message
+		if len(self._promotions.gainedPromotions()) < (level - 1):
+			if self.player.isHuman():
+				self.player.notifications.addNotification(NotificationType.unitPromotion, location=self.location)
+			else:
+				promotion = self.choosePromotion()
+				self._promotions.earnPromotion(promotion)
+
+		return
 
 	def activityType(self) -> UnitActivityType:
 		return self._activityTypeValue
@@ -2167,12 +2203,12 @@ class Unit:
 
 	def baseMoves(self, domain: UnitDomainType = UnitDomainType.none, simulation=None) -> int:
 		"""
-	    Get the base movement points for the unit.
+		Get the base movement points for the unit.
 
-	    @param domain:     - If NO_DOMAIN, this will use the units current domain.
-		    This can give different results based on whether the unit is currently embarked or not.
-		    Passing in DOMAIN_SEA will return the units baseMoves as if it were already embarked.
-		    Passing in DOMAIN_LAND will return the units baseMoves as if it were on land, even if it is currently embarked.
+		@param domain:     - If NO_DOMAIN, this will use the units current domain.
+			This can give different results based on whether the unit is currently embarked or not.
+			Passing in DOMAIN_SEA will return the units baseMoves as if it were already embarked.
+			Passing in DOMAIN_LAND will return the units baseMoves as if it were on land, even if it is currently embarked.
 
 		@param simulation:
 		@return:
@@ -2580,4 +2616,79 @@ class Unit:
 	def baseRangedCombatStrength(self):
 		return self.unitType.rangedStrength()
 
+	def canRangeStrikeAt(self, point: HexPoint, needWar: bool, simulation) -> bool:
+		playerDiplomacy = self.player.diplomacyAI
+
+		units = simulation.unitsAt(point)
+		city = simulation.cityAt(point)
+
+		if city is not None:
+			# If it is a City, only consider those we're at war with
+			# If you're already at war don't need to check
+			if not playerDiplomacy.isAtWarWith(city.player):
+				if needWar:
+					return False
+				else:
+					# Don't need to be at war with this City's owner(yet)
+					if not playerDiplomacy.canDeclareWarTo(city.player):
+						return False
+		elif len(units) > 0:
+			# If it's NOT a city, see if there are any units to aim for
+			if needWar:
+				foundUnit = False
+
+				for unit in units:
+					# if there is a unit that we are not at war with - we cant attack
+					if not playerDiplomacy.isAtWarWith(unit.player)and not unit.player.isBarbarian():
+						return False
+
+					foundUnit = True
+
+				# no unit no attack
+				if not foundUnit:
+					return False
+			else:
+				# We don't need to be at war (yet) with a Unit here, so let's try to find one
+				foundUnit = False
+
+				for unit in units:
+					# Make sure it's a valid Team
+					if playerDiplomacy.isAtWarWith(unit.player) or playerDiplomacy.canDeclareWarTo(unit.player):
+						foundUnit = True
+						break
+
+				# no unit no attack
+				if not foundUnit:
+					return False
+		else:
+			# nothing here - no unit no city
+			return False
+
+		return True
+
+	def choosePromotion(self) -> UnitPromotionType:
+		possiblePromotions = self._promotions.possiblePromotions()
+
+		# only one promotion possible - take this
+		if len(possiblePromotions) == 1:
+			return possiblePromotions[0]
+
+		# get best promotion
+		weightedPromotion = WeightedBaseList()
+		for promotion in possiblePromotions:
+			weightedPromotion.addWeight(float(self.valueOfPromotion(promotion)), promotion)
+
+		bestPromotion = weightedPromotion.chooseLargest()
+		if bestPromotion is not None:
+			return bestPromotion
+
+		raise Exception(f'Could find promotion for unit {self.name()}')
+
+	def valueOfPromotion(self, promotion):
+		val = 0
+
+		for flavorType in list(FlavorType):
+			val += self.player.personalAndGrandStrategyFlavor(flavorType) * promotion.flavor(flavorType)
+
+		return val
 	
