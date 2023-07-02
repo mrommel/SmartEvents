@@ -10,7 +10,7 @@ from game.game import GameModel
 from game.governments import GovernmentType
 from game.players import Player
 from game.states.victories import VictoryType
-from game.types import CivicType
+from game.types import CivicType, TechType
 from game.unitTypes import UnitType
 from map.base import HexPoint
 from map.types import TerrainType, FeatureType
@@ -463,6 +463,11 @@ class TestCity(unittest.TestCase):
 		# city
 		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
 		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+
+		city2 = City('Berlin', HexPoint(10, 5), isCapital=False, player=self.playerTrajan)
+		city2.initialize(self.simulation)
+		self.simulation.addCity(city2)
 
 		# WHEN
 		# CivicType.stateWorkforce
@@ -475,8 +480,45 @@ class TestCity(unittest.TestCase):
 		city.buildDistrict(DistrictType.encampment, HexPoint(4, 5), self.simulation)
 		militaryTrainingTriggeredAfter = self.playerTrajan.civics.inspirationTriggeredFor(CivicType.militaryTraining)
 
+		# CivicType.recordedHistory
+		recordedHistoryTriggeredBefore = self.playerTrajan.civics.inspirationTriggeredFor(CivicType.recordedHistory)
+		city2.buildDistrict(DistrictType.campus, HexPoint(11, 5), self.simulation)
+		recordedHistoryTriggeredAfter = self.playerTrajan.civics.inspirationTriggeredFor(CivicType.recordedHistory)
+
+		# TechType.construction
+		constructionTriggeredBefore = self.playerTrajan.techs.eurekaTriggeredFor(TechType.construction)
+		city.buildBuilding(BuildingType.waterMill, self.simulation)
+		constructionTriggeredAfter = self.playerTrajan.techs.eurekaTriggeredFor(TechType.construction)
+
+		# TechType.engineering
+		engineeringTriggeredBefore = self.playerTrajan.techs.eurekaTriggeredFor(TechType.engineering)
+		city.buildBuilding(BuildingType.ancientWalls, self.simulation)
+		engineeringTriggeredAfter = self.playerTrajan.techs.eurekaTriggeredFor(TechType.engineering)
+
+		# TechType.shipBuilding
+		shipBuildingTriggeredBefore = self.playerTrajan.techs.eurekaTriggeredFor(TechType.shipBuilding)
+		city.trainUnit(UnitType.galley, self.simulation)
+		city.trainUnit(UnitType.galley, self.simulation)
+		shipBuildingTriggeredAfter = self.playerTrajan.techs.eurekaTriggeredFor(TechType.shipBuilding)
+
+		# TechType.economics
+		economicsTriggeredBefore = self.playerTrajan.techs.eurekaTriggeredFor(TechType.economics)
+		city.buildBuilding(BuildingType.bank, self.simulation)
+		city2.buildBuilding(BuildingType.bank, self.simulation)
+		economicsTriggeredAfter = self.playerTrajan.techs.eurekaTriggeredFor(TechType.economics)
+
 		# THEN
 		self.assertFalse(stateWorkforceTriggeredBefore)
 		self.assertTrue(stateWorkforceTriggeredAfter)
 		self.assertFalse(militaryTrainingTriggeredBefore)
 		self.assertTrue(militaryTrainingTriggeredAfter)
+		self.assertFalse(recordedHistoryTriggeredBefore)
+		self.assertTrue(recordedHistoryTriggeredAfter)
+		self.assertFalse(constructionTriggeredBefore)
+		self.assertTrue(constructionTriggeredAfter)
+		self.assertFalse(engineeringTriggeredBefore)
+		self.assertTrue(engineeringTriggeredAfter)
+		self.assertFalse(shipBuildingTriggeredBefore)
+		self.assertTrue(shipBuildingTriggeredAfter)
+		self.assertFalse(economicsTriggeredBefore)
+		self.assertTrue(economicsTriggeredAfter)
