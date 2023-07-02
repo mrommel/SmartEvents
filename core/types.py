@@ -65,3 +65,6 @@ class EraType(ExtendedEnum):
 
 	def __le__(self, other):
 		return self.value() <= other.value()
+
+	def __lt__(self, other):
+		return self.value() < other.value()

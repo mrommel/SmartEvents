@@ -489,10 +489,13 @@ class Tile:
 	def district(self) -> DistrictType:
 		return self._districtValue
 
+	def buildWonder(self, wonder: WonderType):
+		self._wonderValue = wonder
+
 	def setOwner(self, player):
 		self._owner = player
 
-	def	workingCity(self):
+	def workingCity(self):
 		return self._workingCity
 
 	def setWorkingCity(self, city):

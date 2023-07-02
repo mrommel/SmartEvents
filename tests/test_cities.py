@@ -12,6 +12,7 @@ from game.players import Player
 from game.states.victories import VictoryType
 from game.types import CivicType, TechType
 from game.unitTypes import UnitType
+from game.wonders import WonderType
 from map.base import HexPoint
 from map.types import TerrainType, FeatureType
 from tests.testBasics import MapModelMock, UserInterfaceMock
@@ -522,3 +523,27 @@ class TestCity(unittest.TestCase):
 		self.assertTrue(shipBuildingTriggeredAfter)
 		self.assertFalse(economicsTriggeredBefore)
 		self.assertTrue(economicsTriggeredAfter)
+
+	def test_productionPerTurn_petra(self):
+		# GIVEN
+
+		# city
+		city = City('Berlin', HexPoint(4, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.simulation)
+		self.simulation.addCity(city)
+
+		self.simulation.tileAt(HexPoint(5, 5)).setTerrain(TerrainType.desert)
+
+		# WHEN
+		productionNormal = city.productionPerTurn(self.simulation)
+
+		# city has petra: +2 Food, +2 Gold, and +1 Production
+		# on all Desert tiles for this city(non - Floodplains).
+		city.buildWonder(WonderType.petra, HexPoint(5, 5), self.simulation)
+
+		city.cityCitizens.setWorkedAt(HexPoint(5, 5), worked=True)
+		productionPetra = city.productionPerTurn(self.simulation)
+
+		# THEN
+		self.assertEqual(productionNormal, 3.0)
+		self.assertEqual(productionPetra, 4.0)

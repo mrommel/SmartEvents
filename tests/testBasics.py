@@ -2,6 +2,7 @@ from typing import Optional, Union
 
 from game.states.ui import Interface, PopupType
 from game.types import TechType, CivicType
+from game.wonders import WonderType
 from map.map import MapModel
 from map.types import TerrainType, MapSize
 
@@ -43,7 +44,6 @@ class UserInterfaceMock(Interface):
 	def refreshTile(self, tile):
 		pass
 
-	def showPopup(self, popup: PopupType, tech: Optional[TechType] = None, civic: Optional[CivicType] = None):
+	def showPopup(self, popup: PopupType, tech: Optional[TechType] = None, civic: Optional[CivicType] = None,
+	              wonder: Optional[WonderType] = None):
 		pass
-
-

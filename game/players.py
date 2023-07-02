@@ -1084,7 +1084,7 @@ class Player:
 	def addMoment(self, momentType: MomentType, civilization: Optional[CivilizationType] = None,
 				  cityName: Optional[str] = None, continentName: Optional[str] = None,
 				  eraType: Optional[EraType] = None, naturalWonder: Optional[FeatureType] = None,
-				  dedication: Optional[DedicationType] = None,
+				  dedication: Optional[DedicationType] = None, wonder: Optional[WonderType] = None,
 				  simulation = None):
 		if simulation is None:
 			raise Exception('simulation not provided')
@@ -1094,7 +1094,7 @@ class Player:
 
 		self.moments.addMomentOf(momentType, simulation.currentTurn, civilization=civilization,
 								 cityName=cityName, continentName=continentName, eraType=eraType,
-								 naturalWonder=naturalWonder, dedication=dedication)
+								 naturalWonder=naturalWonder, dedication=dedication, wonder=wonder)
 
 		# also show a notification, when the moment brings era score
 		if momentType.eraScore() > 0:

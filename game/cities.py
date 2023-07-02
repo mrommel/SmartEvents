@@ -1,6 +1,6 @@
 import random
 import sys
-from typing import Optional
+from typing import Optional, Union
 
 from game.ai.cities import CityStrategyAI, CitySpecializationType, BuildableItem, BuildableType
 from game.ai.economicStrategies import EconomicStrategyType
@@ -26,6 +26,7 @@ from game.specialists import SpecialistType
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
+from game.states.ui import PopupType
 from game.types import EraType, TechType, CivicType, CityFocusType
 from game.unitTypes import UnitType, UnitClassType
 from game.units import Unit
@@ -35,7 +36,7 @@ from map.base import HexPoint
 from map.improvements import ImprovementType
 from map.types import YieldList, FeatureType, TerrainType, ResourceUsage, ResourceType, YieldType, Yields, RouteType, \
 	UnitDomainType, Tutorials
-from core.base import ExtendedEnum, WeightedBaseList
+from core.base import WeightedBaseList
 
 
 class CityDistrictItem:
@@ -185,8 +186,19 @@ class CityWonders:
 	def __init__(self, city):
 		self.city = city
 
+		self._wonders: [WonderType] = []
+
 	def hasWonder(self, wonder: WonderType) -> bool:
-		return False
+		return wonder in self._wonders
+
+	def buildWonder(self, wonder: WonderType):
+		if self.hasWonder(wonder):
+			return
+
+		self._wonders.append(wonder)
+
+	def numberOfBuiltWonders(self) -> int:
+		return len(self._wonders)
 
 
 class CityProjects:
@@ -1257,15 +1269,26 @@ class GreatWorkPlaceInBuilding:
 		self.used = used
 
 
+class GreatWorkPlaceInWonder:
+	def __init__(self, wonder: WonderType, slot: GreatWorkSlotType, used: bool = False):
+		self.wonder = wonder
+		self.slot = slot
+		self.used = used
+
+
 class CityGreatWorks:
 	def __init__(self, city):
 		self.city = city
 
 		self._placesInBuildings = []
 
-	def addPlacesFor(self, building: BuildingType):
-		for slot in building.slotsForGreatWork():
-			self._placesInBuildings.append(GreatWorkPlaceInBuilding(building, slot))
+	def addPlacesFor(self, building_or_wonder: Union[BuildingType, WonderType]):
+		if isinstance(building_or_wonder, BuildingType):
+			for slot in building_or_wonder.slotsForGreatWork():
+				self._placesInBuildings.append(GreatWorkPlaceInBuilding(building_or_wonder, slot))
+		elif isinstance(building_or_wonder, WonderType):
+			for slot in building_or_wonder.slotsForGreatWork():
+				self._placesInBuildings.append(GreatWorkPlaceInWonder(building_or_wonder, slot))
 
 
 class CityReligion:
@@ -1565,7 +1588,7 @@ class City:
 			# for quest in self.player.ownQuests(simulation):
 			# 	if case .constructDistrict(type: let district) = quest.type {
 			# 		if district == districtType && player.leader == quest.leader {
-			# 			let cityStatePlayer = gameModel.cityStatePlayer(for: quest.cityState)
+			# 			let cityStatePlayer = simulation.cityStatePlayer(for: quest.cityState)
 			# 			cityStatePlayer?.fulfillQuest(by: player.leader,simulation)
 
 			if district == DistrictType.preserve:
@@ -1601,6 +1624,130 @@ class City:
 				simulation.userInterface.refreshTile(tile)
 		except Exception as e:
 			raise Exception(f'cant build district: already build => {e}')
+
+	def buildWonder(self, wonderType: WonderType, location: HexPoint, simulation):
+
+		tile = simulation.tileAt(location)
+		techs = self.player.techs
+		civics = self.player.civics
+
+		self.wonders.buildWonder(wonderType)
+		self.greatWorks.addPlacesFor(wonderType)
+
+		# moments
+		self.player.addMoment(MomentType.wonderCompleted, wonder=wonderType, simulation=simulation)
+
+		if wonderType.era() < self.player.currentEra():
+			self.player.addMoment(MomentType.oldWorldWonderCompleted, simulation)
+
+		simulation.buildWonder(wonderType)
+
+		# pyramids
+		if wonderType == WonderType.pyramids:
+			# Grants a free Builder.
+			extraBuilder = Unit(self.location, UnitType.builder, self.player)
+			simulation.addUnit(extraBuilder)
+			simulation.userInterface.showUnit(extraBuilder, self.location)
+
+		# stonehenge
+		if wonderType == WonderType.stonehenge:
+			# Grants a free Great Prophet.
+			extraProphet = Unit(self.location, UnitType.prophet, self.player)
+			simulation.addUnit(extraProphet)
+			simulation.userInterface.showUnit(extraProphet, self.location)
+
+		# great library
+		if wonderType == WonderType.greatLibrary:
+			# Receive boosts to all Ancient and Classical era technologies.
+			for techType in list(TechType):
+				if techType.era() == EraType.ancient or techType.era() == EraType.classical:
+					if not techs.eurekaTriggeredFor(techType):
+						techs.triggerEurekaFor(techType, simulation)
+
+		# angkorWat
+		if wonderType == WonderType.angkorWat:
+			# +1 Citizen Population in all current cities when built.
+			for city in simulation.citiesOf(self.player):
+				city.changePopulationBy(1, reassignCitizen=True, simulation=simulation)
+
+		# colossus
+		if wonderType == WonderType.colossus:
+			# Grants a Trader unit.
+			extraTrader = Unit(self.location, UnitType.trader, self.player)
+			simulation.addUnit(extraTrader)
+			simulation.userInterface.showUnit(extraTrader, self.location)
+
+		# statueOfZeus
+		if wonderType == WonderType.statueOfZeus:
+			# Grants 3 Spearmen, 3 Archers, and a Battering Ram.
+			for _ in range(3):
+				extraSpearmen = Unit(self.location, UnitType.spearman, self.player)
+				simulation.addUnit(extraSpearmen)
+				extraSpearmen.jumpToNearestValidPlotWithin(radius=2, simulation=simulation)
+				simulation.userInterface.showUnit(extraSpearmen, self.location)
+
+				extraArcher = Unit(self.location, UnitType.archer, self.player)
+				simulation.addUnit(extraArcher)
+				extraArcher.jumpToNearestValidPlotWithin(radius=2, simulation=simulation)
+				simulation.userInterface.showUnit(extraArcher, self.location)
+
+			extraBatteringRam = Unit(self.location, UnitType.batteringRam, self.player)
+			simulation.addUnit(extraBatteringRam)
+			extraBatteringRam.jumpToNearestValidPlotWithin(radius=2, simulation=simulation)
+			simulation.userInterface.showUnit(extraBatteringRam, self.location)
+
+		# mahabodhiTemple
+		if wonderType == WonderType.mahabodhiTemple:
+			# Grants 2 Apostles.
+			for _ in range(2):
+				extraApostle = Unit(self.location, UnitType.apostle, self.player)
+				simulation.addUnit(extraApostle)
+				simulation.userInterface.showUnit(extraApostle)
+
+		# apadana
+		if self.wonders.hasWonder(WonderType.apadana):
+			# +2 Envoys when you build a wonder, including Apadana, in this city.
+			self.player.changeUnassignedEnvoysBy(2)
+
+			# notify player about envoy to spend
+			if self.player.isHuman():
+				self.player.notifications.addNotification(NotificationType.envoyEarned)
+
+		# kilwaKisiwani
+		if wonderType == WonderType.kilwaKisiwani:
+			# +3 Envoys when built.
+			self.player.changeUnassignedEnvoysBy(3)
+
+			# notify player about envoy to spend
+			if self.player.isHuman():
+				self.player.notifications.addNotification(NotificationType.envoyEarned)
+
+		if wonderType == WonderType.casaDeContratacion:
+			# Gain 3 Governor Titles.
+			self.player.addGovernorTitle()
+			self.player.addGovernorTitle()
+			self.player.addGovernorTitle()
+
+		# inspiration: Drama and Poetry - Build a Wonder.
+		if not civics.inspirationTriggeredFor(CivicType.dramaAndPoetry):
+			civics.triggerInspirationFor(CivicType.dramaAndPoetry, simulation)
+
+		tile.buildWonder(wonderType)
+		simulation.userInterface.refreshTile(tile)
+
+		if self.player.isHuman():
+			simulation.userInterface.showPopup(PopupType.wonderBuilt, wonder=wonderType)
+		else:
+			humanPlayer = simulation.humanPlayer()
+			# inform human about foreign wonder built
+			if self.player.hasMet(humanPlayer):
+				# human known this player
+				humanPlayer.notifications.addNotification(NotificationType.wonderBuilt, wonder=wonderType, civilization=self.player.leader.civilization())
+			else:
+				# human has not met this player
+				humanPlayer.notifications.addNotification(NotificationType.wonderBuilt, wonder=wonderType, civilization=CivilizationType.unmet)
+
+		return
 
 	def population(self) -> int:
 		return int(self._populationValue)
@@ -2434,8 +2581,8 @@ class City:
 		# 	if int(self._populationValue) >= Tutorials.ImprovingCityTutorial.citizenInCityNeeded and
 		# 		buildings.has(building: .granary) and buildings.has(building:.monument):
 		#
-		# 		gameModel.userInterface?.finish(tutorial:.improvingCity)
-		# 		gameModel.enable(tutorial:.none)
+		# 		simulation.userInterface?.finish(tutorial:.improvingCity)
+		# 		simulation.enable(tutorial:.none)
 
 		# moments
 		# if self._populationValue > 10:
@@ -2443,7 +2590,7 @@ class City:
 		# 		not player.hasMoment(of:.worldsFirstBustlingCity(cityName: self.name)):
 		#
 		#         # check if someone else already had a bustling city
-		# 		if gameModel.anyHasMoment(of: .worldsFirstBustlingCity(cityName: self.name)):
+		# 		if simulation.anyHasMoment(of: .worldsFirstBustlingCity(cityName: self.name)):
 		# 			player.addMoment(of:.firstBustlingCity(cityName: self.name),simulation)
 		# 		else:
 		# 			player.addMoment(of:.worldsFirstBustlingCity(cityName: self.name),simulation)
@@ -2453,7 +2600,7 @@ class City:
 		# 		not player.hasMoment(of:.worldsFirstLargeCity(cityName: self.name)):
 		#
 		#         #  check if someone else already had a bustling city
-		# 		if gameModel.anyHasMoment(of: .worldsFirstLargeCity(cityName: self.name)):
+		# 		if simulation.anyHasMoment(of: .worldsFirstLargeCity(cityName: self.name)):
 		# 			player.addMoment(of:.firstLargeCity(cityName: self.name),simulation)
 		# 		else:
 		# 			player.addMoment(of:.worldsFirstLargeCity(cityName: self.name),simulation)
@@ -2473,7 +2620,7 @@ class City:
 		# 		not player.hasMoment(of:.worldsFirstGiganticCity(cityName: self.name)):
 		#
 		#         # check if someone else already had a bustling city
-		# 		if gameModel.anyHasMoment(of: .worldsFirstGiganticCity(cityName: self.name)):
+		# 		if simulation.anyHasMoment(of: .worldsFirstGiganticCity(cityName: self.name)):
 		# 			player.addMoment(of:.firstGiganticCity(cityName: self.name),simulation)
 		# 		else:
 		# 			player.addMoment(of:.worldsFirstGiganticCity(cityName: self.name),simulation)
@@ -4381,7 +4528,7 @@ class City:
 		# for quest in self.player.ownQuests(simulation):
 		# 	if quest.type == QuestType.trainUnit(type: unitType) & & quest.leader == player.leader
 		# 	cityStatePlayer = gameModel?.cityStatePlayer(for: quest.cityState)
-		# 	cityStatePlayer?.fulfillQuest(by: player.leader, in: gameModel)
+		# 	cityStatePlayer?.fulfillQuest(by: player.leader, simulation)
 
 		return
 

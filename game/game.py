@@ -692,6 +692,9 @@ class GameModel:
 
 		return False
 
+	def buildWonder(self, wonderType: WonderType):
+		pass
+
 	def checkArchaeologySites(self):
 		pass
 

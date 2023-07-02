@@ -3,6 +3,7 @@ from typing import Optional
 from game.civilizations import CivilizationType
 from game.states.dedications import DedicationType
 from game.types import EraType
+from game.wonders import WonderType
 from map.types import FeatureType
 from core.base import ExtendedEnum, InvalidEnumError
 
@@ -178,7 +179,7 @@ class MomentType(ExtendedEnum):
 	# masterSpyEarned  # 221
 	metNewCivilization = 'metNewCivilization'  # 222
 	# oldGreatPersonRecruited  # 223
-	# oldWorldWonderCompleted  # 224
+	oldWorldWonderCompleted = 'oldWorldWonderCompleted' # 224
 	# operationIvyCompleted 225
 	# pantheonFounded(pantheon: PantheonType)  # 226
 	# riverFloodMitigated  # 227 #
@@ -189,7 +190,7 @@ class MomentType(ExtendedEnum):
 	# tribalVillageContacted  # 232
 	tundraCity = 'tundraCity'  # (cityName: String)  # 233
 	unitPromotedWithDistinction = 'firstUnitPromotedWithDistinction'  # 234
-	# wonderCompleted(wonder: WonderType)  # 235
+	wonderCompleted = 'wonderCompleted'  # (wonder: WonderType)  # 235
 
 	# hidden
 	# shipSunk  # 300 for artifacts
@@ -360,7 +361,16 @@ class MomentType(ExtendedEnum):
 				eraScore=1
 			)
 		# oldGreatPersonRecruited  # 223
-		# oldWorldWonderCompleted  # 224
+		elif self == MomentType.oldWorldWonderCompleted:
+			# 224
+			return MomentTypeData(
+				name="Old World Wonder Completed",
+				summary="A World Wonder is completed." +
+				         "Even though it belongs to a bygone era, it will still show our grandeur over other civilizations.",
+				instanceText=None,
+				category=MomentCategory.minor,
+				eraScore=3
+			)
 		# operationIvyCompleted 225
 		# pantheonFounded(pantheon: PantheonType)  # 226
 		# riverFloodMitigated  # 227 #
@@ -395,7 +405,15 @@ class MomentType(ExtendedEnum):
 				category=MomentCategory.minor,
 				eraScore=1
 			)
-		# wonderCompleted(wonder: WonderType)  # 235
+		elif self == MomentType.wonderCompleted:
+			# 235
+			return MomentTypeData(
+				name="World Wonder Completed",
+				summary="A world wonder is completed, showing our grandeur over other civilizations.",
+				instanceText=None,
+				category=MomentCategory.minor,
+				eraScore=4
+			)
 
 		# hidden
 		# shipSunk  # 300 for artifacts
@@ -417,7 +435,7 @@ class Moment:
 	def __init__(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None,
 	             cityName: Optional[str] = None, continentName: Optional[str] = None,
 	             eraType: Optional[EraType] = None, naturalWonder: [FeatureType] = None,
-	             dedication: [DedicationType] = None):
+	             dedication: [DedicationType] = None, wonder: Optional[WonderType] = None):
 		self.momentType = momentType
 		self.turn = turn
 
@@ -428,6 +446,7 @@ class Moment:
 		self.eraType = eraType
 		self.naturalWonder = naturalWonder
 		self.dedication = dedication
+		self.wonder = wonder
 
 	def __eq__(self, other):
 		if not isinstance(other, Moment):

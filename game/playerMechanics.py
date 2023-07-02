@@ -15,6 +15,7 @@ from game.states.diplomaticMessages import DiplomaticRequestState, DiplomaticReq
 from game.states.gossips import GossipType
 from game.states.ui import PopupType
 from game.types import TechType, CivicType, EraType
+from game.wonders import WonderType
 from map.types import FeatureType
 from core.base import WeightedBaseList, ExtendedEnum, InvalidEnumError
 
@@ -1607,10 +1608,10 @@ class PlayerMoments:
 	def addMomentOf(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None,
 	                cityName: Optional[str] = None, continentName: Optional[str] = None,
 	                eraType: Optional[EraType] = None, naturalWonder: [FeatureType] = None,
-	                dedication: Optional[DedicationType] = None):
+	                dedication: Optional[DedicationType] = None, wonder: Optional[WonderType] = None):
 		self._momentsArray.append(Moment(momentType, turn, civilization=civilization, cityName=cityName,
 		                                 continentName=continentName, eraType=eraType, naturalWonder=naturalWonder,
-		                                 dedication=dedication))
+		                                 dedication=dedication, wonder=wonder))
 
 		self._currentEraScore += momentType.eraScore()
 

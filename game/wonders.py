@@ -1446,3 +1446,9 @@ class WonderType(ExtendedEnum):
 				nextToFeature = True
 
 		return nextToFeature
+
+	def slotsForGreatWork(self):
+		return self._data().slots
+
+	def era(self) -> EraType:
+		return self._data().era
