@@ -228,3 +228,17 @@ class GossipType(ExtendedEnum):
 				name=_("TXT_KEY_DIPLOMACY_GOSSIP_NAME_WAR_PREPARATIONS"),
 				accessLevel=AccessLevel.topSecret
 			)
+
+
+class GossipSourceType(ExtendedEnum):
+	spy = 'spy'
+
+
+class GossipItem:
+	def __init__(self, gossipType: GossipType, turn: int, source: GossipSourceType):
+		self.gossipType = gossipType
+		self.turn = turn
+		self.source = source
+
+	def __repr__(self):
+		return f'GossipItem({self.gossipType}, {self.turn}, {self.source})'

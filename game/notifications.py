@@ -3,9 +3,11 @@ from typing import Optional
 from game.cityStates import CityStateType
 from game.civilizations import LeaderType, CivilizationType
 from game.moments import MomentType
+from game.religions import PantheonType
 from game.wonders import WonderType
 from map.base import HexPoint
 from core.base import ExtendedEnum, InvalidEnumError
+from map.improvements import ImprovementType
 
 
 class NotificationTypeData:
@@ -286,6 +288,130 @@ class Notification:
 		self.civilization = civilization
 		self.continentName = continentName
 
+		self.dismissed = False
+		self.needsBroadcasting = True
+		self.turn = -1  # which turn this event was created on
+
+	def dismiss(self, simulation):
+		self.dismissed = True
+		simulation.userInterface.removeNotification(self)
+
+	def expiredFor(self, player, simulation) -> bool:
+		if self == NotificationType.techNeeded:
+			if not player.techs.needToChooseTech():
+				# already selected a tech
+				return True
+
+			return False
+
+		elif self == NotificationType.civicNeeded:
+			if not player.civics.needToChooseCivic():
+				# already selected a civic
+				return True
+
+			return False
+
+		elif self == NotificationType.productionNeeded:
+			city = simulation.cityAt(self.location)
+
+			if city is None:
+				return True
+
+			# when the city does no longer belong to this player(revolt),
+			# it should be expired
+			if not currentPlayer.isEqualTo(city.player):
+				return True
+
+			if city.buildQueue.hasBuildable():
+				# already has something to build
+				return True
+
+			return False
+
+		elif self == NotificationType.canChangeGovernment:
+			return True
+
+		elif self == NotificationType.policiesNeeded:
+			return player.government.hasPolicyCardsFilled(simulation)
+
+		elif self == NotificationType.unitPromotion:
+			if not player.hasPromotableUnit(simulation):
+				return True
+
+			return False
+
+		elif self == NotificationType.canFoundPantheon:
+			if player.religion.pantheon() != PantheonType.none:
+				return True
+
+			return False
+
+		elif self == NotificationType.governorTitleAvailable:
+			if player.governors.numTitlesAvailable() == 0:
+				return True
+
+			return False
+
+		elif self == NotificationType.greatPersonJoined:
+			return True
+
+		elif self == NotificationType.canRecruitGreatPerson:
+			return True
+
+		elif self == NotificationType.goodyHutDiscovered:
+			tile = simulation.tileAt(self.location)
+			if not tile.hasImprovement(ImprovementType.goodyHut):
+				return True
+
+			return False
+
+		elif self == NotificationType.barbarianCampDiscovered:
+			tile = simulation.tileAt(self.location)
+			if not tile.hasImprovement(ImprovementType.barbarianCamp):
+				return True
+
+			return False
+
+		elif self == NotificationType.questCityStateFulfilled:
+			return False
+
+		elif self == NotificationType.questCityStateGiven:
+			return False
+
+		elif self == NotificationType.questCityStateObsolete:
+			return False
+
+		elif self == NotificationType.metCityState:
+			return False
+
+		elif self == NotificationType.tradeRouteCapacityIncreased:
+			return False
+
+		elif self == NotificationType.momentAdded:
+			return False
+
+		elif self == NotificationType.cityCanShoot:
+			city = simulation.cityAt(self.location)
+			if city is None:
+				return True
+
+			return city.isOutOfAttacks(simulation)
+
+		elif self == NotificationType.cityAcquired:
+			return False
+
+		elif self == NotificationType.envoyEarned:
+			return False
+
+		elif self == NotificationType.enemyInTerritory:
+			for unit in simulation.unitsAt(self.location):
+				if player.isAtWarWith(unit.player):
+					return False
+
+			return True
+
+		return False
+
 
 class Notifications:
 	def __init__(self, player):
@@ -296,7 +422,19 @@ class Notifications:
 		self.notifications.append(notification)
 
 	def cleanUp(self, simulation):
-		pass
+		"""removing notifications at the end turns"""
+		for notification in self.notifications:
+			# city growth should vanish at the end of turn ( if not already)
+			if notification.notificationType == NotificationType.cityGrowth:
+				if not notification.dismissed:
+					notification.dismiss(simulation)
+
+			# city starving too
+			if notification.notificationType == NotificationType.starving:
+				if not notification.dismissed:
+					notification.dismiss(simulation)
+
+		self.notifications = list(filter(lambda notification: not notification.dismissed, self.notifications))
 
 	def addNotification(self, notificationType: NotificationType, momentType: Optional[MomentType] = None,
 	                    cityState: Optional[CityStateType] = None, cityName: Optional[str] = None,
@@ -318,4 +456,15 @@ class Notifications:
 		self.notifications.append(notification)
 
 	def update(self, simulation):
-		pass
+		for notification in self.notifications:
+			if notification.dismissed:
+				continue
+
+			if notification.expiredFor(self.player, simulation):
+				notification.dismiss(simulation)
+			else:
+				if notification.needsBroadcasting:
+					simulation.userInterface.addNotification(notification)
+					notification.needsBroadcasting = False
+
+		return

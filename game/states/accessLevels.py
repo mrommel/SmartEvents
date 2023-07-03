@@ -13,18 +13,30 @@ class AccessLevelData:
 
 
 class AccessLevel(ExtendedEnum):
-	none = 'none'
+	none = -1, 'none'
 
-	limited = 'limited'
-	open = 'open'
-	secret = 'secret'
-	topSecret = 'topSecret'
+	limited = 0, 'limited'
+	open = 1, 'open'
+	secret = 2, 'secret'
+	topSecret = 3, 'topSecret'
+
+	def __new__(cls, value, name):
+		member = object.__new__(cls)
+		member._value = value
+		member._name = name
+		return member
 
 	def name(self) -> str:
 		return self._data().name
 
 	def increased(self):
 		return self._data().increased
+
+	def __gt__(self, other):
+		if isinstance(other, AccessLevel):
+			return self._value > other._value
+
+		return False
 
 	def _data(self) -> AccessLevelData:
 		if self == AccessLevel.none:

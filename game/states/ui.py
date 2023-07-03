@@ -45,6 +45,12 @@ class Interface:
 	def leaveCity(self, unit, point):
 		pass
 
+	def addNotification(self, notification):
+		pass
+
+	def removeNotification(self, notification):
+		pass
+
 
 class ScreenType(ExtendedEnum):
 	diplomatic = 'diplomatic'

@@ -12,7 +12,7 @@ from game.states.accessLevels import AccessLevel
 from game.states.ages import AgeType
 from game.states.dedications import DedicationType
 from game.states.diplomaticMessages import DiplomaticRequestState, DiplomaticRequestMessage, LeaderEmotionType
-from game.states.gossips import GossipType
+from game.states.gossips import GossipType, GossipItem
 from game.states.ui import PopupType
 from game.types import TechType, CivicType, EraType
 from game.wonders import WonderType
@@ -1070,6 +1070,16 @@ class DiplomaticPlayerDict:
 
 		return False
 
+	def addGossipItem(self, gossipItem: GossipItem, otherPlayer):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.gossipItems.append(gossipItem)
+		else:
+			raise Exception("not gonna happen")
+
+		return
 
 class DiplomacyAI:
 	def __init__(self, player):
@@ -1585,6 +1595,9 @@ class DiplomacyAI:
 
 	def allPlayersWithDefensivePacts(self) -> [LeaderType]:
 		return self.playerDict.allPlayersWithDefensivePacts()
+
+	def addGossipItem(self, gossipItem: GossipItem, otherPlayer):
+		self.playerDict.addGossipItem(gossipItem, otherPlayer)
 
 
 class DiplomacyRequests:

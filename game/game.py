@@ -13,8 +13,9 @@ from game.notifications import NotificationType
 from game.players import Player
 from game.promotions import UnitPromotionType
 from game.religions import PantheonType
+from game.states.accessLevels import AccessLevel
 from game.states.builds import BuildType
-from game.states.gossips import GossipType
+from game.states.gossips import GossipType, GossipSourceType, GossipItem
 from game.states.ui import ScreenType
 from game.states.victories import VictoryType
 from game.types import TechType, EraType, CivicType
@@ -623,10 +624,38 @@ class GameModel:
 		return numPlayerCities >= (numNextBestPlayersCities + 3)
 
 	def sendGossip(self, gossipType: GossipType, cityName: Optional[str] = None, tech: Optional[TechType] = None,
-	               player=None, leader: Optional[LeaderType] = None, building: Optional[BuildingType] = None,
-	               district: Optional[DistrictType] = None, pantheonName: Optional[str] = None):
-		print('send gossip is not implemented')  # fixme
-		pass
+	               leader: Optional[LeaderType] = None, building: Optional[BuildingType] = None,
+	               district: Optional[DistrictType] = None, pantheonName: Optional[str] = None, player=None):
+		if player is None:
+			raise Exception('player must not be none')
+
+		humanPlayer = self.humanPlayer()
+
+		if humanPlayer is None:
+			# no human player in this setup - so nothing to report
+			return
+
+		humanPlayerDiplomacyAI = humanPlayer.diplomacyAI
+
+		#  when the gossip event is triggered by human, don't send
+		if humanPlayer.isEqualTo(player):
+			return
+
+		# only send gossip to human player, if he has met player
+		if not humanPlayer.hasMetWith(player):
+			return
+
+		accessLevel: AccessLevel = humanPlayerDiplomacyAI.accessLevelTowards(player)
+
+		# check that this information is accessible to the human player
+		if gossipType.accessLevel() > accessLevel:
+			return
+
+		gossipSource: GossipSourceType = GossipSourceType.spy  # todo
+		gossipItem = GossipItem(gossipType, turn=self.currentTurn, source=gossipSource)
+		humanPlayerDiplomacyAI.addGossipItem(gossipItem, player)
+
+		return
 
 	def visibleEnemyAt(self, location: HexPoint, player, unitMapType: UnitMapType = UnitMapType.combat) -> Optional[
 		Unit]:
