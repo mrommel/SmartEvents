@@ -2,6 +2,7 @@ from typing import Optional
 
 from game.ai.barbarians import BarbarianAI
 from game.ai.religions import Religions
+from game.ai.tactics import TacticalAnalysisMap
 from game.baseTypes import HandicapType, GameState
 from game.buildings import BuildingType
 from game.cities import City
@@ -44,6 +45,7 @@ class GameModel:
 		self._map = map
 		self.userInterface = None
 		self._gameStateValue = GameState.on
+		self._tacticalAnalysisMap = TacticalAnalysisMap(Size(map.width, map.height))
 
 		# game ai
 		self.barbarianAI = BarbarianAI()
@@ -506,8 +508,10 @@ class GameModel:
 		return next((player for player in self.players if player.isAlive() and player.isActive()), None)
 
 	def updateTacticalAnalysisMap(self, player):
-		# fixme
-		pass
+		self._tacticalAnalysisMap.refreshFor(player, self)
+
+	def tacticalAnalysisMap(self) -> TacticalAnalysisMap:
+		return self._tacticalAnalysisMap
 
 	def sightAt(self, location: HexPoint, sight: int, unit=None, player=None):
 		if player is None:

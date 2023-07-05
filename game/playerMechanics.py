@@ -1,7 +1,9 @@
 import random
+import sys
 from functools import reduce
 from typing import Optional
 
+from core.base import WeightedBaseList, ExtendedEnum, InvalidEnumError
 from game.ai.baseTypes import PlayerStateAllWars, WarGoalType
 from game.ai.militaries import MilitaryThreatType
 from game.civilizations import CivilizationType, LeaderType
@@ -17,7 +19,6 @@ from game.states.ui import PopupType
 from game.types import TechType, CivicType, EraType
 from game.wonders import WonderType
 from map.types import FeatureType
-from core.base import WeightedBaseList, ExtendedEnum, InvalidEnumError
 
 
 class WeightedTechList(WeightedBaseList):
@@ -112,7 +113,7 @@ class PlayerTechs:
 				self.player.addMoment(MomentType.firstTechnologyOfNewEra, eraType=tech.era(), simulation=simulation)
 			else:
 				self.player.addMoment(MomentType.worldsFirstTechnologyOfNewEra, eraType=tech.era(),
-				                      simulation=simulation)
+									  simulation=simulation)
 
 		self.updateEurekas(simulation)
 
@@ -134,7 +135,7 @@ class PlayerTechs:
 		# 		}
 		#
 		# if obsolete {
-		# if let cityStatePlayer = gameModel.cityStatePlayer( for: quest.cityState) {
+		# if let cityStatePlayer = simulation.cityStatePlayer( for: quest.cityState) {
 		# 	                                                                          cityStatePlayer.obsoleteQuest(
 		# 		                                                                          by: player.leader, in: gameModel)
 		# }
@@ -147,7 +148,7 @@ class PlayerTechs:
 		# if questTechType == tech
 		# {
 		# if let
-		# cityStatePlayer = gameModel.cityStatePlayer(
+		# cityStatePlayer = simulation.cityStatePlayer(
 		# for: quest.cityState) {
 		# 	    cityStatePlayer.obsoleteQuest(by: player.leader, in: gameModel)
 
@@ -478,14 +479,6 @@ class PlayerCivics:
 		return self._inspirations.triggerCountFor(civic)
 
 
-class TacticalAI:
-	def __init__(self, player):
-		self.player = player
-
-	def doTurn(self, simulation):
-		pass
-
-
 class PlayerApproachType:
 	pass
 
@@ -661,7 +654,7 @@ class LeaderAgendaType(ExtendedEnum):
 
 class ApproachModifierTypeData:
 	def __init__(self, summary: str, initialValue: int, reductionTurns: int, reductionValue: int,
-	             hiddenAgenda: Optional[LeaderAgendaType]):
+				 hiddenAgenda: Optional[LeaderAgendaType]):
 		self.summary = summary
 		self.initialValue = initialValue
 		self.reductionTurns = reductionTurns
@@ -750,7 +743,7 @@ class ApproachModifierType(ExtendedEnum):
 
 class DiplomaticAIPlayerApproachItem:
 	def __init__(self, approachModifierType: ApproachModifierType, initialValue: Optional[int] = None,
-	             reductionValue: Optional[int] = None):
+				 reductionValue: Optional[int] = None):
 		self.approachModifierType = approachModifierType
 
 		if initialValue is not None:
@@ -885,7 +878,7 @@ class DiplomaticPlayerDict:
 		return 50  # default
 
 	def addApproachOf(self, approachModifierType: ApproachModifierType, initialValue: int, reductionValue: int,
-	                  otherPlayer):
+					  otherPlayer):
 		otherLeader = otherPlayer.leader
 		item = next((item for item in self.items if item.leader == otherLeader), None)
 
@@ -906,14 +899,12 @@ class DiplomaticPlayerDict:
 		else:
 			raise Exception("not gonna happen")
 
-		return
-
-	def updateMilitaryThreatOf(self, otherPlayer, strength: StrengthType):
+	def updateMilitaryThreatOf(self, otherPlayer, militaryThreat: MilitaryThreatType):
 		otherLeader = otherPlayer.leader
 		item = next((item for item in self.items if item.leader == otherLeader), None)
 
 		if item is not None:
-			item.militaryStrength = strength
+			item.militaryThreat = militaryThreat
 		else:
 			raise Exception("not gonna happen")
 
@@ -949,7 +940,7 @@ class DiplomaticPlayerDict:
 		return
 
 	def addApproach(self, approachModifier: ApproachModifierType, initialValue: Optional[int] = None,
-	                reductionValue: Optional[int] = None, otherPlayer=None):
+					reductionValue: Optional[int] = None, otherPlayer=None):
 		if otherPlayer is None:
 			raise Exception('otherPlayer must be filled')
 
@@ -1081,12 +1072,37 @@ class DiplomaticPlayerDict:
 
 		return
 
+	def proximityTo(self, otherPlayer) -> PlayerProximityType:
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			return item.proximity
+
+		raise Exception("not gonna happen")
+
+	def updateProximityTo(self, otherPlayer, proximity):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.proximity = proximity
+		else:
+			raise Exception("not gonna happen")
+
+		return
+
+
 class DiplomacyAI:
 	def __init__(self, player):
 		self.playerDict = DiplomaticPlayerDict()
 		self.stateOfAllWars = PlayerStateAllWars.neutral
 		self.player = player
 		self.greetPlayers = []
+
+		self._hasBrokenPeaceTreatyValue: bool = False
+		self._earlyGameHiddenAgendaVal: Optional[LeaderAgendaType] = None
+		self._lateGameHiddenAgendaVal: Optional[LeaderAgendaType] = None
 
 	def doTurn(self, simulation):
 		# Military Stuff
@@ -1159,7 +1175,7 @@ class DiplomacyAI:
 		if activePlayer is not None:
 			# check if activePlayer is in greetPlayers
 			if reduce(lambda b0, b1: b0 or b1, map(lambda player: activePlayer.isEqualTo(player), self.greetPlayers),
-			          False):
+					  False):
 				if self.player.isCityState() or activePlayer.isCityState():
 					if activePlayer.isHuman() and self.player.isCityState():
 						cityState = self.player.cityState
@@ -1243,7 +1259,7 @@ class DiplomacyAI:
 
 		impression = simulation.handicap.firstImpressionBaseValue() + random.randrange(-3, 3)
 		self.playerDict.addApproachOf(ApproachModifierType.firstImpression, impression, 1 if impression > 0 else -1,
-		                              otherPlayer)
+									  otherPlayer)
 
 		# Humans don't say hi to ai player automatically
 		if not self.player.isHuman():
@@ -1285,17 +1301,17 @@ class DiplomacyAI:
 			#     eLoopThirdPlayer = (PlayerTypes) iThirdPlayerLoop;
 			#     eLoopThirdTeam = GET_PLAYER(eLoopThirdPlayer).getTeam();
 			#
-			#     // These two players not at war?
+			#     # These two players not at war?
 			#     if(!GET_TEAM(eLoopThirdTeam).isAtWar(eLoopTeam))
 			#     {
 			#         iValue = GetOtherPlayerWarValueLost(eLoopPlayer, eLoopThirdPlayer);
 			#
 			#         if(iValue > 0)
 			#         {
-			#             // Go down by 1/20th every turn at peace
+			#             # Go down by 1/20th every turn at peace
 			#             iValue /= 20;
 			#
-			#             // Make sure it's changing by at least 1
+			#             # Make sure it's changing by at least 1
 			#             iValue = max(1, iValue);
 			#
 			#             ChangeOtherPlayerWarValueLost(eLoopPlayer, eLoopThirdPlayer, -iValue);
@@ -1508,7 +1524,82 @@ class DiplomacyAI:
 		pass
 
 	def updateProximities(self, simulation):
-		pass
+		for otherPlayer in simulation.players:
+			if otherPlayer.leader != self.player.leader and self.player.hasMetWith(otherPlayer):
+				self.updateProximityTo(otherPlayer, simulation)
+
+	def updateProximityTo(self, otherPlayer, simulation):
+		smallestDistanceBetweenCities = sys.maxsize
+		averageDistanceBetweenCities = 0
+		numCityConnections = 0
+
+		# Loop through all of MY Cities
+		for myCity in simulation.citiesOf(self.player):
+			# Loop through all of THEIR Cities
+			for otherCity in simulation.citiesOf(otherPlayer):
+				numCityConnections += 1
+				distance = myCity.location.distanceTo(otherCity.location)
+
+				if distance < smallestDistanceBetweenCities:
+					smallestDistanceBetweenCities = distance
+
+				averageDistanceBetweenCities += distance
+
+		# Seed this value with something reasonable to start.This will be the value assigned if one player has 0 Cities.
+		proximity: PlayerProximityType = PlayerProximityType.none
+
+		if numCityConnections > 0:
+			averageDistanceBetweenCities /= numCityConnections
+
+			if smallestDistanceBetweenCities <= 7:  # PROXIMITY_NEIGHBORS_CLOSEST_CITY_REQUIREMENT
+				# Closest Cities must be within a certain range
+				proximity = PlayerProximityType.neighbors
+			elif smallestDistanceBetweenCities <= 11:
+				# If our closest Cities are pretty near one another and our average is less than the max then we
+				# can be considered CLOSE (will also look at City average below)
+				proximity = PlayerProximityType.close
+
+			if proximity == PlayerProximityType.none:
+				mapFactor = (simulation.mapSize().width() + simulation.mapSize().height()) / 2
+
+				# Normally base distance on map size, but cap it at a certain point
+				closeDistance = mapFactor * 25 / 100  # PROXIMITY_CLOSE_DISTANCE_MAP_MULTIPLIER
+
+				if closeDistance > 20:  # PROXIMITY_CLOSE_DISTANCE_MAX
+					# Close can't be so big that it sits on Far's turf
+					closeDistance = 20  # PROXIMITY_CLOSE_DISTANCE_MAX
+				elif closeDistance < 10:  # PROXIMITY_CLOSE_DISTANCE_MIN
+					# Close also can't be so small that it sits on Neighbor's turf
+					closeDistance = 10  # PROXIMITY_CLOSE_DISTANCE_MIN
+
+				farDistance = mapFactor * 45 / 100  # PROXIMITY_FAR_DISTANCE_MAP_MULTIPLIER
+
+				if farDistance > 50:  # PROXIMITY_CLOSE_DISTANCE_MAX
+					# Far can't be so big that it sits on Distant's turf
+					farDistance = 50  # PROXIMITY_CLOSE_DISTANCE_MAX
+				elif farDistance < 20:  # PROXIMITY_CLOSE_DISTANCE_MIN
+					# Close also can't be so small that it sits on Neighbor's turf
+					farDistance = 20 # PROXIMITY_CLOSE_DISTANCE_MIN
+
+				if averageDistanceBetweenCities <= closeDistance:
+					proximity = PlayerProximityType.close
+				elif averageDistanceBetweenCities <= farDistance:
+					proximity = PlayerProximityType.far
+				else:
+					proximity = PlayerProximityType.distant
+
+			# Players NOT on the same landmass - bump up PROXIMITY by one level (unless we're already distant)
+			if proximity != PlayerProximityType.distant:
+				# FIXME
+				pass
+
+		numPlayerLeft = len(list(filter(lambda p: p.isAlive(), simulation.players)))
+		if numPlayerLeft == 2:
+			proximity = proximity if proximity > PlayerProximityType.close else PlayerProximityType.close
+		elif numPlayerLeft <= 4:
+			proximity = proximity if proximity > PlayerProximityType.far else PlayerProximityType.far
+
+		self.playerDict.updateProximityTo(otherPlayer, proximity)
 
 	def doContactMajorCivs(self, simulation):
 		pass
@@ -1574,7 +1665,7 @@ class DiplomacyAI:
 		return self.playerDict.isPeaceTreatyActiveWith(otherPlayer)
 
 	def updateHasBrokenPeaceTreatyTo(self, value: bool):
-		self.hasBrokenPeaceTreatyValue = value
+		self._hasBrokenPeaceTreatyValue = value
 
 	def proximityTo(self, otherPlayer) -> PlayerProximityType:
 		return self.playerDict.proximityTo(otherPlayer)
@@ -1616,15 +1707,15 @@ class PlayerMoments:
 
 	def add(self, moment: Moment):
 		self._momentsArray.append(moment)
-		self._currentEraScore += moment.type.eraScore()
+		self._currentEraScore += moment.momentType.eraScore()
 
 	def addMomentOf(self, momentType: MomentType, turn: int, civilization: Optional[CivilizationType] = None,
-	                cityName: Optional[str] = None, continentName: Optional[str] = None,
-	                eraType: Optional[EraType] = None, naturalWonder: [FeatureType] = None,
-	                dedication: Optional[DedicationType] = None, wonder: Optional[WonderType] = None):
+					cityName: Optional[str] = None, continentName: Optional[str] = None,
+					eraType: Optional[EraType] = None, naturalWonder: [FeatureType] = None,
+					dedication: Optional[DedicationType] = None, wonder: Optional[WonderType] = None):
 		self._momentsArray.append(Moment(momentType, turn, civilization=civilization, cityName=cityName,
-		                                 continentName=continentName, eraType=eraType, naturalWonder=naturalWonder,
-		                                 dedication=dedication, wonder=wonder))
+										 continentName=continentName, eraType=eraType, naturalWonder=naturalWonder,
+										 dedication=dedication, wonder=wonder))
 
 		self._currentEraScore += momentType.eraScore()
 
@@ -1638,12 +1729,12 @@ class PlayerMoments:
 		self._currentEraScore = 0
 
 	def hasMoment(self, momentType: MomentType, civilization: Optional[CivilizationType] = None,
-	              eraType: Optional[EraType] = None, cityName: Optional[str] = None,
-	              continentName: Optional[str] = None, naturalWonder: Optional[FeatureType] = None,
-	              dedication: Optional[DedicationType] = None) -> bool:
+				  eraType: Optional[EraType] = None, cityName: Optional[str] = None,
+				  continentName: Optional[str] = None, naturalWonder: Optional[FeatureType] = None,
+				  dedication: Optional[DedicationType] = None) -> bool:
 
 		tmpMoment = Moment(momentType=momentType, civilization=civilization, eraType=eraType, cityName=cityName,
-		                   continentName=continentName, naturalWonder=naturalWonder, dedication=dedication, turn=0)
+						   continentName=continentName, naturalWonder=naturalWonder, dedication=dedication, turn=0)
 
 		# check all player moments
 		for moment in self._momentsArray:

@@ -14,7 +14,7 @@ from map.areas import Continent, ContinentType, Ocean
 from map.base import HexPoint, HexDirection, Size, Array2D, HexArea
 from map.improvements import ImprovementType
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
-	Tutorials, Yields, AppealLevel, UnitDomainType
+	Tutorials, Yields, AppealLevel, UnitDomainType, ResourceUsage
 from core.base import WeightedBaseList, ExtendedEnum
 
 
@@ -105,6 +105,9 @@ class Tile:
 
 		self._builderAIScratchPad = BuilderAIScratchPad()
 
+	def __repr__(self):
+		return f'Tile({self.point}, {self._terrainValue}, hills={self._isHills}, {self._featureValue}, {self._resourceValue})'
+
 	def owner(self) -> Player:
 		return self._owner
 
@@ -173,8 +176,13 @@ class Tile:
 	def hasAnyResourceFor(self, player) -> bool:
 		return self.resourceFor(player) != ResourceType.none
 
-	def hasResource(self, resource: ResourceType, player) -> bool:
-		return self.resourceFor(player) == resource
+	def hasResource(self, resource: Union[ResourceType, ResourceUsage], player) -> bool:
+		if isinstance(resource, ResourceType):
+			return self.resourceFor(player) == resource
+		elif isinstance(resource, ResourceUsage):
+			return self.resourceFor(player).usage() == resource
+
+		return False
 
 	def setResource(self, resource: ResourceType):
 		self._resourceValue = resource

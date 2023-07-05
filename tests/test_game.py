@@ -580,7 +580,7 @@ class TestSimulation(unittest.TestCase):
 
 	def test_player_turn(self):
 		# GIVEN
-		mapModel = MapModelMock(20, 10, TerrainType.grass)
+		mapModel = MapModelMock(MapSize.tiny, TerrainType.grass)
 		simulation = GameModel(
 			victoryTypes=[VictoryType.domination],
 			handicap=HandicapType.chieftain,
@@ -627,7 +627,7 @@ class TestSimulation(unittest.TestCase):
 class TestUsecases(unittest.TestCase):
 	def test_first_city_build(self):
 		# GIVEN
-		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		mapModel = MapModelMock(MapSize.tiny, TerrainType.grass)
 		simulation = GameModel(
 			victoryTypes=[VictoryType.domination],
 			handicap=HandicapType.chieftain,
@@ -697,7 +697,7 @@ class TestUsecases(unittest.TestCase):
 
 	def test_first100turns(self):
 		# GIVEN
-		mapModel = MapModelMock(24, 20, TerrainType.grass)
+		mapModel = MapModelMock(MapSize.tiny, TerrainType.grass)
 		simulation = GameModel(
 			victoryTypes=[VictoryType.domination],
 			handicap=HandicapType.chieftain,

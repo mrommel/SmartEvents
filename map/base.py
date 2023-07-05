@@ -452,6 +452,9 @@ class Array2D:
 
 		self.values = [[fill_value] * self.width for _ in range(self.height)]
 
+	def __repr__(self):
+		return f'Array2D({self.width}, {self.height})'
+
 	def valid(self, point_or_x, y=None):
 		"""
             checks if the given Point is inside the two-dimensional Array

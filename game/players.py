@@ -3,6 +3,7 @@ from typing import Optional
 
 from game.ai.builderTasking import BuilderTaskingAI
 from game.ai.homeland import HomelandAI
+from game.ai.tactics import TacticalAI
 from game.baseTypes import GameState
 from game.ai.economics import EconomicAI
 from game.ai.grandStrategies import GrandStrategyAI, GrandStrategyAIType
@@ -17,7 +18,7 @@ from game.governments import PlayerGovernment, GovernmentType
 from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import Notifications, NotificationType, Notification
-from game.playerMechanics import PlayerTechs, PlayerCivics, TacticalAI, DiplomacyAI, \
+from game.playerMechanics import PlayerTechs, PlayerCivics, DiplomacyAI, \
 	DiplomacyRequests, PlayerMoments
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType, ReligionType

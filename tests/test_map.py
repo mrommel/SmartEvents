@@ -737,6 +737,17 @@ class TestMap(unittest.TestCase):
 		for index in range(4):
 			self.assertEqual(map_points[index], expected[index])
 
+	def test_tileAt(self):
+		mapModel = MapModelMock(4, 6, TerrainType.ocean)
+
+		for x in range(4):
+			for y in range(6):
+				tile = mapModel.tileAt(x, y)
+				self.assertEqual(tile.terrain(), TerrainType.ocean)
+
+				tile = mapModel.tileAt(HexPoint(x, y))
+				self.assertEqual(tile.terrain(), TerrainType.ocean)
+
 	def test_average_tile_appeal(self):
 		# GIVEN
 		mapModel = MapModelMock(10, 10, TerrainType.ocean)
