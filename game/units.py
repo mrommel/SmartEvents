@@ -2186,6 +2186,9 @@ class Unit:
 	def isUnderTacticalControl(self) -> bool:
 		return self._tacticalMoveValue != TacticalMoveType.none
 
+	def setTacticalMove(self, move: TacticalMoveType):
+		self._tacticalMoveValue = move
+
 	def clearMissions(self):
 		self._missions = []
 

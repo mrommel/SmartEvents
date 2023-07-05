@@ -1,3 +1,4 @@
+import random
 from typing import Optional
 
 from core.base import ExtendedEnum
@@ -16,6 +17,10 @@ class TacticalMoveTypeData:
 		self.offenseFlavorWeight: int = offenseFlavorWeight
 		self.defenseFlavorWeight: int = defenseFlavorWeight
 		self.priority: int = priority
+
+
+class TacticalMoveType:
+	pass
 
 
 class TacticalMoveType(ExtendedEnum):
@@ -86,6 +91,32 @@ class TacticalMoveType(ExtendedEnum):
 	barbarianPlunderTradeUnit = 'barbarianPlunderTradeUnit'  # AI_TACTICAL_BARBARIAN_PLUNDER_TRADE_UNIT,
 	barbarianPillageCitadel = 'barbarianPillageCitadel'  # AI_TACTICAL_BARBARIAN_PILLAGE_CITADEL,
 	barbarianPillageNextTurn = 'barbarianPillageNextTurn'  # AI_TACTICAL_BARBARIAN_PILLAGE_NEXT_TURN
+
+	@staticmethod
+	def allBarbarianMoves() -> [TacticalMoveType]:
+		return [
+			TacticalMoveType.barbarianCaptureCity,
+			TacticalMoveType.barbarianDamageCity,
+			TacticalMoveType.barbarianDestroyHighPriorityUnit,
+			TacticalMoveType.barbarianDestroyMediumPriorityUnit,
+			TacticalMoveType.barbarianDestroyLowPriorityUnit,
+			TacticalMoveType.barbarianMoveToSafety,
+			TacticalMoveType.barbarianAttritHighPriorityUnit,
+			TacticalMoveType.barbarianAttritMediumPriorityUnit,
+			TacticalMoveType.barbarianAttritLowPriorityUnit,
+			TacticalMoveType.barbarianPillage,
+			TacticalMoveType.barbarianBlockadeResource,
+			TacticalMoveType.barbarianCivilianAttack,
+			TacticalMoveType.barbarianAggressiveMove,
+			TacticalMoveType.barbarianPassiveMove,
+			TacticalMoveType.barbarianCampDefense,
+			TacticalMoveType.barbarianGuardCamp,
+			TacticalMoveType.barbarianDesperateAttack,
+			TacticalMoveType.barbarianEscortCivilian,
+			TacticalMoveType.barbarianPlunderTradeUnit,
+			TacticalMoveType.barbarianPillageCitadel,
+			TacticalMoveType.barbarianPillageNextTurn
+		]
 
 	def priority(self) -> int:
 		return self._data().priority
@@ -472,7 +503,7 @@ class TacticalAnalysisCell:
 
 class TacticalDominanceZone:
 	def __init__(self, territoryType: TacticalDominanceTerritoryType, dominanceFlag: TacticalDominanceType, owner,
-				 area: HexArea, isWater: bool, center, navalInvasion: bool, friendlyStrength: int,
+				 area: Optional[HexArea], isWater: bool, center, navalInvasion: bool, friendlyStrength: int,
 				 friendlyRangedStrength: int, friendlyUnitCount: int, friendlyRangedUnitCount: int,
 				 enemyStrength: int, enemyRangedStrength: int, enemyUnitCount: int, enemyRangedUnitCount: int,
 				 enemyNavalUnitCount: int, rangeClosestEnemyUnit: int, dominanceValue: int):
@@ -481,7 +512,7 @@ class TacticalDominanceZone:
 		self.owner = owner
 		self.area = area
 		self.isWater = isWater
-		self._center = center
+		self._center = center  # Tile
 		self.navalInvasion = navalInvasion
 		self.friendlyStrength = friendlyStrength
 		self.friendlyRangedStrength = friendlyRangedStrength
@@ -494,6 +525,8 @@ class TacticalDominanceZone:
 		self.enemyNavalUnitCount = enemyNavalUnitCount
 		self.rangeClosestEnemyUnit = rangeClosestEnemyUnit
 		self.dominanceValue = dominanceValue
+
+		self.closestCity = None  # City
 
 	@property
 	def center(self):
@@ -693,11 +726,48 @@ class TacticalPosture:
 
 
 class TacticalCity:
-	pass
+	"""Object stored in the list of current move cities (currentMoveCities)"""
+	def __init__(self, attackStrength: int = 0, expectedTargetDamage: int = 0, city = None):
+		self.attackStrength = attackStrength
+		self.expectedTargetDamage = expectedTargetDamage
+		self.city = city
+
+	def __lt__(self, other):
+		if isinstance(other, TacticalCity):
+			return self.attackStrength > other.attackStrength
+
+		return False
+
+	def __eq__(self, other):
+		if isinstance(other, TacticalCity):
+			return False
+
+		return False
 
 
 class TacticalUnit:
-	pass
+	def __init__(self, unit, attackStrength: int = 0, healthPercent: int = 0):
+		self.attackStrength = attackStrength
+		self.healthPercent = healthPercent
+		self.movesToTarget = 0
+		self.expectedTargetDamage = 0
+		self.expectedSelfDamage = 0
+		self.unit = unit
+
+	def attackPriority(self) -> int:
+		return self.attackStrength * self.healthPercent
+
+	def __lt__(self, other):
+		if isinstance(other, TacticalUnit):
+			return self.attackStrength > other.attackStrength
+
+		return False
+
+	def __eq__(self, other):
+		if isinstance(other, TacticalUnit):
+			return False
+
+		return False
 
 
 class BlockingUnit:
@@ -1166,5 +1236,281 @@ class TacticalAI:
 				else:
 					self.extractTargets()
 					self.assignTacticalMove(move, simulation)
+
+		return
+
+	def establishBarbarianPriorities(self, turn: int):
+		"""Choose which tactics the barbarians should emphasize this turn"""
+		# Only establish priorities once per turn
+		if turn <= self.movePriorityTurn:
+			return
+
+		self.movePriorityList = []
+		self.movePriorityTurn = turn
+
+		# Loop through each possible tactical move(other than "none" or "unassigned")
+		for barbarianTacticalMove in TacticalMoveType.allBarbarianMoves():
+			priority = barbarianTacticalMove.priority()
+
+			# Make sure base priority is not negative
+			if priority >= 0:
+
+				# Finally, add a random die roll to each priority
+				priority += random.randint(-2, 2)  # AI_TACTICAL_MOVE_PRIORITY_RANDOMNESS
+
+				# Store off this move and priority
+				move = TacticalMove()
+				move.moveType = barbarianTacticalMove
+				move.priority = priority
+				self.movePriorityList.append(move)
+
+		self.movePriorityList.sort()
+		return
+
+	def extractTargets(self, dominanceZone: Optional[TacticalDominanceZone] = None):
+		"""Sift through the target list and find just those that apply to the dominance zone we are currently looking at"""
+		self.zoneTargets = []
+
+		for target in self.allTargets:
+			valid = False
+
+			if dominanceZone is not None:
+				domain: UnitDomainType = UnitDomainType.sea if dominanceZone.isWater else UnitDomainType.land
+				valid = target.isTargetValidIn(domain)
+			else:
+				valid = True
+
+			if valid:
+				if dominanceZone is None or dominanceZone == target.dominanceZone:
+					self.zoneTargets.append(target)
+				else:
+					# Not obviously in this zone, but if within 2 of city we want them anyway
+					city = dominanceZone.closestCity
+					if city is not None:
+						if target.target.distanceTo(city.location) <= 2:
+							self.zoneTargets.append(target)
+
+		print(f"targets extracted: {len(self.zoneTargets)}")
+		return
+
+	def assignBarbarianMoves(self, simulation):
+		"""Choose which tactics to run and assign units to it (barbarian version)"""
+		for move in self.movePriorityList:
+			if move.moveType == TacticalMoveType.barbarianCaptureCity:
+				# AI_TACTICAL_BARBARIAN_CAPTURE_CITY
+				self.plotCaptureCityMoves(simulation)
+			elif move.moveType == TacticalMoveType.barbarianDamageCity:
+				# AI_TACTICAL_BARBARIAN_DAMAGE_CITY
+				self.plotDamageCityMoves(simulation)
+			elif move.moveType == TacticalMoveType.barbarianDestroyHighPriorityUnit:
+				# AI_TACTICAL_BARBARIAN_DESTROY_HIGH_PRIORITY_UNIT
+				self.plotDestroyUnitMoves(TacticalTargetType.highPriorityUnit, mustBeAbleToKill=True, attackAtPoorOdds=False, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianDestroyMediumPriorityUnit:
+				# AI_TACTICAL_BARBARIAN_DESTROY_MEDIUM_PRIORITY_UNIT
+				self.plotDestroyUnitMoves(TacticalTargetType.mediumPriorityUnit, mustBeAbleToKill=True, attackAtPoorOdds=False, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianDestroyLowPriorityUnit:
+				# AI_TACTICAL_BARBARIAN_DESTROY_LOW_PRIORITY_UNIT
+				self.plotDestroyUnitMoves(TacticalTargetType.lowPriorityUnit, mustBeAbleToKill=True, attackAtPoorOdds=False, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianMoveToSafety:
+				# AI_TACTICAL_BARBARIAN_MOVE_TO_SAFETY
+				self.plotMovesToSafety(combatUnits=True, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianAttritHighPriorityUnit:
+				# AI_TACTICAL_BARBARIAN_ATTRIT_HIGH_PRIORITY_UNIT
+				self.plotDestroyUnitMoves(TacticalTargetType.highPriorityUnit, mustBeAbleToKill=False, attackAtPoorOdds=False, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianAttritMediumPriorityUnit:
+				# AI_TACTICAL_BARBARIAN_ATTRIT_MEDIUM_PRIORITY_UNIT
+				self.plotDestroyUnitMoves(TacticalTargetType.mediumPriorityUnit, mustBeAbleToKill=False, attackAtPoorOdds=False, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianAttritLowPriorityUnit:
+				# AI_TACTICAL_BARBARIAN_ATTRIT_LOW_PRIORITY_UNIT
+				self.plotDestroyUnitMoves(TacticalTargetType.lowPriorityUnit, mustBeAbleToKill=False, attackAtPoorOdds=False, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianPillage:
+				# AI_TACTICAL_BARBARIAN_PILLAGE
+				self.plotPillageMoves(TacticalTargetType.improvementResource, firstPass=True, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianPillageCitadel:
+				# AI_TACTICAL_BARBARIAN_PILLAGE_CITADEL
+				self.plotPillageMoves(TacticalTargetType.citadel, firstPass=True, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianPillageNextTurn:
+				# AI_TACTICAL_BARBARIAN_PILLAGE_NEXT_TURN
+				self.plotPillageMoves(TacticalTargetType.citadel, firstPass=False, simulation=simulation)
+				self.plotPillageMoves(TacticalTargetType.improvementResource, firstPass=False, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianBlockadeResource:
+				# AI_TACTICAL_BARBARIAN_PRIORITY_BLOCKADE_RESOURCE \
+				# PlotBlockadeImprovementMoves();
+				pass
+			elif move.moveType == TacticalMoveType.barbarianCivilianAttack:
+				# AI_TACTICAL_BARBARIAN_CIVILIAN_ATTACK
+				self.plotCivilianAttackMoves(TacticalTargetType.veryHighPriorityCivilian, simulation)
+				self.plotCivilianAttackMoves(TacticalTargetType.highPriorityCivilian, simulation)
+				self.plotCivilianAttackMoves(TacticalTargetType.mediumPriorityCivilian, simulation)
+				self.plotCivilianAttackMoves(TacticalTargetType.lowPriorityCivilian, simulation)
+			elif move.moveType == TacticalMoveType.barbarianCampDefense:
+				# AI_TACTICAL_BARBARIAN_CAMP_DEFENSE
+				self.plotCampDefenseMoves(simulation)
+			elif move.moveType == TacticalMoveType.barbarianAggressiveMove:
+				# AI_TACTICAL_BARBARIAN_AGGRESSIVE_MOVE
+				self.plotBarbarianMove(aggressive=True, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianPassiveMove:
+				# AI_TACTICAL_BARBARIAN_PASSIVE_MOVE
+				self.plotBarbarianMove(aggressive=False, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianDesperateAttack:
+				# AI_TACTICAL_BARBARIAN_DESPERATE_ATTACK
+				self.plotDestroyUnitMoves(TacticalTargetType.lowPriorityUnit, mustBeAbleToKill=False, attackAtPoorOdds=True, simulation=simulation)
+			elif move.moveType == TacticalMoveType.barbarianEscortCivilian:
+				# AI_TACTICAL_BARBARIAN_ESCORT_CIVILIAN
+				self.plotBarbarianCivilianEscortMove(simulation)
+			elif move.moveType == TacticalMoveType.barbarianPlunderTradeUnit:
+				# AI_TACTICAL_BARBARIAN_PLUNDER_TRADE_UNIT
+				self.plotBarbarianPlunderTradeUnitMove(UnitDomainType.land, simulation)
+				self.plotBarbarianPlunderTradeUnitMove(UnitDomainType.sea, simulation)
+			elif move.moveType == TacticalMoveType.barbarianGuardCamp:
+				self.plotGuardBarbarianCamp( simulation)
+			else:
+				print(f"not implemented: TacticalAI - {move.moveType}")
+
+		self.reviewUnassignedBarbarianUnits( simulation)
+
+	def plotGuardBarbarianCamp(self, simulation):
+		"""Assigns a barbarian to go protect an undefended camp"""
+		if not self.player.isBarbarian():
+			return
+
+		self.currentMoveUnits = []
+
+		for loopUnit in self.currentTurnUnits:
+			# is unit already at a camp?
+			tile = simulation.tileAt(loopUnit.location)
+			if tile is not None:
+				if tile.hasImprovement(ImprovementType.barbarianCamp):
+					unit = TacticalUnit(loopUnit)
+					self.currentMoveUnits.append(unit)
+
+		if len(self.currentMoveUnits) > 0:
+			self.executeGuardBarbarianCamp(simulation)
+
+		return
+
+	def plotBarbarianCivilianEscortMove(self, simulation):
+		"""Escort captured civilians back to barbarian camps"""
+		if not self.player.isBarbarian():
+			return
+
+		self.currentMoveUnits = []
+
+		for currentTurnUnit in self.currentTurnUnits:
+			# Find any civilians we may have "acquired" from the civilizations
+			if not currentTurnUnit.canAttack():
+				unit = TacticalUnit(currentTurnUnit)
+				self.currentMoveUnits.append(unit)
+
+		if len(self.currentMoveUnits) > 0:
+			self.executeBarbarianCivilianEscortMove(simulation)
+
+		return
+
+	def plotBarbarianPlunderTradeUnitMove(self, domain: UnitDomainType, simulation):
+		"""Plunder trade routes"""
+		targetType: TacticalTargetType = TacticalTargetType.none
+		navalOnly = False
+
+		if domain == UnitDomainType.land:
+			targetType = TacticalTargetType.tradeUnitLand
+		elif domain == UnitDomainType.sea:
+			targetType = TacticalTargetType.tradeUnitSea
+			navalOnly = True
+
+		if targetType == TacticalTargetType.none:
+			return
+
+		for target in self.zoneTargetsFor(targetType):
+			# See what units we have who can reach target this turn
+			if self.findUnitsWithinStrikingDistanceTowards(target.target, numTurnsAway=0, noRangedUnits=False, navalOnly=navalOnly, simulation=simulation):
+				# Queue best one up to capture it
+				self.executePlunderTradeUnitAt(target.target, simulation)
+
+		return
+
+	def zoneTargetsFor(self, targetType: TacticalTargetType) -> [TacticalTarget]:
+		"""Find the first target of a requested type in current dominance zone (call after ExtractTargetsForZone())"""
+		tempTargets: [TacticalTarget] = []
+		for zoneTarget in self.zoneTargets:
+			if targetType == TacticalTargetType.none or zoneTarget.targetType == targetType:
+				tempTargets.append(zoneTarget)
+
+		return tempTargets
+
+	def plotDestroyUnitMoves(self, targetType: TacticalTargetType, mustBeAbleToKill: bool, attackAtPoorOdds: bool, simulation):
+		"""Assign a group of units to attack each unit we think we can destroy"""
+		requiredDamage: int = 0
+		expectedDamage: int = 0
+
+		# See how many moves of this type we can execute
+		for target in self.zoneTargetsFor(targetType):
+			unitCanAttack = False
+			cityCanAttack = False
+
+			if target.target is not None:
+				targetLocation = target.target
+				tile = simulation.tileAt(targetLocation)
+
+				if tile is None:
+					continue
+
+				defender = simulation.unitAt(targetLocation, UnitMapType.combat)
+
+				if defender is not None:
+					unitCanAttack = self.findUnitsWithinStrikingDistanceTowards(tile.point, numTurnsAway=1, noRangedUnits=False, simulation=simulation)
+					cityCanAttack = self.findCitiesWithinStrikingDistanceOf(targetLocation, simulation)
+
+					if unitCanAttack or cityCanAttack:
+						expectedDamage = self.computeTotalExpectedDamage(target, tile, simulation)
+						expectedDamage += self.computeTotalExpectedBombardDamageAgainst(defender, simulation)
+						requiredDamage = defender.healthPoints()
+
+						target.damage = requiredDamage
+
+						if not mustBeAbleToKill:
+							# Attack no matter what
+							if attackAtPoorOdds:
+								self.executeAttack(target, tile, inflictWhatWeTake=False, mustSurviveAttack=False, simulation=simulation)
+							else:
+								# If we can at least knock the defender to 40 % strength with our combined efforts, go ahead even if each individual attack isn't favorable
+								mustInflictWhatWeTake = True
+								if expectedDamage >= (requiredDamage * 40) / 100:
+									mustInflictWhatWeTake = False
+
+								self.executeAttack(target, tile, inflictWhatWeTake=mustInflictWhatWeTake, mustSurviveAttack=True, simulation=simulation)
+						else:
+							# Do we have enough firepower to destroy it?
+							if expectedDamage > requiredDamage:
+								self.executeAttack(target, tile, inflictWhatWeTake=False, mustSurviveAttack=(targetType != TacticalTargetType.highPriorityUnit), simulation=simulation)
+
+			return
+
+	def plotPillageMoves(self, targetType: TacticalTargetType, firstPass: bool, simulation):
+		"""Assigns units to pillage enemy improvements"""
+		for target in self.zoneTargetsFor(targetType):
+			# // try paratroopers first, not because they are more effective, just because it looks cooler...
+			# / * if (bFirstPass & & FindParatroopersWithinStrikingDistance(pPlot))
+			# {
+			# # Queue best one up to capture it
+			# ExecuteParadropPillage(pPlot);
+			# } else * /
+			if firstPass and self.findUnitsWithinStrikingDistance(target.target, numTurnsAway=0, noRangedUnits=False, navalOnly=False, mustMoveThrough=True, includeBlockedUnits=False, willPillage=True, simulation=simulation):
+				# Queue best one up to capture it
+				self.executePillageAt(target.target, simulation)
+
+			elif not firstPass and self.findUnitsWithinStrikingDistance(target.target, numTurnsAway=2, noRangedUnits=False, navalOnly=False, mustMoveThrough=False, includeBlockedUnits=False, willPillage=True, simulation=simulation):
+				# No one can reach it this turn, what about next turn?
+				self.executeMoveToTarget(target.target, garrisonIfPossible=False, simulation=simulation)
+
+		return
+
+	def plotCivilianAttackMoves(self, targetType: TacticalTargetType, simulation):
+		"""Assigns units to capture undefended civilians"""
+		for target in self.zoneTargetsFor(targetType):
+			# See what units we have who can reach target this turn
+			if self.findUnitsWithinStrikingDistance(target.target, numTurnsAway=1, noRangedUnits=False, navalOnly=False, mustMoveThrough=False, includeBlockedUnits=False, willPillage=False, targetUndefended=True, simulation=simulation):
+				# Queue best one up to capture it
+				self.executeCivilianCapture(target.target, simulation)
 
 		return
