@@ -1092,8 +1092,17 @@ class DiplomaticPlayerDict:
 
 		return
 
+	def isOpenBorderAgreementActiveWith(self, otherPlayer) -> bool:
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
 
-class DiplomacyAI:
+		if item is not None:
+			return item.openBorderAgreement.isActive()
+
+		return False
+
+
+class DiplomaticAI:
 	def __init__(self, player):
 		self.playerDict = DiplomaticPlayerDict()
 		self.stateOfAllWars = PlayerStateAllWars.neutral
@@ -1689,6 +1698,9 @@ class DiplomacyAI:
 
 	def addGossipItem(self, gossipItem: GossipItem, otherPlayer):
 		self.playerDict.addGossipItem(gossipItem, otherPlayer)
+
+	def isOpenBorderAgreementActiveWith(self, otherPlayer) -> bool:
+		return self.playerDict.isOpenBorderAgreementActiveWith(otherPlayer)
 
 
 class DiplomacyRequests:

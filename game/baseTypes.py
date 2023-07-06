@@ -8,14 +8,15 @@ from utils.translation import gettext_lazy as _
 
 class HandicapTypeData:
 	def __init__(self, name: str, value: int, barbarianCampGold: int, barbarianSpawnMod: int,
-	             earliestBarbarianReleaseTurn: int, freeHumanTechs: [TechType], freeHumanCivics: [CivicType],
-	             freeHumanStartingUnitTypes: [UnitType], freeHumanCombatBonus: int,
+	             earliestBarbarianReleaseTurn: int, barbarbianLandTargetRange: int, freeHumanTechs: [TechType],
+	             freeHumanCivics: [CivicType], freeHumanStartingUnitTypes: [UnitType], freeHumanCombatBonus: int,
 	             freeAIStartingUnitTypes: [UnitType], freeAICombatBonus: int):
 		self.name = name
 		self.value = value
 		self.barbarianCampGold = barbarianCampGold
 		self.barbarianSpawnMod = barbarianSpawnMod
 		self.earliestBarbarianReleaseTurn = earliestBarbarianReleaseTurn
+		self.barbarbianLandTargetRange = barbarbianLandTargetRange
 		# human
 		self.freeHumanTechs = freeHumanTechs
 		self.freeHumanCivics = freeHumanCivics
@@ -56,6 +57,9 @@ class HandicapType(Enum):
 	def earliestBarbarianReleaseTurn(self) -> int:
 		return self._data().earliestBarbarianReleaseTurn
 
+	def barbarbianLandTargetRange(self) -> int:
+		return self._data().barbarbianLandTargetRange
+
 	def _data(self) -> HandicapTypeData:
 		if self == HandicapType.settler:
 			#
@@ -65,6 +69,7 @@ class HandicapType(Enum):
 				barbarianCampGold=50,
 				barbarianSpawnMod=8,
 				earliestBarbarianReleaseTurn=50,
+				barbarbianLandTargetRange=2,
 				# human
 				freeHumanTechs=[TechType.pottery, TechType.animalHusbandry, TechType.mining],
 				freeHumanCivics=[],
@@ -82,6 +87,7 @@ class HandicapType(Enum):
 				barbarianCampGold=40,
 				barbarianSpawnMod=5,
 				earliestBarbarianReleaseTurn=40,
+				barbarbianLandTargetRange=3,
 				# human
 				freeHumanTechs=[TechType.pottery, TechType.animalHusbandry],
 				freeHumanCivics=[],
@@ -99,6 +105,7 @@ class HandicapType(Enum):
 				barbarianCampGold=30,
 				barbarianSpawnMod=3,
 				earliestBarbarianReleaseTurn=35,
+				barbarbianLandTargetRange=4,
 				# human
 				freeHumanTechs=[TechType.pottery],
 				freeHumanCivics=[],
@@ -118,6 +125,7 @@ class HandicapType(Enum):
 				barbarianCampGold=25,
 				barbarianSpawnMod=0,
 				earliestBarbarianReleaseTurn=35,
+				barbarbianLandTargetRange=5,
 				# human
 				freeHumanTechs=[],
 				freeHumanCivics=[],
@@ -135,6 +143,7 @@ class HandicapType(Enum):
 				barbarianCampGold=25,
 				barbarianSpawnMod=0,
 				earliestBarbarianReleaseTurn=30,
+				barbarbianLandTargetRange=5,
 				# human
 				freeHumanTechs=[],
 				freeHumanCivics=[],
@@ -152,6 +161,7 @@ class HandicapType(Enum):
 				barbarianCampGold=25,
 				barbarianSpawnMod=0,
 				earliestBarbarianReleaseTurn=20,
+				barbarbianLandTargetRange=6,
 				# human
 				freeHumanTechs=[],
 				freeHumanCivics=[],
@@ -170,6 +180,7 @@ class HandicapType(Enum):
 				barbarianCampGold=25,
 				barbarianSpawnMod=0,
 				earliestBarbarianReleaseTurn=10,
+				barbarbianLandTargetRange=7,
 				# human
 				freeHumanTechs=[],
 				freeHumanCivics=[],
@@ -188,6 +199,7 @@ class HandicapType(Enum):
 				barbarianCampGold=25,
 				barbarianSpawnMod=0,
 				earliestBarbarianReleaseTurn=0,
+				barbarbianLandTargetRange=8,
 				# human
 				freeHumanTechs=[],
 				freeHumanCivics=[],

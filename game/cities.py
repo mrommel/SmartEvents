@@ -1400,6 +1400,7 @@ class BuildQueue:
 
 
 class City:
+	attackRange = 2
 	workRadius = 3
 
 	def __init__(self, name: str, location: HexPoint, isCapital: bool, player):
@@ -1413,6 +1414,7 @@ class City:
 		self._foodBasketValue = 1.0
 		self._lastTurnFoodEarnedValue = 0.0
 		self._lastTurnFoodHarvestedValue = 0.0
+		self._lastTurnGarrisonAssigned = 0
 
 		self.player = player
 		self.leader = player.leader
@@ -1427,6 +1429,7 @@ class City:
 		self._numberOfAttacksMade = 0
 
 		self.healthPointsValue = 200
+		self._threatValue = 0
 		self.amenitiesForWarWearinessValue = 0
 
 		self._luxuries = []
@@ -4617,7 +4620,16 @@ class City:
 		return rangedStrength
 
 	def canRangeStrikeAt(self, point: HexPoint) -> bool:
-		return self.location.distance(point) <= self.strikeRange()
+		return self.location.distance(point) <= City.attackRange
 
-	def strikeRange(self) -> int:
-		return 2
+	def threatValue(self) -> int:
+		return self._threatValue
+
+	def setThreatValue(self, threatValue: int):
+		self._threatValue = threatValue
+
+	def lastTurnGarrisonAssigned(self) -> int:
+		return self._lastTurnGarrisonAssigned
+
+	def setLastTurnGarrisonAssigned(self, value):
+		self._lastTurnGarrisonAssigned = value

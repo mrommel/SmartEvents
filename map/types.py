@@ -190,12 +190,14 @@ class YieldList(WeightedBaseList):
 
 
 class TerrainData:
-	def __init__(self, name: str, yields: Yields, isWater: bool, domain: UnitDomainType, antiquityPriority: int):
+	def __init__(self, name: str, yields: Yields, isWater: bool, domain: UnitDomainType, antiquityPriority: int,
+	             defenseModifier: int):
 		self.name = name
 		self.yields = yields
 		self.isWater = isWater
 		self.domain = domain
 		self.antiquityPriority = antiquityPriority
+		self.defenseModifier = defenseModifier
 
 
 class TerrainType(ExtendedEnum):
@@ -229,7 +231,8 @@ class TerrainType(ExtendedEnum):
 				yields=Yields(food=0, production=0, gold=0, science=0),
 				isWater=False,
 				domain=UnitDomainType.land,
-				antiquityPriority=5
+				antiquityPriority=5,
+				defenseModifier=0
 			)
 		elif self == TerrainType.grass:
 			return TerrainData(
@@ -237,7 +240,8 @@ class TerrainType(ExtendedEnum):
 				yields=Yields(food=2, production=0, gold=0, science=0),
 				isWater=False,
 				domain=UnitDomainType.land,
-				antiquityPriority=2
+				antiquityPriority=2,
+				defenseModifier=0
 			)
 		elif self == TerrainType.ocean:
 			return TerrainData(
@@ -245,7 +249,8 @@ class TerrainType(ExtendedEnum):
 				yields=Yields(food=1, production=0, gold=0, science=0),
 				isWater=True,
 				domain=UnitDomainType.sea,
-				antiquityPriority=0
+				antiquityPriority=0,
+				defenseModifier=0
 			)
 		elif self == TerrainType.plains:
 			return TerrainData(
@@ -253,7 +258,8 @@ class TerrainType(ExtendedEnum):
 				yields=Yields(food=1, production=1, gold=0, science=0),
 				isWater=False,
 				domain=UnitDomainType.land,
-				antiquityPriority=2
+				antiquityPriority=2,
+				defenseModifier=0
 			)
 		elif self == TerrainType.shore:
 			return TerrainData(
@@ -261,7 +267,8 @@ class TerrainType(ExtendedEnum):
 				yields=Yields(food=1, production=0, gold=1, science=0),
 				isWater=True,
 				domain=UnitDomainType.sea,
-				antiquityPriority=2
+				antiquityPriority=2,
+				defenseModifier=0
 			)
 		elif self == TerrainType.snow:
 			return TerrainData(
@@ -269,7 +276,8 @@ class TerrainType(ExtendedEnum):
 				yields=Yields(food=0, production=0, gold=0, science=0),
 				isWater=False,
 				domain=UnitDomainType.land,
-				antiquityPriority=1
+				antiquityPriority=1,
+				defenseModifier=0
 			)
 		elif self == TerrainType.tundra:
 			return TerrainData(
@@ -277,7 +285,8 @@ class TerrainType(ExtendedEnum):
 				yields=Yields(food=1, production=0, gold=0, science=0),
 				isWater=False,
 				domain=UnitDomainType.land,
-				antiquityPriority=3
+				antiquityPriority=3,
+				defenseModifier=0
 			)
 
 		elif self == TerrainType.land:
@@ -286,7 +295,8 @@ class TerrainType(ExtendedEnum):
 				yields=Yields(food=0, production=0, gold=0),
 				isWater=False,
 				domain=UnitDomainType.land,
-				antiquityPriority=0
+				antiquityPriority=0,
+				defenseModifier=0
 			)
 		elif self == TerrainType.sea:
 			return TerrainData(
@@ -294,7 +304,8 @@ class TerrainType(ExtendedEnum):
 				yields=Yields(food=0, production=0, gold=0),
 				isWater=False,
 				domain=UnitDomainType.land,
-				antiquityPriority=0
+				antiquityPriority=0,
+				defenseModifier=0
 			)
 
 		raise InvalidEnumError(self)
@@ -363,13 +374,17 @@ class TerrainType(ExtendedEnum):
 	def yields(self) -> Yields:
 		return self._data().yields
 
+	def defenseModifier(self):
+		return self._data().defenseModifier
+
 
 class FeatureData:
-	def __init__(self, name, yields, isWonder: bool, isRemovable: bool):
+	def __init__(self, name, yields, isWonder: bool, isRemovable: bool, defenseModifier: int):
 		self.name = name
 		self.yields = yields
 		self.isWonder = isWonder
 		self.isRemovable = isRemovable
+		self.defenseModifier = defenseModifier
 
 
 class FeatureType(ExtendedEnum):
@@ -407,84 +422,96 @@ class FeatureType(ExtendedEnum):
 				name='None',
 				yields=Yields(food=0, production=0, gold=0),
 				isWonder=False,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		if self == FeatureType.forest or self == FeatureType.pine:
 			return FeatureData(
 				name='Forest',
 				yields=Yields(0, 1, gold=0),
 				isWonder=False,
-				isRemovable=True
+				isRemovable=True,
+				defenseModifier=3
 			)
 		elif self == FeatureType.rainforest:
 			return FeatureData(
 				name='Rainforest',
 				yields=Yields(1, 0, gold=0),
 				isWonder=False,
-				isRemovable=True
+				isRemovable=True,
+				defenseModifier=3
 			)
 		elif self == FeatureType.floodplains:
 			return FeatureData(
 				name='Floodplains',
 				yields=Yields(3, 0, gold=0),
 				isWonder=False,
-				isRemovable=True
+				isRemovable=True,
+				defenseModifier=-2
 			)
 		elif self == FeatureType.marsh:
 			return FeatureData(
 				name='Marsh',
 				yields=Yields(3, 0, gold=0),
 				isWonder=False,
-				isRemovable=True
+				isRemovable=True,
+				defenseModifier=-2
 			)
 		elif self == FeatureType.oasis:
 			return FeatureData(
 				name="Oasis",
 				yields=Yields(1, 0, gold=0),
 				isWonder=False,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		elif self == FeatureType.reef:
 			return FeatureData(
 				name="Reef",
 				yields=Yields(1, 0, gold=0),
 				isWonder=False,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		elif self == FeatureType.ice:
 			return FeatureData(
 				name="Ice",
 				yields=Yields(0, 0, gold=0),
 				isWonder=False,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		elif self == FeatureType.atoll:
 			return FeatureData(
 				name="Atoll",
 				yields=Yields(1, 0, gold=0),
 				isWonder=False,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		elif self == FeatureType.volcano:
 			return FeatureData(
 				name="Volcano",
 				yields=Yields(0, 0, gold=0),
 				isWonder=False,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		elif self == FeatureType.mountains:
 			return FeatureData(
 				name="Mountains",
 				yields=Yields(0, 0, gold=0),
 				isWonder=False,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		elif self == FeatureType.lake:
 			return FeatureData(
 				name="Lake",
 				yields=Yields(0, 0, gold=0),
 				isWonder=False,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		elif self == FeatureType.fallout:
 			return FeatureData(
@@ -492,6 +519,7 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(-3, -3, gold=-3),
 				isWonder=True,
 				isRemovable=True,
+				defenseModifier=0
 			)
 
 		# wonders
@@ -500,28 +528,32 @@ class FeatureType(ExtendedEnum):
 				name="Mount Everest",
 				yields=Yields(food=2, production=0, gold=0, science=0, faith=1),
 				isWonder=True,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		elif self == FeatureType.greatBarrierReef:
 			return FeatureData(
 				name="Great Barrier Reef",
 				yields=Yields(food=3, production=0, gold=0, science=2),
 				isWonder=True,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		elif self == FeatureType.cliffsOfDover:
 			return FeatureData(
 				name="Cliffs of Dover",
 				yields=Yields(food=0, production=0, gold=0, science=0, culture=0, faith=0),  #
 				isWonder=True,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 		elif self == FeatureType.uluru:
 			return FeatureData(
 				name="Uluru",
 				yields=Yields(food=0, production=0, gold=0, science=0, culture=2, faith=2),
 				isWonder=True,
-				isRemovable=False
+				isRemovable=False,
+				defenseModifier=0
 			)
 
 		raise AttributeError(f'FeatureType.data: {self} not handled!')
@@ -768,6 +800,9 @@ class FeatureType(ExtendedEnum):
 
 	def yields(self) -> Yields:
 		return self._data().yields
+
+	def defenseModifier(self):
+		return self._data().defenseModifier
 
 
 class ResourceUsage(ExtendedEnum):

@@ -853,7 +853,7 @@ class Tile:
 			return True
 
 		# territory of player we have open border with
-		if player.diplomaticAI.isOpenBorderAgreementActiveWith(self.owner()):
+		if player.diplomacyAI.isOpenBorderAgreementActiveWith(self.owner()):
 			return True
 
 		return False
@@ -874,6 +874,23 @@ class Tile:
 		# territory of player we have open border with
 		if player.diplomaticAI.isAtWarWith(self.owner()):
 			return True
+
+		return False
+
+	def isVisibleToEnemy(self, player, simulation) -> bool:
+		diplomacyAI = player.diplomacyAI
+
+		for loopPlayer in simulation.players:
+
+			if loopPlayer.isBarbarian():
+				continue
+
+			if player.isEqualTo(loopPlayer):
+				continue
+
+			if diplomacyAI.isAtWarWith(loopPlayer):
+				if self.isVisibleTo(loopPlayer):
+					return True
 
 		return False
 
@@ -953,6 +970,29 @@ class Tile:
 
 	def isRoutePillaged(self) -> bool:
 		return False
+
+	def defenseModifierFor(self, player) -> int:
+		modifier = 0
+
+		# Can only get Defensive Bonus from ONE thing - they don't stack
+		featureModifier = 0
+		if self._featureValue != FeatureType.mountains:
+			featureModifier = self._featureValue.defenseModifier()
+
+		if self.isHills() or self.hasFeature(FeatureType.mountains):
+			# Hill( and mountain)
+			modifier += 3  # HILLS_EXTRA_DEFENSE
+		elif featureModifier > 0:
+			# Features
+			modifier = featureModifier
+		else:
+			# Terrain
+			modifier = self.terrain().defenseModifier()
+
+		if self.improvement() != ImprovementType.none:
+			modifier += self.improvement().defenseModifier()
+
+		return modifier
 
 
 class TileStatistics:

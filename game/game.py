@@ -513,6 +513,18 @@ class GameModel:
 	def tacticalAnalysisMap(self) -> TacticalAnalysisMap:
 		return self._tacticalAnalysisMap
 
+	def refreshDangerPlots(self):
+		"""Loop through all the players and do any deferred updates of their danger plots"""
+		for loopPlayer in self.players:
+			# Must be alive
+			if not loopPlayer.isAlive():
+				continue
+
+			if loopPlayer.dangerPlotsAI.isDirty():
+				loopPlayer.dangerPlotsAI.updateDanger(False, False, self)
+
+		return
+
 	def sightAt(self, location: HexPoint, sight: int, unit=None, player=None):
 		if player is None:
 			raise Exception("cant get player")

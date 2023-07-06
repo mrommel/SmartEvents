@@ -18,7 +18,7 @@ from game.governments import PlayerGovernment, GovernmentType
 from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import Notifications, NotificationType, Notification
-from game.playerMechanics import PlayerTechs, PlayerCivics, DiplomacyAI, \
+from game.playerMechanics import PlayerTechs, PlayerCivics, DiplomaticAI, \
 	DiplomacyRequests, PlayerMoments
 from game.policyCards import PolicyCardType
 from game.religions import PantheonType, ReligionType
@@ -33,7 +33,7 @@ from game.unitTypes import UnitMissionType, UnitTaskType, UnitMapType, UnitType
 from game.units import Army, Unit
 from game.wonders import WonderType
 from map import constants
-from map.base import HexPoint, HexArea
+from map.base import HexPoint, HexArea, Array2D
 from map.improvements import ImprovementType
 from map.path_finding.finder import AStarPathfinder
 from map.types import Tutorials, Yields, TerrainType, FeatureType, UnitMovementType, RouteType, UnitDomainType
@@ -301,19 +301,205 @@ class DangerPlotsAI:
 	def __init__(self, player):
 		self.player = player
 
+		self._dangerPlots = None
+		self._arrayAllocated = False
+		self._dirty = True
+
+	def initialize(self, simulation):
+		mapSize = simulation.mapSize()
+		self._dangerPlots = Array2D(mapSize.width(), mapSize.height())
+		self._dangerPlots.fill(0)
+
+		self._arrayAllocated = True
+
 	def dangerAt(self, location: HexPoint) -> float:
-		return 0.0
+		if self._dangerPlots is None:
+			return 0.0
+
+		return self._dangerPlots.values[location.y][location.x]
+
+	def updateDanger(self, pretendWarWithAllCivs: bool, ignoreVisibility: bool, simulation):
+		"""Updates the danger plots values to reflect threats across the map"""
+		# danger plots have not been initialized yet, so no need to update
+		if not self._arrayAllocated:
+			self.initialize(simulation)
+
+		mapSize = simulation.mapSize()
+		if self._dangerPlots.width != mapSize.width() or self._dangerPlots.height != mapSize.height():
+			raise Exception("map size does not match number of DangerPlots")
+
+		# wipe out values
+		self._dangerPlots.fill(0)
+
+		# for each opposing civ
+		for loopPlayer in simulation.players:
+			if not loopPlayer.isAlive():
+				continue
+
+			if loopPlayer.isEqualTo(self.player):
+				continue
+
+			if self.shouldIgnorePlayer(loopPlayer) and not pretendWarWithAllCivs:
+				continue
+
+			# for each unit
+			for loopUnit in simulation.unitsOf(loopPlayer):
+				if self.shouldIgnoreUnit(loopUnit, ignoreVisibility, simulation):
+					continue
+
+				unitRange = loopUnit.baseMoves()
+				if loopUnit.canRangeStrike():
+					unitRange += loopUnit.range()
+
+				unitTile = simulation.tileAt(loopUnit.location)
+				self.assignUnitDangerValue(loopUnit, unitTile, simulation)
+
+				for loopPoint in loopUnit.location.areaWithRadius(unitRange):
+					if not simulation.valid(loopPoint):
+						continue
+
+					if loopPoint == loopUnit.location:
+						continue
+
+					loopTile = simulation.tileAt(loopUnit)
+
+					if not loopUnit.canMoveOrAttackInto(loopTile) and not loopUnit.canRangeStrikeAt(loopPoint):
+						continue
+
+					self.assignUnitDangerValue(loopUnit, loopTile)
+
+			# for each city
+			for loopCity in simulation.citiesOf(loopPlayer):
+				if self.shouldIgnoreCity(loopCity, ignoreVisibility, simulation):
+					continue
+
+				cityRange = City.attackRange
+				cityTile = simulation.tileAt(loopCity.point)
+				self.assignCityDangerValue(loopCity, cityTile)
+
+				for loopPoint in loopCity.point.areaWithRadius(cityRange):
+					if not simulation.valid(loopPoint):
+						continue
+
+					loopTile = simulation.tileAt(loopUnit)
+					self.assignCityDangerValue(loopCity, loopTile)
+
+		# // Citadels
+		# 	int iCitadelValue = GetDangerValueOfCitadel();
+		# 	int iPlotLoop;
+		# 	CvPlot *pPlot, *pAdjacentPlot;
+		# 	for (iPlotLoop = 0; iPlotLoop < GC.getMap().numPlots(); iPlotLoop++)
+		# 	{
+		# 		pPlot = GC.getMap().plotByIndexUnchecked(iPlotLoop);
+		#
+		# 		if (pPlot->isRevealed(thisTeam))
+		# 		{
+		# 			ImprovementTypes eImprovement = pPlot->getRevealedImprovementType(thisTeam);
+		# 			if (eImprovement != NO_IMPROVEMENT && GC.getImprovementInfo(eImprovement)->GetNearbyEnemyDamage() > 0)
+		# 			{
+		# 				if (!ShouldIgnoreCitadel(pPlot, bIgnoreVisibility))
+		# 				{
+		# 					for (int iI = 0; iI < NUM_DIRECTION_TYPES; iI++)
+		# 					{
+		# 						pAdjacentPlot = plotDirection(pPlot->getX(), pPlot->getY(), ((DirectionTypes)iI));
+		#
+		# 						if (pAdjacentPlot != NULL)
+		# 						{
+		# 							AddDanger(pAdjacentPlot->getX(), pAdjacentPlot->getY(), iCitadelValue);
+		# 						}
+		# 					}
+		# 				}
+		# 			}
+		# 		}
+		# 	}
+
+		# testing city danger values
+		for loopCity in simulation.citiesOf(self.player):
+			threatValue = self.dangerOfCity(loopCity)
+			loopCity.setThreatValue(threatValue)
+
+		self._dirty = False
+
+	def setDirty(self):
+		self._dirty = True
+
+	def isDirty(self) -> bool:
+		return self._dirty
+
+	def shouldIgnorePlayer(self, otherPlayer) -> bool:
+		"""Should this player be ignored when creating the danger plots?"""
+		if otherPlayer.isCityState() != self.player.isCityState() and not otherPlayer.isBarbarian() and \
+			not otherPlayer.isBarbarian():
+
+			if self.player.isCityState():
+				minor = self.player
+				major = otherPlayer
+			else:
+				minor = otherPlayer
+				major = self.player
+
+			if minor.minorCivAI.isFriends(major):
+				return True
+
+			# if we're a major, we should ignore minors that are not at war with us
+			if self.player.isCityState():
+				if not major.isAtWarWith(minor):
+					return True
+
+		return False
+
+	def shouldIgnoreCity(self, city, ignoreVisibility, simulation) -> bool:
+		"""Should this city be ignored when creating the danger plots?"""
+		# ignore unseen cities
+		tile = simulation.tileAt(city.location)
+		if not tile.isVisibleTo(self.player) and not ignoreVisibility:
+			return True
+
+		return False
+
+	def shouldIgnoreUnit(self, unit, ignoreVisibility, simulation):
+		"""Should this unit be ignored when creating the danger plots?"""
+		if not unit.canAttack():
+			return True
+
+		tile = simulation.tileAt(unit.location)
+		if not tile.isVisibleTo(self.player) and not ignoreVisibility:
+			return True
+
+		if unit.domain() == UnitDomainType.air:
+			return True
+
+		return False
+
+	def dangerOfCity(self, city) -> int:
+		"""Sums the danger values of the plots around the city to determine the danger value of the city"""
+		if city is None:
+			return 0
+
+		evalRange = 5  # AI_DIPLO_PLOT_RANGE_FROM_CITY_HOME_FRONT
+		dangerValue = 0
+		for pt in city.location.areaWithRadius(evalRange):
+			dangerValue += self.dangerAt(pt)
+
+		return dangerValue
+
+
 
 
 class PlayerOperations:
 	def __init__(self, player):
 		self.player = player
 
+		self._operations = []
+
 	def doDelayedDeath(self, simulation):
 		pass
 
 	def doTurn(self, simulation):
 		pass
+
+	def __iter__(self):
+		return self._operations.__iter__()
 
 
 class PlayerArmies:
@@ -344,7 +530,7 @@ class Player:
 		self.economicAI = EconomicAI(player=self)
 		self.militaryAI = MilitaryAI(player=self)
 		self.tacticalAI = TacticalAI(player=self)
-		self.diplomacyAI = DiplomacyAI(player=self)
+		self.diplomacyAI = DiplomaticAI(player=self)
 		self.homelandAI = HomelandAI(player=self)
 		self.builderTaskingAI = BuilderTaskingAI(player=self)
 		self.citySpecializationAI = CitySpecializationAI(player=self)
@@ -413,6 +599,7 @@ class Player:
 			return f'Player({self.leader}, {self.leader.civilization()}, AI)'
 
 	def doTurn(self, simulation):
+		self.dangerPlotsAI.updateDanger(False, False, simulation)
 		self.doEurekas(simulation)
 		self.doResourceStockpile(simulation)
 		self.doSpaceRace(simulation)
@@ -783,6 +970,9 @@ class Player:
 		# TURN IS BEGINNING
 		# ##################################################################
 
+		if self.dangerPlotsAI.isDirty():
+			self.dangerPlotsAI.updateDanger(False, False, simulation)
+			
 		# self.doUnitAttrition()
 		self.verifyAlive(simulation)
 
@@ -988,6 +1178,9 @@ class Player:
 		return False
 
 	def unitUpdate(self, simulation):
+		if self.dangerPlotsAI.isDirty():
+			self.dangerPlotsAI.updateDanger(False, False, simulation)
+
 		# CvPlayerAI::AI_unitUpdate()
 		# Now it's the homeland AI's turn.
 		if self.isHuman():
@@ -1532,6 +1725,9 @@ class Player:
 
 	def doDeclareWarTo(self, otherPlayer, simulation):
 		self.diplomacyAI.doDeclareWarTo(otherPlayer, simulation)
+
+		# update danger plots
+		simulation.refreshDangerPlots()
 
 		# inform other players, that war was declared
 		otherLeader = otherPlayer.leader
