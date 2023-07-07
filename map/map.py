@@ -69,39 +69,69 @@ class Tile:
 		it has a TerrainType, FeatureType, ResourceType and a boolean value for being hilly (or not)
 	"""
 
-	def __init__(self, point: HexPoint, terrain: TerrainType):
+	def __init__(self, point_or_dict: Union[HexPoint, dict], terrain: Optional[TerrainType]=None):
 		"""
 			constructs a Tile from a TerrainType
 
 			@param point: location of the tile
 			@param terrain: TerrainType
 		"""
-		self.point = point
-		self._terrainValue = terrain
-		self._isHills = False
-		self._featureValue = FeatureType.none
-		self._resourceValue = ResourceType.none  # property is hidden
-		self._resourceQuantity = 0
+		if isinstance(point_or_dict, HexPoint) and terrain is not None:
+			self.point = point_or_dict
+			self._terrainValue = terrain
+			self._isHills = False
+			self._featureValue = FeatureType.none
+			self._resourceValue = ResourceType.none  # property is hidden
+			self._resourceQuantity = 0
 
-		# river
-		self._riverValue = 0
-		self._riverName = None
+			# river
+			self._riverValue = 0
+			self._riverName = None
 
-		self._climateZone = ClimateZone.temperate
-		self._route = RouteType.none
-		self._improvementValue = ImprovementType.none
-		self._improvementPillagedValue: bool = False
-		self.continentIdentifier = None
-		self.oceanIdentifier = None
-		self.discovered = dict()
-		self.visible = dict()
-		self._cityValue = None
-		self._districtValue = None
-		self._wonderValue = WonderType.none
-		self._owner = None
-		self._workingCity = None
-		self._buildProgressList = WeightedBuildList()
-		self._area = None
+			self._climateZone = ClimateZone.temperate
+			self._route = RouteType.none
+			self._improvementValue = ImprovementType.none
+			self._improvementPillagedValue: bool = False
+			self.continentIdentifier = None
+			self.oceanIdentifier = None
+			self.discovered = dict()
+			self.visible = dict()
+			self._cityValue = None
+			self._districtValue = None
+			self._wonderValue = WonderType.none
+			self._owner = None
+			self._workingCity = None
+			self._buildProgressList = WeightedBuildList()
+			self._area = None
+		elif isinstance(point_or_dict, dict):
+			self.point = point_or_dict.get('point', HexPoint(-1, -1))
+			self._terrainValue = point_or_dict.get('terrain', TerrainType.grass)
+			self._isHills = False
+			self._featureValue = FeatureType.none
+			self._resourceValue = ResourceType.none  # property is hidden
+			self._resourceQuantity = 0
+
+			# river
+			self._riverValue = 0
+			self._riverName = None
+
+			self._climateZone = ClimateZone.temperate
+			self._route = RouteType.none
+			self._improvementValue = ImprovementType.none
+			self._improvementPillagedValue: bool = False
+			self.continentIdentifier = None
+			self.oceanIdentifier = None
+			self.discovered = dict()
+			self.visible = dict()
+			self._cityValue = None
+			self._districtValue = None
+			self._wonderValue = WonderType.none
+			self._owner = None
+			self._workingCity = None
+			self._buildProgressList = WeightedBuildList()
+			self._area = None
+		else:
+			raise Exception('unsupported combination')
 
 		self._builderAIScratchPad = BuilderAIScratchPad()
 
@@ -1045,6 +1075,9 @@ class MapModel:
 
 	def updateStatistics(self):
 		pass
+
+	# def save(self, filename: str) -> bool:
+
 
 	def valid(self, x_or_hex: Union[int, HexPoint], y: Optional[int] = None) -> bool:
 		if isinstance(x_or_hex, HexPoint) and y is None:

@@ -3,10 +3,9 @@ import random
 import sys
 from typing import Optional
 
-from bitarray import bitarray
-
 from game.cityStates import CityStateType
 from game.civilizations import LeaderType
+from game.unitTypes import BitArray
 from map.areas import OceanType, ContinentType, Continent, Ocean
 from map.base import HexPoint, HexDirection, Array2D, HexArea
 from map.map import MapModel, Tile
@@ -616,7 +615,8 @@ class ContinentFinder:
 			self.continentIdentifiers.values[y][x] = ContinentFinder.noContinent
 
 	def firstFreeIdentifier(self):
-		freeIdentifiers = 256 * bitarray('1')
+		freeIdentifiers = BitArray(256)
+		freeIdentifiers.fill(True)
 
 		for x in range(self.continentIdentifiers.width):
 			for y in range(self.continentIdentifiers.height):
@@ -726,7 +726,8 @@ class OceanFinder:
 			self.oceanIdentifiers.values[y][x] = OceanFinder.noContinent
 
 	def firstFreeIdentifier(self):
-		freeIdentifiers = 256 * bitarray('1')
+		freeIdentifiers = BitArray(256)
+		freeIdentifiers.fill(True)
 
 		for x in range(self.oceanIdentifiers.width):
 			for y in range(self.oceanIdentifiers.height):

@@ -426,7 +426,7 @@ class HexPoint(Point):
 
 
 class Array2D:
-	"""class that stores a 2 dimensional matrix of complex or basic objects"""
+	"""class that stores a 2-dimensional matrix of complex or basic objects"""
 
 	def __init__(self, width, height, fill=None):
 		"""
@@ -454,6 +454,9 @@ class Array2D:
 
 	def __repr__(self):
 		return f'Array2D({self.width}, {self.height})'
+
+	def __iter__(self):
+		return self.values.__iter__()
 
 	def valid(self, point_or_x, y=None):
 		"""
