@@ -18,9 +18,9 @@ class TileSchema(Schema):
 	riverName = fields.String(attribute="_riverName", allow_none=True)
 
 	climateZone = fields.String(attribute="_climateZone")
-	# self._route = RouteType.none
-	# self._improvementValue = ImprovementType.none
-	# self._improvementPillagedValue: bool = False
+	route = fields.String(attribute="_route")
+	improvement = fields.String(attribute="_improvementValue")
+	improvementPillaged = fields.Boolean(attribute="_improvementPillagedValue")
 	continentIdentifier = fields.String(allow_none=True)
 	oceanIdentifier = fields.String(allow_none=True)
 	# self.discovered = dict()
@@ -34,6 +34,27 @@ class TileSchema(Schema):
 	# self._area = None
 
 
+class StartLocationSchema(Schema):
+	location = fields.Nested(PointSchema)
+	leader = fields.String(allow_none=True)
+	cityState = fields.String(allow_none=True)
+	isHuman = fields.Boolean()
+
+
+class ContinentSchema(Schema):
+	identifier = fields.String()
+	name = fields.String()
+	points = fields.List(fields.Nested(PointSchema))
+	continentType = fields.String()
+
+
+class OceanSchema(Schema):
+	identifier = fields.String()
+	name = fields.String()
+	points = fields.List(fields.Nested(PointSchema))
+	oceanType = fields.String()
+
+
 class MapModelSchema(Schema):
 	width = fields.Int()
 	height = fields.Int()
@@ -41,8 +62,8 @@ class MapModelSchema(Schema):
 
 	# self._cities = []
 	# self._units = []
-	# self.startLocations = []
-	# cityStateStartLocations = []
-	#
-	# self.continents = []
-	# self.oceans = []
+	startLocations = fields.List(fields.Nested(StartLocationSchema))
+	cityStateStartLocations = fields.List(fields.Nested(StartLocationSchema))
+
+	continents = fields.List(fields.Nested(ContinentSchema))
+	oceans = fields.List(fields.Nested(OceanSchema))

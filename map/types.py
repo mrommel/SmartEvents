@@ -441,6 +441,44 @@ class FeatureType(ExtendedEnum):
 	def fromName(featureName: str) -> FeatureType:
 		if featureName == 'FeatureType.none' or featureName == 'none':
 			return FeatureType.none
+		elif featureName == 'FeatureType.atoll' or featureName == 'atoll':
+			return FeatureType.atoll
+		elif featureName == 'FeatureType.fallout' or featureName == 'fallout':
+			return FeatureType.fallout
+		elif featureName == 'FeatureType.floodplains' or featureName == 'floodplains':
+			return FeatureType.floodplains
+		elif featureName == 'FeatureType.forest' or featureName == 'forest':
+			return FeatureType.forest
+		elif featureName == 'FeatureType.ice' or featureName == 'ice':
+			return FeatureType.ice
+		elif featureName == 'FeatureType.marsh' or featureName == 'marsh':
+			return FeatureType.marsh
+		elif featureName == 'FeatureType.mountains' or featureName == 'mountains':
+			return FeatureType.mountains
+		elif featureName == 'FeatureType.oasis' or featureName == 'oasis':
+			return FeatureType.oasis
+		elif featureName == 'FeatureType.pine' or featureName == 'pine':
+			return FeatureType.pine
+		elif featureName == 'FeatureType.rainforest' or featureName == 'rainforest':
+			return FeatureType.rainforest
+		elif featureName == 'FeatureType.reef' or featureName == 'reef':
+			return FeatureType.reef
+		elif featureName == 'FeatureType.lake' or featureName == 'lake':
+			return FeatureType.lake
+		elif featureName == 'FeatureType.volcano' or featureName == 'volcano':
+			return FeatureType.volcano
+
+		# natural wonder
+		elif featureName == 'FeatureType.mountEverest' or featureName == 'mountEverest':
+			return FeatureType.mountEverest
+		elif featureName == 'FeatureType.mountKilimanjaro' or featureName == 'mountKilimanjaro':
+			return FeatureType.mountKilimanjaro
+		elif featureName == 'FeatureType.greatBarrierReef' or featureName == 'greatBarrierReef':
+			return FeatureType.greatBarrierReef
+		elif featureName == 'FeatureType.cliffsOfDover' or featureName == 'cliffsOfDover':
+			return FeatureType.cliffsOfDover
+		elif featureName == 'FeatureType.uluru' or featureName == 'uluru':
+			return FeatureType.uluru
 
 		raise Exception(f'No matching case for featureName: "{featureName}"')
 
@@ -930,6 +968,85 @@ class ResourceType(ExtendedEnum):
 	def fromName(resourceName: str) -> ResourceType:
 		if resourceName == 'ResourceType.none' or resourceName == 'none':
 			return ResourceType.none
+
+		# bonus
+		elif resourceName == 'ResourceType.banana' or resourceName == 'banana':
+			return ResourceType.banana
+		elif resourceName == 'ResourceType.cattle' or resourceName == 'cattle':
+			return ResourceType.cattle
+		elif resourceName == 'ResourceType.copper' or resourceName == 'copper':
+			return ResourceType.copper
+		elif resourceName == 'ResourceType.crab' or resourceName == 'crab':
+			return ResourceType.crab
+		elif resourceName == 'ResourceType.deer' or resourceName == 'deer':
+			return ResourceType.deer
+		elif resourceName == 'ResourceType.fish' or resourceName == 'fish':
+			return ResourceType.fish
+		elif resourceName == 'ResourceType.rice' or resourceName == 'rice':
+			return ResourceType.rice
+		elif resourceName == 'ResourceType.sheep' or resourceName == 'sheep':
+			return ResourceType.sheep
+		elif resourceName == 'ResourceType.stone' or resourceName == 'stone':
+			return ResourceType.stone
+		elif resourceName == 'ResourceType.wheat' or resourceName == 'wheat':
+			return ResourceType.wheat
+
+		# luxury
+		elif resourceName == 'ResourceType.citrus' or resourceName == 'citrus':
+			return ResourceType.citrus
+		elif resourceName == 'ResourceType.cocoa' or resourceName == 'cocoa':
+			return ResourceType.cocoa
+		elif resourceName == 'ResourceType.cotton' or resourceName == 'cotton':
+			return ResourceType.cotton
+		elif resourceName == 'ResourceType.dyes' or resourceName == 'dyes':
+			return ResourceType.dyes
+		elif resourceName == 'ResourceType.furs' or resourceName == 'furs':
+			return ResourceType.furs
+		elif resourceName == 'ResourceType.incense' or resourceName == 'incense':
+			return ResourceType.incense
+		elif resourceName == 'ResourceType.ivory' or resourceName == 'ivory':
+			return ResourceType.ivory
+		elif resourceName == 'ResourceType.pearls' or resourceName == 'pearls':
+			return ResourceType.pearls
+		elif resourceName == 'ResourceType.salt' or resourceName == 'salt':
+			return ResourceType.salt
+		elif resourceName == 'ResourceType.silk' or resourceName == 'silk':
+			return ResourceType.silk
+		elif resourceName == 'ResourceType.silver' or resourceName == 'silver':
+			return ResourceType.silver
+		elif resourceName == 'ResourceType.spices' or resourceName == 'spices':
+			return ResourceType.spices
+		elif resourceName == 'ResourceType.sugar' or resourceName == 'sugar':
+			return ResourceType.sugar
+		elif resourceName == 'ResourceType.tea' or resourceName == 'tea':
+			return ResourceType.tea
+		elif resourceName == 'ResourceType.whales' or resourceName == 'whales':
+			return ResourceType.whales
+		elif resourceName == 'ResourceType.wine' or resourceName == 'wine':
+			return ResourceType.wine
+		# marble
+
+			# strategic
+		elif resourceName == 'ResourceType.horses' or resourceName == 'horses':
+			return ResourceType.horses
+		elif resourceName == 'ResourceType.iron' or resourceName == 'iron':
+			return ResourceType.iron
+		elif resourceName == 'ResourceType.coal' or resourceName == 'coal':
+			return ResourceType.coal
+		elif resourceName == 'ResourceType.oil' or resourceName == 'oil':
+			return ResourceType.oil
+		elif resourceName == 'ResourceType.aluminum' or resourceName == 'aluminum':
+			return ResourceType.aluminum
+		elif resourceName == 'ResourceType.uranium' or resourceName == 'uranium':
+			return ResourceType.uranium
+		elif resourceName == 'ResourceType.niter' or resourceName == 'niter':
+			return ResourceType.niter
+
+			# artifacts
+		elif resourceName == 'ResourceType.antiquitySite' or resourceName == 'antiquitySite':
+			return ResourceType.antiquitySite
+		elif resourceName == 'ResourceType.shipwreck' or resourceName == 'shipwreck':
+			return ResourceType.shipwreck
 
 		raise Exception(f'No matching case for resourceName: "{resourceName}"')
 

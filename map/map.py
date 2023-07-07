@@ -1046,17 +1046,31 @@ class TileStatistics:
 
 
 class MapModel:
-	def __init__(self, width_or_size: Union[Size, int], height: Optional[int] = None):
+	def __init__(self, width_or_size: Union[Size, int, dict], height: Optional[int] = None):
 		if isinstance(width_or_size, Size) and height is None:
 			size = width_or_size
 			self.width = size.width()
 			self.height = size.height()
+			self._initialize()
 		elif isinstance(width_or_size, int) and isinstance(height, int):
 			self.width = width_or_size
 			self.height = height
+			self._initialize()
+		elif isinstance(width_or_size, dict) and height is None:
+			self.width = width_or_size.get('width', 0)
+			self.height = width_or_size.get('height', 0)
+
+			tiles_dict = width_or_size.get('tiles', 0)
+			self.tiles = Array2D(self.width, self.height)
+
+			for y in range(self.height):
+				for x in range(self.width):
+					self.tiles.values[y][x] = Tile(tiles_dict[y][x])
+
 		else:
 			raise AttributeError(f'Map with wrong attributes: {width_or_size} / {height}')
 
+	def _initialize(self):
 		self.tiles = Array2D(self.width, self.height)
 
 		# create a unique Tile per place
