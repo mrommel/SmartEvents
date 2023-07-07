@@ -200,6 +200,10 @@ class TerrainData:
 		self.defenseModifier = defenseModifier
 
 
+class TerrainType:
+	pass
+
+
 class TerrainType(ExtendedEnum):
 	desert = 'desert'
 	grass = 'grass'
@@ -211,6 +215,25 @@ class TerrainType(ExtendedEnum):
 
 	land = 'land'
 	sea = 'sea'
+
+	@staticmethod
+	def fromName(terrainName: str) -> TerrainType:
+		if terrainName == 'TerrainType.desert' or terrainName == 'desert':
+			return TerrainType.desert
+		elif terrainName == 'TerrainType.grass' or terrainName == 'grass':
+			return TerrainType.grass
+		elif terrainName == 'TerrainType.ocean' or terrainName == 'ocean':
+			return TerrainType.ocean
+		elif terrainName == 'TerrainType.plains' or terrainName == 'plains':
+			return TerrainType.plains
+		elif terrainName == 'TerrainType.shore' or terrainName == 'shore':
+			return TerrainType.shore
+		elif terrainName == 'TerrainType.snow' or terrainName == 'snow':
+			return TerrainType.snow
+		elif terrainName == 'TerrainType.tundra' or terrainName == 'tundra':
+			return TerrainType.tundra
+
+		raise Exception(f'No matching case for terrainName: "{terrainName}"')
 
 	def name(self) -> str:
 		return self._data().name
@@ -387,6 +410,10 @@ class FeatureData:
 		self.defenseModifier = defenseModifier
 
 
+class FeatureType:
+	pass
+
+
 class FeatureType(ExtendedEnum):
 	none = 'none'
 	atoll = 'atoll'
@@ -409,6 +436,13 @@ class FeatureType(ExtendedEnum):
 	greatBarrierReef = 'greatBarrierReef'
 	cliffsOfDover = 'cliffsOfDover'
 	uluru = 'uluru'
+
+	@staticmethod
+	def fromName(featureName: str) -> FeatureType:
+		if featureName == 'FeatureType.none' or featureName == 'none':
+			return FeatureType.none
+
+		raise Exception(f'No matching case for featureName: "{featureName}"')
 
 	def name(self) -> str:
 		return self._data().name
@@ -840,6 +874,10 @@ class ResourceTypeData:
 		self.yields = yields
 
 
+class ResourceType:
+	pass
+
+
 class ResourceType(ExtendedEnum):
 	# default
 	none = 'none'
@@ -887,6 +925,13 @@ class ResourceType(ExtendedEnum):
 	# artifacts
 	antiquitySite = 'antiquitySite'  # https://civilization.fandom.com/wiki/Antiquity_Site_(Civ6)
 	shipwreck = 'shipwreck'  # https://civilization.fandom.com/wiki/Shipwreck_(Civ6)
+
+	@staticmethod
+	def fromName(resourceName: str) -> ResourceType:
+		if resourceName == 'ResourceType.none' or resourceName == 'none':
+			return ResourceType.none
+
+		raise Exception(f'No matching case for resourceName: "{resourceName}"')
 
 	def name(self) -> str:
 		return self._data().name
@@ -1651,12 +1696,31 @@ class ResourceType(ExtendedEnum):
 		return self._data().yields
 
 
+class ClimateZone:
+	pass
+
+
 class ClimateZone(ExtendedEnum):
 	polar = 'polar'
 	sub_polar = 'sub_polar'
 	temperate = 'temperate'
 	sub_tropic = 'sub_tropic'
 	tropic = 'tropic'
+
+	@staticmethod
+	def fromName(climateName: str) -> ClimateZone:
+		if climateName == 'ClimateZone.polar' or climateName == 'polar':
+			return ClimateZone.polar
+		elif climateName == 'ClimateZone.sub_polar' or climateName == 'sub_polar':
+			return ClimateZone.sub_polar
+		elif climateName == 'ClimateZone.temperate' or climateName == 'temperate':
+			return ClimateZone.temperate
+		elif climateName == 'ClimateZone.sub_tropic' or climateName == 'sub_tropic':
+			return ClimateZone.sub_tropic
+		elif climateName == 'ClimateZone.tropic' or climateName == 'tropic':
+			return ClimateZone.tropic
+
+		raise Exception(f'No matching case for climateName: "{climateName}"')
 
 	def moderate(self):
 		if self == ClimateZone.polar:
@@ -1711,12 +1775,32 @@ class RouteTypeData:
 		self.movementCost = movementCost
 
 
+class RouteType:
+	pass
+
+
 class RouteType(ExtendedEnum):
 	none = 'none'
 	ancientRoad = 'ancientRoad'
 	classicalRoad = 'classicalRoad'
 	industrialRoad = 'industrialRoad'
 	modernRoad = 'modernRoad'
+
+	@staticmethod
+	def fromName(routeName: str) -> RouteType:
+		if routeName == 'RouteType.none' or routeName == 'none':
+			return RouteType.none
+		elif routeName == 'RouteType.ancientRoad' or routeName == 'ancientRoad':
+			return RouteType.ancientRoad
+		elif routeName == 'RouteType.classicalRoad' or routeName == 'classicalRoad':
+			return RouteType.classicalRoad
+		elif routeName == 'RouteType.industrialRoad' or routeName == 'industrialRoad':
+			return RouteType.industrialRoad
+		elif routeName == 'RouteType.modernRoad' or routeName == 'modernRoad':
+			return RouteType.modernRoad
+
+		raise Exception(f'No matching case for routeName: "{routeName}"')
+
 
 	def name(self) -> str:
 		return self._data().name

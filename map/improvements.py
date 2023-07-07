@@ -20,6 +20,10 @@ class ImprovementTypeData:
 		self.flavors = flavors
 
 
+class ImprovementType:
+	pass
+
+
 class ImprovementType(ExtendedEnum):
 	none = 'none'
 
@@ -39,6 +43,39 @@ class ImprovementType(ExtendedEnum):
 
 	goodyHut = 'goodyHut'
 	ruins = 'ruins'
+
+	@staticmethod
+	def fromName(improvementName: str) -> ImprovementType:
+		if improvementName == 'ImprovementType.none' or improvementName == 'none':
+			return ImprovementType.none
+		elif improvementName == 'ImprovementType.barbarianCamp' or improvementName == 'barbarianCamp':
+			return ImprovementType.barbarianCamp
+		elif improvementName == 'ImprovementType.mine' or improvementName == 'mine':
+			return ImprovementType.mine
+		elif improvementName == 'ImprovementType.plantation' or improvementName == 'plantation':
+			return ImprovementType.plantation
+		elif improvementName == 'ImprovementType.farm' or improvementName == 'farm':
+			return ImprovementType.farm
+		elif improvementName == 'ImprovementType.quarry' or improvementName == 'quarry':
+			return ImprovementType.quarry
+		elif improvementName == 'ImprovementType.camp' or improvementName == 'camp':
+			return ImprovementType.camp
+		elif improvementName == 'ImprovementType.fishingBoats' or improvementName == 'fishingBoats':
+			return ImprovementType.fishingBoats
+		elif improvementName == 'ImprovementType.pasture' or improvementName == 'pasture':
+			return ImprovementType.pasture
+		elif improvementName == 'ImprovementType.oilWell' or improvementName == 'oilWell':
+			return ImprovementType.oilWell
+		elif improvementName == 'ImprovementType.fort' or improvementName == 'fort':
+			return ImprovementType.fort
+		elif improvementName == 'ImprovementType.citadelle' or improvementName == 'citadelle':
+			return ImprovementType.citadelle
+		elif improvementName == 'ImprovementType.goodyHut' or improvementName == 'goodyHut':
+			return ImprovementType.goodyHut
+		elif improvementName == 'ImprovementType.ruins' or improvementName == 'ruins':
+			return ImprovementType.ruins
+
+		raise Exception(f'No matching case for improvementName: "{improvementName}"')
 
 	def name(self):
 		return self._data().name

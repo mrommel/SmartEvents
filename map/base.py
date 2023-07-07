@@ -315,7 +315,7 @@ class HexDirection(ExtendedEnum):
 
 
 class HexPoint(Point):
-	def __init__(self, x_or_hex_cube: Union[int, HexCube], y: Optional[int] = None):
+	def __init__(self, x_or_hex_cube: Union[int, HexCube, dict], y: Optional[int] = None):
 		if isinstance(x_or_hex_cube, int) and isinstance(y, int):
 			x = x_or_hex_cube
 			super().__init__(x, y)
@@ -328,6 +328,10 @@ class HexPoint(Point):
 			super().__init__(x_value, hex_cube.s)
 			self.x = x_value
 			self.y = hex_cube.s
+		elif isinstance(x_or_hex_cube, dict) and 'x' in x_or_hex_cube and 'y' in x_or_hex_cube and y is None:
+			super().__init__(0, 0)
+			self.x = x_or_hex_cube['x']
+			self.y = x_or_hex_cube['y']
 		else:
 			raise AttributeError(f'HexPoint with wrong attributes: {x_or_hex_cube} / {y}')
 

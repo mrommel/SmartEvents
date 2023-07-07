@@ -104,23 +104,23 @@ class Tile:
 			self._buildProgressList = WeightedBuildList()
 			self._area = None
 		elif isinstance(point_or_dict, dict):
-			self.point = point_or_dict.get('point', HexPoint(-1, -1))
-			self._terrainValue = point_or_dict.get('terrain', TerrainType.grass)
-			self._isHills = False
-			self._featureValue = FeatureType.none
-			self._resourceValue = ResourceType.none  # property is hidden
-			self._resourceQuantity = 0
+			self.point = HexPoint(point_or_dict.get('point', {'x': -1, 'y': -1}))
+			self._terrainValue = TerrainType.fromName(point_or_dict.get('_terrainValue', 'TerrainType.grass'))
+			self._isHills = point_or_dict.get('_isHills', False)
+			self._featureValue = FeatureType.fromName(point_or_dict.get('_featureValue', 'FeatureType.none'))
+			self._resourceValue = ResourceType.fromName(point_or_dict.get('_resourceValue', 'ResourceType.none'))
+			self._resourceQuantity = point_or_dict.get('_resourceQuantity', 0)
 
 			# river
-			self._riverValue = 0
-			self._riverName = None
+			self._riverValue = point_or_dict.get('_riverValue', 0)
+			self._riverName = point_or_dict.get('_riverName', None)
 
-			self._climateZone = ClimateZone.temperate
-			self._route = RouteType.none
-			self._improvementValue = ImprovementType.none
-			self._improvementPillagedValue: bool = False
-			self.continentIdentifier = None
-			self.oceanIdentifier = None
+			self._climateZone = ClimateZone.fromName(point_or_dict.get('_climateZone', 'ClimateZone.temperate'))
+			self._route = RouteType.fromName(point_or_dict.get('_route', 'RouteType.none'))
+			self._improvementValue = ImprovementType.fromName(point_or_dict.get('_improvementValue', 'ImprovementType.none'))
+			self._improvementPillagedValue: bool = point_or_dict.get('_improvementPillagedValue', False)
+			self.continentIdentifier = point_or_dict.get('continentIdentifier', None)
+			self.oceanIdentifier = point_or_dict.get('oceanIdentifier', None)
 			self.discovered = dict()
 			self.visible = dict()
 			self._cityValue = None

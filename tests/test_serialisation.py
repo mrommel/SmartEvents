@@ -9,18 +9,18 @@ from tests.testBasics import MapModelMock
 
 class TestSerialisation(unittest.TestCase):
 	def test_tile_dump(self):
-		pass
-		# tile = Tile(HexPoint(1, 13), TerrainType.desert)
-		# json_str = TileSchema().dumps(tile)
-		#
-		# self.assertGreater(len(json_str), 0)
-		#
-		# obj_dict = TileSchema().loads(json_str)
-		# obj = Tile(obj_dict)
-		#
-		# self.assertEqual(obj.point.x, tile.point.x)
-		# self.assertEqual(obj.point.y, tile.point.y)
-		# self.assertEqual(obj.terrain(), tile.terrain())
+		tile = Tile(HexPoint(1, 13), TerrainType.desert)
+		json_str = TileSchema().dumps(tile)
+
+		self.assertGreater(len(json_str), 0)
+
+		obj_dict = TileSchema().loads(json_str)
+		obj = Tile(obj_dict)
+
+		self.assertEqual(obj.point.x, tile.point.x)
+		self.assertEqual(obj.point.y, tile.point.y)
+		self.assertEqual(obj.terrain(), tile.terrain())
+		self.assertEqual(obj.feature(), tile.feature())
 
 	def test_map_dump(self):
 		pass
