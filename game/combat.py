@@ -5,7 +5,7 @@ from core.base import ExtendedEnum
 
 
 def isinstance_string(variable, string):
-    return variable.__class__.__name__ == string
+	return variable.__class__.__name__ == string
 
 
 class CombatResultType(ExtendedEnum):
@@ -99,12 +99,12 @@ class Combat:
 
 	@classmethod
 	def predictRangedAttack(cls, attacker, defender, simulation) -> CombatResult:
-		attackerTile = simulation.tileAt(attacker.location)
+		# attackerTile = simulation.tileAt(attacker.location)
 		defenderTile = simulation.tileAt(defender.location)
 
 		if isinstance_string(attacker, 'City') and isinstance_string(defender, 'Unit'):
 			attackerStrength = attacker.rangedCombatStrengthAgainst(defender, defenderTile)
-			defenderStrength = defender.defensiveStrengthAgainst(None, None, defenderTile, ranged=True, simulation=simulation)
+			defenderStrength = defender.defensiveStrengthAgainst(None, attacker, defenderTile, ranged=True, simulation=simulation)
 			strengthDifference = attackerStrength - defenderStrength
 
 			damage: int = int(30.0 * pow(math.e, 0.04 * float(strengthDifference)))
@@ -113,6 +113,42 @@ class Combat:
 				damage = 0
 
 			# no damage for attacker, no suppression to cities
+			value = Combat.evaluateResult(
+				defenderHealth=defender.healthPoints(),
+				defenderDamage=damage,
+				attackerHealth=attacker.healthPoints(),
+				attackerDamage=0
+			)
+			return CombatResult(defenderDamage=damage, attackerDamage=0, value=value)
+		elif isinstance_string(attacker, 'Unit') and isinstance_string(defender, 'Unit'):
+			attackerStrength = attacker.rangedCombatStrengthAgainst(defender, defenderTile)
+			defenderStrength = defender.defensiveStrengthAgainst(attacker, None, defenderTile, ranged=True, simulation=simulation)
+			strengthDifference = attackerStrength - defenderStrength
+
+			damage: int = int(30.0 * pow(math.e, 0.04 * float(strengthDifference)))
+
+			if damage < 0:
+				damage = 0
+
+			# no damage for attacker
+			value = Combat.evaluateResult(
+				defenderHealth=defender.healthPoints(),
+				defenderDamage=damage,
+				attackerHealth=attacker.healthPoints(),
+				attackerDamage=0
+			)
+			return CombatResult(defenderDamage=damage, attackerDamage=0, value=value)
+		elif isinstance_string(attacker, 'Unit') and isinstance_string(defender, 'City'):
+			attackerStrength = attacker.rangedCombatStrengthAgainst(defender, defenderTile)
+			defenderStrength = defender.defensiveStrengthAgainst(attacker, None, defenderTile, ranged=True, simulation=simulation)
+			strengthDifference = attackerStrength - defenderStrength
+
+			damage: int = int(30.0 * pow(math.e, 0.04 * float(strengthDifference)))
+
+			if damage < 0:
+				damage = 0
+
+			# no damage for attacker
 			value = Combat.evaluateResult(
 				defenderHealth=defender.healthPoints(),
 				defenderDamage=damage,
@@ -137,10 +173,10 @@ class Combat:
 
 	@classmethod
 	def evaluateResult(cls,
-	                   defenderHealth: int,
-	                   defenderDamage: int,
-	                   attackerHealth: int,
-	                   attackerDamage: int) -> CombatResultType:
+					   defenderHealth: int,
+					   defenderDamage: int,
+					   attackerHealth: int,
+					   attackerDamage: int) -> CombatResultType:
 
 		if defenderDamage > defenderHealth and attackerHealth - attackerDamage > 10:
 			return CombatResultType.totalVictory
