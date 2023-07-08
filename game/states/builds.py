@@ -67,6 +67,14 @@ class BuildType(ExtendedEnum):
 	def requiredTech(self) -> Optional[TechType]:
 		return self._data().requiredTech
 
+	def requiredRemoveTechFor(self, feature: FeatureType) -> Optional[TechType]:
+		featureBuild = next(filter(lambda fb: fb.featureType == feature, self._data().featureBuilds), None)
+
+		if featureBuild is not None:
+			return featureBuild.required
+
+		return None
+
 	def canRemove(self, feature: FeatureType) -> bool:
 		featureBuild = next((build for build in self._data().featureBuilds if build.featureType == feature), None)
 

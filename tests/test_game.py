@@ -771,32 +771,27 @@ class TestUsecases(unittest.TestCase):
 		self.assertEqual(simulation.gameState(), GameState.on)
 		self.assertEqual(simulation.currentTurn, 50)
 
-	def _test_units(self):
+	def test_units(self):
 		# GIVEN
-		mapModel = MapModelMock(MapSize.tiny, TerrainType.grass)
+		mapModel = MapModelMock.duelMap()
 
+		# players
+		playerBarbar = Player(LeaderType.barbar, human=False)
+		playerBarbar.initialize()
 
+		playerTrajan = Player(LeaderType.trajan, human=False)
+		playerTrajan.initialize()
+
+		playerAlexander = Player(LeaderType.alexander, human=True)
+		playerAlexander.initialize()
 
 		simulation = GameModel(
 			victoryTypes=[VictoryType.domination],
 			handicap=HandicapType.chieftain,
 			turnsElapsed=0,
-			players=[],
+			players=[playerBarbar, playerTrajan, playerAlexander],
 			map=mapModel
 		)
-
-		# players
-		playerBarbar = Player(LeaderType.barbar, human=False)
-		playerBarbar.initialize()
-		simulation.players.append(playerBarbar)
-
-		playerTrajan = Player(LeaderType.trajan, human=False)
-		playerTrajan.initialize()
-		simulation.players.append(playerTrajan)
-
-		playerAlexander = Player(LeaderType.alexander, human=True)
-		playerAlexander.initialize()
-		simulation.players.append(playerAlexander)
 
 		# add UI
 		simulation.userInterface = UserInterfaceMock()

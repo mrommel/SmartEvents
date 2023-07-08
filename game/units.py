@@ -1975,8 +1975,8 @@ class Unit:
 		# damage from features? FeatureTypes
 		feature = simulation.tileAt(self.location).feature()
 		if feature != FeatureType.none:
-			if feature.getTurnDamage() > 0:
-				self.changeDamage(feature.getTurnDamage(), None, simulation)
+			if feature.turnDamage() > 0:
+				self.changeDamage(feature.turnDamage(), None, simulation)
 
 		# Only increase our Fortification level if we've actually been told to Fortify
 		if self.isFortifiedThisTurn():

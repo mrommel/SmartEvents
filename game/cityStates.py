@@ -93,6 +93,10 @@ class CityStateTypeData:
 		self.suzarinBonus = suzarinBonus
 
 
+class CityStateType:
+	pass
+
+
 class CityStateType(ExtendedEnum):
 	# akkad
 	amsterdam = 'amsterdam'
@@ -152,6 +156,83 @@ class CityStateType(ExtendedEnum):
 	# wolin
 	# yerevan
 	# zanzibar
+	
+	@staticmethod
+	def fromName(cityStateName: str) -> CityStateType:
+		# akkad
+		if cityStateName == 'CityStateType.amsterdam' or cityStateName == 'amsterdam':
+			return CityStateType.amsterdam
+		# anshan
+		# antananarivo
+		# antioch
+		# armagh
+		if cityStateName == 'CityStateType.auckland' or cityStateName == 'auckland':
+			return CityStateType.auckland
+		# ayutthaya
+		if cityStateName == 'CityStateType.babylon' or cityStateName == 'babylon':
+			return CityStateType.babylon
+		# bandarBrunei
+		if cityStateName == 'CityStateType.bologna' or cityStateName == 'bologna':
+			return CityStateType.bologna
+		# brussels
+		# buenosAires
+		# caguana
+		# cahokia
+		# cardiff
+		if cityStateName == 'CityStateType.carthage' or cityStateName == 'carthage':
+			return CityStateType.carthage
+		# chinguetti
+		# fez
+		if cityStateName == 'CityStateType.geneva' or cityStateName == 'geneva':
+			return CityStateType.geneva
+		# granada
+		# hattusa
+		# hongKong
+		# hunza
+		# jakarta
+		# jerusalem
+		if cityStateName == 'CityStateType.johannesburg' or cityStateName == 'johannesburg':
+			return CityStateType.johannesburg
+		# kabul
+		# kandy
+		# kumasi
+		# laVenta
+		# Lahore
+		# Lisbon
+		# Mexico City
+		# Mitla
+		# Mogadishu
+		# Mohenjo-Daro
+		# Muscat
+		# Nalanda
+		# Nan Madol
+		# Nazca
+		# Ngazargamu
+		# Palenque
+		# Preslav
+		# Rapa Nui
+		# samarkand
+		if cityStateName == 'CityStateType.seoul' or cityStateName == 'seoul':
+			return CityStateType.seoul
+		if cityStateName == 'CityStateType.singapore' or cityStateName == 'singapore':
+			return CityStateType.singapore
+		if cityStateName == 'CityStateType.stockholm' or cityStateName == 'stockholm':
+			return CityStateType.stockholm
+		# taruga
+		if cityStateName == 'CityStateType.toronto' or cityStateName == 'toronto':
+			return CityStateType.toronto
+		if cityStateName == 'CityStateType.valletta' or cityStateName == 'valletta':
+			return CityStateType.valletta
+		# vaticanCity
+		if cityStateName == 'CityStateType.venice' or cityStateName == 'venice':
+			return CityStateType.venice
+		if cityStateName == 'CityStateType.vilnius' or cityStateName == 'vilnius':
+			return CityStateType.vilnius
+		# wolin
+		# yerevan
+		# zanzibar
+
+		raise Exception(f'No matching case for cityStateName: "{cityStateName}"')
 
 	def name(self) -> str:
 		return self._data().name

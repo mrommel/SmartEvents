@@ -3,8 +3,10 @@ from enum import Enum
 from typing import Optional
 
 from core.types import EraType
-from game.types import TechType, CivicType
-from map.base import ExtendedEnum, Size
+from game.cityStates import CityStateType
+from game.civilizations import LeaderType
+from game.types import TechType, CivicType  # not good - map should not import game
+from map.base import ExtendedEnum, Size, HexPoint
 from core.base import InvalidEnumError, WeightedBaseList
 from utils.translation import gettext_lazy as _
 
@@ -402,12 +404,13 @@ class TerrainType(ExtendedEnum):
 
 
 class FeatureData:
-	def __init__(self, name, yields, isWonder: bool, isRemovable: bool, defenseModifier: int):
+	def __init__(self, name, yields, isWonder: bool, isRemovable: bool, defenseModifier: int, turnDamage: int):
 		self.name = name
 		self.yields = yields
 		self.isWonder = isWonder
 		self.isRemovable = isRemovable
 		self.defenseModifier = defenseModifier
+		self.turnDamage = turnDamage
 
 
 class FeatureType:
@@ -485,8 +488,11 @@ class FeatureType(ExtendedEnum):
 	def name(self) -> str:
 		return self._data().name
 
-	def isRemovable(self) -> bool:#
+	def isRemovable(self) -> bool:
 		return self._data().isRemovable
+
+	def turnDamage(self) -> int:
+		return self._data().turnDamage
 
 	def _data(self):
 		if self == FeatureType.none:
@@ -495,7 +501,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(food=0, production=0, gold=0),
 				isWonder=False,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		if self == FeatureType.forest or self == FeatureType.pine:
 			return FeatureData(
@@ -503,7 +510,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(0, 1, gold=0),
 				isWonder=False,
 				isRemovable=True,
-				defenseModifier=3
+				defenseModifier=3,
+				turnDamage=0
 			)
 		elif self == FeatureType.rainforest:
 			return FeatureData(
@@ -511,7 +519,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(1, 0, gold=0),
 				isWonder=False,
 				isRemovable=True,
-				defenseModifier=3
+				defenseModifier=3,
+				turnDamage=0
 			)
 		elif self == FeatureType.floodplains:
 			return FeatureData(
@@ -519,7 +528,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(3, 0, gold=0),
 				isWonder=False,
 				isRemovable=True,
-				defenseModifier=-2
+				defenseModifier=-2,
+				turnDamage=0
 			)
 		elif self == FeatureType.marsh:
 			return FeatureData(
@@ -527,7 +537,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(3, 0, gold=0),
 				isWonder=False,
 				isRemovable=True,
-				defenseModifier=-2
+				defenseModifier=-2,
+				turnDamage=0
 			)
 		elif self == FeatureType.oasis:
 			return FeatureData(
@@ -535,7 +546,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(1, 0, gold=0),
 				isWonder=False,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		elif self == FeatureType.reef:
 			return FeatureData(
@@ -543,7 +555,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(1, 0, gold=0),
 				isWonder=False,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		elif self == FeatureType.ice:
 			return FeatureData(
@@ -551,7 +564,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(0, 0, gold=0),
 				isWonder=False,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		elif self == FeatureType.atoll:
 			return FeatureData(
@@ -559,7 +573,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(1, 0, gold=0),
 				isWonder=False,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		elif self == FeatureType.volcano:
 			return FeatureData(
@@ -567,7 +582,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(0, 0, gold=0),
 				isWonder=False,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		elif self == FeatureType.mountains:
 			return FeatureData(
@@ -575,7 +591,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(0, 0, gold=0),
 				isWonder=False,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		elif self == FeatureType.lake:
 			return FeatureData(
@@ -583,7 +600,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(0, 0, gold=0),
 				isWonder=False,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		elif self == FeatureType.fallout:
 			return FeatureData(
@@ -591,7 +609,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(-3, -3, gold=-3),
 				isWonder=True,
 				isRemovable=True,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 
 		# wonders
@@ -601,7 +620,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(food=2, production=0, gold=0, science=0, faith=1),
 				isWonder=True,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		elif self == FeatureType.greatBarrierReef:
 			return FeatureData(
@@ -609,7 +629,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(food=3, production=0, gold=0, science=2),
 				isWonder=True,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		elif self == FeatureType.cliffsOfDover:
 			return FeatureData(
@@ -617,7 +638,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(food=0, production=0, gold=0, science=0, culture=0, faith=0),  #
 				isWonder=True,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 		elif self == FeatureType.uluru:
 			return FeatureData(
@@ -625,7 +647,8 @@ class FeatureType(ExtendedEnum):
 				yields=Yields(food=0, production=0, gold=0, science=0, culture=2, faith=2),
 				isWonder=True,
 				isRemovable=False,
-				defenseModifier=0
+				defenseModifier=0,
+				turnDamage=0
 			)
 
 		raise AttributeError(f'FeatureType.data: {self} not handled!')
@@ -1982,3 +2005,16 @@ class Tutorials(Enum):
 	@classmethod
 	def citizenInCityNeeded(cls) -> int:
 		return 2  # ???
+
+
+class StartLocation:
+	def __init__(self, location: HexPoint, leader: LeaderType, cityState: Optional[CityStateType], isHuman: bool):
+		self.location = location
+		self.leader = leader
+		self.cityState = cityState
+		self.isHuman = isHuman
+
+	def __str__(self):
+		human_str = '(Human)' if self.isHuman else ''
+		cityState_str = self.cityState.name() if self.cityState is not None else ''
+		return f'StartLocation at: {self.location} for {self.leader} {cityState_str} {human_str}'

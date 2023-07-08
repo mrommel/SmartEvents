@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 from game.cities import City
+from game.cityStates import CityStateType
 from game.civilizations import LeaderType
 from game.districts import DistrictType
 from game.governors import GovernorType, GovernorTitle
@@ -10,11 +11,11 @@ from game.types import TechType, CivicType
 from game.unitTypes import UnitMapType
 from game.units import Unit
 from game.wonders import WonderType
-from map.areas import Continent, ContinentType, Ocean
+from map.areas import Continent, ContinentType, Ocean, OceanType
 from map.base import HexPoint, HexDirection, Size, Array2D, HexArea
 from map.improvements import ImprovementType
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
-	Tutorials, Yields, AppealLevel, UnitDomainType, ResourceUsage
+	Tutorials, Yields, AppealLevel, UnitDomainType, ResourceUsage, StartLocation
 from core.base import WeightedBaseList, ExtendedEnum
 
 
@@ -1057,15 +1058,76 @@ class MapModel:
 			self.height = height
 			self._initialize()
 		elif isinstance(width_or_size, dict) and height is None:
-			self.width = width_or_size.get('width', 0)
-			self.height = width_or_size.get('height', 0)
+			dict_obj = width_or_size
+			self.width = dict_obj.get('width', 0)
+			self.height = dict_obj.get('height', 0)
 
-			tiles_dict = width_or_size.get('tiles', 0)
+			tiles_dict = dict_obj.get('tiles', 0)
 			self.tiles = Array2D(self.width, self.height)
 
 			for y in range(self.height):
 				for x in range(self.width):
 					self.tiles.values[y][x] = Tile(tiles_dict[y][x])
+
+			self._cities = []
+			self._units = []
+
+			startLocations_list = dict_obj.get('startLocations', [])
+			self.startLocations = []
+			for startLocation_dict in startLocations_list:
+				location = HexPoint(startLocation_dict.get('location', {'x': -1, 'y': -1}))
+				leader = LeaderType.fromName(startLocation_dict.get('leader', 'none'))
+				cityState = None
+				isHuman = startLocation_dict.get('isHuman', False)
+				self.startLocations.append(StartLocation(location, leader, cityState, isHuman))
+
+			cityStateStartLocations_list = dict_obj.get('cityStateStartLocations', [])
+			self.cityStateStartLocations = []
+			for cityStateStartLocation_dict in cityStateStartLocations_list:
+				location = HexPoint(cityStateStartLocation_dict.get('location', {'x': -1, 'y': -1}))
+				leader = LeaderType.fromName(cityStateStartLocation_dict.get('leader', 'none'))
+				if cityStateStartLocation_dict.get('cityState', None) is not None:
+					cityState = CityStateType.fromName(cityStateStartLocation_dict.get('cityState', 'none'))
+				else:
+					raise Exception('cityState must not be None')
+				isHuman = cityStateStartLocation_dict.get('isHuman', False)
+				self.cityStateStartLocations.append(StartLocation(location, leader, cityState, isHuman))
+
+			continents_list = dict_obj.get('continents', [])
+			self.continents = []
+			for continent_dict in continents_list:
+				identifier: int = int(continent_dict.get('identifier', '0'))
+				name: str = continent_dict.get('name', '')
+				continentType: ContinentType = ContinentType.fromName(continent_dict.get('continentType', ''))
+				points_list = continent_dict.get('points', [])
+				points = []
+				for point_dict in points_list:
+					points.append(HexPoint(point_dict))
+
+				continent = Continent(identifier, name, self)
+				continent.continentType = continentType
+				for point in points:
+					continent.add(point)
+				self.continents.append(continent)
+
+			oceans_list = dict_obj.get('oceans', [])
+			self.oceans = []
+			for ocean_dict in oceans_list:
+				identifier: int = int(ocean_dict.get('identifier', '0'))
+				name: str = ocean_dict.get('name', '')
+				oceanType: OceanType = OceanType.fromName(ocean_dict.get('oceanType', ''))
+				points_list = ocean_dict.get('points', [])
+				points = []
+				for point_dict in points_list:
+					points.append(HexPoint(point_dict))
+
+				ocean = Ocean(identifier, name, self)
+				ocean.oceanType = oceanType
+				for point in points:
+					ocean.add(point)
+				self.oceans.append(ocean)
+
+			self.areas = []  # fixme
 
 		else:
 			raise AttributeError(f'Map with wrong attributes: {width_or_size} / {height}')
@@ -1427,3 +1489,6 @@ class MapModel:
 	def improvementAt(self, location: HexPoint) -> ImprovementType:
 		tile = self.tileAt(location)
 		return tile.improvement()
+
+	def discover(self, player, simulation):
+		pass

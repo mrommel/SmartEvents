@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from game.civilizations import LeaderType
@@ -47,7 +48,11 @@ class TestSerialisation(unittest.TestCase):
 		self.assertEqual(obj.tileAt(HexPoint(2, 3)).feature(), mapModel.tileAt(HexPoint(2, 3)).feature())
 
 	def test_map_deserialization_from_file(self):
-		with open('files/duel.map', "r") as file:
+		path = './tests/files/duel.map'
+		if os.path.exists('./files/duel.map'):
+			path = './files/duel.map'
+
+		with open(path, "r") as file:
 			fileContent = file.read()
 
 			obj_dict = MapModelSchema().loads(fileContent)
@@ -55,6 +60,12 @@ class TestSerialisation(unittest.TestCase):
 
 			self.assertEqual(obj.width, 32)
 			self.assertEqual(obj.height, 22)
+
+			self.assertGreater(len(obj.startLocations), 0)
+			self.assertGreater(len(obj.cityStateStartLocations), 0)
+
+			self.assertGreater(len(obj.continents), 0)
+			self.assertGreater(len(obj.oceans), 0)
 
 	def _test_generate_testfile(self):
 		def _callback(state):
@@ -68,5 +79,5 @@ class TestSerialisation(unittest.TestCase):
 
 		json_str = MapModelSchema().dumps(mapModel)
 
-		with open('out.map', "w") as file:
+		with open('duel.map', "w") as file:
 			file.write(json_str)

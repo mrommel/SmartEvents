@@ -1,3 +1,4 @@
+import os
 from typing import Optional, Union
 
 from game.states.ui import Interface, PopupType
@@ -5,6 +6,7 @@ from game.types import TechType, CivicType
 from game.wonders import WonderType
 from map.map import MapModel
 from map.types import TerrainType, MapSize
+from serialisation.map import MapModelSchema
 
 
 class MapModelMock(MapModel):
@@ -29,6 +31,18 @@ class MapModelMock(MapModel):
 		for point in self.points():
 			tile = self.tileAt(point)
 			tile.discoverBy(player, simulation)
+
+	@staticmethod
+	def duelMap() -> MapModel:
+		path = './tests/files/duel.map'
+		if os.path.exists('./files/duel.map'):
+			path = './files/duel.map'
+
+		with open(path, "r") as file:
+			fileContent = file.read()
+
+			obj_dict = MapModelSchema().loads(fileContent)
+			return MapModel(obj_dict)
 
 
 class UserInterfaceMock(Interface):

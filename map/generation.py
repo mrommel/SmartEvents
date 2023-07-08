@@ -12,7 +12,7 @@ from map.map import MapModel, Tile
 from map.path_finding.finder import MoveTypeIgnoreUnitsOptions, MoveTypeIgnoreUnitsPathfinderDataSource, AStarPathfinder
 from map.perlin_noise.perlinNoise import PerlinNoise
 from map.types import TerrainType, MapType, MapAge, MapSize, ResourceType, ClimateZone, FeatureType, ResourceUsage, \
-	UnitMovementType
+	UnitMovementType, StartLocation
 from core.base import WeightedStringList
 from utils.translation import gettext_lazy as _
 
@@ -143,19 +143,6 @@ class MapGeneratorState:
 	def __init__(self, value, message):
 		self.value = value
 		self.message = message
-
-
-class StartLocation:
-	def __init__(self, location: HexPoint, leader: LeaderType, cityState: Optional[CityStateType], isHuman: bool):
-		self.location = location
-		self.leader = leader
-		self.cityState = cityState
-		self.isHuman = isHuman
-
-	def __str__(self):
-		human_str = '(Human)' if self.isHuman else ''
-		cityState_str = self.cityState.name() if self.cityState is not None else ''
-		return f'StartLocation at: {self.location} for {self.leader} {cityState_str} {human_str}'
 
 
 class BaseSiteEvaluator:
@@ -1494,7 +1481,18 @@ class MapGenerator:
 		print(f'found: {len(continents)} continents')
 
 	def _identifyOceans(self, mapModel):
-		pass
+		finder = OceanFinder(mapModel.width, mapModel.height)
+
+		oceans = finder.executeOn(mapModel)
+
+		mapModel.oceans = oceans
+
+		# set area on plots
+		for ocean in oceans:
+			for point in ocean.points:
+				mapModel.setOcean(ocean, point)
+
+		print(f'found: {len(oceans)} oceans')
 
 	def _identifyStartPositions(self, mapModel):
 		numberOfPlayers = self.options.mapSize.numberOfPlayers()

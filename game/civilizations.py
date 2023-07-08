@@ -294,6 +294,10 @@ class LeaderTypeData:
 		self.traits = traits
 
 
+class LeaderType:
+	pass
+
+
 class LeaderType(ExtendedEnum):
 	barbar = 'barbar'
 	cityState = 'cityState'
@@ -303,6 +307,26 @@ class LeaderType(ExtendedEnum):
 	trajan = 'trajan'
 	victoria = 'victoria'
 	peter = 'peter'
+
+	@staticmethod
+	def fromName(leaderName: str) -> LeaderType:
+		if leaderName == 'LeaderType.none' or leaderName == 'none':
+			return LeaderType.none
+		elif leaderName == 'LeaderType.barbar' or leaderName == 'barbar':
+			return LeaderType.barbar
+		elif leaderName == 'LeaderType.cityState' or leaderName == 'cityState':
+			return LeaderType.cityState
+
+		elif leaderName == 'LeaderType.alexander' or leaderName == 'alexander':
+			return LeaderType.alexander
+		elif leaderName == 'LeaderType.trajan' or leaderName == 'trajan':
+			return LeaderType.trajan
+		elif leaderName == 'LeaderType.victoria' or leaderName == 'victoria':
+			return LeaderType.victoria
+		elif leaderName == 'LeaderType.peter' or leaderName == 'peter':
+			return LeaderType.peter
+
+		raise Exception(f'No matching case for leaderName: "{leaderName}"')
 
 	def name(self) -> str:
 		return self._data().name
