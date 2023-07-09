@@ -13,6 +13,9 @@ class Interface:
 	def updateCity(self, city):
 		pass
 
+	def removeCity(self, city):
+		pass
+
 	def updatePlayer(self, player):
 		pass
 
@@ -63,3 +66,5 @@ class PopupType(ExtendedEnum):
 	inspirationTriggered = 'inspirationTriggered'
 	eurekaTriggered = 'eurekaTriggered'
 	wonderBuilt = 'wonderBuilt'
+	lostOwnCapital = 'lostOwnCapital'
+	lostCapital = 'lostCapital'

@@ -603,11 +603,23 @@ class DiplomaticPact:
 
 
 class PlayerProximityType(ExtendedEnum):
-	neighbors = 'neighbors'
-	none = 'none'
-	distant = 'distant'
-	far = 'far'
-	close = 'close'
+	neighbors = 0, 'neighbors'
+	none = 1, 'none'
+	distant = 2, 'distant'
+	far = 3, 'far'
+	close = 4, 'close'
+
+	def __new__(cls, value, name):
+		member = object.__new__(cls)
+		member._value = value
+		member._name = name
+		return member
+
+	def __gt__(self, other):
+		if isinstance(other, PlayerProximityType):
+			return self._value > other._value
+
+		raise Exception('wrong type to compare to')
 
 
 class PlayerWarFaceType(ExtendedEnum):
@@ -829,9 +841,19 @@ class DiplomaticAIPlayerItem:
 		self.peaceTreatyWillingToAccept = PeaceTreatyType.none
 
 
+class DiplomaticAIPlayersItem:
+	"""class that stores data that belong to/references one other player"""
+	def __init__(self, fromLeader: LeaderType, toLeader: LeaderType):
+		self.fromLeader = fromLeader
+		self.toLeader = toLeader
+
+		self.warValueLost = 0
+
+
 class DiplomaticPlayerDict:
 	def __init__(self):
 		self.items: [DiplomaticAIPlayerItem] = []
+		self.itemsOther: [DiplomaticAIPlayersItem] = []
 
 	def initContactWith(self, otherPlayer, turn: int):
 		otherLeader = otherPlayer.leader
@@ -1100,6 +1122,53 @@ class DiplomaticPlayerDict:
 			return item.openBorderAgreement.isActive()
 
 		return False
+
+	def otherPlayerWarValueLostFrom(self, fromPlayer, toPlayer) -> int:
+		item = next((item for item in self.itemsOther if item.fromLeader == fromPlayer.leader and item.toLeader == toPlayer.leader), None)
+
+		if item is not None:
+			return item.warValueLost
+
+		return 0
+
+	def updateOtherPlayerWarValueLostFrom(self, fromPlayer, toPlayer, value: int):
+		item = next((item for item in self.itemsOther if item.fromLeader == fromPlayer.leader and item.toLeader == toPlayer.leader), None)
+
+		if item is not None:
+			item.warValueLost = value
+		else:
+			newItem = DiplomaticAIPlayersItem(fromPlayer.leader, toPlayer.leader)
+			newItem.warValueLost = value
+			self.itemsOther.append(newItem)
+
+		return
+
+	def warValueLostWith(self, otherPlayer) -> int:
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			return item.warValueLost
+
+		raise Exception('not gonna happen')
+
+	def updateWarValueLostWith(self, otherPlayer, value: int):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.warValueLost = value
+		else:
+			raise Exception('not gonna happen')
+
+	def changeWarWearinessWith(self, otherPlayer, value: int):
+		otherLeader = otherPlayer.leader
+		item = next((item for item in self.items if item.leader == otherLeader), None)
+
+		if item is not None:
+			item.warWeariness = max(item.warWeariness + value, 0)
+		else:
+			raise Exception('not gonna happen')
 
 
 class DiplomaticAI:
@@ -1701,6 +1770,20 @@ class DiplomaticAI:
 
 	def isOpenBorderAgreementActiveWith(self, otherPlayer) -> bool:
 		return self.playerDict.isOpenBorderAgreementActiveWith(otherPlayer)
+
+	def changeOtherPlayerWarValueLostBy(self, fromPlayer, toPlayer, delta: int):
+		value = self.playerDict.otherPlayerWarValueLostFrom(fromPlayer, toPlayer)
+		self.playerDict.updateOtherPlayerWarValueLostFrom(fromPlayer, toPlayer, value + delta)
+
+	def changeWarValueLostBy(self, otherPlayer, delta: int):
+		if self.player.isEqualTo(otherPlayer):
+			return
+
+		value = self.playerDict.warValueLostWith(otherPlayer)
+		self.playerDict.updateWarValueLostWith(otherPlayer, value + delta)
+
+	def changeWarWearinessWith(self, otherPlayer, value):
+		self.playerDict.changeWarWearinessWith(otherPlayer, value)
 
 
 class DiplomacyRequests:

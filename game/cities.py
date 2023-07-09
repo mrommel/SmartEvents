@@ -112,6 +112,10 @@ class CityDistricts:
 
 		return yields
 
+	def clear(self):
+		self._items = []
+		return
+
 
 class CityBuildings:
 	def __init__(self, city):
@@ -181,6 +185,10 @@ class CityBuildings:
 
 		self._housingValue = housingValue
 
+	def clear(self):
+		self._buildings = []
+		return
+
 
 class CityWonders:
 	def __init__(self, city):
@@ -200,6 +208,10 @@ class CityWonders:
 	def numberOfBuiltWonders(self) -> int:
 		return len(self._wonders)
 
+	def clear(self):
+		self._wonders = []
+		return
+
 
 class CityProjects:
 	def __init__(self, city):
@@ -214,7 +226,6 @@ class WorkingPlot:
 
 	def __repr__(self):
 		return f'WorkingPlot({self.location}, {self.worked} / {self.workedForced})'
-
 
 
 class SpecialistCountList(WeightedBaseList):
@@ -1398,13 +1409,16 @@ class BuildQueue:
 			return len(
 				list(filter(lambda it: it.buildableType == BuildableType.unit and it.unit == unit, self._items))) > 0
 
+	def clear(self):
+		self._items = []
+
 
 class City:
 	attackRange = 2
 	workRadius = 3
 
 	def __init__(self, name: str, location: HexPoint, isCapital: bool, player):
-		self.name = name
+		self._name = name
 		self.location = location
 		self.capitalValue = isCapital
 		self.everCapitalValue = isCapital
@@ -1423,6 +1437,7 @@ class City:
 
 		self._isFeatureSurroundedValue = False
 		self._cheapestPlotInfluenceValue = 0
+		self._cultureLevelValue = 0
 
 		self.threatVal = 0
 		self._garrisonedUnitValue = None
@@ -1462,7 +1477,13 @@ class City:
 		self.cityTourism = None
 
 	def __str__(self):
-		return f'City "{self.name}" at {self.location}'
+		return f'City "{self._name}" at {self.location}'
+
+	def name(self) -> str:
+		return self._name
+
+	def setName(self, name: str):
+		self._name = name
 
 	def doFoundMessage(self):
 		pass
@@ -2505,11 +2526,15 @@ class City:
 
 		return healthPointsVal
 
-	def changeDamage(self, damage: int, otherPlayer, simulation):
-		self.healthPointsValue = self.maxHealthPoints() - damage
+	def changeDamage(self, deltaDamage: int):
+		self.healthPointsValue = self.maxHealthPoints() - deltaDamage
 
 		self.healthPointsValue = max(self.healthPointsValue, self.maxHealthPoints())
 		self.healthPointsValue = min(0, self.healthPointsValue)
+
+	def setDamage(self, damage: int):
+		deltaDamage = self.damage() - damage
+		self.changeDamage(deltaDamage)
 
 	def setMadeAttackTo(self, madeAttack: bool):
 		if madeAttack:
@@ -2523,7 +2548,7 @@ class City:
 		# ...
 
 		if not self.isProduction() and self.player.isHuman() and not self.isProductionAutomated():
-			self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name,
+			self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name(),
 													  location=self.location)
 			return okay
 
@@ -2546,7 +2571,7 @@ class City:
 		if foodDiff < 0:
 			# notify human about starvation
 			if self.player.isHuman():
-				# @fixme self.player.notifications()?.add(notification: .starving(cityName: self.name, location: self.location))
+				# @fixme self.player.notifications()?.add(notification: .starving(cityName: self.name(), location: self.location))
 				pass
 
 		# modifier
@@ -2575,7 +2600,7 @@ class City:
 				if self._populationValue <= 5:
 
 					if self.player.isHuman():
-						# @fixme self.player.notifications()?.add(notification:.cityGrowth(cityName: self.name, population: self.population(), location: self.location)
+						# @fixme self.player.notifications()?.add(notification:.cityGrowth(cityName: self.name(), population: self.population(), location: self.location)
 						pass
 
 		# check for improving city tutorial
@@ -2588,44 +2613,44 @@ class City:
 
 		# moments
 		# if self._populationValue > 10:
-		# 	if not self.player.hasMoment(of:.firstBustlingCity(cityName: self.name)) and
-		# 		not player.hasMoment(of:.worldsFirstBustlingCity(cityName: self.name)):
+		# 	if not self.player.hasMoment(of:.firstBustlingCity(cityName: self.name())) and
+		# 		not player.hasMoment(of:.worldsFirstBustlingCity(cityName: self.name())):
 		#
 		#         # check if someone else already had a bustling city
-		# 		if simulation.anyHasMoment(of: .worldsFirstBustlingCity(cityName: self.name)):
-		# 			player.addMoment(of:.firstBustlingCity(cityName: self.name),simulation)
+		# 		if simulation.anyHasMoment(of: .worldsFirstBustlingCity(cityName: self.name())):
+		# 			player.addMoment(of:.firstBustlingCity(cityName: self.name()),simulation)
 		# 		else:
-		# 			player.addMoment(of:.worldsFirstBustlingCity(cityName: self.name),simulation)
+		# 			player.addMoment(of:.worldsFirstBustlingCity(cityName: self.name()),simulation)
 
 		# if self._populationValue > 15:
-		# 	if not player.hasMoment(of: .firstLargeCity(cityName: self.name)) and
-		# 		not player.hasMoment(of:.worldsFirstLargeCity(cityName: self.name)):
+		# 	if not player.hasMoment(of: .firstLargeCity(cityName: self.name())) and
+		# 		not player.hasMoment(of:.worldsFirstLargeCity(cityName: self.name())):
 		#
 		#         #  check if someone else already had a bustling city
-		# 		if simulation.anyHasMoment(of: .worldsFirstLargeCity(cityName: self.name)):
-		# 			player.addMoment(of:.firstLargeCity(cityName: self.name),simulation)
+		# 		if simulation.anyHasMoment(of: .worldsFirstLargeCity(cityName: self.name())):
+		# 			player.addMoment(of:.firstLargeCity(cityName: self.name()),simulation)
 		# 		else:
-		# 			player.addMoment(of:.worldsFirstLargeCity(cityName: self.name),simulation)
+		# 			player.addMoment(of:.worldsFirstLargeCity(cityName: self.name()),simulation)
 
 		# if self.populationValue > 20:
-		# 	if not self.player.hasMoment(of: .firstEnormousCity(cityName: self.name)) and
-		# 		not self.player.hasMoment(of:.worldsFirstEnormousCity(cityName: self.name)):
+		# 	if not self.player.hasMoment(of: .firstEnormousCity(cityName: self.name())) and
+		# 		not self.player.hasMoment(of:.worldsFirstEnormousCity(cityName: self.name())):
 		#
 		#         # check if someone else already had a bustling city
-		# 		if simulation.anyHasMoment(of: .worldsFirstEnormousCity(cityName: self.name)) {
-		# 			player.addMoment(of:.firstEnormousCity(cityName: self.name),simulation)
+		# 		if simulation.anyHasMoment(of: .worldsFirstEnormousCity(cityName: self.name())) {
+		# 			player.addMoment(of:.firstEnormousCity(cityName: self.name()),simulation)
 		# 		else:
-		# 			player.addMoment(of:.worldsFirstEnormousCity(cityName: self.name),simulation)
+		# 			player.addMoment(of:.worldsFirstEnormousCity(cityName: self.name()),simulation)
 
 		# if self._populationValue > 25:
-		# 	if not self.player.hasMoment(of: .firstGiganticCity(cityName: self.name)) and
-		# 		not player.hasMoment(of:.worldsFirstGiganticCity(cityName: self.name)):
+		# 	if not self.player.hasMoment(of: .firstGiganticCity(cityName: self.name())) and
+		# 		not player.hasMoment(of:.worldsFirstGiganticCity(cityName: self.name())):
 		#
 		#         # check if someone else already had a bustling city
-		# 		if simulation.anyHasMoment(of: .worldsFirstGiganticCity(cityName: self.name)):
-		# 			player.addMoment(of:.firstGiganticCity(cityName: self.name),simulation)
+		# 		if simulation.anyHasMoment(of: .worldsFirstGiganticCity(cityName: self.name())):
+		# 			player.addMoment(of:.firstGiganticCity(cityName: self.name()),simulation)
 		# 		else:
-		# 			player.addMoment(of:.worldsFirstGiganticCity(cityName: self.name),simulation)
+		# 			player.addMoment(of:.worldsFirstGiganticCity(cityName: self.name()),simulation)
 
 		elif self.foodBasket() < 0:
 			self.setFoodBasket(0)
@@ -4270,7 +4295,7 @@ class City:
 		self._buildQueue.append(BuildableItem(wonderType, location))
 
 		# send gossip
-		simulation.sendGossip(GossipType.wonderStarted, wonder=wonderType, cityName=self.name, player=self.player)
+		simulation.sendGossip(GossipType.wonderStarted, wonder=wonderType, cityName=self.name(), player=self.player)
 
 	def startBuildingDistrict(self, districtType: DistrictType, location: HexPoint, simulation):
 		tile = simulation.tileAt(location)
@@ -4316,13 +4341,13 @@ class City:
 				self.player.doUpdateTradeRouteCapacity(simulation)
 
 				if self.player.isHuman():
-					self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name, location=self.location)
+					self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name(), location=self.location)
 				else:
 					self.cityStrategy.chooseProduction(simulation)
 
 		else:
 			if self.player.isHuman():
-				self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name, location=self.location)
+				self.player.notifications.addNotification(NotificationType.productionNeeded, cityName=self.name(), location=self.location)
 			else:
 				self.cityStrategy.chooseProduction(simulation)
 
@@ -4522,7 +4547,7 @@ class City:
 
 		# send gossip
 		if unitType == UnitType.settler:
-			simulation.sendGossip(GossipType.settlerTrained, cityName=self.name, player=self.player)
+			simulation.sendGossip(GossipType.settlerTrained, cityName=self.name(), player=self.player)
 
 		self.updateEurekas(simulation)
 
@@ -4633,3 +4658,97 @@ class City:
 
 	def setLastTurnGarrisonAssigned(self, value):
 		self._lastTurnGarrisonAssigned = value
+
+	def isBarbarian(self) -> bool:
+		return self.player.isBarbarian()
+
+	def originalLeader(self) -> LeaderType:
+		return self.originalLeaderValue
+
+	def turnFounded(self) -> int:
+		return self.gameTurnFoundedValue
+
+	def isEverCapital(self) -> bool:
+		return self.everCapitalValue
+
+	def cultureLevel(self) -> int:
+		return self._cultureLevelValue
+
+	def isOutOfAttacks(self, simulation) -> bool:
+		return self._numberOfAttacksMade >= self.numberOfAttacksPerTurn(simulation)
+
+	def numberOfAttacksPerTurn(self, simulation) -> int:
+		numberOfAttacksPerTurnValue: int = 0
+
+		# initially units have 1 attack
+		numberOfAttacksPerTurnValue += 1
+
+		# Victor - embrasure - City gains an additional Ranged Strike per turn.
+		if self.governor() is not None:
+			if self.governor().type() == GovernorType.victor and self.governor().hasTitle(GovernorTitle.embrasure):
+				numberOfAttacksPerTurnValue += 1
+
+		return numberOfAttacksPerTurnValue
+
+	def preKill(self, simulation):
+		cityCitizens = self.cityCitizens
+
+		self.setProductionAutomatedTo(False, clear=True, simulation=simulation)
+		self.setPopulation(0, reassignCitizen=False, simulation=simulation)
+
+		self.player.tradeRoutes.clearTradeRoutesAt(self.location)
+
+		self.districts.clear()
+		self.buildings.clear()
+		self.wonders.clear()
+
+		self.cleanUpQueue(simulation)
+
+		for point in cityCitizens.workingTileLocations():
+			tile = simulation.tileAt(point)
+
+			if tile is None:
+				continue
+
+			if self.player.isEqualTo(tile.owner()):
+				tile.removeOwner()
+
+		cityTile = simulation.tileAt(self.location)
+		cityTile.setCity(None)
+
+		self.player.updatePlots(simulation)
+
+		# self.player?.changeNumCities(by: -1)
+		# gameModel?.changeNumCities(by: -1)
+		return
+
+	def setProductionAutomatedTo(self, value: bool, clear: bool, simulation):
+		if self.isProductionAutomated() != value:
+			self.productionAutomatedValue = value
+
+			# if ((getOwner() == GC.getGame().getActivePlayer()) & & isCitySelected())
+			# DLLUI->setDirty(SelectionButtons_DIRTY_BIT, true);
+
+			# if automated and not network game and all 3 modifiers down, clear the queue and choose again
+			if value and clear:
+				self._buildQueue.clear()
+
+			if not self.isProduction() and not self.player.isHuman():
+				self.AI_chooseProduction(interruptWonders=False, simulation=simulation)
+
+		return
+
+	def setIsCapitalTo(self, value):
+		self.capitalValue = value
+
+	def setOriginalLeader(self, leader: LeaderType):
+		self.originalLeaderValue = leader
+
+	def setGameTurnFounded(self, turnFounded: int):
+		self.gameTurnFoundedValue = turnFounded
+
+	def setPreviousLeader(self, previousLeader: LeaderType):
+		self.previousLeaderValue = previousLeader
+
+	def changeCultureLevelBy(self, delta: int):
+		self._cultureLevelValue += delta

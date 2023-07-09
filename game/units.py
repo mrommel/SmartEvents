@@ -637,7 +637,7 @@ class Unit:
 
 			if newPlot.isVisibleTo(loopPlayer):
 				# check if we have met this guy already
-				if not self.player.hasMet(loopPlayer):
+				if not self.player.hasMetWith(loopPlayer):
 					# do the hello,
 					loopPlayer.doFirstContactWith(self.player, simulation)
 					self.player.doFirstContactWith(loopPlayer, simulation)
@@ -1893,7 +1893,30 @@ class Unit:
 
 		return False
 
-	def canMoveAllTerrain(self):
+	def canMoveAllTerrain(self) -> bool:
+		return False
+
+	def canMoveAfterAttacking(self) -> bool:
+		# guerrilla - Can move after attacking.
+		if self.hasPromotion(UnitPromotionType.guerrilla):
+			return True
+
+		# eliteGuard - +1 additional attack per turn if Movement allows. Can move after attacking.
+		if self.hasPromotion(UnitPromotionType.eliteGuard):
+			return True
+
+		# breakthrough - +1 additional attack per turn if Movement allows.
+		if self.hasPromotion(UnitPromotionType.breakthrough):
+			return True
+
+		# expertCrew - Can attack after moving.
+		if self.hasPromotion(UnitPromotionType.expertCrew):
+			return True
+
+		# expertMarksman - +1 additional attack per turn if unit has not moved.
+		if self.hasPromotion(UnitPromotionType.expertMarksman):
+			return True
+
 		return False
 
 	def doEstablishTradeRouteTo(self, targetCity, gameModel):

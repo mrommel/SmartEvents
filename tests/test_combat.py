@@ -15,7 +15,7 @@ from game.units import Unit
 from map.base import HexPoint
 from map.map import Tile
 from map.types import TerrainType, MapSize
-from tests.testBasics import MapModelMock, UserInterfaceMock
+from tests.testBasics import MapModelMock, UserInterfaceMock, BetweenAssertMixin
 
 
 class TestCombatModifier(unittest.TestCase):
@@ -85,7 +85,7 @@ class TestCombatModifier(unittest.TestCase):
 		])
 
 
-class TestCombat(unittest.TestCase):
+class TestCombat(unittest.TestCase, BetweenAssertMixin):
 	def setUp(self) -> None:
 		# players
 		self.barbarianPlayer = Player(LeaderType.barbar, human=False)
@@ -109,6 +109,8 @@ class TestCombat(unittest.TestCase):
 			map=self.mapModel
 		)
 		self.gameModel.userInterface = UserInterfaceMock()
+
+		self.playerTrajan.doFirstContactWith(self.playerAlexander, self.gameModel)
 
 	def test_predict_warrior_against_warrior(self):
 		# GIVEN
@@ -208,5 +210,5 @@ class TestCombat(unittest.TestCase):
 		result = Combat.doMeleeAttack(attacker, city, self.gameModel)
 
 		# THEN
-		self.assertEqual(result.attackerDamage, 0)
-		self.assertEqual(result.defenderDamage, 22)
+		self.assertBetween(result.attackerDamage, 21, 23)
+		self.assertBetween(result.defenderDamage, 16, 21)

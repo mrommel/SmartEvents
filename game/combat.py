@@ -256,8 +256,11 @@ class Combat:
 		)
 
 		# apply damage
-		attacker.changeDamage(attackerDamage, defenderPlayer, simulation)
-		defender.changeDamage(defenderDamage, attackerPlayer, simulation)
+		attacker.changeDamage(attackerDamage, attackerPlayer, simulation)
+		if attackAgainstUnit:
+			defender.changeDamage(defenderDamage, attackerPlayer, simulation)
+		elif attackAgainstCity:
+			defender.changeDamage(defenderDamage)
 
 		# experience
 		attackerBaseExperience: float = 5.0  # EXPERIENCE_ATTACKING_UNIT_MELEE

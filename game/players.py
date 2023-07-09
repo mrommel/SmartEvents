@@ -1,6 +1,8 @@
 import math
+import random
 from typing import Optional
 
+from core.base import ExtendedEnum
 from game.ai.builderTasking import BuilderTaskingAI
 from game.ai.homeland import HomelandAI
 from game.ai.tactics import TacticalAI
@@ -26,7 +28,7 @@ from game.states.ages import AgeType
 from game.states.builds import BuildType
 from game.states.dedications import DedicationType
 from game.states.gossips import GossipType
-from game.states.ui import ScreenType
+from game.states.ui import ScreenType, PopupType
 from game.tradeRoutes import TradeRoutes, TradeRoute, TradeRoutePathfinderDataSource
 from game.types import EraType, TechType, CivicType
 from game.unitTypes import UnitMissionType, UnitTaskType, UnitMapType, UnitType
@@ -89,6 +91,11 @@ class PlayerTradeRoutes:
 	def finishTradeRoute(self, tradeRoute):
 		self._routes = list(filter(lambda tr: tr.start != tradeRoute.start and tr.end != tradeRoute.end, self._routes))
 		return
+
+	def clearTradeRoutesAt(self, location: HexPoint):
+		self._routes = list(filter(lambda tr: tr.start != location, self._routes))
+		return
+
 
 class PlayerGreatPeople:
 	def __init__(self, player):
@@ -519,6 +526,16 @@ class PlayerArmies:
 		self._armies = list(filter(lambda armyIt: armyIt != self._armies, self._armies))
 
 
+class ReplyEventType(ExtendedEnum):
+	major = 'major'
+
+
+class DistrictItem:
+	def __init__(self, district: DistrictType, location: HexPoint):
+		self.district = district
+		self.location = location
+
+
 class Player:
 	def __init__(self, leader: LeaderType, cityState: Optional[CityStateType]=None, human: bool=False):
 		self.leader = leader
@@ -698,7 +715,7 @@ class Player:
 		self.armies.doTurn(simulation)
 
 		# Homeland AI
-		# self.homelandAI?.doTurn( in: gameModel) is empty
+		# self.homelandAI?.doTurn( simulation) is empty
 
 		# Start: old unit AI processing
 		for passValue in range(4):
@@ -993,7 +1010,7 @@ class Player:
 
 		if simulation.currentTurn == 1 and simulation.showTutorialInfos():
 			if self.isHuman():
-				# simulation.userInterface.showPopup(popupType: .tutorialStart(tutorial: gameModel.tutorialInfos()))
+				# simulation.userInterface.showPopup(popupType: .tutorialStart(tutorial: simulation.tutorialInfos()))
 				pass
 
 	def endTurn(self, simulation):
@@ -1763,11 +1780,11 @@ class Player:
 				)
 
 				# possibleTradingPosts = (simulation.players.filter {$0.isAlive()}.count - 1)
-				# if self.numEverEstablishedTradingPosts( in: gameModel) == possibleTradingPosts
-				# 	if gameModel.anyHasMoment(of: .firstTradingPostsInAllCivilizations) {
-				# 		self.addMoment(of:.tradingPostsInAllCivilizations, in: gameModel)
+				# if self.numEverEstablishedTradingPosts( simulation) == possibleTradingPosts
+				# 	if simulation.anyHasMoment(of: .firstTradingPostsInAllCivilizations) {
+				# 		self.addMoment(of:.tradingPostsInAllCivilizations, simulation)
 				# 	else:
-				# 		self.addMoment(of:.firstTradingPostsInAllCivilizations, in: gameModel)
+				# 		self.addMoment(of:.firstTradingPostsInAllCivilizations, simulation)
 
 			# update access level
 			if not self.isEqualTo(targetCity.player):
@@ -1779,10 +1796,10 @@ class Player:
 			self.techs.triggerEurekaFor(TechType.currency, simulation)
 
 		# check quests
-		# for quest in self.ownQuests( in: gameModel):
+		# for quest in self.ownQuests( simulation):
 		# 	if case.cityState(type: let cityStateType) = targetLeader
 		# 		if quest.type ==.sendTradeRoute & & cityStateType == quest.cityState & & quest.leader == self.leader
-		# 			targetCity.player?.fulfillQuest(by: self.leader, in: gameModel)
+		# 			targetCity.player?.fulfillQuest(by: self.leader, simulation)
 
 		# no check ?
 
@@ -1894,3 +1911,313 @@ class Player:
 
 	def addPlotAt(self, point: HexPoint):
 		self._area.addPoint(point)
+
+	def acquireCity(self, oldCity, conquest: bool, gift: bool, simulation):
+		diplomacyAI = self.diplomacyAI
+		otherDiplomacyAI = oldCity.player.diplomacyAI
+
+		units = simulation.unitsAt(oldCity.location)
+		for loopUnit in units:
+			if loopUnit.player.leader != self.leader:
+				if loopUnit.isImmobile():
+					loopUnit.doKill(delayed=True, otherPlayer=self, simulation=simulation)
+					# DoUnitKilledCombat(pLoopUnit->getOwner(), pLoopUnit->getUnitType());
+
+		if conquest:
+			# / * CvNotifications * pNotifications = GET_PLAYER(pOldCity->getOwner()).GetNotifications();
+			# if (pNotifications)
+			# {
+			# Localization::String
+			# locString = Localization::Lookup("TXT_KEY_NOTIFICATION_CITY_LOST");
+			# locString << pOldCity->getNameKey() << getNameKey();
+			# Localization::String
+			# locSummary = Localization::Lookup("TXT_KEY_NOTIFICATION_SUMMARY_CITY_LOST");
+			# locSummary << pOldCity->getNameKey();
+			# pNotifications->Add(NOTIFICATION_CITY_LOST, locString.toUTF8(), locSummary.toUTF8(),
+			#                     pOldCity->getX(), pOldCity->getY(), -1);
+			# } * /
+
+			if not self.isBarbarian() and not oldCity.isBarbarian():
+				defaultCityValue = 150  # WAR_DAMAGE_LEVEL_CITY_WEIGHT
+
+				# Notify Diplo AI that damage has been done
+				value = defaultCityValue
+				value += oldCity.population() * 100  # WAR_DAMAGE_LEVEL_INVOLVED_CITY_POP_MULTIPLIER
+				# My viewpoint
+				diplomacyAI.changeOtherPlayerWarValueLostBy(oldCity.player, self, value)
+				# Bad guy's viewpoint
+				otherDiplomacyAI.changeWarValueLostBy(self, value)
+
+				value = defaultCityValue
+				value += oldCity.population() * 120 # WAR_DAMAGE_LEVEL_UNINVOLVED_CITY_POP_MULTIPLIER
+
+				# Now update everyone else in the world, but use a different multiplier(since they don't have complete info on
+				# the situation - they don't know when Units are killed)
+				for loopPlayer in simulation.players:
+					# Not us and not the player we acquired City from
+					if not self.isEqualTo(loopPlayer) and not loopPlayer.isEqualTo(oldCity.player):
+						loopPlayer.diplomacyAI.changeOtherPlayerWarValueLostBy(oldCity.player, self, value)
+
+		if oldCity.originalLeader() == oldCity.player.leader:
+			simulation.playerFor(oldCity.originalLeader()).changeCitiesLostBy(1)
+		elif oldCity.originalLeader() == self.leader:
+			self.changeCitiesLostBy(-1)
+
+		if conquest:
+			if self.isEqualTo(simulation.activePlayer()):
+				# simulation.userInterface?.showTooltip(at: oldCity.location,
+				# 	type:.capturedCity(cityName: oldCity.name),
+				# 	delay: 3
+				# )
+				pass
+
+			message = f"\(oldCity.name) was captured by the \(self.leader.civilization().name())!!!"
+			simulation.addReplayEvent(ReplyEventType.major, message, oldCity.location)
+
+			# inform other players, that a city was conquered or liberated
+			if self.leader == oldCity.originalLeader():
+				simulation.sendGossip(GossipType.cityLiberated, cityName=oldCity.name, originalOwner=oldCity.originalLeader(), player=self)
+			else:
+				simulation.sendGossip(GossipType.cityConquests, cityName=oldCity.name, player=self)
+
+		captureGold = 0
+
+		if conquest:
+			captureGold += 200  # BASE_CAPTURE_GOLD
+			captureGold += oldCity.population() * 40  # CAPTURE_GOLD_PER_POPULATION
+			captureGold += random.randint(0, 40)  # CAPTURE_GOLD_RAND1
+			captureGold += random.randint(0, 20)  # CAPTURE_GOLD_RAND2
+
+			foundedTurnsAgo = simulation.currentTurn - oldCity.turnFounded()
+			captureGold *= min(500, max(0, foundedTurnsAgo)) # CAPTURE_GOLD_MAX_TURNS
+			captureGold /= 500  # CAPTURE_GOLD_MAX_TURNS
+
+			# captureGold *= (100 + oldCity.capturePlunderModifier()) / 100
+			# captureGold *= (100 + self.leader.traits().plunderModifier()) / 100
+
+		self.treasury.changeGoldBy(float(captureGold))
+
+		oldPlayer = simulation.playerFor(oldCity.leader)
+
+		oldCityLocation = oldCity.location
+		oldLeader = oldCity.leader
+		originalOwner = oldCity.originalLeader()
+		oldTurnFounded = oldCity.turnFounded()
+		oldPopulation = oldCity.population()
+		# iHighestPopulation = pOldCity->getHighestPopulation();
+		everCapital = oldCity.isEverCapital()
+		oldName = oldCity.name
+		oldCultureLevel = oldCity.cultureLevel()
+		hasMadeAttack = oldCity.isOutOfAttacks(simulation)
+		oldBattleDamage = oldCity.damage()
+
+		# Traded cities between humans don't heal (an exploit would be to trade a city back and forth between teammates to get an instant heal.)
+		oldPlayerHuman: bool = simulation.playerFor(oldCity.leader).isHuman()
+		if not gift or not self.isHuman() or not oldPlayerHuman:
+			battleDamageThreshold = 200  * 50 # MAX_CITY_HIT_POINTS, CITY_CAPTURE_DAMAGE_PERCENT
+			battleDamageThreshold /= 100
+
+			if oldBattleDamage > battleDamageThreshold:
+				oldBattleDamage = battleDamageThreshold
+
+		# / * for (iI = 0; iI < MAX_PLAYERS; iI++)
+		# 	abEverOwned[iI] = pOldCity->isEverOwned((PlayerTypes)
+		# iI);
+		# abEverOwned[GetID()] = true; * /
+
+		oldDistricts: [DistrictItem] = []
+		for districtType in list(DistrictType):
+			if districtType == DistrictType.cityCenter:
+				continue
+
+			if oldCity.hasDistrict(districtType):
+				oldLocation = oldCity.locationOfDistrict(districtType)
+				oldDistricts.append(DistrictItem(districtType, oldLocation))
+
+		oldBuildings: [BuildingType] = []
+		for buildingType in list(BuildingType):
+			if oldCity.hasBuilding(buildingType):
+				oldBuildings.append(buildingType)
+
+		oldWonders: [WonderType] = []
+		for wonderType in list(WonderType):
+			if oldCity.hasWonder(wonderType):
+				oldWonders.append(wonderType)
+
+		recapture = False
+		capital = oldCity.isCapital()
+
+		oldCity.preKill(simulation)
+
+		simulation.userInterface.removeCity(oldCity)
+
+		simulation.deleteCity(oldCity)
+		# adapted from PostKill()
+
+		# GC.getGame().addReplayMessage(REPLAY_MESSAGE_CITY_CAPTURED, m_eID, "", pCityPlot->getX(), pCityPlot->getY());
+
+		# Update Proximity between this Player and all others
+		for loopPlayer in simulation.players:
+			if not loopPlayer.isEqualTo(self) and loopPlayer.isAlive() and loopPlayer.hasMetWith(self):
+				self.doUpdateProximityTowards(loopPlayer, simulation)
+				loopPlayer.doUpdateProximityTowards(self, simulation)
+
+		for neighbor in oldCityLocation.areaWithRadius(3):
+			tile = simulation.tileAt(neighbor)
+			simulation.userInterface.refreshTile(tile)
+
+		# Lost the capital!
+		if capital:
+			oldPlayer.setHasLostCapital(True, self, simulation)
+			oldPlayer.findNewCapital(simulation)
+
+		# GC.GetEngineUserInterface()->setDirty(NationalBorders_DIRTY_BIT, true);
+		# end adapted from PostKill()
+
+		newCity = City(oldName, oldCityLocation, False, self)
+		newCity.initialize(simulation)
+
+		newCity.setOriginalLeader(originalOwner)
+		newCity.setGameTurnFounded(oldTurnFounded)
+		newCity.setPreviousLeader(oldLeader)
+		newCity.setEverCapitalTo(everCapital)
+
+		# Population change for capturing a city
+		if not recapture and conquest:
+			# Don't drop it if we're recapturing our own City
+			oldPopulation = max(1, oldPopulation * 50 / 100)  # CITY_CAPTURE_POPULATION_PERCENT
+
+		newCity.setPopulation(oldPopulation, reassignCitizen=False, simulation=simulation)
+		# pNewCity->setHighestPopulation(iHighestPopulation);
+		newCity.setName(oldName)
+		# pNewCity->setNeverLost(false);
+		newCity.setDamage(oldBattleDamage)
+		newCity.setMadeAttackTo(hasMadeAttack)
+
+		#for (iI = 0; iI < MAX_PLAYERS; iI++)
+		#	pNewCity->setEverOwned(((PlayerTypes)iI), abEverOwned[iI]);
+
+		newCity.changeCultureLevelBy(oldCultureLevel)
+
+		for district in oldDistricts:
+			newCity.districts.build(district.district, district.location)
+
+		for building in oldBuildings:
+			newCity.buildings.build(building)
+
+		for wonder in oldWonders:
+			newCity.wonders.build(wonder)
+
+		# Did we re-acquire our Capital?
+		if self.originalCapitalLocation() == oldCityLocation:
+			self.setHasLostCapital(False, None, simulation)
+
+		simulation.addCity(newCity)
+
+		# If the old owner is "killed", then notify everyone's Grand Strategy AI
+		numberOfCities = len(simulation.citiesOf(oldPlayer))
+		if numberOfCities == 0:
+			if not self.isCityState() and not self.isBarbarian():
+				for loopPlayer in simulation.players:
+					if not self.isEqualTo(loopPlayer) and loopPlayer.isAlive():
+						# Have I met the player who killed the guy?
+						if loopPlayer.hasMetWith(self):
+							# loopPlayer.diplomacyAI.doPlayerKilledSomeone(self, oldPlayer)
+							pass
+		else:
+			# If not, old owner should look at city specializations
+			oldPlayer.citySpecializationAI.setSpecializationsDirty()
+
+		# Do the same for the new owner
+		self.citySpecializationAI.setSpecializationsDirty()
+
+		return
+
+	def doUpdateProximityTowards(self, otherPlayer, simulation):
+		self.diplomacyAI.updateProximityTo(otherPlayer, simulation)
+
+	def changeCitiesLostBy(self, delta: int):
+		self._citiesLostValue += delta
+
+	def setHasLostCapital(self, value: bool, conqueror, simulation):
+		"""
+		/// Sets us to having lost our capital in war
+	    /// also checks for domination victory
+	    // void CvPlayer::SetHasLostCapital(bool bValue, PlayerTypes eConqueror)
+		@param value: 
+		@param conqueror: 
+		@param simulation: 
+		@return: 
+		"""
+		if value != self.lostCapitalValue:
+			self.lostCapitalValue = value
+			self.conquerorValue = conqueror.leader
+
+			# Someone just lost their capital, test to see if someone wins
+			if value:
+				# slewis - Moved Conquest victory elsewhere so that victory is more accurately awarded
+				# simulation.DoTestConquestVictory();
+
+				# notify users about another player lost his capital
+				if self.isHuman():
+					simulation.userInterface.showPopup(PopupType.lostOwnCapital)
+				else:
+					if self.hasMetWith(simulation.humanPlayer()):
+						simulation.userInterface.showPopup(PopupType.lostCapital, leader=self.leader)
+					else:
+						simulation.userInterface.showPopup(PopupType.lostCapital, leader=LeaderType.unmet)
+
+				# todo: add replay message
+				# GC.getGame().addReplayMessage(REPLAY_MESSAGE_MAJOR_EVEN
+
+		return
+
+	def findNewCapital(self, simulation):
+		bestCity = None
+		bestValue = 0
+
+		for loopCity in simulation.citiesOf(self):
+			value = loopCity.population() * 4
+
+			yieldValueTimes100: int = int(loopCity.foodPerTurn(simulation)) * 100
+			yieldValueTimes100 += int(loopCity.productionPerTurn(simulation)) *100 * 3
+			yieldValueTimes100 += int(loopCity.goldPerTurn(simulation)) *100 * 2
+			value += (yieldValueTimes100 / 100)
+
+			if value > bestValue:
+				bestValue = value
+				bestCity = loopCity
+
+		if bestCity is None:
+			return
+
+		bestCity.buildings.buildBuilding(BuildingType.palace)
+		bestCity.setIsCapitalTo(True)
+
+		# update UI
+		simulation.userInterface.updateCity(bestCity)
+		simulation.userInterface.refreshTile(simulation.tileAt(bestCity.location))
+
+		return
+
+	def updateWarWearinessAgainst(self, otherPlayer, point, killed: bool, simulation):
+		# https://civilization.fandom.com/wiki/War_weariness_(Civ6)
+		tile = simulation.tileAt(point)
+
+		# the fight against barbarians does not trigger war weariness
+		if self.isBarbarian() or otherPlayer.isBarbarian():
+			return
+
+		# war type / Casus Belli not implemented
+		baseValue = self._currentEraValue.warWearinessValue(formal=False)
+		ownTerritoty = self.isEqualTo(tile.owner())
+
+		warWearinessVal = baseValue * (1 if ownTerritoty else 2) + baseValue * (0 if killed else 3)
+
+		print(f"### add war weariness for {self.leader} against {otherPlayer.leader}: {warWearinessVal}")
+		self.changeWarWearinessWith(otherPlayer, warWearinessVal)
+
+		self.combatThisTurnValue = True
+
+	def changeWarWearinessWith(self, otherPlayer, value: int):
+		self.diplomacyAI.changeWarWearinessWith(otherPlayer, value)

@@ -11,7 +11,7 @@ from game.districts import DistrictType
 from game.greatPersons import GreatPersonType
 from game.moments import MomentType
 from game.notifications import NotificationType
-from game.players import Player
+from game.players import Player, ReplyEventType
 from game.promotions import UnitPromotionType
 from game.religions import PantheonType
 from game.states.accessLevels import AccessLevel
@@ -194,6 +194,9 @@ class GameModel:
 				city.player.techs.triggerEurekaFor(TechType.sailing, self)
 
 		return
+
+	def deleteCity(self, city):
+		self._map.deleteCity(city)
 
 	def tileAt(self, location) -> Tile:
 		return self._map.tileAt(location)
@@ -852,3 +855,14 @@ class GameModel:
 	def worldEra(self) -> EraType:
 		# fixme
 		return EraType.ancient
+
+	def playerFor(self, leader: LeaderType) -> Optional[Player]:
+		for player in self.players:
+			if player.leader == leader:
+				return player
+
+		return None
+
+	def addReplayEvent(self, eventType: ReplyEventType, message: str, location: HexPoint):
+		# fixme
+		pass

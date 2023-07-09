@@ -146,6 +146,9 @@ class Tile:
 	def hasOwner(self) -> bool:
 		return self._owner is not None
 
+	def removeOwner(self):
+		self._owner = None
+
 	def area(self) -> Optional[HexArea]:
 		return self._area
 
@@ -1376,6 +1379,9 @@ class MapModel:
 		tile.setCity(city)
 
 		self._sightCity(city, simulation)
+
+	def deleteCity(self, city):
+		self._cities = list(filter(lambda c: c.location != city.location, self._cities))
 
 	def _sightCity(self, city, simulation):
 		for pt in city.location.areaWithRadius(3):

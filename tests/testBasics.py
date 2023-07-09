@@ -1,12 +1,19 @@
 import os
 from typing import Optional, Union
 
+from game.civilizations import LeaderType
 from game.states.ui import Interface, PopupType
 from game.types import TechType, CivicType
 from game.wonders import WonderType
 from map.map import MapModel
 from map.types import TerrainType, MapSize
 from serialisation.map import MapModelSchema
+
+
+class BetweenAssertMixin(object):
+    def assertBetween(self, x, lo, hi):
+        if not (lo <= x <= hi):
+            raise AssertionError('%r not between %r and %r' % (x, lo, hi))
 
 
 class MapModelMock(MapModel):
@@ -59,5 +66,5 @@ class UserInterfaceMock(Interface):
 		pass
 
 	def showPopup(self, popup: PopupType, tech: Optional[TechType] = None, civic: Optional[CivicType] = None,
-	              wonder: Optional[WonderType] = None):
+	              wonder: Optional[WonderType] = None, leader: Optional[LeaderType] = None):
 		pass
