@@ -21,7 +21,7 @@ from game.states.ui import TooltipType
 from game.types import EraType, TechType, CivicType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitTaskType, UnitType, UnitMissionType, UnitActivityType, \
-	UnitMapType, UnitAbilityType, MoveOption, UnitClassType, UnitAutomationType
+	UnitMapType, UnitAbilityType, MoveOption, UnitClassType, UnitAutomationType, UnitAnimationType
 from game.wonders import WonderType
 from map.base import HexPoint, HexArea, HexDirection
 from map.improvements import ImprovementType
@@ -1036,7 +1036,7 @@ class Unit:
 		# fixme: show damage popup
 
 		if self.isDead():
-			self.doKill(delayed=True, otherPlayer=player, simulation=simulation)
+			self.doKill(delayed=True, otherPlayer=self.player, simulation=simulation)
 
 			# fixme log kill in ai log
 

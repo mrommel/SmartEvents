@@ -106,7 +106,7 @@ class EraType(ExtendedEnum):
 		elif self == EraType.future:
 			return EraTypeData(
 				name=_('TXT_KEY_ERA_FUTURE'),
-				next=EraType.none,
+				next=EraType.future,
 				formalWarWeariness=40,
 				surpriseWarWeariness=52
 			)
