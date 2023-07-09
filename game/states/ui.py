@@ -1,4 +1,5 @@
 from core.base import ExtendedEnum
+from map.base import HexPoint
 
 
 class TooltipType(ExtendedEnum):
@@ -30,7 +31,7 @@ class Interface:
 	def showUnit(self, unit, location):
 		pass
 
-	def animateUnit(self, unit, animation):
+	def animateUnit(self, unit, animation, startPoint: [HexPoint]=None, endPoint: [HexPoint]=None):
 		pass
 
 	def selectTech(self, tech):

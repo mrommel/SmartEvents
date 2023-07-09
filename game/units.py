@@ -21,7 +21,7 @@ from game.states.ui import TooltipType
 from game.types import EraType, TechType, CivicType
 from game.unitMissions import UnitMission
 from game.unitTypes import UnitTaskType, UnitType, UnitMissionType, UnitActivityType, \
-	UnitMapType, UnitAbilityType, MoveOption, UnitClassType
+	UnitMapType, UnitAbilityType, MoveOption, UnitClassType, UnitAutomationType
 from game.wonders import WonderType
 from map.base import HexPoint, HexArea, HexDirection
 from map.improvements import ImprovementType
@@ -31,20 +31,8 @@ from map.types import UnitDomainType, YieldType, ResourceType, RouteType, Featur
 from core.base import ExtendedEnum, WeightedBaseList
 
 
-class UnitAutomationType(ExtendedEnum):
-	none = 'none'
-
-	build = 'build'
-	explore = 'explore'
-
-
 class Army:
 	pass
-
-
-class UnitAnimationType:
-	fortify = 'fortify'
-	unfortify = 'unfortify'
 
 
 class UnitTradeRouteDirection(ExtendedEnum):
@@ -1034,7 +1022,7 @@ class Unit:
 	def damage(self) -> int:
 		return max(0, int(Unit.maxHealth) - int(self._healthPointsValue))
 
-	def changeDamage(self, newDamage, player, simulation):
+	def changeDamage(self, newDamage, otherPlayer, simulation):
 		oldValue = self.damage()
 		self._healthPointsValue -= newDamage
 
@@ -1052,8 +1040,8 @@ class Unit:
 
 			# fixme log kill in ai log
 
-			if player is not None:
-				player.doUnitKilledCombat(self.player, self.unitType)
+			if otherPlayer is not None:
+				otherPlayer.doUnitKilledCombat(self.player, self.unitType)
 
 	def isDead(self):
 		return int(self._healthPointsValue) <= 0

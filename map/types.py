@@ -2018,3 +2018,7 @@ class StartLocation:
 		human_str = '(Human)' if self.isHuman else ''
 		cityState_str = self.cityState.name() if self.cityState is not None else ''
 		return f'StartLocation at: {self.location} for {self.leader} {cityState_str} {human_str}'
+
+
+class ArchaeologicalRecordType(ExtendedEnum):
+	battleMelee = 'battleMelee'

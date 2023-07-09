@@ -341,6 +341,19 @@ class UnitTypeData:
 		self.flavors = flavors
 
 
+class UnitAutomationType(ExtendedEnum):
+	none = 'none'
+
+	build = 'build'
+	explore = 'explore'
+
+
+class UnitAnimationType(ExtendedEnum):
+	fortify = 'fortify'
+	unfortify = 'unfortify'
+	attack = 'attack'
+
+
 class UnitType(ExtendedEnum):
 	# default ------------------------------
 	none = 'none'

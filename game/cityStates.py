@@ -125,7 +125,7 @@ class CityStateType(ExtendedEnum):
 	# jakarta
 	# jerusalem
 	johannesburg = 'johannesburg'
-	# kabul
+	kabul = 'kabul'
 	# kandy
 	# kumasi
 	# laVenta
@@ -153,7 +153,7 @@ class CityStateType(ExtendedEnum):
 	# vaticanCity
 	venice = 'venice'
 	vilnius = 'vilnius'
-	# wolin
+	wolin = 'wolin'
 	# yerevan
 	# zanzibar
 	
@@ -193,7 +193,8 @@ class CityStateType(ExtendedEnum):
 		# jerusalem
 		if cityStateName == 'CityStateType.johannesburg' or cityStateName == 'johannesburg':
 			return CityStateType.johannesburg
-		# kabul
+		if cityStateName == 'CityStateType.kabul' or cityStateName == 'kabul':
+			return CityStateType.kabul
 		# kandy
 		# kumasi
 		# laVenta
@@ -228,7 +229,8 @@ class CityStateType(ExtendedEnum):
 			return CityStateType.venice
 		if cityStateName == 'CityStateType.vilnius' or cityStateName == 'vilnius':
 			return CityStateType.vilnius
-		# wolin
+		if cityStateName == 'CityStateType.wolin' or cityStateName == 'wolin':
+			return CityStateType.wolin
 		# yerevan
 		# zanzibar
 
@@ -322,7 +324,13 @@ class CityStateType(ExtendedEnum):
 				category=CityStateCategory.industrial,
 				suzarinBonus=_("TXT_KEY_CITY_STATE_JOHANNESBURG_SUZARIN")
 			)
-		# kabul
+		elif self == CityStateType.kabul:
+			# https://civilization.fandom.com/wiki/Kabul_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_KABUL_NAME"),
+				category=CityStateCategory.militaristic,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_KABUL_SUZARIN")
+			)
 		# kandy
 		# kumasi
 		# laVenta
@@ -392,7 +400,13 @@ class CityStateType(ExtendedEnum):
 				category=CityStateCategory.cultural,
 				suzarinBonus=_("TXT_KEY_CITY_STATE_VILNIUS_SUZARIN")
 			)
-		# wolin
+		elif self == CityStateType.wolin:
+			# https://civilization.fandom.com/wiki/Wolin_(Civ6)
+			return CityStateTypeData(
+				name=_("TXT_KEY_CITY_STATE_WOLIN_NAME"),
+				category=CityStateCategory.militaristic,
+				suzarinBonus=_("TXT_KEY_CITY_STATE_WOLIN_SUZARIN")
+			)
 		# yerevan
 		# zanzibar
 

@@ -86,204 +86,126 @@ class TestCombatModifier(unittest.TestCase):
 
 
 class TestCombat(unittest.TestCase):
-	def test_combat_warrior_against_warrior(self):
-		# GIVEN
-
+	def setUp(self) -> None:
 		# players
-		barbarianPlayer = Player(LeaderType.barbar, human=False)
-		barbarianPlayer.initialize()
+		self.barbarianPlayer = Player(LeaderType.barbar, human=False)
+		self.barbarianPlayer.initialize()
 
-		playerTrajan = Player(LeaderType.trajan, human=False)
-		playerTrajan.initialize()
+		self.playerTrajan = Player(LeaderType.trajan, human=False)
+		self.playerTrajan.initialize()
 
-		playerAlexander = Player(LeaderType.alexander, human=True)
-		playerAlexander.initialize()
+		self.playerAlexander = Player(LeaderType.alexander, human=True)
+		self.playerAlexander.initialize()
 
 		# map
-		mapModel = MapModelMock(MapSize.duel, TerrainType.grass)
+		self.mapModel = MapModelMock(MapSize.duel, TerrainType.grass)
 
 		# game
-		gameModel = GameModel(
+		self.gameModel = GameModel(
 			victoryTypes=[VictoryType.domination, VictoryType.cultural, VictoryType.diplomatic],
 			handicap=HandicapType.chieftain,
 			turnsElapsed=0,
-			players=[barbarianPlayer, playerTrajan, playerAlexander],
-			map=mapModel
+			players=[self.barbarianPlayer, self.playerTrajan, self.playerAlexander],
+			map=self.mapModel
 		)
+		self.gameModel.userInterface = UserInterfaceMock()
 
-		attacker = Unit(HexPoint(5, 6), UnitType.warrior, playerAlexander)
-		gameModel.addUnit(attacker)
+	def test_predict_warrior_against_warrior(self):
+		# GIVEN
+		attacker = Unit(HexPoint(5, 6), UnitType.warrior, self.playerAlexander)
+		self.gameModel.addUnit(attacker)
 
-		defender = Unit(HexPoint(6, 6), UnitType.warrior, playerTrajan)
-		gameModel.addUnit(attacker)
+		defender = Unit(HexPoint(6, 6), UnitType.warrior, self.playerTrajan)
+		self.gameModel.addUnit(attacker)
 
 		# WHEN
-		result = Combat.predictMeleeAttack(attacker, defender, gameModel)
+		result = Combat.predictMeleeAttack(attacker, defender, self.gameModel)
 
 		# THEN
 		self.assertEqual(result.attackerDamage, 26)
 		self.assertEqual(result.defenderDamage, 33)
 
-	def test_combat_warrior_against_warrior_flanking(self):
+	def test_predict_warrior_against_warrior_flanking(self):
 		# GIVEN
+		self.playerAlexander.civics.discover(CivicType.militaryTradition, self.gameModel)
 
-		# players
-		barbarianPlayer = Player(LeaderType.barbar, human=False)
-		barbarianPlayer.initialize()
+		attacker = Unit(HexPoint(5, 6), UnitType.warrior, self.playerAlexander)
+		self.gameModel.addUnit(attacker)
 
-		playerTrajan = Player(LeaderType.trajan, human=False)
-		playerTrajan.initialize()
+		flanking = Unit(HexPoint(5, 5), UnitType.warrior, self.playerAlexander)
+		self.gameModel.addUnit(flanking)
 
-		playerAlexander = Player(LeaderType.alexander, human=True)
-		playerAlexander.initialize()
-
-		# map
-		mapModel = MapModelMock(MapSize.duel, TerrainType.grass)
-
-		# game
-		gameModel = GameModel(
-			victoryTypes=[VictoryType.domination, VictoryType.cultural, VictoryType.diplomatic],
-			handicap=HandicapType.chieftain,
-			turnsElapsed=0,
-			players=[barbarianPlayer, playerTrajan, playerAlexander],
-			map=mapModel
-		)
-
-		playerAlexander.civics.discover(CivicType.militaryTradition, gameModel)
-
-		attacker = Unit(HexPoint(5, 6), UnitType.warrior, playerAlexander)
-		gameModel.addUnit(attacker)
-
-		flanking = Unit(HexPoint(5, 5), UnitType.warrior, playerAlexander)
-		gameModel.addUnit(flanking)
-
-		defender = Unit(HexPoint(6, 5), UnitType.warrior, playerTrajan)
-		gameModel.addUnit(attacker)
+		defender = Unit(HexPoint(6, 5), UnitType.warrior, self.playerTrajan)
+		self.gameModel.addUnit(attacker)
 
 		# WHEN
-		result = Combat.predictMeleeAttack(attacker, defender, gameModel)
+		result = Combat.predictMeleeAttack(attacker, defender, self.gameModel)
 
 		# THEN
 		self.assertEqual(result.attackerDamage, 24)
 		self.assertEqual(result.defenderDamage, 36)
 
-	def test_combat_warrior_against_capital(self):
+	def test_predict_warrior_against_capital(self):
 		# GIVEN
+		attacker = Unit(HexPoint(5, 6), UnitType.warrior, self.playerAlexander)
+		self.gameModel.addUnit(attacker)
 
-		# players
-		barbarianPlayer = Player(LeaderType.barbar, human=False)
-		barbarianPlayer.initialize()
-
-		playerTrajan = Player(LeaderType.trajan, human=False)
-		playerTrajan.initialize()
-
-		playerAlexander = Player(LeaderType.alexander, human=True)
-		playerAlexander.initialize()
-
-		# map
-		mapModel = MapModelMock(MapSize.duel, TerrainType.grass)
-
-		# game
-		gameModel = GameModel(
-			victoryTypes=[VictoryType.domination, VictoryType.cultural, VictoryType.diplomatic],
-			handicap=HandicapType.chieftain,
-			turnsElapsed=0,
-			players=[barbarianPlayer, playerTrajan, playerAlexander],
-			map=mapModel
-		)
-		gameModel.userInterface = UserInterfaceMock()
-
-		attacker = Unit(HexPoint(5, 6), UnitType.warrior, playerAlexander)
-		gameModel.addUnit(attacker)
-
-		city = City("Berlin", HexPoint(5, 5), isCapital=True, player=playerTrajan)
-		city.initialize(gameModel)
-		gameModel.addCity(city)
+		city = City("Berlin", HexPoint(5, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.gameModel)
+		self.gameModel.addCity(city)
 
 		# WHEN
-		result = Combat.predictMeleeAttack(attacker, city, gameModel)
+		result = Combat.predictMeleeAttack(attacker, city, self.gameModel)
 
 		# THEN
 		self.assertEqual(result.attackerDamage, 22)
 		self.assertEqual(result.defenderDamage, 17)
 		self.assertEqual(city.maxHealthPoints(), 200)
 
-	def test_combat_warrior_against_city(self):
+	def test_predict_warrior_against_city(self):
 		# GIVEN
+		attacker = Unit(HexPoint(5, 6), UnitType.warrior, self.playerAlexander)
+		self.gameModel.addUnit(attacker)
 
-		# players
-		barbarianPlayer = Player(LeaderType.barbar, human=False)
-		barbarianPlayer.initialize()
-
-		playerTrajan = Player(LeaderType.trajan, human=False)
-		playerTrajan.initialize()
-
-		playerAlexander = Player(LeaderType.alexander, human=True)
-		playerAlexander.initialize()
-
-		# map
-		mapModel = MapModelMock(MapSize.duel, TerrainType.grass)
-
-		# game
-		gameModel = GameModel(
-			victoryTypes=[VictoryType.domination, VictoryType.cultural, VictoryType.diplomatic],
-			handicap=HandicapType.chieftain,
-			turnsElapsed=0,
-			players=[barbarianPlayer, playerTrajan, playerAlexander],
-			map=mapModel
-		)
-		gameModel.userInterface = UserInterfaceMock()
-
-		attacker = Unit(HexPoint(5, 6), UnitType.warrior, playerAlexander)
-		gameModel.addUnit(attacker)
-
-		city = City("Berlin", HexPoint(5, 5), isCapital=False, player=playerTrajan)
-		city.initialize(gameModel)
-		gameModel.addCity(city)
+		city = City("Berlin", HexPoint(5, 5), isCapital=False, player=self.playerTrajan)
+		city.initialize(self.gameModel)
+		self.gameModel.addCity(city)
 
 		# WHEN
-		result = Combat.predictMeleeAttack(attacker, city, gameModel)
+		result = Combat.predictMeleeAttack(attacker, city, self.gameModel)
 
 		# THEN
 		self.assertEqual(result.attackerDamage, 22)
 		self.assertEqual(result.defenderDamage, 48)
 		self.assertEqual(city.maxHealthPoints(), 200)
 
-	def test_combat_city_against_warrior(self):
+	def test_predict_city_against_warrior(self):
 		# GIVEN
+		defender = Unit(HexPoint(5, 6), UnitType.warrior, self.playerAlexander)
+		self.gameModel.addUnit(defender)
 
-		# players
-		barbarianPlayer = Player(LeaderType.barbar, human=False)
-		barbarianPlayer.initialize()
-
-		playerTrajan = Player(LeaderType.trajan, human=False)
-		playerTrajan.initialize()
-
-		playerAlexander = Player(LeaderType.alexander, human=True)
-		playerAlexander.initialize()
-
-		# map
-		mapModel = MapModelMock(MapSize.duel, TerrainType.grass)
-
-		# game
-		gameModel = GameModel(
-			victoryTypes=[VictoryType.domination, VictoryType.cultural, VictoryType.diplomatic],
-			handicap=HandicapType.chieftain,
-			turnsElapsed=0,
-			players=[barbarianPlayer, playerTrajan, playerAlexander],
-			map=mapModel
-		)
-		gameModel.userInterface = UserInterfaceMock()
-
-		defender = Unit(HexPoint(5, 6), UnitType.warrior, playerAlexander)
-		gameModel.addUnit(defender)
-
-		city = City("Berlin", HexPoint(5, 5), isCapital=True, player=playerTrajan)
-		city.initialize(gameModel)
-		gameModel.addCity(city)
+		city = City("Berlin", HexPoint(5, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.gameModel)
+		self.gameModel.addCity(city)
 
 		# WHEN
-		result = Combat.predictRangedAttack(city, defender, gameModel)
+		result = Combat.predictRangedAttack(city, defender, self.gameModel)
+
+		# THEN
+		self.assertEqual(result.attackerDamage, 0)
+		self.assertEqual(result.defenderDamage, 22)
+
+	def test_combat_warrior_against_city(self):
+		# GIVEN
+		attacker = Unit(HexPoint(5, 6), UnitType.warrior, self.playerAlexander)
+		self.gameModel.addUnit(attacker)
+
+		city = City("Berlin", HexPoint(5, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.gameModel)
+		self.gameModel.addCity(city)
+
+		# WHEN
+		result = Combat.doMeleeAttack(attacker, city, self.gameModel)
 
 		# THEN
 		self.assertEqual(result.attackerDamage, 0)

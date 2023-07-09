@@ -1,5 +1,6 @@
 from typing import Optional, Union
 
+from core.types import EraType
 from game.cities import City
 from game.cityStates import CityStateType
 from game.civilizations import LeaderType
@@ -15,7 +16,7 @@ from map.areas import Continent, ContinentType, Ocean, OceanType
 from map.base import HexPoint, HexDirection, Size, Array2D, HexArea
 from map.improvements import ImprovementType
 from map.types import TerrainType, FeatureType, ResourceType, ClimateZone, RouteType, UnitMovementType, MapSize, \
-	Tutorials, Yields, AppealLevel, UnitDomainType, ResourceUsage, StartLocation
+	Tutorials, Yields, AppealLevel, UnitDomainType, ResourceUsage, StartLocation, ArchaeologicalRecordType
 from core.base import WeightedBaseList, ExtendedEnum
 
 
@@ -1024,6 +1025,9 @@ class Tile:
 			modifier += self.improvement().defenseModifier()
 
 		return modifier
+
+	def addArchaeologicalRecord(self, recordType: ArchaeologicalRecordType, era: EraType, leader1: LeaderType, leader2: LeaderType):
+		pass
 
 
 class TileStatistics:

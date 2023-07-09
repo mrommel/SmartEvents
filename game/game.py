@@ -848,3 +848,7 @@ class GameModel:
 				numPantheons += 1
 
 		return numPantheons
+
+	def worldEra(self) -> EraType:
+		# fixme
+		return EraType.ancient

@@ -2505,7 +2505,7 @@ class City:
 
 		return healthPointsVal
 
-	def setDamage(self, damage: int):
+	def changeDamage(self, damage: int, otherPlayer, simulation):
 		self.healthPointsValue = self.maxHealthPoints() - damage
 
 		self.healthPointsValue = max(self.healthPointsValue, self.maxHealthPoints())

@@ -200,7 +200,7 @@ class PolicyCardType(ExtendedEnum):
 	internationalSpaceAgency = 'internationalSpaceAgency'
 	# onlineCommunities
 	# collectiveActivism
-	# afterActionReports
+	afterActionReports = 'afterActionReports'
 	# communicationsOffice
 	# aerospaceContractors
 
@@ -1295,5 +1295,21 @@ class PolicyCardType(ExtendedEnum):
 				replace=[],
 				flavors=[]
 			)
+		# onlineCommunities
+		# collectiveActivism
+		elif self == PolicyCardType.afterActionReports:
+			# https://civilization.fandom.com/wiki/After_Action_Reports_(Civ6)
+			return PolicyCardTypeData(
+				name="TXT_KEY_POLICY_CARD_AFTER_ACTION_REPORTS_TITLE",
+				bonus="TXT_KEY_POLICY_CARD_AFTER_ACTION_REPORTS_BONUS",
+				slot=PolicyCardSlot.military,
+				requiredCivic=CivicType.rapidDeployment,
+				obsoleteCivic=None,
+				replace=[],
+				flavors=[]
+			)
+
+		# communicationsOffice
+		# aerospaceContractors
 
 		raise AttributeError(f'cant get data for policy card {self}')
