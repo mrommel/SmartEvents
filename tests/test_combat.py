@@ -212,3 +212,32 @@ class TestCombat(unittest.TestCase, BetweenAssertMixin):
 		# THEN
 		self.assertBetween(result.attackerDamage, 21, 23)
 		self.assertBetween(result.defenderDamage, 16, 21)
+
+	def test_conquer_city(self):
+		# GIVEN
+		attacker = Unit(HexPoint(5, 6), UnitType.warrior, self.playerAlexander)
+		self.gameModel.addUnit(attacker)
+
+		city = City("Berlin", HexPoint(5, 5), isCapital=True, player=self.playerTrajan)
+		city.initialize(self.gameModel)
+		city.setDamage(190)
+		self.gameModel.addCity(city)
+
+		city2 = City("Potsdam", HexPoint(10, 5), isCapital=False, player=self.playerTrajan)
+		city2.initialize(self.gameModel)
+		self.gameModel.addCity(city2)
+
+		numberOfCitiesBefore = len(self.gameModel.citiesOf(self.playerTrajan))
+
+		# WHEN
+		result = Combat.doMeleeAttack(attacker, city, self.gameModel)
+
+		# THEN
+		self.assertBetween(result.attackerDamage, 21, 23)
+		self.assertBetween(result.defenderDamage, 16, 21)
+
+		cityAtLocation = self.gameModel.cityAt(HexPoint(5, 5))
+		numberOfCitiesAfter = len(self.gameModel.citiesOf(self.playerTrajan))
+		self.assertEqual(cityAtLocation.player.leader, LeaderType.alexander)
+		self.assertEqual(numberOfCitiesBefore, 2)
+		self.assertEqual(numberOfCitiesAfter, 1)

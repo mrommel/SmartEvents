@@ -31,17 +31,17 @@ class EraType(ExtendedEnum):
 	def name(self) -> str:
 		return self._data().name
 
-	# def __eq__(self, other):
-	# 	if self.ft == other.ft and self.inch == other.inch:
-	# 		return "both objects are equal"
-	# 	else:
-	# 		return "both objects are not equal"
-
 	def __le__(self, other):
-		return self._value <= other._value
+		if isinstance(other, EraType):
+			return self._value <= other._value
+
+		raise Exception('cannot compare EraType to other type')
 
 	def __lt__(self, other):
-		return self._value < other._value
+		if isinstance(other, EraType):
+			return self._value < other._value
+
+		raise Exception('cannot compare EraType to other type')
 
 	def warWearinessValue(self, formal: bool):
 		return self._data().formalWarWeariness if formal else self._data().surpriseWarWeariness

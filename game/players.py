@@ -2191,7 +2191,7 @@ class Player:
 		if bestCity is None:
 			return
 
-		bestCity.buildings.buildBuilding(BuildingType.palace)
+		bestCity.buildings.build(BuildingType.palace)
 		bestCity.setIsCapitalTo(True)
 
 		# update UI
